@@ -1,0 +1,35 @@
+// Top-level build file where you can add configuration options common to all sub-projects/modules.
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.6.+'
+    }
+}
+
+// Set repositories used by all subprojects
+subprojects {
+    repositories {
+        mavenCentral()
+        maven {
+            url "http://maven.xtremelabs.com/artifactory/xl-libs"
+
+            //
+            // To provide your credentials to the maven artifactory, you will need
+            // to create a file called 'gradle.properties' in the project base directory
+            // or in your ~/.gradle directory (if you want it to apply to all projects
+            // you build on your computer).  This file should contain the following settings:
+            //
+            //     xlMavenUser=<your.username.for.maven.xtremelabs.com>
+            //     xlMavenPassword=<your.password.for.maven.xtremelabs.com>
+            //
+            // Please do not check in this file.  Keep your password a secret!
+            //
+            credentials {
+                username xlMavenUser
+                password xlMavenPassword
+            }
+        }
+    }
+}
