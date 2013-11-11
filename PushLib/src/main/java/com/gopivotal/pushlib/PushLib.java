@@ -7,33 +7,49 @@ import com.xtreme.commons.Logger;
 
 public class PushLib {
 
-    private static final String TAG_NAME = "PivotalPushLib";
     private static PushLib instance;
 
-    public static PushLib getInstance(Context context) {
+    public static PushLib init(Context context, String senderId) {
         if (instance == null) {
-            instance = new PushLib(context);
+            instance = new PushLib(context, senderId);
         }
         return instance;
     }
 
-    private final Context context;
+    private Context context;
+    private String senderId;
 
-    private PushLib(Context context) {
-        if (context == null) {
-            throw new IllegalArgumentException("context may not be null");
+    private PushLib(Context context, String senderId) {
+        verifyArguments(context, senderId);
+        saveArguments(context, senderId);
+
+        if (!Logger.isSetup()) {
+            Logger.setup(context, Const.TAG_NAME);
         }
 
+        GcmRegistrar registrar = new GcmRegistrar(context, senderId);
+        registrar.startRegistration();
+
+        Logger.i("PushLib initialized");
+    }
+
+    private void saveArguments(Context context, String senderId) {
         if (!(context instanceof Application)) {
             this.context = context.getApplicationContext();
         } else {
             this.context = context;
         }
+        this.senderId = senderId;
+    }
 
-        if (!Logger.isSetup()) {
-            Logger.setup(context, TAG_NAME);
+    private void verifyArguments(Context context, String senderId) {
+        if (context == null) {
+            throw new IllegalArgumentException("context may not be null");
+        }
+        if (senderId == null) {
+            throw new IllegalArgumentException("senderId may not be null");
         }
 
-        Logger.i("PushLib initialized");
     }
+
 }

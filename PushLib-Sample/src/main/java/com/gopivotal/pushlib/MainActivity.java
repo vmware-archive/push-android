@@ -8,6 +8,8 @@ import roboguice.inject.InjectView;
 
 public class MainActivity extends RoboActivity {
 
+    private static final String SENDER_ID = "816486687340";
+
     @InjectView(R.id.outputText)
     TextView outputText;
 
@@ -19,7 +21,7 @@ public class MainActivity extends RoboActivity {
         setContentView(R.layout.activity_main);
         outputText.setText("Ready\n");
 
-        pushLib = PushLib.getInstance(this);
+        pushLib = PushLib.init(this, SENDER_ID);
     }
 
 
