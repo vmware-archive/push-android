@@ -1,1 +1,2 @@
-include ':pivotal-push_lib-android'
+include ':PushLib-Sample'
+include ':GooglePlayServices'
