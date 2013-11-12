@@ -1,2 +1,3 @@
-include ':PushLib-Sample', ':PushLib'
 include ':GooglePlayServices'
+include ':PushLib'
+include ':PushLib-Sample'
