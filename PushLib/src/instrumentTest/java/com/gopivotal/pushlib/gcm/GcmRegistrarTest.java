@@ -2,7 +2,8 @@ package com.gopivotal.pushlib.gcm;
 
 import android.test.AndroidTestCase;
 
-import com.gopivotal.pushlib.gcm.GcmRegistrar;
+import com.gopivotal.pushlib.prefs.FakePreferencesProvider;
+import com.gopivotal.pushlib.prefs.PreferencesProvider;
 
 import java.util.concurrent.Semaphore;
 
@@ -21,7 +22,7 @@ public class GcmRegistrarTest extends AndroidTestCase {
 
     public void testNullContext() {
         try {
-            new GcmRegistrar(null, TEST_SENDER_ID, new FakeGcmProvider(TEST_REGISTRATION_ID));
+            new GcmRegistrar(null, TEST_SENDER_ID, new FakeGcmProvider(TEST_REGISTRATION_ID), new FakePreferencesProvider(TEST_REGISTRATION_ID));
             fail();
         } catch (IllegalArgumentException e) {
             // Exception expected
@@ -30,7 +31,7 @@ public class GcmRegistrarTest extends AndroidTestCase {
 
     public void testNullSenderId() {
         try {
-            new GcmRegistrar(getContext(), null, new FakeGcmProvider(TEST_REGISTRATION_ID));
+            new GcmRegistrar(getContext(), null, new FakeGcmProvider(TEST_REGISTRATION_ID), new FakePreferencesProvider(TEST_REGISTRATION_ID));
             fail();
         } catch (IllegalArgumentException e) {
             // Exception expected
@@ -39,18 +40,32 @@ public class GcmRegistrarTest extends AndroidTestCase {
 
     public void testNullGcmProvider() {
         try {
-            new GcmRegistrar(getContext(), TEST_SENDER_ID, null);
+            new GcmRegistrar(getContext(), TEST_SENDER_ID, null, new FakePreferencesProvider(TEST_REGISTRATION_ID));
             fail();
         } catch (IllegalArgumentException e) {
             // Exception expected
         }
     }
 
-    public void testSuccessfulRegistration() throws InterruptedException {
-        final GcmRegistrar registrar = new GcmRegistrar(getContext(), TEST_SENDER_ID, new FakeGcmProvider(TEST_REGISTRATION_ID));
+    public void testNullPreferencesProvider() {
+        try {
+            new GcmRegistrar(getContext(), TEST_SENDER_ID, new FakeGcmProvider(TEST_REGISTRATION_ID), null);
+            fail();
+        } catch (IllegalArgumentException e) {
+            // Exception expected
+        }
+    }
+
+    public void testSuccessfulInitialRegistration() throws InterruptedException {
+        final FakePreferencesProvider prefs = new FakePreferencesProvider(null);
+        final FakeGcmProvider gcm = new FakeGcmProvider(TEST_REGISTRATION_ID);
+        final GcmRegistrar registrar = new GcmRegistrar(getContext(), TEST_SENDER_ID, gcm, prefs);
         final GcmRegistrarListener listener = getGcmRegistrarListener(true);
         registrar.startRegistration(listener);
-        semaphore.wait();
+        semaphore.acquire();
+        assertTrue(prefs.wasSaved());
+        assertEquals(TEST_REGISTRATION_ID, prefs.getSavedRegistrationId());
+        assertTrue(gcm.wasRegisterCalled());
     }
 
     private GcmRegistrarListener getGcmRegistrarListener(final boolean isSuccessfulRegistration) {
@@ -70,10 +85,25 @@ public class GcmRegistrarTest extends AndroidTestCase {
             };
     }
 
-    public void testFailedRegistration() throws InterruptedException {
-        final GcmRegistrar registrar = new GcmRegistrar(getContext(), TEST_SENDER_ID, new FakeGcmProvider(null, true));
+    public void testFailedInitialRegistration() throws InterruptedException {
+        final FakePreferencesProvider prefs = new FakePreferencesProvider(null);
+        final FakeGcmProvider gcm = new FakeGcmProvider(null, true);
+        final GcmRegistrar registrar = new GcmRegistrar(getContext(), TEST_SENDER_ID, gcm, prefs);
         final GcmRegistrarListener listener = getGcmRegistrarListener(false);
         registrar.startRegistration(listener);
-        semaphore.wait();
+        semaphore.acquire();
+        assertFalse(prefs.wasSaved());
+        assertTrue(gcm.wasRegisterCalled());
+    }
+
+    public void testUseSavedRegistration() throws InterruptedException {
+        final FakePreferencesProvider prefs = new FakePreferencesProvider(TEST_REGISTRATION_ID);
+        final FakeGcmProvider gcm = new FakeGcmProvider(null, true);
+        final GcmRegistrar registrar = new GcmRegistrar(getContext(), TEST_SENDER_ID, gcm, prefs);
+        final GcmRegistrarListener listener = getGcmRegistrarListener(true);
+        registrar.startRegistration(listener);
+        semaphore.acquire();
+        assertFalse(prefs.wasSaved());
+        assertFalse(gcm.wasRegisterCalled());
     }
 }

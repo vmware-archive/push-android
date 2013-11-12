@@ -6,6 +6,7 @@ import android.content.Context;
 import com.gopivotal.pushlib.gcm.GcmRegistrar;
 import com.gopivotal.pushlib.gcm.GcmRegistrarListener;
 import com.gopivotal.pushlib.gcm.RealGcmProvider;
+import com.gopivotal.pushlib.prefs.RealPreferencesProvider;
 import com.xtreme.commons.Logger;
 
 public class PushLib {
@@ -33,7 +34,8 @@ public class PushLib {
 
     public void startRegistration(GcmRegistrarListener listener) {
         final RealGcmProvider gcmProvider = new RealGcmProvider(context);
-        GcmRegistrar registrar = new GcmRegistrar(context, senderId, gcmProvider);
+        final RealPreferencesProvider preferencesProvider = new RealPreferencesProvider(context);
+        final GcmRegistrar registrar = new GcmRegistrar(context, senderId, gcmProvider, preferencesProvider);
         registrar.startRegistration(listener);
     }
 
