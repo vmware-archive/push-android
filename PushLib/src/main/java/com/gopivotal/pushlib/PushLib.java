@@ -3,6 +3,9 @@ package com.gopivotal.pushlib;
 import android.app.Application;
 import android.content.Context;
 
+import com.gopivotal.pushlib.gcm.GcmRegistrar;
+import com.gopivotal.pushlib.gcm.GcmRegistrarListener;
+import com.gopivotal.pushlib.gcm.RealGcmProvider;
 import com.xtreme.commons.Logger;
 
 public class PushLib {
@@ -26,11 +29,12 @@ public class PushLib {
         if (!Logger.isSetup()) {
             Logger.setup(context, Const.TAG_NAME);
         }
+    }
 
-        GcmRegistrar registrar = new GcmRegistrar(context, senderId);
-        registrar.startRegistration();
-
-        Logger.i("PushLib initialized");
+    public void startRegistration(GcmRegistrarListener listener) {
+        final RealGcmProvider gcmProvider = new RealGcmProvider(context);
+        GcmRegistrar registrar = new GcmRegistrar(context, senderId, gcmProvider);
+        registrar.startRegistration(listener);
     }
 
     private void saveArguments(Context context, String senderId) {

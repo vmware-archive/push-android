@@ -1,60 +1,62 @@
-package com.gopivotal.pushlib;
+package com.gopivotal.pushlib.gcm;
 
-import android.app.Application;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
-import android.util.Log;
 
-import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.gopivotal.pushlib.Const;
 import com.xtreme.commons.Logger;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-public class GcmRegistrar extends AsyncTask<Void, Void, String> {
+public class GcmRegistrar extends AsyncTask<GcmRegistrarListener, Void, String> {
 
     public static final String PROPERTY_REG_ID = "registration_id";
     private static final String PROPERTY_APP_VERSION = "appVersion";
 
-    private GoogleCloudMessaging gcm;
     private Context context;
     private String senderId;
+    private GcmProvider gcmProvider;
 
-    public GcmRegistrar(Context context, String senderId) {
-        verifyArguments(context, senderId);
-        saveArguments(context, senderId);
+    public GcmRegistrar(Context context, String senderId, GcmProvider gcmProvider) {
+        verifyArguments(context, senderId, gcmProvider);
+        saveArguments(context, senderId, gcmProvider);
     }
 
-    private void saveArguments(Context context, String senderId) {
-        if (!(context instanceof Application)) {
-            this.context = context.getApplicationContext();
-        } else {
-            this.context = context;
-        }
+    private void saveArguments(Context context, String senderId, GcmProvider gcmProvider) {
+        this.context = context;
         this.senderId = senderId;
+        this.gcmProvider = gcmProvider;
     }
 
-    private void verifyArguments(Context context, String senderId) {
+    private void verifyArguments(Context context, String senderId, GcmProvider gcmProvider) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
         if (senderId == null) {
             throw new IllegalArgumentException("senderId may not be null");
         }
+        if (gcmProvider == null) {
+            throw new IllegalArgumentException("gcmProvider may not be null");
+        }
     }
 
-    public void startRegistration() {
+    public void startRegistration(GcmRegistrarListener listener) {
+
         final String regId = getRegistrationId(context);
 
         if (regId.isEmpty()) {
-            registerInBackground();
+            registerInBackground(listener);
         } else {
             // TODO - do we need to register with Studio server on every launch, or only when a new registration ID is created (I suspect the latter).
             Logger.i("Loaded registration ID: " + regId);
+            if (listener != null) {
+                listener.onRegistrationComplete(regId);
+            }
         }
     }
 
@@ -85,25 +87,28 @@ public class GcmRegistrar extends AsyncTask<Void, Void, String> {
         return registrationId;
     }
 
-    private void registerInBackground() {
-        execute(null);
+    private void registerInBackground(GcmRegistrarListener listener) {
+        execute(listener);
     }
 
     @Override
-    protected String doInBackground(Void... params) {
+    protected String doInBackground(GcmRegistrarListener... listeners) {
+
+        GcmRegistrarListener listener = null;
+        if (listeners != null && listeners.length > 0) {
+            listener = listeners[0];
+        }
 
         String msg = "";
         try {
-            if (gcm == null) {
-                gcm = GoogleCloudMessaging.getInstance(context);
-            }
-            final String regId = gcm.register(senderId);
+            final String regId = gcmProvider.register(senderId);
             Logger.i("Device registered. Registration ID:" + regId);
 
             // You should send the registration ID to your server over HTTP,
             // so it can use GCM/HTTP or CCS to send messages to your app.
             // The request to your server should be authenticated if your app
             // is using accounts.
+            // NOTE: may need the listener
             sendRegistrationIdToBackend();
 
             // For this demo: we don't need to send it because the device
@@ -112,12 +117,20 @@ public class GcmRegistrar extends AsyncTask<Void, Void, String> {
 
             // Persist the regID - no need to register again.
             storeRegistrationId(context, regId);
+
+            // Inform callback of registration success
+            if (listener != null) {
+                listener.onRegistrationComplete(regId);
+            }
             return regId;
         } catch (IOException ex) {
             Logger.ex("Error registering device:", ex);
             // If there is an error, don't just keep trying to register.
             // Require the user to click a button again, or perform
             // exponential back-off.
+            if (listener != null) {
+                listener.onRegistrationFailed(ex.getLocalizedMessage());
+            }
             return null;
         }
     }
@@ -130,6 +143,7 @@ public class GcmRegistrar extends AsyncTask<Void, Void, String> {
      */
     private void sendRegistrationIdToBackend() {
         // Your implementation here.
+        // NOTE - should we bring the callback in here as well?
     }
 
     /**
@@ -147,15 +161,15 @@ public class GcmRegistrar extends AsyncTask<Void, Void, String> {
         editor.putString(PROPERTY_REG_ID, regId);
         editor.putInt(PROPERTY_APP_VERSION, appVersion);
         editor.commit();
-        PrintWriter p = null;
-        try {
-            // TODO - save regid to app cache directory
-            p = new PrintWriter("/mnt/sdcard/regid.txt");
-            p.print(regId);
-            p.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
+        //PrintWriter p = null;
+        //try {
+        //    // TODO - save regid to app cache directory
+        //    p = new PrintWriter("/mnt/sdcard/regid.txt");
+        //    p.print(regId);
+        //    p.close();
+        //} catch (FileNotFoundException e) {
+        //    e.printStackTrace();
+        //}
     }
 
     /**
@@ -178,10 +192,5 @@ public class GcmRegistrar extends AsyncTask<Void, Void, String> {
             // should never happen
             throw new RuntimeException("Could not get package name: " + e);
         }
-    }
-
-    @Override
-    protected void onPostExecute(String regId) {
-        // TODO - send registration ID to Studio server
     }
 }
