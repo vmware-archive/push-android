@@ -1,5 +1,9 @@
 package com.gopivotal.pushlib.api;
 
+import android.os.Build;
+
+import com.google.gson.Gson;
+import com.gopivotal.pushlib.model.ApiRegistrationRequestData;
 import com.gopivotal.pushlib.network.NetworkWrapper;
 import com.xtreme.commons.Logger;
 import com.xtreme.network.NetworkError;
@@ -42,27 +46,39 @@ public class ApiRegistrar {
         }
 
         Logger.i("Making network request to register this device with the Pivotal Push server");
-        final NetworkRequest networkRequest = new NetworkRequest(REQUEST_URL, new NetworkRequestListener() {
+        final NetworkRequest networkRequest = new NetworkRequest(REQUEST_URL, getNetworkRequestListener(listener));
+        networkRequest.setRequestType(NetworkRequest.RequestType.POST);
+        networkRequest.setBodyData(getRequestBodyData(deviceRegistrationId));
+        return networkRequest;
+    }
+
+    private NetworkRequestListener getNetworkRequestListener(final ApiRegistrarListener listener) {
+        return new NetworkRequestListener() {
 
             @Override
             public void onSuccess(NetworkResponse networkResponse) {
                 Logger.i("Pivotal Push server registration successful");
 
                 if (networkResponse == null) {
+                    Logger.e("Pivotal Push server registration failed: no networkResponse");
                     listener.onRegistrationFailed("no networkResponse");
                     return;
                 }
 
                 if (networkResponse.getStatus() == null) {
+                    Logger.e("Pivotal Push server registration failed: no statusLine in networkResponse");
                     listener.onRegistrationFailed("no statusLine in networkResponse");
                     return;
                 }
 
                 final int statusCode = networkResponse.getStatus().getStatusCode();
                 if (isFailureStatusCode(statusCode)) {
-                    listener.onRegistrationFailed("server returned HTTP status "+statusCode);
+                    Logger.e("Pivotal Push server registration failed: server returned HTTP status " + statusCode);
+                    listener.onRegistrationFailed("server returned HTTP status " + statusCode);
                     return;
                 }
+
+                Logger.i("Pivtoal Push Server registration succeeded.");
 
                 listener.onRegistrationSuccess();
             }
@@ -79,11 +95,25 @@ public class ApiRegistrar {
                 }
                 listener.onRegistrationFailed(reason);
             }
-        });
-        return networkRequest;
+        };
     }
 
     private boolean isFailureStatusCode(int statusCode) {
         return (statusCode < 200 || statusCode >= 300);
+    }
+
+    private String getRequestBodyData(String deviceRegistrationId) {
+        // TODO - most of this data is bogus. I need to figure out what it's really supposed to look like.
+        final ApiRegistrationRequestData data = new ApiRegistrationRequestData();
+        data.setReplicantUuid("9e60c311-f5c7-4416-aea2-d07bbc94f208");
+        data.setSecret("3c676b20-3c49-4215-be1a-3932e3458514");
+        data.setDeviceAlias("androidtest");
+        data.setDeviceModel("someModel");
+        data.setDeviceType("phone");
+        data.setOs("android");
+        data.setOsVersion(Build.VERSION.RELEASE);
+        data.setRegistrationToken(deviceRegistrationId);
+        final Gson gson = new Gson();
+        return gson.toJson(data);
     }
 }

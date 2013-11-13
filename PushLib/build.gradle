@@ -44,7 +44,7 @@ android {
 }
 
 dependencies {
-    //compile 'com.google.code.gson:gson:2.2.4'
+    compile 'com.google.code.gson:gson:2.2.4'
     compile 'com.xtremelabs:xl-commons-android:1.6.0-RELEASE'
     compile 'com.xtremelabs:xl-network-android:1.5.2-RELEASE'
     compile 'com.google.android.gms:play-services:4.0.30'
