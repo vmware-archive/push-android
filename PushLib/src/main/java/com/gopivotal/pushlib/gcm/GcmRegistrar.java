@@ -44,15 +44,15 @@ public class GcmRegistrar extends AsyncTask<GcmRegistrarListener, Void, String> 
 
     public void startRegistration(GcmRegistrarListener listener) {
 
-        final String regId = preferencesProvider.loadRegistrationId();
+        final String deviceRegistrationId = preferencesProvider.loadDeviceRegistrationId();
 
-        if (regId == null || regId.isEmpty()) {
+        if (deviceRegistrationId == null || deviceRegistrationId.isEmpty()) {
             registerInBackground(listener);
         } else {
             // TODO - do we need to register with Studio server on every launch, or only when a new registration ID is created (I suspect the latter).
-            Logger.i("Loaded registration ID: " + regId);
+            Logger.i("Loaded device registration ID: " + deviceRegistrationId);
             if (listener != null) {
-                listener.onRegistrationComplete(regId);
+                listener.onRegistrationComplete(deviceRegistrationId);
             }
         }
     }
@@ -69,8 +69,8 @@ public class GcmRegistrar extends AsyncTask<GcmRegistrarListener, Void, String> 
         }
 
         try {
-            final String registrationId = gcmProvider.register(senderId);
-            Logger.i("Device registered. Registration ID:" + registrationId);
+            final String deviceRegistrationId = gcmProvider.register(senderId);
+            Logger.i("Device registered. Device Registration ID:" + deviceRegistrationId);
 
             // You should send the registration ID to your server over HTTP,
             // so it can use GCM/HTTP or CCS to send messages to your app.
@@ -84,13 +84,13 @@ public class GcmRegistrar extends AsyncTask<GcmRegistrarListener, Void, String> 
             // message using the 'from' address in the message.
 
             // Persist the regID - no need to register again.
-            preferencesProvider.saveRegistrationId(registrationId);
+            preferencesProvider.saveDeviceRegistrationId(deviceRegistrationId);
 
             // Inform callback of registration success
             if (listener != null) {
-                listener.onRegistrationComplete(registrationId);
+                listener.onRegistrationComplete(deviceRegistrationId);
             }
-            return registrationId;
+            return deviceRegistrationId;
         } catch (IOException ex) {
             Logger.ex("Error registering device:", ex);
             // If there is an error, don't just keep trying to register.

@@ -1,6 +1,6 @@
 package com.gopivotal.pushlib.prefs;
 
 public interface PreferencesProvider {
-    String loadRegistrationId();
-    void saveRegistrationId(String registrationId);
+    String loadDeviceRegistrationId();
+    void saveDeviceRegistrationId(String deviceRegistrationId);
 }

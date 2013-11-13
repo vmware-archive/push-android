@@ -4,9 +4,9 @@ public interface GcmRegistrarListener {
     /**
      * Returns when registation is complete.  May return on a background thread.
      *
-     * @param registrationId The registration ID, as provided by Google Cloud Messaging.
+     * @param deviceRegistrationId The registration ID, as provided by Google Cloud Messaging.
      */
-    void onRegistrationComplete(String registrationId);
+    void onRegistrationComplete(String deviceRegistrationId);
 
     /**
      * Returns if registration has failed.

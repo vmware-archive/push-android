@@ -10,8 +10,8 @@ import com.xtreme.commons.Logger;
 
 public class RealPreferencesProvider implements PreferencesProvider {
 
-    private static final String PROPERTY_REG_ID = "registration_id";
-    private static final String PROPERTY_APP_VERSION = "appVersion";
+    private static final String PROPERTY_DEVICE_REGISTRATION_ID = "device_registration_id";
+    private static final String PROPERTY_APP_VERSION = "app_version";
 
     private final Context context;
 
@@ -23,11 +23,11 @@ public class RealPreferencesProvider implements PreferencesProvider {
     }
 
     @Override
-    public String loadRegistrationId() {
+    public String loadDeviceRegistrationId() {
         final SharedPreferences prefs = getGCMPreferences();
-        final String registrationId = prefs.getString(PROPERTY_REG_ID, "");
-        if (registrationId.isEmpty()) {
-            Logger.i("Registration not found. Registration will be required.");
+        final String deviceRegistrationId = prefs.getString(PROPERTY_DEVICE_REGISTRATION_ID, "");
+        if (deviceRegistrationId.isEmpty()) {
+            Logger.i("Device Registration ID not found. Device registration with GCM will be required.");
             return null;
         }
 
@@ -40,17 +40,17 @@ public class RealPreferencesProvider implements PreferencesProvider {
             Logger.i("App version changed. Registration will be required.");
             return null;
         }
-        return registrationId;
+        return deviceRegistrationId;
     }
 
 
     @Override
-    public void saveRegistrationId(String registrationId) {
+    public void saveDeviceRegistrationId(String registrationId) {
         final SharedPreferences prefs = getGCMPreferences();
         final int appVersion = getAppVersion();
-        Logger.i("Saving regId on app version " + appVersion);
+        Logger.i("Saving device registration ID for app version " + appVersion);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(PROPERTY_REG_ID, registrationId);
+        editor.putString(PROPERTY_DEVICE_REGISTRATION_ID, registrationId);
         editor.putInt(PROPERTY_APP_VERSION, appVersion);
         editor.commit();
         //PrintWriter p = null;

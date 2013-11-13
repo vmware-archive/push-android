@@ -13,12 +13,12 @@ public class FakePreferencesProvider implements PreferencesProvider {
     }
 
     @Override
-    public String loadRegistrationId() {
+    public String loadDeviceRegistrationId() {
         return registrationIdToLoad;
     }
 
     @Override
-    public void saveRegistrationId(String registrationId) {
+    public void saveDeviceRegistrationId(String registrationId) {
         this.savedRegistrationId = registrationId;
         wasSaved = true;
     }

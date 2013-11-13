@@ -71,9 +71,9 @@ public class GcmRegistrarTest extends AndroidTestCase {
     private GcmRegistrarListener getGcmRegistrarListener(final boolean isSuccessfulRegistration) {
         return new GcmRegistrarListener() {
                 @Override
-                public void onRegistrationComplete(String registrationId) {
+                public void onRegistrationComplete(String deviceRegistrationId) {
                     assertTrue(isSuccessfulRegistration);
-                    assertEquals(TEST_REGISTRATION_ID, registrationId);
+                    assertEquals(TEST_REGISTRATION_ID, deviceRegistrationId);
                     semaphore.release();
                 }
 
