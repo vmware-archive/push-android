@@ -15,13 +15,13 @@ package com.gopivotal.pushlib.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class ApiRegistrationRequestData {
+public class BackEndApiRegistrationResponseData {
 
-    @SerializedName("replication_uuid")
-    private String replicantUuid;
+    @SerializedName("replicant_id")
+    private String replicantId;
 
-    @SerializedName("secret")
-    private String secret;
+    @SerializedName("device_uuid")
+    private String deviceUuid;
 
     @SerializedName("device_alias")
     private String deviceAlias;
@@ -41,26 +41,23 @@ public class ApiRegistrationRequestData {
     @SerializedName("registration_token")
     private String registrationToken;
 
-    @SerializedName("device_uuid")
-    private String deviceUuid;
-
-    public ApiRegistrationRequestData() {
+    public BackEndApiRegistrationResponseData() {
     }
 
-    public String getReplicantUuid() {
-        return replicantUuid;
+    public String getReplicantId() {
+        return replicantId;
     }
 
-    public void setReplicantUuid(String replicantUuid) {
-        this.replicantUuid = replicantUuid;
+    public void setReplicantId(String replicantId) {
+        this.replicantId = replicantId;
     }
 
-    public String getSecret() {
-        return secret;
+    public String getDeviceUuid() {
+        return deviceUuid;
     }
 
-    public void setSecret(String secret) {
-        this.secret = secret;
+    public void setDeviceUuid(String deviceUuid) {
+        this.deviceUuid = deviceUuid;
     }
 
     public String getDeviceAlias() {

@@ -3,13 +3,16 @@ package com.gopivotal.pushlib.api;
 import android.os.Build;
 
 import com.google.gson.Gson;
-import com.gopivotal.pushlib.model.ApiRegistrationRequestData;
+import com.gopivotal.pushlib.model.BackEndApiRegistrationRequestData;
+import com.gopivotal.pushlib.model.BackEndApiRegistrationResponseData;
 import com.gopivotal.pushlib.network.NetworkWrapper;
 import com.xtreme.commons.Logger;
 import com.xtreme.network.NetworkError;
 import com.xtreme.network.NetworkRequest;
 import com.xtreme.network.NetworkRequestListener;
 import com.xtreme.network.NetworkResponse;
+
+import java.io.IOException;
 
 public class BackEndRegistrationApiRequest {
 
@@ -61,27 +64,55 @@ public class BackEndRegistrationApiRequest {
 
                 if (networkResponse == null) {
                     Logger.e("Back-end server registration failed: no networkResponse");
-                    listener.onBackEndRegistrationFailed("no networkResponse");
+                    listener.onBackEndRegistrationFailed("No networkResponse from back-end server.");
                     return;
                 }
 
                 if (networkResponse.getStatus() == null) {
                     Logger.e("Back-end server registration failed: no statusLine in networkResponse");
-                    listener.onBackEndRegistrationFailed("no statusLine in networkResponse");
+                    listener.onBackEndRegistrationFailed("Back-end no statusLine in networkResponse");
                     return;
                 }
 
                 final int statusCode = networkResponse.getStatus().getStatusCode();
                 if (isFailureStatusCode(statusCode)) {
                     Logger.e("Back-end server registration failed: server returned HTTP status " + statusCode);
-                    listener.onBackEndRegistrationFailed("server returned HTTP status " + statusCode);
+                    listener.onBackEndRegistrationFailed("Back-end server returned HTTP status " + statusCode);
                     return;
                 }
 
-                Logger.i("Back-end Server registration succeeded.");
+                final Gson gson = new Gson();
+                final String responseString;
+                try {
+                    responseString = networkResponse.getResponseString();
+                } catch (IOException e) {
+                    Logger.e("Back-end server registration failed: server response empty");
+                    listener.onBackEndRegistrationFailed("Back-end server response empty");
+                    return;
+                }
+
+                final BackEndApiRegistrationResponseData responseData;
+                try {
+                    responseData = gson.fromJson(responseString, BackEndApiRegistrationResponseData.class);
+                    if (responseData == null) {
+                        throw new Exception("unable to parse server response");
+                    }
+                } catch (Exception e) {
+                    Logger.e("Back-end server registration failed: " + e.getLocalizedMessage());
+                    listener.onBackEndRegistrationFailed(e.getLocalizedMessage());
+                    return;
+                }
+
+                final String deviceUuid = responseData.getDeviceUuid();
+                if (deviceUuid == null || deviceUuid.isEmpty()) {
+                    Logger.e("Back-end server registration failed: did not return device_uuid");
+                    listener.onBackEndRegistrationFailed("Back-end server did not return device_uuid");
+                    return;
+                }
 
                 // TODO - pass back device_uuid from network response
-                listener.onBackEndRegistrationSuccess("CATS");
+                Logger.i("Back-end Server registration succeeded.");
+                listener.onBackEndRegistrationSuccess(deviceUuid);
             }
 
             @Override
@@ -105,7 +136,7 @@ public class BackEndRegistrationApiRequest {
 
     private String getRequestBodyData(String deviceRegistrationId) {
         // TODO - most of this data is bogus. I need to figure out what it's really supposed to look like.
-        final ApiRegistrationRequestData data = new ApiRegistrationRequestData();
+        final BackEndApiRegistrationRequestData data = new BackEndApiRegistrationRequestData();
         data.setReplicantUuid("9e60c311-f5c7-4416-aea2-d07bbc94f208");
         data.setSecret("3c676b20-3c49-4215-be1a-3932e3458514");
         data.setDeviceAlias("androidtest");

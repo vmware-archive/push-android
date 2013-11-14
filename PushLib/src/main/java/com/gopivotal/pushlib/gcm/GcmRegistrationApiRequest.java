@@ -84,6 +84,7 @@ public class GcmRegistrationApiRequest extends AsyncTask<GcmRegistrationListener
             // message using the 'from' address in the message.
 
             // Persist the regID - no need to register again.
+            // TODO - save this somewhere else.  this class should only be responsible for accessing the server.
             preferencesProvider.saveGcmDeviceRegistrationId(deviceRegistrationId);
 
             // Inform callback of registration success
