@@ -8,14 +8,14 @@ import com.xtreme.commons.Logger;
 
 import java.io.IOException;
 
-public class GcmRegistrar extends AsyncTask<GcmRegistrarListener, Void, String> {
+public class GcmRegistrationApiRequest extends AsyncTask<GcmRegistrationListener, Void, String> {
 
     private Context context;
     private String senderId;
     private GcmProvider gcmProvider;
     private PreferencesProvider preferencesProvider;
 
-    public GcmRegistrar(Context context, String senderId, GcmProvider gcmProvider, PreferencesProvider preferencesProvider) {
+    public GcmRegistrationApiRequest(Context context, String senderId, GcmProvider gcmProvider, PreferencesProvider preferencesProvider) {
         verifyArguments(context, senderId, gcmProvider, preferencesProvider);
         saveArguments(context, senderId, gcmProvider, preferencesProvider);
     }
@@ -42,7 +42,7 @@ public class GcmRegistrar extends AsyncTask<GcmRegistrarListener, Void, String> 
         this.preferencesProvider = preferencesProvider;
     }
 
-    public void startRegistration(GcmRegistrarListener listener) {
+    public void startRegistration(GcmRegistrationListener listener) {
 
         final String gcmDeviceRegistrationId = preferencesProvider.loadGcmDeviceRegistrationId();
 
@@ -52,18 +52,18 @@ public class GcmRegistrar extends AsyncTask<GcmRegistrarListener, Void, String> 
             // TODO - do we need to register with Studio server on every launch, or only when a new registration ID is created (I suspect the latter).
             Logger.i("Loaded GCM device registration ID: " + gcmDeviceRegistrationId);
             if (listener != null) {
-                listener.onRegistrationComplete(gcmDeviceRegistrationId);
+                listener.onGcmRegistrationComplete(gcmDeviceRegistrationId);
             }
         }
     }
-    private void registerInBackground(GcmRegistrarListener listener) {
+    private void registerInBackground(GcmRegistrationListener listener) {
         execute(listener);
     }
 
     @Override
-    protected String doInBackground(GcmRegistrarListener... listeners) {
+    protected String doInBackground(GcmRegistrationListener... listeners) {
 
-        GcmRegistrarListener listener = null;
+        GcmRegistrationListener listener = null;
         if (listeners != null && listeners.length > 0) {
             listener = listeners[0];
         }
@@ -88,7 +88,7 @@ public class GcmRegistrar extends AsyncTask<GcmRegistrarListener, Void, String> 
 
             // Inform callback of registration success
             if (listener != null) {
-                listener.onRegistrationComplete(deviceRegistrationId);
+                listener.onGcmRegistrationComplete(deviceRegistrationId);
             }
             return deviceRegistrationId;
 
@@ -98,7 +98,7 @@ public class GcmRegistrar extends AsyncTask<GcmRegistrarListener, Void, String> 
             // Require the user to click a button again, or perform
             // exponential back-off.
             if (listener != null) {
-                listener.onRegistrationFailed(ex.getLocalizedMessage());
+                listener.onGcmRegistrationFailed(ex.getLocalizedMessage());
             }
             return null;
         }

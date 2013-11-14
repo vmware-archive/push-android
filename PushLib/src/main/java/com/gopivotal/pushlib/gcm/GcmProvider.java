@@ -4,4 +4,5 @@ import java.io.IOException;
 
 public interface GcmProvider {
     String register(String... senderIds) throws IOException;
+    // TODO - needs unregister method
 }

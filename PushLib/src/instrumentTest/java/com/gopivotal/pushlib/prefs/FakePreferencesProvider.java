@@ -3,13 +3,19 @@ package com.gopivotal.pushlib.prefs;
 public class FakePreferencesProvider implements PreferencesProvider {
 
     private final String gcmDeviceRegistrationIdToLoad;
-    private boolean wasSaved = false;
+    private final String backEndDeviceRegistrationIdToLoad;
+    private boolean wasGcmDeviceRegistrationIdSaved;
+    private boolean wasBackEndDeviceRegistrationIdSaved;
     private String savedGcmDeviceRegistrationId;
+    private String savedBackEndDeviceRegistrationId;
 
-    public FakePreferencesProvider(String gcmDeviceRegistrationIdToLoad) {
+    public FakePreferencesProvider(String gcmDeviceRegistrationIdToLoad, String backendDeviceRegistrationId) {
         this.gcmDeviceRegistrationIdToLoad = gcmDeviceRegistrationIdToLoad;
-        this.wasSaved = false;
+        this.backEndDeviceRegistrationIdToLoad = backendDeviceRegistrationId;
+        this.wasGcmDeviceRegistrationIdSaved = false;
+        this.wasBackEndDeviceRegistrationIdSaved = false;
         this.savedGcmDeviceRegistrationId = null;
+        this.savedBackEndDeviceRegistrationId = null;
     }
 
     @Override
@@ -19,15 +25,34 @@ public class FakePreferencesProvider implements PreferencesProvider {
 
     @Override
     public void saveGcmDeviceRegistrationId(String gcmDeviceRegistrationId) {
-        this.savedGcmDeviceRegistrationId = gcmDeviceRegistrationId;
-        wasSaved = true;
+        savedGcmDeviceRegistrationId = gcmDeviceRegistrationId;
+        wasGcmDeviceRegistrationIdSaved = true;
     }
 
-    public boolean wasSaved() {
-        return wasSaved;
+    @Override
+    public String loadBackEndDeviceRegistrationId() {
+        return backEndDeviceRegistrationIdToLoad;
+    }
+
+    @Override
+    public void saveBackEndDeviceRegistrationId(String backendDeviceRegistrationId) {
+        savedBackEndDeviceRegistrationId = backendDeviceRegistrationId;
+        wasBackEndDeviceRegistrationIdSaved = true;
+    }
+
+    public boolean wasGcmDeviceRegistrationIdSaved() {
+        return wasGcmDeviceRegistrationIdSaved;
+    }
+
+    public boolean wasBackEndDeviceRegistrationIdSaved() {
+        return wasBackEndDeviceRegistrationIdSaved;
     }
 
     public String getSavedGcmDeviceRegistrationId() {
         return savedGcmDeviceRegistrationId;
+    }
+
+    public String getSavedBackEndDeviceRegistrationId() {
+        return savedBackEndDeviceRegistrationId;
     }
 }

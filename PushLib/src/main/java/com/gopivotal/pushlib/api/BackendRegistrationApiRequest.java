@@ -11,13 +11,13 @@ import com.xtreme.network.NetworkRequest;
 import com.xtreme.network.NetworkRequestListener;
 import com.xtreme.network.NetworkResponse;
 
-public class ApiRegistrar {
+public class BackEndRegistrationApiRequest {
 
     private static final String REQUEST_URL = "http://ec2-54-234-124-123.compute-1.amazonaws.com:8080/v1/registration";
 
     private NetworkWrapper networkWrapper;
 
-    public ApiRegistrar(NetworkWrapper networkWrapper) {
+    public BackEndRegistrationApiRequest(NetworkWrapper networkWrapper) {
         verifyArguments(networkWrapper);
         saveArguments(networkWrapper);
     }
@@ -32,55 +32,56 @@ public class ApiRegistrar {
         this.networkWrapper = networkWrapper;
     }
 
-    public void startDeviceRegistration(String deviceRegistrationId, ApiRegistrarListener listener) {
-        final NetworkRequest request = getNetworkRequest(deviceRegistrationId, listener);
+    public void startDeviceRegistration(String gcmDeviceRegistrationId, BackEndRegistrationListener listener) {
+        final NetworkRequest request = getNetworkRequest(gcmDeviceRegistrationId, listener);
         networkWrapper.getNetworkRequestLauncher().executeRequest(request);
     }
 
-    private NetworkRequest getNetworkRequest(String deviceRegistrationId, final ApiRegistrarListener listener) {
-        if (deviceRegistrationId == null) {
-            throw new IllegalArgumentException("deviceRegistrationId may not be null");
+    private NetworkRequest getNetworkRequest(String gcmDeviceRegistrationId, final BackEndRegistrationListener listener) {
+        if (gcmDeviceRegistrationId == null) {
+            throw new IllegalArgumentException("gcmDeviceRegistrationId may not be null");
         }
         if (listener == null) {
             throw new IllegalArgumentException("listener may not be null");
         }
 
-        Logger.i("Making network request to register this device with the Pivotal Push server");
+        Logger.i("Making network request to register this device with the back-end server");
         final NetworkRequest networkRequest = new NetworkRequest(REQUEST_URL, getNetworkRequestListener(listener));
         networkRequest.setRequestType(NetworkRequest.RequestType.POST);
-        networkRequest.setBodyData(getRequestBodyData(deviceRegistrationId));
+        networkRequest.setBodyData(getRequestBodyData(gcmDeviceRegistrationId));
         return networkRequest;
     }
 
-    private NetworkRequestListener getNetworkRequestListener(final ApiRegistrarListener listener) {
+    private NetworkRequestListener getNetworkRequestListener(final BackEndRegistrationListener listener) {
         return new NetworkRequestListener() {
 
             @Override
             public void onSuccess(NetworkResponse networkResponse) {
-                Logger.i("Pivotal Push server registration successful");
+                Logger.i("Back-end server registration successful");
 
                 if (networkResponse == null) {
-                    Logger.e("Pivotal Push server registration failed: no networkResponse");
-                    listener.onRegistrationFailed("no networkResponse");
+                    Logger.e("Back-end server registration failed: no networkResponse");
+                    listener.onBackEndRegistrationFailed("no networkResponse");
                     return;
                 }
 
                 if (networkResponse.getStatus() == null) {
-                    Logger.e("Pivotal Push server registration failed: no statusLine in networkResponse");
-                    listener.onRegistrationFailed("no statusLine in networkResponse");
+                    Logger.e("Back-end server registration failed: no statusLine in networkResponse");
+                    listener.onBackEndRegistrationFailed("no statusLine in networkResponse");
                     return;
                 }
 
                 final int statusCode = networkResponse.getStatus().getStatusCode();
                 if (isFailureStatusCode(statusCode)) {
-                    Logger.e("Pivotal Push server registration failed: server returned HTTP status " + statusCode);
-                    listener.onRegistrationFailed("server returned HTTP status " + statusCode);
+                    Logger.e("Back-end server registration failed: server returned HTTP status " + statusCode);
+                    listener.onBackEndRegistrationFailed("server returned HTTP status " + statusCode);
                     return;
                 }
 
-                Logger.i("Pivtoal Push Server registration succeeded.");
+                Logger.i("Back-end Server registration succeeded.");
 
-                listener.onRegistrationSuccess();
+                // TODO - pass back device_uuid from network response
+                listener.onBackEndRegistrationSuccess("CATS");
             }
 
             @Override
@@ -90,10 +91,10 @@ public class ApiRegistrar {
                     if (networkError.getException() != null) {
                         reason = networkError.getException().getMessage();
                     } else if (networkError.getHttpStatus() != null) {
-                        reason = "Server returned HTTP status " + networkError.getHttpStatus().getStatusCode();
+                        reason = "Back-end server returned HTTP status upon registration attempt " + networkError.getHttpStatus().getStatusCode();
                     }
                 }
-                listener.onRegistrationFailed(reason);
+                listener.onBackEndRegistrationFailed(reason);
             }
         };
     }

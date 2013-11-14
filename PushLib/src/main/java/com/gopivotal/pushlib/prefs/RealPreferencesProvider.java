@@ -11,6 +11,7 @@ import com.xtreme.commons.Logger;
 public class RealPreferencesProvider implements PreferencesProvider {
 
     private static final String PROPERTY_GCM_DEVICE_REGISTRATION_ID = "gcm_device_registration_id";
+    private static final String PROPERTY_BACKEND_DEVICE_REGISTRATION_ID = "backend_device_registration_id";
     private static final String PROPERTY_APP_VERSION = "app_version";
 
     private final Context context;
@@ -27,7 +28,7 @@ public class RealPreferencesProvider implements PreferencesProvider {
         final SharedPreferences prefs = getSharedPreferences();
         final String gcmDeviceRegistrationId = prefs.getString(PROPERTY_GCM_DEVICE_REGISTRATION_ID, "");
         if (gcmDeviceRegistrationId.isEmpty()) {
-            Logger.i("Device Registration ID not found. Device registration with GCM will be required.");
+            Logger.i("GCM device registration ID not found. Device registration with GCM will be required.");
             return null;
         }
 
@@ -62,6 +63,26 @@ public class RealPreferencesProvider implements PreferencesProvider {
         //} catch (FileNotFoundException e) {
         //    e.printStackTrace();
         //}
+    }
+
+    @Override
+    public String loadBackEndDeviceRegistrationId() {
+        final SharedPreferences prefs = getSharedPreferences();
+        final String backendDeviceRegistrationId = prefs.getString(PROPERTY_BACKEND_DEVICE_REGISTRATION_ID, "");
+        if (backendDeviceRegistrationId.isEmpty()) {
+            Logger.i("Backend device registration ID not found. Device registration with the backend will be required.");
+            return null;
+        }
+        return backendDeviceRegistrationId;
+    }
+
+    @Override
+    public void saveBackEndDeviceRegistrationId(String backendDeviceRegistrationId) {
+        final SharedPreferences prefs = getSharedPreferences();
+        Logger.i("Saving backend device registration ID");
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(PROPERTY_BACKEND_DEVICE_REGISTRATION_ID, backendDeviceRegistrationId);
+        editor.commit();
     }
 
     private SharedPreferences getSharedPreferences() {

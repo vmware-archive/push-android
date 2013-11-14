@@ -4,18 +4,18 @@ import java.io.IOException;
 
 public class FakeGcmProvider implements GcmProvider {
 
-    private final String registrationId;
+    private final String gcmDeviceRegistrationId;
     private final boolean willThrow;
     private boolean wasRegisterCalled;
 
-    public FakeGcmProvider(String registrationId) {
-        this.registrationId = registrationId;
+    public FakeGcmProvider(String gcmDeviceRegistrationId) {
+        this.gcmDeviceRegistrationId = gcmDeviceRegistrationId;
         this.willThrow = false;
         this.wasRegisterCalled = false;
     }
 
-    public FakeGcmProvider(String registrationId, boolean willThrow) {
-        this.registrationId = registrationId;
+    public FakeGcmProvider(String gcmDeviceRegistrationId, boolean willThrow) {
+        this.gcmDeviceRegistrationId = gcmDeviceRegistrationId;
         this.willThrow = willThrow;
         this.wasRegisterCalled = false;
     }
@@ -24,12 +24,14 @@ public class FakeGcmProvider implements GcmProvider {
     public String register(String... senderIds) throws IOException {
         this.wasRegisterCalled = true;
         if (willThrow) {
-            throw new IOException("Fake registration failed fakely");
+            throw new IOException("Fake GCM device registration failed fakely");
         }
-        return registrationId;
+        return gcmDeviceRegistrationId;
     }
 
     public boolean wasRegisterCalled() {
         return wasRegisterCalled;
     }
+
+    // TODO - needs unregister method
 }

@@ -4,7 +4,7 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.widget.TextView;
 
-import com.gopivotal.pushlib.gcm.GcmRegistrarListener;
+import com.gopivotal.pushlib.gcm.GcmRegistrationListener;
 import com.xtreme.commons.ThreadUtil;
 
 public class MainActivity extends ActionBarActivity {
@@ -25,14 +25,14 @@ public class MainActivity extends ActionBarActivity {
         addLogMessage("Starting registration...");
 
         pushLib = PushLib.init(this, SENDER_ID);
-        pushLib.startRegistration(new GcmRegistrarListener() {
+        pushLib.startRegistration(new GcmRegistrationListener() {
             @Override
-            public void onRegistrationComplete(String gcmDeviceRegistrationId) {
+            public void onGcmRegistrationComplete(String gcmDeviceRegistrationId) {
                 addLogMessage("Registration successful. Registration ID is '" + gcmDeviceRegistrationId + "'.");
             }
 
             @Override
-            public void onRegistrationFailed(String reason) {
+            public void onGcmRegistrationFailed(String reason) {
                 addLogMessage("Registration failed. Reason is '" + reason + "'.");
             }
         });

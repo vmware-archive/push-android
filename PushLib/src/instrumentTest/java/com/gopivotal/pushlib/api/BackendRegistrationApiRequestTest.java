@@ -13,9 +13,9 @@ import com.xtreme.network.NetworkResponse;
 
 import java.util.concurrent.Semaphore;
 
-public class ApiRegistrarTest extends AndroidTestCase {
+public class BackEndRegistrationApiRequestTest extends AndroidTestCase {
 
-    private static final String TEST_REGISTRATION_ID = "TEST_REGISTRATION_ID";
+    private static final String TEST_GCM_DEVICE_REGISTRATION_ID = "TEST_GCM_DEVICE_REGISTRATION_ID";
     private static final long TEN_SECOND_TIMEOUT = 10000L;
     private static final long NO_DELAY = 0L;
     private static final long ONE_SECOND_DELAY = 1000L;
@@ -25,7 +25,7 @@ public class ApiRegistrarTest extends AndroidTestCase {
     private DelayedLoop delayedLoop;
     private boolean wasRequestSuccessful;
     private Semaphore semaphore;
-    private ApiRegistrarListener apiRegistrarListener;
+    private BackEndRegistrationListener backEndRegistrationListener;
 
     @Override
     protected void setUp() throws Exception {
@@ -38,18 +38,18 @@ public class ApiRegistrarTest extends AndroidTestCase {
 
     public void testRequiresNetworkWrapper() {
         try {
-            new ApiRegistrar(null);
+            new BackEndRegistrationApiRequest(null);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
             // Success
         }
     }
 
-    public void testRequiresDeviceRegistrationId() {
+    public void testRequiresGcmDeviceRegistrationId() {
         try {
-            final ApiRegistrar apiRegistrar = new ApiRegistrar(new MockNetworkWrapper());
+            final BackEndRegistrationApiRequest backEndRegistrationApiRequest = new BackEndRegistrationApiRequest(new MockNetworkWrapper());
             makeApiRegistrarListener(true);
-            apiRegistrar.startDeviceRegistration(null, apiRegistrarListener);
+            backEndRegistrationApiRequest.startDeviceRegistration(null, backEndRegistrationListener);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
             // Success
@@ -58,8 +58,8 @@ public class ApiRegistrarTest extends AndroidTestCase {
 
     public void testRequiresListener() {
         try {
-            final ApiRegistrar apiRegistrar = new ApiRegistrar(new MockNetworkWrapper());
-            apiRegistrar.startDeviceRegistration(TEST_REGISTRATION_ID, null);
+            final BackEndRegistrationApiRequest backEndRegistrationApiRequest = new BackEndRegistrationApiRequest(new MockNetworkWrapper());
+            backEndRegistrationApiRequest.startDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, null);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
             // Success
@@ -68,48 +68,48 @@ public class ApiRegistrarTest extends AndroidTestCase {
 
     public void testSuccessfulRequest() {
         makeListenersForSuccessfulRequestFromNetwork(NO_DELAY, true, 200);
-        final ApiRegistrar registrar = new ApiRegistrar(networkWrapper);
-        registrar.startDeviceRegistration(TEST_REGISTRATION_ID, apiRegistrarListener);
+        final BackEndRegistrationApiRequest registrar = new BackEndRegistrationApiRequest(networkWrapper);
+        registrar.startDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, backEndRegistrationListener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
 
     public void testSuccessfulAsync() {
         makeListenersForSuccessfulRequestFromNetwork(ONE_SECOND_DELAY, true, 200);
-        final ApiRegistrar registrar = new ApiRegistrar(networkWrapper);
-        registrar.startDeviceRegistration(TEST_REGISTRATION_ID, apiRegistrarListener);
+        final BackEndRegistrationApiRequest registrar = new BackEndRegistrationApiRequest(networkWrapper);
+        registrar.startDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, backEndRegistrationListener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
 
     public void testNullResponse() {
         makeListenersForSuccessfulNullResultFromNetwork(NO_DELAY);
-        final ApiRegistrar registrar = new ApiRegistrar(networkWrapper);
-        registrar.startDeviceRegistration(TEST_REGISTRATION_ID, apiRegistrarListener);
+        final BackEndRegistrationApiRequest registrar = new BackEndRegistrationApiRequest(networkWrapper);
+        registrar.startDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, backEndRegistrationListener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
 
     public void testNoStatusLine() {
         makeListenersForSuccessfulWithNoStatusLineFromNetwork(NO_DELAY);
-        final ApiRegistrar registrar = new ApiRegistrar(networkWrapper);
-        registrar.startDeviceRegistration(TEST_REGISTRATION_ID, apiRegistrarListener);
+        final BackEndRegistrationApiRequest registrar = new BackEndRegistrationApiRequest(networkWrapper);
+        registrar.startDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, backEndRegistrationListener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
 
     public void testSuccessful404() {
         makeListenersForSuccessfulRequestFromNetwork(NO_DELAY, false, 404);
-        final ApiRegistrar registrar = new ApiRegistrar(networkWrapper);
-        registrar.startDeviceRegistration(TEST_REGISTRATION_ID, apiRegistrarListener);
+        final BackEndRegistrationApiRequest registrar = new BackEndRegistrationApiRequest(networkWrapper);
+        registrar.startDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, backEndRegistrationListener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
 
     public void testCouldNotConnect() {
         makeListenersFromFailedRequestFromNetwork(NO_DELAY, "Your server is busted", 0);
-        final ApiRegistrar registrar = new ApiRegistrar(networkWrapper);
-        registrar.startDeviceRegistration(TEST_REGISTRATION_ID, apiRegistrarListener);
+        final BackEndRegistrationApiRequest registrar = new BackEndRegistrationApiRequest(networkWrapper);
+        registrar.startDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, backEndRegistrationListener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
@@ -171,10 +171,12 @@ public class ApiRegistrarTest extends AndroidTestCase {
     }
 
     public void makeApiRegistrarListener(final boolean isSuccessfulRequest) {
-        apiRegistrarListener = new ApiRegistrarListener() {
+        backEndRegistrationListener = new BackEndRegistrationListener() {
+
             @Override
-            public void onRegistrationSuccess() {
+            public void onBackEndRegistrationSuccess(String backEndDeviceRegistrationId) {
                 assertTrue(isSuccessfulRequest);
+                // TODO - assert device registration ID is what we expect it to be
                 if (isSuccessfulRequest) {
                     delayedLoop.flagSuccess();
                 } else {
@@ -183,7 +185,7 @@ public class ApiRegistrarTest extends AndroidTestCase {
             }
 
             @Override
-            public void onRegistrationFailed(String reason) {
+            public void onBackEndRegistrationFailed(String reason) {
                 assertFalse(isSuccessfulRequest);
                 if (isSuccessfulRequest) {
                     delayedLoop.flagFailure();

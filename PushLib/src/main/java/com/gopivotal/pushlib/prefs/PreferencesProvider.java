@@ -6,4 +6,7 @@ public interface PreferencesProvider {
 
     void saveGcmDeviceRegistrationId(String gcmDeviceRegistrationId);
 
+    String loadBackEndDeviceRegistrationId();
+
+    void saveBackEndDeviceRegistrationId(String backendDeviceRegistrationId);
 }
