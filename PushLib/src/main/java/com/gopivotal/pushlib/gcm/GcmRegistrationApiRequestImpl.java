@@ -3,51 +3,59 @@ package com.gopivotal.pushlib.gcm;
 import android.content.Context;
 import android.os.AsyncTask;
 
-import com.gopivotal.pushlib.prefs.PreferencesProvider;
 import com.xtreme.commons.Logger;
 
 import java.io.IOException;
 
-public class GcmRegistrationApiRequestImpl extends AsyncTask<GcmRegistrationListener, Void, String> implements GcmRegistrationApiRequest {
+public class GcmRegistrationApiRequestImpl extends AsyncTask<Void, Void, String> implements GcmRegistrationApiRequest {
 
     private Context context;
     private String senderId;
     private GcmProvider gcmProvider;
+    private GcmRegistrationListener listener;
 
-    public GcmRegistrationApiRequestImpl(Context context, String senderId, GcmProvider gcmProvider) {
-        verifyArguments(context, senderId, gcmProvider);
-        saveArguments(context, senderId, gcmProvider);
+    public GcmRegistrationApiRequestImpl(Context context, GcmProvider gcmProvider) {
+        verifyArguments(context, gcmProvider);
+        saveArguments(context, gcmProvider);
     }
 
-    private void verifyArguments(Context context, String senderId, GcmProvider gcmProvider) {
+    private void verifyArguments(Context context, GcmProvider gcmProvider) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
-        }
-        if (senderId == null) {
-            throw new IllegalArgumentException("senderId may not be null");
         }
         if (gcmProvider == null) {
             throw new IllegalArgumentException("gcmProvider may not be null");
         }
     }
 
-    private void saveArguments(Context context, String senderId, GcmProvider gcmProvider) {
+    private void saveArguments(Context context, GcmProvider gcmProvider) {
         this.context = context;
-        this.senderId = senderId;
         this.gcmProvider = gcmProvider;
     }
 
-    public void startRegistration(GcmRegistrationListener listener) {
-        execute(listener);
+    public void startRegistration(String senderId, GcmRegistrationListener listener) {
+        verifyRegistrationArguments(senderId, listener);
+        saveRegistrationArguments(senderId, listener);
+        // TODO - stop using a AsyncTask to implement this class since the calling mechanism will already be on its own worker thread
+        execute(null);
+    }
+
+    private void verifyRegistrationArguments(String senderId, GcmRegistrationListener listener) {
+        if (senderId == null) {
+            throw new IllegalArgumentException("senderId may not be null");
+        }
+        if (listener == null) {
+            throw new IllegalArgumentException("listener may not be null");
+        }
+    }
+
+    private void saveRegistrationArguments(String senderId, GcmRegistrationListener listener) {
+        this.senderId = senderId;
+        this.listener = listener;
     }
 
     @Override
-    protected String doInBackground(GcmRegistrationListener... listeners) {
-
-        GcmRegistrationListener listener = null;
-        if (listeners != null && listeners.length > 0) {
-            listener = listeners[0];
-        }
+    protected String doInBackground(Void... v) {
 
         try {
             final String deviceRegistrationId = gcmProvider.register(senderId);
@@ -71,4 +79,8 @@ public class GcmRegistrationApiRequestImpl extends AsyncTask<GcmRegistrationList
         }
     }
 
+    @Override
+    public GcmRegistrationApiRequest copy() {
+        return new GcmRegistrationApiRequestImpl(context, gcmProvider);
+    }
 }

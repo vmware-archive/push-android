@@ -9,4 +9,8 @@ public interface PreferencesProvider {
     String loadBackEndDeviceRegistrationId();
 
     void saveBackEndDeviceRegistrationId(String backendDeviceRegistrationId);
+
+    int loadAppVersion();
+
+    void saveAppVersion(int appVersion);
 }

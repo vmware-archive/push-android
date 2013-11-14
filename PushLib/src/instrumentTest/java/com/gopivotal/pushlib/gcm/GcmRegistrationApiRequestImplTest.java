@@ -2,8 +2,6 @@ package com.gopivotal.pushlib.gcm;
 
 import android.test.AndroidTestCase;
 
-import com.gopivotal.pushlib.prefs.FakePreferencesProvider;
-
 import java.util.concurrent.Semaphore;
 
 public class GcmRegistrationApiRequestImplTest extends AndroidTestCase {
@@ -21,16 +19,7 @@ public class GcmRegistrationApiRequestImplTest extends AndroidTestCase {
 
     public void testNullContext() {
         try {
-            new GcmRegistrationApiRequestImpl(null, TEST_SENDER_ID, new FakeGcmProvider(TEST_GCM_DEVICE_REGISTRATION_ID));
-            fail();
-        } catch (IllegalArgumentException e) {
-            // Exception expected
-        }
-    }
-
-    public void testNullSenderId() {
-        try {
-            new GcmRegistrationApiRequestImpl(getContext(), null, new FakeGcmProvider(TEST_GCM_DEVICE_REGISTRATION_ID));
+            new GcmRegistrationApiRequestImpl(null, new FakeGcmProvider(TEST_GCM_DEVICE_REGISTRATION_ID));
             fail();
         } catch (IllegalArgumentException e) {
             // Exception expected
@@ -39,7 +28,27 @@ public class GcmRegistrationApiRequestImplTest extends AndroidTestCase {
 
     public void testNullGcmProvider() {
         try {
-            new GcmRegistrationApiRequestImpl(getContext(), TEST_SENDER_ID, null);
+            new GcmRegistrationApiRequestImpl(getContext(), null);
+            fail();
+        } catch (IllegalArgumentException e) {
+            // Exception expected
+        }
+    }
+
+    public void testNullSenderId() {
+        try {
+            final GcmRegistrationApiRequest request = new GcmRegistrationApiRequestImpl(getContext(), new FakeGcmProvider(TEST_GCM_DEVICE_REGISTRATION_ID));
+            request.startRegistration(null, getGcmRegistrarListener(false));
+            fail();
+        } catch (IllegalArgumentException e) {
+            // Exception expected
+        }
+    }
+
+    public void testNullListener() {
+        try {
+            final GcmRegistrationApiRequest request = new GcmRegistrationApiRequestImpl(getContext(), new FakeGcmProvider(TEST_GCM_DEVICE_REGISTRATION_ID));
+            request.startRegistration(TEST_SENDER_ID, null);
             fail();
         } catch (IllegalArgumentException e) {
             // Exception expected
@@ -48,18 +57,18 @@ public class GcmRegistrationApiRequestImplTest extends AndroidTestCase {
 
     public void testSuccessfulInitialRegistration() throws InterruptedException {
         final FakeGcmProvider gcm = new FakeGcmProvider(TEST_GCM_DEVICE_REGISTRATION_ID);
-        final GcmRegistrationApiRequestImpl registrar = new GcmRegistrationApiRequestImpl(getContext(), TEST_SENDER_ID, gcm);
+        final GcmRegistrationApiRequestImpl registrar = new GcmRegistrationApiRequestImpl(getContext(), gcm);
         final GcmRegistrationListener listener = getGcmRegistrarListener(true);
-        registrar.startRegistration(listener);
+        registrar.startRegistration(TEST_SENDER_ID, listener);
         semaphore.acquire();
         assertTrue(gcm.wasRegisterCalled());
     }
 
     public void testFailedRegistration() throws InterruptedException {
         final FakeGcmProvider gcm = new FakeGcmProvider(null, true);
-        final GcmRegistrationApiRequestImpl registrar = new GcmRegistrationApiRequestImpl(getContext(), TEST_SENDER_ID, gcm);
+        final GcmRegistrationApiRequestImpl registrar = new GcmRegistrationApiRequestImpl(getContext(), gcm);
         final GcmRegistrationListener listener = getGcmRegistrarListener(false);
-        registrar.startRegistration(listener);
+        registrar.startRegistration(TEST_SENDER_ID, listener);
         semaphore.acquire();
         assertTrue(gcm.wasRegisterCalled());
     }

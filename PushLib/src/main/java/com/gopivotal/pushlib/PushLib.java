@@ -3,12 +3,16 @@ package com.gopivotal.pushlib;
 import android.app.Application;
 import android.content.Context;
 
+import com.gopivotal.pushlib.gcm.GcmProvider;
+import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequest;
 import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequestImpl;
-import com.gopivotal.pushlib.gcm.GcmRegistrationListener;
+import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequestProvider;
 import com.gopivotal.pushlib.gcm.RealGcmProvider;
+import com.gopivotal.pushlib.prefs.PreferencesProvider;
 import com.gopivotal.pushlib.prefs.RealPreferencesProvider;
 import com.gopivotal.pushlib.registration.RegistrationEngine;
 import com.gopivotal.pushlib.registration.RegistrationListener;
+import com.gopivotal.pushlib.util.Const;
 import com.xtreme.commons.Logger;
 
 public class PushLib {
@@ -41,9 +45,11 @@ public class PushLib {
      * @param listener
      */
     public void startRegistration(RegistrationListener listener) {
-        final RealGcmProvider gcmProvider = new RealGcmProvider(context);
-        final RealPreferencesProvider preferencesProvider = new RealPreferencesProvider(context);
-        final RegistrationEngine registrationEngine = new RegistrationEngine(context, gcmProvider, preferencesProvider);
+        final GcmProvider gcmProvider = new RealGcmProvider(context);
+        final PreferencesProvider preferencesProvider = new RealPreferencesProvider(context);
+        final GcmRegistrationApiRequest dummyGcmRegistrationApiRequest = new GcmRegistrationApiRequestImpl(context, gcmProvider);
+        final GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider = new GcmRegistrationApiRequestProvider(dummyGcmRegistrationApiRequest);
+        final RegistrationEngine registrationEngine = new RegistrationEngine(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider);
         registrationEngine.registerDevice(senderId, listener);
     }
 

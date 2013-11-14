@@ -2,42 +2,53 @@ package com.gopivotal.pushlib.prefs;
 
 public class FakePreferencesProvider implements PreferencesProvider {
 
-    private final String gcmDeviceRegistrationIdToLoad;
-    private final String backEndDeviceRegistrationIdToLoad;
+    private String gcmDeviceRegistrationId;
+    private String backEndDeviceRegistrationId;
+    private int appVersion;
     private boolean wasGcmDeviceRegistrationIdSaved;
     private boolean wasBackEndDeviceRegistrationIdSaved;
-    private String savedGcmDeviceRegistrationId;
-    private String savedBackEndDeviceRegistrationId;
+    private boolean wasAppVersionSaved;
 
-    public FakePreferencesProvider(String gcmDeviceRegistrationIdToLoad, String backendDeviceRegistrationId) {
-        this.gcmDeviceRegistrationIdToLoad = gcmDeviceRegistrationIdToLoad;
-        this.backEndDeviceRegistrationIdToLoad = backendDeviceRegistrationId;
+    public FakePreferencesProvider(String gcmDeviceRegistrationIdToLoad, String backendDeviceRegistrationIdToLoad, int appVersionToLoad) {
+        this.gcmDeviceRegistrationId = gcmDeviceRegistrationIdToLoad;
+        this.backEndDeviceRegistrationId = backendDeviceRegistrationIdToLoad;
+        this.appVersion = appVersionToLoad;
         this.wasGcmDeviceRegistrationIdSaved = false;
         this.wasBackEndDeviceRegistrationIdSaved = false;
-        this.savedGcmDeviceRegistrationId = null;
-        this.savedBackEndDeviceRegistrationId = null;
+        this.wasAppVersionSaved = false;
     }
 
     @Override
     public String loadGcmDeviceRegistrationId() {
-        return gcmDeviceRegistrationIdToLoad;
-    }
-
-    @Override
-    public void saveGcmDeviceRegistrationId(String gcmDeviceRegistrationId) {
-        savedGcmDeviceRegistrationId = gcmDeviceRegistrationId;
-        wasGcmDeviceRegistrationIdSaved = true;
+        return gcmDeviceRegistrationId;
     }
 
     @Override
     public String loadBackEndDeviceRegistrationId() {
-        return backEndDeviceRegistrationIdToLoad;
+        return backEndDeviceRegistrationId;
+    }
+
+    @Override
+    public int loadAppVersion() {
+        return appVersion;
+    }
+
+    @Override
+    public void saveGcmDeviceRegistrationId(String gcmDeviceRegistrationId) {
+        this.gcmDeviceRegistrationId = gcmDeviceRegistrationId;
+        wasGcmDeviceRegistrationIdSaved = true;
     }
 
     @Override
     public void saveBackEndDeviceRegistrationId(String backendDeviceRegistrationId) {
-        savedBackEndDeviceRegistrationId = backendDeviceRegistrationId;
+        this.backEndDeviceRegistrationId = backendDeviceRegistrationId;
         wasBackEndDeviceRegistrationIdSaved = true;
+    }
+
+    @Override
+    public void saveAppVersion(int appVersion) {
+        this.appVersion = appVersion;
+        wasAppVersionSaved = true;
     }
 
     public boolean wasGcmDeviceRegistrationIdSaved() {
@@ -48,11 +59,7 @@ public class FakePreferencesProvider implements PreferencesProvider {
         return wasBackEndDeviceRegistrationIdSaved;
     }
 
-    public String getSavedGcmDeviceRegistrationId() {
-        return savedGcmDeviceRegistrationId;
-    }
-
-    public String getSavedBackEndDeviceRegistrationId() {
-        return savedBackEndDeviceRegistrationId;
+    public boolean wasAppVersionSaved() {
+        return wasAppVersionSaved;
     }
 }
