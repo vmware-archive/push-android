@@ -14,13 +14,13 @@ import com.xtreme.network.NetworkResponse;
 
 import java.io.IOException;
 
-public class BackEndRegistrationApiRequest {
+public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApiRequest {
 
     private static final String REQUEST_URL = "http://ec2-54-234-124-123.compute-1.amazonaws.com:8080/v1/registration";
 
     private NetworkWrapper networkWrapper;
 
-    public BackEndRegistrationApiRequest(NetworkWrapper networkWrapper) {
+    public BackEndRegistrationApiRequestImpl(NetworkWrapper networkWrapper) {
         verifyArguments(networkWrapper);
         saveArguments(networkWrapper);
     }

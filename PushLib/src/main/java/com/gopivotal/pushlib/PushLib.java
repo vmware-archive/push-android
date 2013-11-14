@@ -3,10 +3,12 @@ package com.gopivotal.pushlib;
 import android.app.Application;
 import android.content.Context;
 
-import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequest;
+import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequestImpl;
 import com.gopivotal.pushlib.gcm.GcmRegistrationListener;
 import com.gopivotal.pushlib.gcm.RealGcmProvider;
 import com.gopivotal.pushlib.prefs.RealPreferencesProvider;
+import com.gopivotal.pushlib.registration.RegistrationEngine;
+import com.gopivotal.pushlib.registration.RegistrationListener;
 import com.xtreme.commons.Logger;
 
 public class PushLib {
@@ -32,11 +34,17 @@ public class PushLib {
         }
     }
 
-    public void startRegistration(GcmRegistrationListener listener) {
+    /**
+     * Registers the device and application for receiving push notifications.  If the application
+     * is already registered then will do nothing.
+     *
+     * @param listener
+     */
+    public void startRegistration(RegistrationListener listener) {
         final RealGcmProvider gcmProvider = new RealGcmProvider(context);
         final RealPreferencesProvider preferencesProvider = new RealPreferencesProvider(context);
-        final GcmRegistrationApiRequest registrar = new GcmRegistrationApiRequest(context, senderId, gcmProvider, preferencesProvider);
-        registrar.startRegistration(listener);
+        final RegistrationEngine registrationEngine = new RegistrationEngine(context, gcmProvider, preferencesProvider);
+        registrationEngine.registerDevice(senderId, listener);
     }
 
     private void saveArguments(Context context, String senderId) {
