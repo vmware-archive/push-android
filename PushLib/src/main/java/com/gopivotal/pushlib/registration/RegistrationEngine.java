@@ -9,6 +9,7 @@ import com.gopivotal.pushlib.gcm.GcmRegistrationListener;
 import com.gopivotal.pushlib.gcm.RealGcmProvider;
 import com.gopivotal.pushlib.prefs.PreferencesProvider;
 import com.gopivotal.pushlib.prefs.RealPreferencesProvider;
+import com.xtreme.commons.Logger;
 
 public class RegistrationEngine {
 
@@ -41,25 +42,56 @@ public class RegistrationEngine {
 
     public void registerDevice(String senderId, final RegistrationListener listener) {
 
-        // TODO - make this method asynchronous
+        verifyRegistrationArguments(senderId);
 
+        // TODO - if there was a previous registration, compare the new GCM device ID with the previous one.  If
+        // they are the same, then we shouldn't have to re-register with the back-end.
+        if (isRegistrationRequired()) {
+            // TODO - make this method asynchronous
+            registerDeviceWithGcm(senderId, listener);
+        } else {
+            // TODO - do we need to register with Studio server on every launch, or only when a new registration ID is created (I suspect the latter)?
+            Logger.i("Already registered with GCM");
+            if (listener != null) {
+                listener.onRegistrationComplete();
+            }
+        }
+    }
+
+    private void verifyRegistrationArguments(String senderId) {
         if (senderId == null) {
             throw new IllegalArgumentException("senderId may not be null");
         }
+    }
 
-        final GcmRegistrationApiRequest gcmRegistrationApiRequest = new GcmRegistrationApiRequestImpl(context, senderId, gcmProvider, preferencesProvider);
+    private boolean isRegistrationRequired() {
+        final String gcmDeviceRegistrationId = preferencesProvider.loadGcmDeviceRegistrationId();
+        return gcmDeviceRegistrationId == null || gcmDeviceRegistrationId.isEmpty();
+    }
+
+    private void registerDeviceWithGcm(String senderId, final RegistrationListener listener) {
+        final GcmRegistrationApiRequest gcmRegistrationApiRequest = new GcmRegistrationApiRequestImpl(context, senderId, gcmProvider);
         gcmRegistrationApiRequest.startRegistration(new GcmRegistrationListener() {
 
             @Override
             public void onGcmRegistrationComplete(String gcmDeviceRegistrationId) {
-                listener.onRegistrationComplete();
+                preferencesProvider.saveGcmDeviceRegistrationId(gcmDeviceRegistrationId);
+
+                // TODO - register with backend here
+
+                if (listener != null) {
+                    listener.onRegistrationComplete();
+                }
             }
 
             @Override
             public void onGcmRegistrationFailed(String reason) {
-                listener.onRegistrationFailed(reason);
+                // TODO - should I unregister the backend here?
+                // TODO - should I clear the gcmDeviceRegistrationId from the preferences?
+                if (listener != null) {
+                    listener.onRegistrationFailed(reason);
+                }
             }
         });
-
     }
 }
