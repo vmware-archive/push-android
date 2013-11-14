@@ -41,6 +41,9 @@ public class ApiRegistrationRequestData {
     @SerializedName("registration_token")
     private String registrationToken;
 
+    @SerializedName("device_uuid")
+    private String deviceUuid;
+
     public ApiRegistrationRequestData() {
     }
 

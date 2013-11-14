@@ -27,8 +27,8 @@ public class MainActivity extends ActionBarActivity {
         pushLib = PushLib.init(this, SENDER_ID);
         pushLib.startRegistration(new GcmRegistrarListener() {
             @Override
-            public void onRegistrationComplete(String deviceRegistrationId) {
-                addLogMessage("Registration successful. Registration ID is '" + deviceRegistrationId + "'.");
+            public void onRegistrationComplete(String gcmDeviceRegistrationId) {
+                addLogMessage("Registration successful. Registration ID is '" + gcmDeviceRegistrationId + "'.");
             }
 
             @Override

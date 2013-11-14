@@ -2,11 +2,11 @@ package com.gopivotal.pushlib.gcm;
 
 public interface GcmRegistrarListener {
     /**
-     * Returns when registation is complete.  May return on a background thread.
+     * Returns when registration is complete.  May return on a background thread.
      *
-     * @param deviceRegistrationId The registration ID, as provided by Google Cloud Messaging.
+     * @param gcmDeviceRegistrationId The registration ID, as provided by Google Cloud Messaging.
      */
-    void onRegistrationComplete(String deviceRegistrationId);
+    void onRegistrationComplete(String gcmDeviceRegistrationId);
 
     /**
      * Returns if registration has failed.

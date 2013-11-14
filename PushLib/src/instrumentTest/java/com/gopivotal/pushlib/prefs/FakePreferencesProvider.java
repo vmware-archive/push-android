@@ -2,24 +2,24 @@ package com.gopivotal.pushlib.prefs;
 
 public class FakePreferencesProvider implements PreferencesProvider {
 
-    private final String registrationIdToLoad;
+    private final String gcmDeviceRegistrationIdToLoad;
     private boolean wasSaved = false;
-    private String savedRegistrationId;
+    private String savedGcmDeviceRegistrationId;
 
-    public FakePreferencesProvider(String registrationIdToLoad) {
-        this.registrationIdToLoad = registrationIdToLoad;
+    public FakePreferencesProvider(String gcmDeviceRegistrationIdToLoad) {
+        this.gcmDeviceRegistrationIdToLoad = gcmDeviceRegistrationIdToLoad;
         this.wasSaved = false;
-        this.savedRegistrationId = null;
+        this.savedGcmDeviceRegistrationId = null;
     }
 
     @Override
-    public String loadDeviceRegistrationId() {
-        return registrationIdToLoad;
+    public String loadGcmDeviceRegistrationId() {
+        return gcmDeviceRegistrationIdToLoad;
     }
 
     @Override
-    public void saveDeviceRegistrationId(String registrationId) {
-        this.savedRegistrationId = registrationId;
+    public void saveGcmDeviceRegistrationId(String gcmDeviceRegistrationId) {
+        this.savedGcmDeviceRegistrationId = gcmDeviceRegistrationId;
         wasSaved = true;
     }
 
@@ -27,7 +27,7 @@ public class FakePreferencesProvider implements PreferencesProvider {
         return wasSaved;
     }
 
-    public String getSavedRegistrationId() {
-        return savedRegistrationId;
+    public String getSavedGcmDeviceRegistrationId() {
+        return savedGcmDeviceRegistrationId;
     }
 }

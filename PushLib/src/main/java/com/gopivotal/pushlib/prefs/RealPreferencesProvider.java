@@ -10,7 +10,7 @@ import com.xtreme.commons.Logger;
 
 public class RealPreferencesProvider implements PreferencesProvider {
 
-    private static final String PROPERTY_DEVICE_REGISTRATION_ID = "device_registration_id";
+    private static final String PROPERTY_GCM_DEVICE_REGISTRATION_ID = "gcm_device_registration_id";
     private static final String PROPERTY_APP_VERSION = "app_version";
 
     private final Context context;
@@ -23,10 +23,10 @@ public class RealPreferencesProvider implements PreferencesProvider {
     }
 
     @Override
-    public String loadDeviceRegistrationId() {
-        final SharedPreferences prefs = getGCMPreferences();
-        final String deviceRegistrationId = prefs.getString(PROPERTY_DEVICE_REGISTRATION_ID, "");
-        if (deviceRegistrationId.isEmpty()) {
+    public String loadGcmDeviceRegistrationId() {
+        final SharedPreferences prefs = getSharedPreferences();
+        final String gcmDeviceRegistrationId = prefs.getString(PROPERTY_GCM_DEVICE_REGISTRATION_ID, "");
+        if (gcmDeviceRegistrationId.isEmpty()) {
             Logger.i("Device Registration ID not found. Device registration with GCM will be required.");
             return null;
         }
@@ -37,20 +37,20 @@ public class RealPreferencesProvider implements PreferencesProvider {
         final int registeredVersion = prefs.getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
         final int currentVersion = getAppVersion();
         if (registeredVersion != currentVersion) {
-            Logger.i("App version changed. Registration will be required.");
+            Logger.i("App version changed. Device registration with GCM  will be required.");
             return null;
         }
-        return deviceRegistrationId;
+        return gcmDeviceRegistrationId;
     }
 
 
     @Override
-    public void saveDeviceRegistrationId(String registrationId) {
-        final SharedPreferences prefs = getGCMPreferences();
+    public void saveGcmDeviceRegistrationId(String gcmDeviceRegistrationId) {
+        final SharedPreferences prefs = getSharedPreferences();
         final int appVersion = getAppVersion();
-        Logger.i("Saving device registration ID for app version " + appVersion);
+        Logger.i("Saving GCM device registration ID for app version " + appVersion);
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(PROPERTY_DEVICE_REGISTRATION_ID, registrationId);
+        editor.putString(PROPERTY_GCM_DEVICE_REGISTRATION_ID, gcmDeviceRegistrationId);
         editor.putInt(PROPERTY_APP_VERSION, appVersion);
         editor.commit();
         //PrintWriter p = null;
@@ -64,7 +64,7 @@ public class RealPreferencesProvider implements PreferencesProvider {
         //}
     }
 
-    private SharedPreferences getGCMPreferences() {
+    private SharedPreferences getSharedPreferences() {
         // This sample app persists the registration ID in shared preferences, but
         // how you store the regID in your app is up to you.
         return context.getSharedPreferences(Const.TAG_NAME, Context.MODE_PRIVATE);

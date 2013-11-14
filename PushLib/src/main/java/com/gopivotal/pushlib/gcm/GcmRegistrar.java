@@ -44,15 +44,15 @@ public class GcmRegistrar extends AsyncTask<GcmRegistrarListener, Void, String> 
 
     public void startRegistration(GcmRegistrarListener listener) {
 
-        final String deviceRegistrationId = preferencesProvider.loadDeviceRegistrationId();
+        final String gcmDeviceRegistrationId = preferencesProvider.loadGcmDeviceRegistrationId();
 
-        if (deviceRegistrationId == null || deviceRegistrationId.isEmpty()) {
+        if (gcmDeviceRegistrationId == null || gcmDeviceRegistrationId.isEmpty()) {
             registerInBackground(listener);
         } else {
             // TODO - do we need to register with Studio server on every launch, or only when a new registration ID is created (I suspect the latter).
-            Logger.i("Loaded device registration ID: " + deviceRegistrationId);
+            Logger.i("Loaded GCM device registration ID: " + gcmDeviceRegistrationId);
             if (listener != null) {
-                listener.onRegistrationComplete(deviceRegistrationId);
+                listener.onRegistrationComplete(gcmDeviceRegistrationId);
             }
         }
     }
@@ -70,29 +70,30 @@ public class GcmRegistrar extends AsyncTask<GcmRegistrarListener, Void, String> 
 
         try {
             final String deviceRegistrationId = gcmProvider.register(senderId);
-            Logger.i("Device registered. Device Registration ID:" + deviceRegistrationId);
+            Logger.i("Device registered with GCM. Device registration ID:" + deviceRegistrationId);
 
             // You should send the registration ID to your server over HTTP,
             // so it can use GCM/HTTP or CCS to send messages to your app.
             // The request to your server should be authenticated if your app
             // is using accounts.
             // NOTE: may need the listener
-            sendRegistrationIdToBackend();
+            sendGcmDeviceRegistrationIdToBackend();
 
             // For this demo: we don't need to send it because the device
             // will send upstream messages to a server that echo back the
             // message using the 'from' address in the message.
 
             // Persist the regID - no need to register again.
-            preferencesProvider.saveDeviceRegistrationId(deviceRegistrationId);
+            preferencesProvider.saveGcmDeviceRegistrationId(deviceRegistrationId);
 
             // Inform callback of registration success
             if (listener != null) {
                 listener.onRegistrationComplete(deviceRegistrationId);
             }
             return deviceRegistrationId;
+
         } catch (IOException ex) {
-            Logger.ex("Error registering device:", ex);
+            Logger.ex("Error registering device with GCM:", ex);
             // If there is an error, don't just keep trying to register.
             // Require the user to click a button again, or perform
             // exponential back-off.
@@ -109,7 +110,7 @@ public class GcmRegistrar extends AsyncTask<GcmRegistrarListener, Void, String> 
      * device sends upstream messages to a server that echoes back the message
      * using the 'from' address in the message.
      */
-    private void sendRegistrationIdToBackend() {
+    private void sendGcmDeviceRegistrationIdToBackend() {
         // Your implementation here.
         // NOTE - should we bring the callback in here as well?
     }
