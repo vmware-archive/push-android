@@ -148,4 +148,9 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
         final Gson gson = new Gson();
         return gson.toJson(data);
     }
+
+    @Override
+    public BackEndRegistrationApiRequest copy() {
+        return new BackEndRegistrationApiRequestImpl(networkWrapper);
+    }
 }

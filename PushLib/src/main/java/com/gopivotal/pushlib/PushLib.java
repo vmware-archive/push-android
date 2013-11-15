@@ -3,11 +3,16 @@ package com.gopivotal.pushlib;
 import android.app.Application;
 import android.content.Context;
 
+import com.gopivotal.pushlib.backend.BackEndRegistrationApiRequest;
+import com.gopivotal.pushlib.backend.BackEndRegistrationApiRequestImpl;
+import com.gopivotal.pushlib.backend.BackEndRegistrationApiRequestProvider;
 import com.gopivotal.pushlib.gcm.GcmProvider;
 import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequest;
 import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequestImpl;
 import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequestProvider;
 import com.gopivotal.pushlib.gcm.RealGcmProvider;
+import com.gopivotal.pushlib.network.NetworkWrapper;
+import com.gopivotal.pushlib.network.NetworkWrapperImpl;
 import com.gopivotal.pushlib.prefs.PreferencesProvider;
 import com.gopivotal.pushlib.prefs.RealPreferencesProvider;
 import com.gopivotal.pushlib.registration.RegistrationEngine;
@@ -52,8 +57,11 @@ public class PushLib {
         final PreferencesProvider preferencesProvider = new RealPreferencesProvider(context);
         final GcmRegistrationApiRequest dummyGcmRegistrationApiRequest = new GcmRegistrationApiRequestImpl(context, gcmProvider);
         final GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider = new GcmRegistrationApiRequestProvider(dummyGcmRegistrationApiRequest);
+        final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
+        final BackEndRegistrationApiRequest dummyBackEndRegistrationApiRequest = new BackEndRegistrationApiRequestImpl(networkWrapper);
+        final BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider = new BackEndRegistrationApiRequestProvider(dummyBackEndRegistrationApiRequest);
         final VersionProvider versionProvider = new RealVersionProvider(context);
-        final RegistrationEngine registrationEngine = new RegistrationEngine(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, versionProvider);
+        final RegistrationEngine registrationEngine = new RegistrationEngine(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
         registrationEngine.registerDevice(senderId, listener);
     }
 

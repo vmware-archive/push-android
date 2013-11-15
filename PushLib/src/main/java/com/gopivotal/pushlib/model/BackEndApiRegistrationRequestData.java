@@ -1,8 +1,9 @@
 package com.gopivotal.pushlib.model;
 
+// TODO - get new format from Ernst and Jesse
 /*
 {
-        "replicant_uuid": "9e60c311-f5c7-4416-aea2-d07bbc94f208",
+        "release_uuid": "9e60c311-f5c7-4416-aea2-d07bbc94f208",
         "secret": "3c676b20-3c49-4215-be1a-3932e3458514",
         "device_alias": "andoidtest",
         "device_type": "phone",
@@ -17,8 +18,8 @@ import com.google.gson.annotations.SerializedName;
 
 public class BackEndApiRegistrationRequestData {
 
-    @SerializedName("replication_uuid")
-    private String replicantUuid;
+    @SerializedName("release_uuid")
+    private String releaseUuid;
 
     @SerializedName("secret")
     private String secret;
@@ -44,12 +45,12 @@ public class BackEndApiRegistrationRequestData {
     public BackEndApiRegistrationRequestData() {
     }
 
-    public String getReplicantUuid() {
-        return replicantUuid;
+    public String getReleaseUuid() {
+        return releaseUuid;
     }
 
-    public void setReplicantUuid(String replicantUuid) {
-        this.replicantUuid = replicantUuid;
+    public void setReleaseUuid(String releaseUuid) {
+        this.releaseUuid = releaseUuid;
     }
 
     public String getSecret() {
