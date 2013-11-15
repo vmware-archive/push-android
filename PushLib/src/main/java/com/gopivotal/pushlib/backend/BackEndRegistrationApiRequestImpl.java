@@ -137,7 +137,7 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
     private String getRequestBodyData(String deviceRegistrationId) {
         // TODO - most of this data is bogus. I need to figure out what it's really supposed to look like.
         final BackEndApiRegistrationRequestData data = new BackEndApiRegistrationRequestData();
-        data.setReplicantUuid("9e60c311-f5c7-4416-aea2-d07bbc94f208");
+        data.setReleaseUuid("9e60c311-f5c7-4416-aea2-d07bbc94f208");
         data.setSecret("3c676b20-3c49-4215-be1a-3932e3458514");
         data.setDeviceAlias("androidtest");
         data.setDeviceModel("someModel");
