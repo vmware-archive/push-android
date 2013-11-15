@@ -49,6 +49,7 @@ public class RegistrationEngine {
         this.preferencesProvider = preferencesProvider;
         this.gcmRegistrationApiRequestProvider = gcmRegistrationApiRequestProvider;
         this.versionProvider = versionProvider;
+        this.previousGcmDeviceRegistrationId = preferencesProvider.loadGcmDeviceRegistrationId();
     }
 
     public void registerDevice(String senderId, final RegistrationListener listener) {
@@ -76,21 +77,20 @@ public class RegistrationEngine {
     }
 
     private boolean isRegistrationRequired() {
-        previousGcmDeviceRegistrationId = preferencesProvider.loadGcmDeviceRegistrationId();
         if (previousGcmDeviceRegistrationId == null || previousGcmDeviceRegistrationId.isEmpty()) {
             return true;
         }
-        return hasAppBeenUpdated();
+        if (hasAppBeenUpdated()) {
+            Logger.i("App version changed. Device registration with GCM will be required.");
+            return true;
+        };
+        return false;
     }
 
     private boolean hasAppBeenUpdated() {
-        final int currentAppVersion = Util.getAppVersion(context);
+        final int currentAppVersion = versionProvider.getAppVersion();
         final int savedAppVersion = preferencesProvider.loadAppVersion();
-        if (currentAppVersion != savedAppVersion) {
-            Logger.i("App version changed. Device registration with GCM will be required.");
-            return true;
-        }
-        return false;
+        return currentAppVersion != savedAppVersion;
     }
 
     private boolean isNewGcmDeviceRegistrationId(String gcmDeviceRegistrationId) {
@@ -106,8 +106,24 @@ public class RegistrationEngine {
 
             @Override
             public void onGcmRegistrationComplete(String gcmDeviceRegistrationId) {
-                preferencesProvider.saveGcmDeviceRegistrationId(gcmDeviceRegistrationId);
-                preferencesProvider.saveAppVersion(Util.getAppVersion(context));
+
+                if (gcmDeviceRegistrationId == null) {
+                    Logger.e("Server returned null gcmDeviceRegistrationId");
+                    if (listener != null) {
+                        listener.onRegistrationFailed("Server returned null gcmDeviceRegistrationId");
+                    }
+                    return;
+                }
+
+                if (previousGcmDeviceRegistrationId != null && previousGcmDeviceRegistrationId.equals(gcmDeviceRegistrationId)) {
+                    Logger.i("New gcmDeviceRegistrationId from server is the same as the old one.");
+                } else {
+                    preferencesProvider.saveGcmDeviceRegistrationId(gcmDeviceRegistrationId);
+                }
+
+                if (previousGcmDeviceRegistrationId == null || hasAppBeenUpdated()) {
+                    preferencesProvider.saveAppVersion(versionProvider.getAppVersion());
+                }
 
                 // TODO - register with backend here
 
