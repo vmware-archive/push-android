@@ -6,30 +6,31 @@ import com.gopivotal.pushlib.gcm.FakeGcmProvider;
 import com.gopivotal.pushlib.gcm.FakeGcmRegistrationApiRequest;
 import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequestProvider;
 import com.gopivotal.pushlib.prefs.FakePreferencesProvider;
-import com.xtreme.commons.testing.DelayedLoop;
+import com.gopivotal.pushlib.version.FakeVersionProvider;
+import com.gopivotal.pushlib.version.VersionProvider;
 
 public class RegistrationEngineTest extends AndroidTestCase {
 
     private static final String TEST_GCM_DEVICE_REGISTRATION_ID = "TEST_GCM_DEVICE_REGISTRATION_ID";
-    private static final String TEST_SENDER_ID = "TEST_SENDER_ID";
-    private static final long TEN_SECOND_TIMEOUT = 10000L;
     private static final long NO_DELAY = 0L;
     private static final long ONE_SECOND_DELAY = 1000L;
-
+    private FakePreferencesProvider preferencesProvider;
     private GcmRegistrationApiRequestProvider gcmApiRequestProvider;
-    private DelayedLoop delayedLoop;
+    private VersionProvider versionProvider;
+    private FakeGcmProvider gcmProvider;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        FakeGcmProvider gcmProvider = new FakeGcmProvider(TEST_GCM_DEVICE_REGISTRATION_ID);
-        gcmApiRequestProvider = new GcmRegistrationApiRequestProvider(new FakeGcmRegistrationApiRequest(true, TEST_GCM_DEVICE_REGISTRATION_ID, gcmProvider));
-        delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
+        gcmProvider = new FakeGcmProvider(TEST_GCM_DEVICE_REGISTRATION_ID);
+        gcmApiRequestProvider = new GcmRegistrationApiRequestProvider(new FakeGcmRegistrationApiRequest(gcmProvider));
+        preferencesProvider = new FakePreferencesProvider(null, null, 0);
+        versionProvider = new FakeVersionProvider(10);
     }
 
     public void testNullContext() {
         try {
-            new RegistrationEngine(null, new FakeGcmProvider(null), new FakePreferencesProvider(null, null, 0), gcmApiRequestProvider);
+            new RegistrationEngine(null, gcmProvider, preferencesProvider, gcmApiRequestProvider, versionProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -38,7 +39,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullGcmProvider() {
         try {
-            new RegistrationEngine(getContext(), null, new FakePreferencesProvider(null, null, 0), gcmApiRequestProvider);
+            new RegistrationEngine(getContext(), null, preferencesProvider, gcmApiRequestProvider, versionProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -47,7 +48,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullPreferencesProvider() {
         try {
-            new RegistrationEngine(getContext(), new FakeGcmProvider(null), null, gcmApiRequestProvider);
+            new RegistrationEngine(getContext(), gcmProvider, null, gcmApiRequestProvider, versionProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -56,7 +57,16 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullGcmApiRequestProvider() {
         try {
-            new RegistrationEngine(getContext(), new FakeGcmProvider(null), new FakePreferencesProvider(null, null, 0), null);
+            new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, null, versionProvider);
+            fail("should not have succeeded");
+        } catch (IllegalArgumentException e) {
+            // success
+        }
+    }
+
+    public void testNullVersionProvider() {
+        try {
+            new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, null);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -64,28 +74,17 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testSuccessfulInitialRegistration() {
-        final FakeGcmProvider gcmProvider = new FakeGcmProvider(null);
-        final FakePreferencesProvider prefsProvider = new FakePreferencesProvider(null, null, 0);
-        final FakeGcmRegistrationApiRequest gcmRequest = new FakeGcmRegistrationApiRequest(true, TEST_GCM_DEVICE_REGISTRATION_ID, gcmProvider);
-        final GcmRegistrationApiRequestProvider gcmRequestProvider = new GcmRegistrationApiRequestProvider(gcmRequest);
-        final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, prefsProvider, gcmRequestProvider);
-        engine.registerDevice(TEST_SENDER_ID, new RegistrationListener() {
-
-            @Override
-            public void onRegistrationComplete() {
-                delayedLoop.flagSuccess();
-            }
-
-            @Override
-            public void onRegistrationFailed(String reason) {
-                fail();
-            }
-        });
-        delayedLoop.startLoop();
-        assertTrue(delayedLoop.isSuccess());
-        assertTrue(gcmProvider.wasRegisterCalled());
-        assertTrue(prefsProvider.wasAppVersionSaved());
-        assertTrue(prefsProvider.wasGcmDeviceRegistrationIdSaved());
-        assertEquals(TEST_GCM_DEVICE_REGISTRATION_ID, prefsProvider.loadGcmDeviceRegistrationId());
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+                .setGcmDeviceRegistrationIdInPreferences(null)
+                .setBackEndDeviceRegistrationIdInPreferences(null)
+                .setAppVersionInPreferences(1)
+                .setCurrentAppVersion(1)
+                .setGcmDeviceRegistrationIdFromServer(TEST_GCM_DEVICE_REGISTRATION_ID)
+                .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID)
+                .setShouldAppVersionHaveBeenSaved(true)
+                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
+                .setShouldGcmProviderRegisterHaveBeenCalled(true)
+                .setShouldRegistrationHaveSucceeded(true);
+         testParams.run(this);
     }
 }

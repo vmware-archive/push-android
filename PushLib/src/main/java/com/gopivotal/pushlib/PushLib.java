@@ -13,6 +13,8 @@ import com.gopivotal.pushlib.prefs.RealPreferencesProvider;
 import com.gopivotal.pushlib.registration.RegistrationEngine;
 import com.gopivotal.pushlib.registration.RegistrationListener;
 import com.gopivotal.pushlib.util.Const;
+import com.gopivotal.pushlib.version.RealVersionProvider;
+import com.gopivotal.pushlib.version.VersionProvider;
 import com.xtreme.commons.Logger;
 
 public class PushLib {
@@ -39,17 +41,19 @@ public class PushLib {
     }
 
     /**
-     * Registers the device and application for receiving push notifications.  If the application
+     * Asynchronously registers the device and application for receiving push notifications.  If the application
      * is already registered then will do nothing.
      *
-     * @param listener
+     * @param listener Optional listener for receiving a callback after registration finishes. This callback may
+     *                 be called on a background thread.
      */
     public void startRegistration(RegistrationListener listener) {
         final GcmProvider gcmProvider = new RealGcmProvider(context);
         final PreferencesProvider preferencesProvider = new RealPreferencesProvider(context);
         final GcmRegistrationApiRequest dummyGcmRegistrationApiRequest = new GcmRegistrationApiRequestImpl(context, gcmProvider);
         final GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider = new GcmRegistrationApiRequestProvider(dummyGcmRegistrationApiRequest);
-        final RegistrationEngine registrationEngine = new RegistrationEngine(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider);
+        final VersionProvider versionProvider = new RealVersionProvider(context);
+        final RegistrationEngine registrationEngine = new RegistrationEngine(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, versionProvider);
         registrationEngine.registerDevice(senderId, listener);
     }
 

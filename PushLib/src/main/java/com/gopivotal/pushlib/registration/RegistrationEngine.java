@@ -4,13 +4,11 @@ import android.content.Context;
 
 import com.gopivotal.pushlib.gcm.GcmProvider;
 import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequest;
-import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequestImpl;
 import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequestProvider;
 import com.gopivotal.pushlib.gcm.GcmRegistrationListener;
-import com.gopivotal.pushlib.gcm.RealGcmProvider;
 import com.gopivotal.pushlib.prefs.PreferencesProvider;
-import com.gopivotal.pushlib.prefs.RealPreferencesProvider;
 import com.gopivotal.pushlib.util.Util;
+import com.gopivotal.pushlib.version.VersionProvider;
 import com.xtreme.commons.Logger;
 
 public class RegistrationEngine {
@@ -20,13 +18,14 @@ public class RegistrationEngine {
     private PreferencesProvider preferencesProvider;
     private String previousGcmDeviceRegistrationId = null;
     private GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider;
+    private VersionProvider versionProvider;
 
-    public RegistrationEngine(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider) {
-        verifyArguments(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider);
-        saveArguments(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider);
+    public RegistrationEngine(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, VersionProvider versionProvider) {
+        verifyArguments(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, versionProvider);
+        saveArguments(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, versionProvider);
     }
 
-    private void verifyArguments(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider) {
+    private void verifyArguments(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, VersionProvider versionProvider) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
@@ -39,13 +38,17 @@ public class RegistrationEngine {
         if (gcmRegistrationApiRequestProvider == null) {
             throw new IllegalArgumentException("gcmRegistrationApiRequestProvider may not be null");
         }
+        if (versionProvider == null) {
+            throw new IllegalArgumentException("versionProvider may not be null");
+        }
     }
 
-    private void saveArguments(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider) {
+    private void saveArguments(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, VersionProvider versionProvider) {
         this.context = context;
         this.gcmProvider = gcmProvider;
         this.preferencesProvider = preferencesProvider;
         this.gcmRegistrationApiRequestProvider = gcmRegistrationApiRequestProvider;
+        this.versionProvider = versionProvider;
     }
 
     public void registerDevice(String senderId, final RegistrationListener listener) {

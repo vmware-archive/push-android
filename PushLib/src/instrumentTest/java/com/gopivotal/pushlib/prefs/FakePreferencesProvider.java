@@ -9,9 +9,9 @@ public class FakePreferencesProvider implements PreferencesProvider {
     private boolean wasBackEndDeviceRegistrationIdSaved;
     private boolean wasAppVersionSaved;
 
-    public FakePreferencesProvider(String gcmDeviceRegistrationIdToLoad, String backendDeviceRegistrationIdToLoad, int appVersionToLoad) {
+    public FakePreferencesProvider(String gcmDeviceRegistrationIdToLoad, String backEndDeviceRegistrationIdToLoad, int appVersionToLoad) {
         this.gcmDeviceRegistrationId = gcmDeviceRegistrationIdToLoad;
-        this.backEndDeviceRegistrationId = backendDeviceRegistrationIdToLoad;
+        this.backEndDeviceRegistrationId = backEndDeviceRegistrationIdToLoad;
         this.appVersion = appVersionToLoad;
         this.wasGcmDeviceRegistrationIdSaved = false;
         this.wasBackEndDeviceRegistrationIdSaved = false;
