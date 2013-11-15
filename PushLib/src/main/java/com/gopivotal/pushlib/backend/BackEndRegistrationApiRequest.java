@@ -1,4 +1,4 @@
-package com.gopivotal.pushlib.api;
+package com.gopivotal.pushlib.backend;
 
 public interface BackEndRegistrationApiRequest {
     void startDeviceRegistration(String gcmDeviceRegistrationId, BackEndRegistrationListener listener);

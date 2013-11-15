@@ -91,7 +91,7 @@ public class RegistrationEngineTestParameters {
 
     public RegistrationEngineTestParameters setGcmDeviceRegistrationIdFromServer(String id) {
         gcmDeviceRegistrationIdFromServer = id;
-        shouldGcmDeviceRegistrationSuccessful = true;
+        shouldGcmDeviceRegistrationSuccessful = id != null;
         return this;
     }
 

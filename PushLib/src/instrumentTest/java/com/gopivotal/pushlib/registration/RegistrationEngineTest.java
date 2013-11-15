@@ -87,6 +87,21 @@ public class RegistrationEngineTest extends AndroidTestCase {
          testParams.run(this);
     }
 
+    public void testFailedInitialRegistration() {
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+                .setGcmDeviceRegistrationIdInPreferences(null)
+                .setBackEndDeviceRegistrationIdInPreferences(null)
+                .setAppVersionInPreferences(1)
+                .setCurrentAppVersion(1)
+                .setGcmDeviceRegistrationIdFromServer(null)
+                .setFinalGcmDeviceRegistrationIdInPreferences(null)
+                .setShouldAppVersionHaveBeenSaved(false)
+                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
+                .setShouldGcmProviderRegisterHaveBeenCalled(true)
+                .setShouldRegistrationHaveSucceeded(false);
+        testParams.run(this);
+    }
+
     public void testWasAlreadyRegisteredWithGcm() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
                 .setGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
@@ -119,6 +134,38 @@ public class RegistrationEngineTest extends AndroidTestCase {
         // TODO - ensure that backend registration was not called
     }
 
+    public void testAppUpdatedToLesserVersionAndSameRegistrationIdWasReturned() {
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+                .setGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
+                .setBackEndDeviceRegistrationIdInPreferences(null)
+                .setAppVersionInPreferences(2)
+                .setCurrentAppVersion(1)
+                .setGcmDeviceRegistrationIdFromServer(TEST_GCM_DEVICE_REGISTRATION_ID_1)
+                .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
+                .setShouldAppVersionHaveBeenSaved(true)
+                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
+                .setShouldGcmProviderRegisterHaveBeenCalled(true)
+                .setShouldRegistrationHaveSucceeded(true);
+        testParams.run(this);
+        // TODO - ensure that backend registration was not called
+    }
+
+    public void testAppUpdatedAndReregistrationFailed() {
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+                .setGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
+                .setBackEndDeviceRegistrationIdInPreferences(null)
+                .setAppVersionInPreferences(1)
+                .setCurrentAppVersion(2)
+                .setGcmDeviceRegistrationIdFromServer(null)
+                .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
+                .setShouldAppVersionHaveBeenSaved(false)
+                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
+                .setShouldGcmProviderRegisterHaveBeenCalled(true)
+                .setShouldRegistrationHaveSucceeded(false);
+        testParams.run(this);
+        // TODO - ensure that backend registration was not called
+    }
+
     public void testAppUpdatedAndDifferentRegistrationIdWasReturned() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
                 .setGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
@@ -134,4 +181,21 @@ public class RegistrationEngineTest extends AndroidTestCase {
         testParams.run(this);
         // TODO - ensure that backend registration still occurs
     }
+
+    public void testAppUpdatedToLesserVersionAndDifferentRegistrationIdWasReturned() {
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+                .setGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
+                .setBackEndDeviceRegistrationIdInPreferences(null)
+                .setAppVersionInPreferences(2)
+                .setCurrentAppVersion(1)
+                .setGcmDeviceRegistrationIdFromServer(TEST_GCM_DEVICE_REGISTRATION_ID_2)
+                .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_2)
+                .setShouldAppVersionHaveBeenSaved(true)
+                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
+                .setShouldGcmProviderRegisterHaveBeenCalled(true)
+                .setShouldRegistrationHaveSucceeded(true);
+        testParams.run(this);
+        // TODO - ensure that backend registration still occurs
+    }
+
 }

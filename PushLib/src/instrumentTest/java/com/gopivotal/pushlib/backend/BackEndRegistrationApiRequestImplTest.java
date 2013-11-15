@@ -1,4 +1,4 @@
-package com.gopivotal.pushlib.api;
+package com.gopivotal.pushlib.backend;
 
 import android.test.AndroidTestCase;
 
