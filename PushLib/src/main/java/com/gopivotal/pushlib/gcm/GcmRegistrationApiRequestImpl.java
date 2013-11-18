@@ -95,6 +95,10 @@ public class GcmRegistrationApiRequestImpl extends AsyncTask<Void, Void, String>
                 final PrintWriter pw;
                 try {
                     final File externalFilesDir = context.getExternalFilesDir(null);
+                    if (externalFilesDir == null) {
+                        Logger.i("Was not able to get the externalFilesDir");
+                        return;
+                    }
                     final File dir = new File(externalFilesDir.getAbsolutePath() + File.separator + "pushlib");
                     if (!dir.exists()) {
                         dir.mkdir();
@@ -104,8 +108,8 @@ public class GcmRegistrationApiRequestImpl extends AsyncTask<Void, Void, String>
                     pw.println(deviceRegistrationId);
                     pw.close();
                     Logger.i("Saved registration ID to file: " + regIdFile.getAbsolutePath());
-                } catch (FileNotFoundException e) {
-                    e.printStackTrace();
+                } catch (Exception e) {
+                    Logger.w("Was not able to save registration ID to filesystem. This error is not-fatal. " + e.getLocalizedMessage());
                 }
             }
         }
