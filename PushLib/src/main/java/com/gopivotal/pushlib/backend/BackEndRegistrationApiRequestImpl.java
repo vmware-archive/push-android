@@ -60,7 +60,6 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
 
             @Override
             public void onSuccess(NetworkResponse networkResponse) {
-                Logger.i("Back-end server registration successful");
 
                 if (networkResponse == null) {
                     Logger.e("Back-end server registration failed: no networkResponse");
