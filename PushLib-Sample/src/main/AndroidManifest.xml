@@ -8,15 +8,14 @@
         android:minSdkVersion="10"
         android:targetSdkVersion="19" />
 
+    <!-- Elements required for host applications to include in their manifest -->
+    <!-- The demo package name 'com.gopivotal.pushlib' *MUST* be replaced with the package name of the host app -->
+    <!-- START -->
     <permission
         android:name="com.gopivotal.pushlib.permission.C2D_MESSAGE"
         android:protectionLevel="signature"/>
-
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
     <uses-permission android:name="com.gopivotal.pushlib.permission.C2D_MESSAGE"/>
+    <!-- END -->
 
     <!-- optional permission - used for debugging only -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
@@ -26,13 +25,11 @@
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
-        <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
         <activity
             android:name="com.gopivotal.pushlib.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
