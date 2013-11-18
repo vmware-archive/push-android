@@ -1,13 +1,18 @@
 package com.gopivotal.pushlib.gcm;
 
 import android.content.Context;
+import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
+import com.xtreme.commons.Logger;
 
 import java.io.IOException;
 
 public class RealGcmProvider implements GcmProvider {
 
+    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private GoogleCloudMessaging gcm;
 
     public RealGcmProvider(Context context) {
@@ -20,6 +25,17 @@ public class RealGcmProvider implements GcmProvider {
     @Override
     public String register(String... senderIds) throws IOException {
         return gcm.register(senderIds);
+    }
+
+    @Override
+    public boolean isGooglePlayServicesInstalled(Context context) {
+        int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            final String errorString = GooglePlayServicesUtil.getErrorString(resultCode);
+            Logger.e("Google Play Services is not available: " + errorString);
+            return false;
+        }
+        return true;
     }
 
     // TODO - needs unregister method

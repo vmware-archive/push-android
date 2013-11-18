@@ -67,7 +67,13 @@ public class RegistrationEngine {
         verifyRegistrationArguments(senderId);
 
         if (isGcmRegistrationRequired()) {
-            registerDeviceWithGcm(senderId, listener);
+            if (gcmProvider.isGooglePlayServicesInstalled(context)) {
+                registerDeviceWithGcm(senderId, listener);
+            } else {
+                if (listener != null) {
+                    listener.onRegistrationFailed("Google Play Services is not available");
+                }
+            }
 
         } else if (isBackEndRegistrationRequired()) {
             registerDeviceWithBackEnd(previousGcmDeviceRegistrationId, listener);

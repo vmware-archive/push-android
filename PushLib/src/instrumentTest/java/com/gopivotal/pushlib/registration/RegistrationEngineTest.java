@@ -11,6 +11,8 @@ import com.gopivotal.pushlib.prefs.FakePreferencesProvider;
 import com.gopivotal.pushlib.version.FakeVersionProvider;
 import com.gopivotal.pushlib.version.VersionProvider;
 
+import java.util.concurrent.Semaphore;
+
 public class RegistrationEngineTest extends AndroidTestCase {
 
     private static final String TEST_GCM_DEVICE_REGISTRATION_ID_1 = "TEST_GCM_DEVICE_REGISTRATION_ID_1";
@@ -85,6 +87,26 @@ public class RegistrationEngineTest extends AndroidTestCase {
         } catch (IllegalArgumentException e) {
             // success
         }
+    }
+
+    public void testGooglePlayServicesNotAvailable() throws InterruptedException {
+        gcmProvider.setIsGooglePlayServicesInstalled(false);
+        final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+        final Semaphore semaphore = new Semaphore(0);
+        engine.registerDevice(TEST_GCM_DEVICE_REGISTRATION_ID_1, new RegistrationListener() {
+            @Override
+            public void onRegistrationComplete() {
+                fail("Registration should have failed");
+                semaphore.release();
+            }
+
+            @Override
+            public void onRegistrationFailed(String reason) {
+                // success
+                semaphore.release();
+            }
+        });
+        semaphore.acquire();
     }
 
     public void testSuccessfulInitialRegistration() {
