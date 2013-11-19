@@ -140,13 +140,35 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
         data.setReleaseUuid(parameters.getReleaseUuid());
         data.setSecret(parameters.getReleaseSecret());
         data.setDeviceAlias("androidtest");
-        data.setDeviceModel("Nexus 4"); // TODO - put actual device model here
+        data.setDeviceModel(getDeviceModel());
         data.setDeviceType("phone"); // TODO - put actual device type here
         data.setOs("android");
         data.setOsVersion(Build.VERSION.RELEASE);
         data.setRegistrationToken(deviceRegistrationId);
         final Gson gson = new Gson();
         return gson.toJson(data);
+    }
+
+    private String getDeviceModel() {
+        String manufacturer = Build.MANUFACTURER;
+        String model = Build.MODEL;
+        if (model.startsWith(manufacturer)) {
+            return capitalize(model);
+        } else {
+            return capitalize(manufacturer) + " " + model;
+        }
+    }
+
+    private String capitalize(String s) {
+        if (s == null || s.length() == 0) {
+            return "";
+        }
+        char first = s.charAt(0);
+        if (Character.isUpperCase(first)) {
+            return s;
+        } else {
+            return Character.toUpperCase(first) + s.substring(1);
+        }
     }
 
     @Override
