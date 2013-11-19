@@ -2,6 +2,7 @@ package com.gopivotal.pushlib.registration;
 
 import android.content.Context;
 
+import com.gopivotal.pushlib.PushLibParameters;
 import com.gopivotal.pushlib.backend.BackEndRegistrationApiRequest;
 import com.gopivotal.pushlib.backend.BackEndRegistrationApiRequestProvider;
 import com.gopivotal.pushlib.backend.BackEndRegistrationListener;
@@ -62,13 +63,13 @@ public class RegistrationEngine {
     }
 
     // TODO - make this method asynchronous
-    public void registerDevice(String senderId, final RegistrationListener listener) {
+    public void registerDevice(PushLibParameters parameters, final RegistrationListener listener) {
 
-        verifyRegistrationArguments(senderId);
+        verifyRegistrationArguments(parameters);
 
         if (isGcmRegistrationRequired()) {
             if (gcmProvider.isGooglePlayServicesInstalled(context)) {
-                registerDeviceWithGcm(senderId, listener);
+                registerDeviceWithGcm(parameters.getGcmSenderId(), parameters, listener);
             } else {
                 if (listener != null) {
                     listener.onRegistrationFailed("Google Play Services is not available");
@@ -76,7 +77,7 @@ public class RegistrationEngine {
             }
 
         } else if (isBackEndRegistrationRequired()) {
-            registerDeviceWithBackEnd(previousGcmDeviceRegistrationId, listener);
+            registerDeviceWithBackEnd(previousGcmDeviceRegistrationId, parameters, listener);
 
         } else {
 
@@ -87,9 +88,18 @@ public class RegistrationEngine {
         }
     }
 
-    private void verifyRegistrationArguments(String senderId) {
-        if (senderId == null) {
-            throw new IllegalArgumentException("senderId may not be null");
+    private void verifyRegistrationArguments(PushLibParameters parameters) {
+        if (parameters == null) {
+            throw new IllegalArgumentException("parameters may not be null");
+        }
+        if (parameters.getGcmSenderId() == null || parameters.getGcmSenderId().isEmpty()) {
+            throw new IllegalArgumentException("parameters.senderId may not be null or empty");
+        }
+        if (parameters.getReleaseUuid() == null || parameters.getReleaseUuid().isEmpty()) {
+            throw new IllegalArgumentException("parameters.releaseUuid may not be null or empty");
+        }
+        if (parameters.getReleaseSecret() == null || parameters.getReleaseSecret().isEmpty()) {
+            throw new IllegalArgumentException("parameters.releaseSecret may not be null or empty");
         }
     }
 
@@ -121,7 +131,7 @@ public class RegistrationEngine {
         return !previousGcmDeviceRegistrationId.equals(gcmDeviceRegistrationId);
     }
 
-    private void registerDeviceWithGcm(String senderId, final RegistrationListener listener) {
+    private void registerDeviceWithGcm(String senderId, final PushLibParameters parameters, final RegistrationListener listener) {
         final GcmRegistrationApiRequest gcmRegistrationApiRequest = gcmRegistrationApiRequestProvider.getRequest();
         gcmRegistrationApiRequest.startRegistration(senderId, new GcmRegistrationListener() {
 
@@ -150,7 +160,7 @@ public class RegistrationEngine {
                 }
 
                 if (isNewGcmDeviceRegistrationId) {
-                    registerDeviceWithBackEnd(gcmDeviceRegistrationId, listener);
+                    registerDeviceWithBackEnd(gcmDeviceRegistrationId, parameters, listener);
                 } else {
                     if (listener != null) {
                         listener.onRegistrationComplete();
@@ -167,9 +177,9 @@ public class RegistrationEngine {
         });
     }
 
-    private void registerDeviceWithBackEnd(final String gcmDeviceRegistrationId, final RegistrationListener listener) {
+    private void registerDeviceWithBackEnd(final String gcmDeviceRegistrationId, PushLibParameters parameters, final RegistrationListener listener) {
         final BackEndRegistrationApiRequest backEndRegistrationApiRequest = backEndRegistrationApiRequestProvider.getRequest();
-        backEndRegistrationApiRequest.startDeviceRegistration(gcmDeviceRegistrationId, getBackEndRegistrationListener(listener));
+        backEndRegistrationApiRequest.startDeviceRegistration(gcmDeviceRegistrationId, parameters, getBackEndRegistrationListener(listener));
     }
 
     private BackEndRegistrationListener getBackEndRegistrationListener(final RegistrationListener listener) {

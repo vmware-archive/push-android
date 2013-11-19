@@ -3,7 +3,7 @@ package com.gopivotal.pushlib.registration;
 import android.content.Context;
 import android.test.AndroidTestCase;
 
-import com.gopivotal.pushlib.backend.BackEndRegistrationApiRequest;
+import com.gopivotal.pushlib.PushLibParameters;
 import com.gopivotal.pushlib.backend.BackEndRegistrationApiRequestProvider;
 import com.gopivotal.pushlib.backend.FakeBackEndRegistrationApiRequest;
 import com.gopivotal.pushlib.gcm.FakeGcmProvider;
@@ -17,6 +17,8 @@ public class RegistrationEngineTestParameters {
 
     private static final long TEN_SECOND_TIMEOUT = 10000L;
     private static final String TEST_SENDER_ID = "TEST_SENDER_ID";
+    private static final String TEST_RELEASE_UUID = "TEST_RELEASE_UUID";
+    private static final String TEST_RELEASE_SECRET = "TEST_RELEASE_SECRET";
 
     private final Context context;
     private final DelayedLoop delayedLoop;
@@ -51,8 +53,9 @@ public class RegistrationEngineTestParameters {
         final FakeBackEndRegistrationApiRequest dummyBackEndRegistrationApiRequest = new FakeBackEndRegistrationApiRequest(backEndDeviceRegistrationIdFromServer, shouldBackEndDeviceRegistrationBeSuccessful);
         final BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider = new BackEndRegistrationApiRequestProvider(dummyBackEndRegistrationApiRequest);
         final RegistrationEngine engine = new RegistrationEngine(context, gcmProvider, prefsProvider, gcmRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+        final PushLibParameters parameters = new PushLibParameters(TEST_SENDER_ID, TEST_RELEASE_UUID, TEST_RELEASE_SECRET);
 
-        engine.registerDevice(TEST_SENDER_ID, new RegistrationListener() {
+        engine.registerDevice(parameters, new RegistrationListener() {
 
             @Override
             public void onRegistrationComplete() {

@@ -26,22 +26,49 @@ public class PushLib {
 
     private static PushLib instance;
 
-    public static PushLib init(Context context, String senderId) {
+    public static PushLib init(Context context, PushLibParameters parameters) {
         if (instance == null) {
-            instance = new PushLib(context, senderId);
+            instance = new PushLib(context, parameters);
         }
         return instance;
     }
 
     private Context context;
-    private String senderId;
+    private PushLibParameters parameters;
 
-    private PushLib(Context context, String senderId) {
-        verifyArguments(context, senderId);
-        saveArguments(context, senderId);
+    private PushLib(Context context, PushLibParameters parameters) {
+        verifyArguments(context, parameters);
+        saveArguments(context, parameters);
 
         if (!Logger.isSetup()) {
             Logger.setup(context, Const.TAG_NAME);
+        }
+    }
+
+    private void saveArguments(Context context, PushLibParameters parameters) {
+        if (!(context instanceof Application)) {
+            this.context = context.getApplicationContext();
+        } else {
+            this.context = context;
+        }
+        this.parameters = parameters;
+    }
+
+    private void verifyArguments(Context context, PushLibParameters parameters) {
+        if (context == null) {
+            throw new IllegalArgumentException("context may not be null");
+        }
+        if (parameters == null) {
+            throw new IllegalArgumentException("parameters may not be null");
+        }
+        if (parameters.getGcmSenderId() == null || parameters.getGcmSenderId().isEmpty()) {
+            throw new IllegalArgumentException("parameters.senderId may not be null or empty");
+        }
+        if (parameters.getReleaseUuid() == null || parameters.getReleaseUuid().isEmpty()) {
+            throw new IllegalArgumentException("parameters.releaseUuid may not be null or empty");
+        }
+        if (parameters.getReleaseSecret() == null || parameters.getReleaseSecret().isEmpty()) {
+            throw new IllegalArgumentException("parameters.releaseSecret may not be null or empty");
         }
     }
 
@@ -62,26 +89,6 @@ public class PushLib {
         final BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider = new BackEndRegistrationApiRequestProvider(dummyBackEndRegistrationApiRequest);
         final VersionProvider versionProvider = new RealVersionProvider(context);
         final RegistrationEngine registrationEngine = new RegistrationEngine(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
-        registrationEngine.registerDevice(senderId, listener);
+        registrationEngine.registerDevice(parameters, listener);
     }
-
-    private void saveArguments(Context context, String senderId) {
-        if (!(context instanceof Application)) {
-            this.context = context.getApplicationContext();
-        } else {
-            this.context = context;
-        }
-        this.senderId = senderId;
-    }
-
-    private void verifyArguments(Context context, String senderId) {
-        if (context == null) {
-            throw new IllegalArgumentException("context may not be null");
-        }
-        if (senderId == null) {
-            throw new IllegalArgumentException("senderId may not be null");
-        }
-
-    }
-
 }

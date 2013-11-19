@@ -4,13 +4,14 @@ import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.widget.TextView;
 
-import com.gopivotal.pushlib.gcm.GcmRegistrationListener;
 import com.gopivotal.pushlib.registration.RegistrationListener;
 import com.xtreme.commons.ThreadUtil;
 
 public class MainActivity extends ActionBarActivity {
 
-    private static final String SENDER_ID = "816486687340";
+    private static final String GCM_SENDER_ID = "816486687340";
+    private static final String RELEASE_UUID = "efb9783f-a160-4cec-abf1-b51bca14b991";
+    private static final String RELEASE_SECRET = "d0bbddc5-f534-4a95-bb49-d90c8e8aec8c";
 
     TextView outputText;
 
@@ -25,7 +26,8 @@ public class MainActivity extends ActionBarActivity {
         outputText.setText("");
         addLogMessage("Starting registration...");
 
-        pushLib = PushLib.init(this, SENDER_ID);
+        final PushLibParameters parameters = new PushLibParameters(GCM_SENDER_ID, RELEASE_UUID, RELEASE_SECRET);
+        pushLib = PushLib.init(this, parameters);
         pushLib.startRegistration(new RegistrationListener() {
 
             @Override

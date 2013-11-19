@@ -3,6 +3,7 @@ package com.gopivotal.pushlib.backend;
 import android.os.Build;
 
 import com.google.gson.Gson;
+import com.gopivotal.pushlib.PushLibParameters;
 import com.gopivotal.pushlib.model.BackEndApiRegistrationRequestData;
 import com.gopivotal.pushlib.model.BackEndApiRegistrationResponseData;
 import com.gopivotal.pushlib.network.NetworkWrapper;
@@ -35,12 +36,12 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
         this.networkWrapper = networkWrapper;
     }
 
-    public void startDeviceRegistration(String gcmDeviceRegistrationId, BackEndRegistrationListener listener) {
-        final NetworkRequest request = getNetworkRequest(gcmDeviceRegistrationId, listener);
+    public void startDeviceRegistration(String gcmDeviceRegistrationId, PushLibParameters parameters, BackEndRegistrationListener listener) {
+        final NetworkRequest request = getNetworkRequest(gcmDeviceRegistrationId, parameters, listener);
         networkWrapper.getNetworkRequestLauncher().executeRequest(request);
     }
 
-    private NetworkRequest getNetworkRequest(String gcmDeviceRegistrationId, final BackEndRegistrationListener listener) {
+    private NetworkRequest getNetworkRequest(String gcmDeviceRegistrationId, PushLibParameters parameters, final BackEndRegistrationListener listener) {
         if (gcmDeviceRegistrationId == null) {
             throw new IllegalArgumentException("gcmDeviceRegistrationId may not be null");
         }
@@ -51,7 +52,7 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
         Logger.i("Making network request to register this device with the back-end server");
         final NetworkRequest networkRequest = new NetworkRequest(REQUEST_URL, getNetworkRequestListener(listener));
         networkRequest.setRequestType(NetworkRequest.RequestType.POST);
-        networkRequest.setBodyData(getRequestBodyData(gcmDeviceRegistrationId));
+        networkRequest.setBodyData(getRequestBodyData(gcmDeviceRegistrationId, parameters));
         return networkRequest;
     }
 
@@ -133,14 +134,14 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
         return (statusCode < 200 || statusCode >= 300);
     }
 
-    private String getRequestBodyData(String deviceRegistrationId) {
+    private String getRequestBodyData(String deviceRegistrationId, PushLibParameters parameters) {
         // TODO - most of this data is bogus. I need to figure out what it's really supposed to look like.
         final BackEndApiRegistrationRequestData data = new BackEndApiRegistrationRequestData();
-        data.setReleaseUuid("9e60c311-f5c7-4416-aea2-d07bbc94f208");
-        data.setSecret("3c676b20-3c49-4215-be1a-3932e3458514");
+        data.setReleaseUuid(parameters.getReleaseUuid());
+        data.setSecret(parameters.getReleaseSecret());
         data.setDeviceAlias("androidtest");
-        data.setDeviceModel("someModel");
-        data.setDeviceType("phone");
+        data.setDeviceModel("Nexus 4"); // TODO - put actual device model here
+        data.setDeviceType("phone"); // TODO - put actual device type here
         data.setOs("android");
         data.setOsVersion(Build.VERSION.RELEASE);
         data.setRegistrationToken(deviceRegistrationId);

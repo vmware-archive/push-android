@@ -1,5 +1,7 @@
 package com.gopivotal.pushlib.backend;
 
+import com.gopivotal.pushlib.PushLibParameters;
+
 public class FakeBackEndRegistrationApiRequest implements BackEndRegistrationApiRequest {
 
     private final FakeBackEndRegistrationApiRequest originatingRequest;
@@ -29,7 +31,7 @@ public class FakeBackEndRegistrationApiRequest implements BackEndRegistrationApi
     }
 
     @Override
-    public void startDeviceRegistration(String gcmDeviceRegistrationId, BackEndRegistrationListener listener) {
+    public void startDeviceRegistration(String gcmDeviceRegistrationId, PushLibParameters parameters, BackEndRegistrationListener listener) {
         wasRegisterCalled = true;
         if (originatingRequest != null) {
             originatingRequest.wasRegisterCalled = true;

@@ -2,6 +2,7 @@ package com.gopivotal.pushlib.registration;
 
 import android.test.AndroidTestCase;
 
+import com.gopivotal.pushlib.PushLibParameters;
 import com.gopivotal.pushlib.backend.BackEndRegistrationApiRequestProvider;
 import com.gopivotal.pushlib.backend.FakeBackEndRegistrationApiRequest;
 import com.gopivotal.pushlib.gcm.FakeGcmProvider;
@@ -19,11 +20,16 @@ public class RegistrationEngineTest extends AndroidTestCase {
     private static final String TEST_GCM_DEVICE_REGISTRATION_ID_2 = "TEST_GCM_DEVICE_REGISTRATION_ID_2";
     private static final String TEST_BACK_END_DEVICE_REGISTRATION_ID_1 = "TEST_BACK_END_DEVICE_REGISTRATION_ID_1";
     private static final String TEST_BACK_END_DEVICE_REGISTRATION_ID_2 = "TEST_BACK_END_DEVICE_REGISTRATION_ID_2";
+    private static final String TEST_SENDER_ID = "TEST_SENDER_ID";
+    private static final String TEST_RELEASE_UUID = "TEST_RELEASE_UUID";
+    private static final String TEST_RELEASE_SECRET = "TEST_RELEASE_SECRET";
+
     private FakePreferencesProvider preferencesProvider;
     private GcmRegistrationApiRequestProvider gcmApiRequestProvider;
     private BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider;
     private VersionProvider versionProvider;
     private FakeGcmProvider gcmProvider;
+    private Semaphore semaphore = new Semaphore(0);
 
     @Override
     protected void setUp() throws Exception {
@@ -89,23 +95,51 @@ public class RegistrationEngineTest extends AndroidTestCase {
         }
     }
 
+    public void testNullParameters() {
+        try {
+            final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+            engine.registerDevice(null, getListenerForFailedRegistration());
+            fail("should not have succeeded");
+        } catch (IllegalArgumentException e) {
+            // success
+        }
+    }
+
+    public void testNullSenderId() {
+        try {
+            final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+            engine.registerDevice(new PushLibParameters(null, TEST_RELEASE_UUID, TEST_RELEASE_SECRET), getListenerForFailedRegistration());
+            fail("should not have succeeded");
+        } catch (IllegalArgumentException e) {
+            // success
+        }
+    }
+
+    public void testNullReleaseUuid() {
+        try {
+            final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+            engine.registerDevice(new PushLibParameters(TEST_SENDER_ID, null, TEST_RELEASE_SECRET), getListenerForFailedRegistration());
+            fail("should not have succeeded");
+        } catch (IllegalArgumentException e) {
+            // success
+        }
+    }
+
+    public void testNullReleaseSecret() {
+        try {
+            final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+            engine.registerDevice(new PushLibParameters(TEST_SENDER_ID, TEST_RELEASE_UUID, null), getListenerForFailedRegistration());
+            fail("should not have succeeded");
+        } catch (IllegalArgumentException e) {
+            // success
+        }
+    }
+
     public void testGooglePlayServicesNotAvailable() throws InterruptedException {
         gcmProvider.setIsGooglePlayServicesInstalled(false);
         final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
-        final Semaphore semaphore = new Semaphore(0);
-        engine.registerDevice(TEST_GCM_DEVICE_REGISTRATION_ID_1, new RegistrationListener() {
-            @Override
-            public void onRegistrationComplete() {
-                fail("Registration should have failed");
-                semaphore.release();
-            }
-
-            @Override
-            public void onRegistrationFailed(String reason) {
-                // success
-                semaphore.release();
-            }
-        });
+        final PushLibParameters parameters = new PushLibParameters(TEST_SENDER_ID, TEST_RELEASE_UUID, TEST_RELEASE_SECRET);
+        engine.registerDevice(parameters, getListenerForFailedRegistration());
         semaphore.acquire();
     }
 
@@ -346,4 +380,19 @@ public class RegistrationEngineTest extends AndroidTestCase {
         testParams.run(this);
     }
 
+    private RegistrationListener getListenerForFailedRegistration() {
+        return new RegistrationListener() {
+            @Override
+            public void onRegistrationComplete() {
+                fail("Registration should have failed");
+                semaphore.release();
+            }
+
+            @Override
+            public void onRegistrationFailed(String reason) {
+                // success
+                semaphore.release();
+            }
+        };
+    }
 }
