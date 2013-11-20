@@ -53,6 +53,7 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
         final NetworkRequest networkRequest = new NetworkRequest(REQUEST_URL, getNetworkRequestListener(listener));
         networkRequest.setRequestType(NetworkRequest.RequestType.POST);
         networkRequest.setBodyData(getRequestBodyData(gcmDeviceRegistrationId, parameters));
+        networkRequest.addHeaderParam("Content-Type", "application/json");
         return networkRequest;
     }
 
