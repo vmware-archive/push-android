@@ -54,7 +54,7 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     public void testRequiresGcmDeviceRegistrationId() {
         try {
             final BackEndRegistrationApiRequestImpl backEndRegistrationApiRequestImpl = new BackEndRegistrationApiRequestImpl(new MockNetworkWrapper());
-            makeGcmRegistrationApiRequestListener(true);
+            makeBackEndRegistrationApiRequestListener(true);
             backEndRegistrationApiRequestImpl.startDeviceRegistration(null, getParameters(), backEndRegistrationListener);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
@@ -158,36 +158,36 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
         final String resultantJson = "{\"device_uuid\" : \"" + TEST_BACK_END_DEVICE_REGISTRATION_ID + "\"}";
         final NetworkResponse response = networkRequestLauncher.getNetworkResponse(resultantJson, expectedHttpStatusCode);
         makeNetworkRequestListenerForSuccessfulRequest(delay, response);
-        makeGcmRegistrationApiRequestListener(isSuccessfulResult);
+        makeBackEndRegistrationApiRequestListener(isSuccessfulResult);
     }
 
     private void makeListenersForSuccessfulNullResultFromNetwork(long delay) {
         makeNetworkRequestListenerForSuccessfulRequest(delay, null);
-        makeGcmRegistrationApiRequestListener(false);
+        makeBackEndRegistrationApiRequestListener(false);
     }
 
     private void makeListenersForSuccessfulWithNoStatusLineFromNetwork(long delay) {
         final NetworkResponse response = networkRequestLauncher.getNetworkResponse(null, MockNetworkResponse.NO_STATUS_CODE);
         makeNetworkRequestListenerForSuccessfulRequest(delay, response);
-        makeGcmRegistrationApiRequestListener(false);
+        makeBackEndRegistrationApiRequestListener(false);
     }
 
     private void makeListenersWithEmptyNetworkResponse(long delay) {
         final NetworkResponse response = networkRequestLauncher.getNetworkResponse(null, 200);
         makeNetworkRequestListenerForSuccessfulRequest(delay, response);
-        makeGcmRegistrationApiRequestListener(false);
+        makeBackEndRegistrationApiRequestListener(false);
     }
 
     private void makeListenersWithBadNetworkResponse(long delay) {
         final NetworkResponse response = networkRequestLauncher.getNetworkResponse("{{{{{{{", 200);
         makeNetworkRequestListenerForSuccessfulRequest(delay, response);
-        makeGcmRegistrationApiRequestListener(false);
+        makeBackEndRegistrationApiRequestListener(false);
     }
 
     private void makeListenersWithNoDeviceUuidInResponse(long delay) {
         final NetworkResponse response = networkRequestLauncher.getNetworkResponse("{}", 200);
         makeNetworkRequestListenerForSuccessfulRequest(delay, response);
-        makeGcmRegistrationApiRequestListener(false);
+        makeBackEndRegistrationApiRequestListener(false);
     }
 
     private void makeNetworkRequestListenerForSuccessfulRequest(final long delay, final NetworkResponse response) {
@@ -225,10 +225,10 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
         }
         final NetworkError error = networkRequestLauncher.getNetworkError(exception, expectedHttpStatusCode);
         makeNetworkRequestListenerForFailedRequest(error, delay);
-        makeGcmRegistrationApiRequestListener(false);
+        makeBackEndRegistrationApiRequestListener(false);
     }
 
-    public void makeGcmRegistrationApiRequestListener(final boolean isSuccessfulRequest) {
+    public void makeBackEndRegistrationApiRequestListener(final boolean isSuccessfulRequest) {
         backEndRegistrationListener = new BackEndRegistrationListener() {
 
             @Override

@@ -4,7 +4,9 @@ import android.test.AndroidTestCase;
 
 import com.gopivotal.pushlib.PushLibParameters;
 import com.gopivotal.pushlib.backend.BackEndRegistrationApiRequestProvider;
+import com.gopivotal.pushlib.backend.BackEndUnregisterDeviceApiRequestProvider;
 import com.gopivotal.pushlib.backend.FakeBackEndRegistrationApiRequest;
+import com.gopivotal.pushlib.backend.FakeBackEndUnregisterDeviceApiRequest;
 import com.gopivotal.pushlib.gcm.FakeGcmProvider;
 import com.gopivotal.pushlib.gcm.FakeGcmRegistrationApiRequest;
 import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequestProvider;
@@ -28,6 +30,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     private FakePreferencesProvider preferencesProvider;
     private GcmRegistrationApiRequestProvider gcmApiRequestProvider;
     private BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider;
+    private BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider;
     private VersionProvider versionProvider;
     private FakeGcmProvider gcmProvider;
     private Semaphore semaphore = new Semaphore(0);
@@ -40,11 +43,12 @@ public class RegistrationEngineTest extends AndroidTestCase {
         preferencesProvider = new FakePreferencesProvider(null, null, 0);
         versionProvider = new FakeVersionProvider(10);
         backEndRegistrationApiRequestProvider = new BackEndRegistrationApiRequestProvider(new FakeBackEndRegistrationApiRequest(TEST_BACK_END_DEVICE_REGISTRATION_ID_1));
+        backEndUnregisterDeviceApiRequestProvider = new BackEndUnregisterDeviceApiRequestProvider(new FakeBackEndUnregisterDeviceApiRequest());
     }
 
     public void testNullContext() {
         try {
-            new RegistrationEngine(null, gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+            new RegistrationEngine(null, gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -53,7 +57,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullGcmProvider() {
         try {
-            new RegistrationEngine(getContext(), null, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+            new RegistrationEngine(getContext(), null, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -62,7 +66,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullPreferencesProvider() {
         try {
-            new RegistrationEngine(getContext(), gcmProvider, null, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+            new RegistrationEngine(getContext(), gcmProvider, null, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -71,16 +75,25 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullGcmApiRequestProvider() {
         try {
-            new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, null, backEndRegistrationApiRequestProvider, versionProvider);
+            new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, null, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
         }
     }
 
-    public void testNullBackEndApiRequestProvider() {
+    public void testNullBackEndRegisterDeviceApiRequestProvider() {
         try {
-            new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, null, versionProvider);
+            new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, null, backEndUnregisterDeviceApiRequestProvider, versionProvider);
+            fail("should not have succeeded");
+        } catch (IllegalArgumentException e) {
+            // success
+        }
+    }
+
+    public void testNullBackEndApiUnregisterDeviceRequestProvider() {
+        try {
+            new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, null, versionProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -89,7 +102,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullVersionProvider() {
         try {
-            new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, null);
+            new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, null);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -98,7 +111,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullParameters() {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+            final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
             engine.registerDevice(null, getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -108,7 +121,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullSenderId() {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+            final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
             engine.registerDevice(new PushLibParameters(null, TEST_RELEASE_UUID, TEST_RELEASE_SECRET, TEST_DEVICE_ALIAS), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -118,7 +131,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullReleaseUuid() {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+            final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
             engine.registerDevice(new PushLibParameters(TEST_SENDER_ID, null, TEST_RELEASE_SECRET, TEST_DEVICE_ALIAS), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -128,7 +141,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullReleaseSecret() {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+            final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
             engine.registerDevice(new PushLibParameters(TEST_SENDER_ID, TEST_RELEASE_UUID, null, TEST_DEVICE_ALIAS), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -137,14 +150,14 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testNullDeviceAlias() throws InterruptedException {
-        final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+        final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
         engine.registerDevice(new PushLibParameters(TEST_SENDER_ID, TEST_RELEASE_UUID, TEST_RELEASE_SECRET, null), getListenerForRegistration(true));
         semaphore.acquire();
     }
 
     public void testGooglePlayServicesNotAvailable() throws InterruptedException {
         gcmProvider.setIsGooglePlayServicesInstalled(false);
-        final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+        final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
         final PushLibParameters parameters = new PushLibParameters(TEST_SENDER_ID, TEST_RELEASE_UUID, TEST_RELEASE_SECRET, TEST_DEVICE_ALIAS);
         engine.registerDevice(parameters, getListenerForRegistration(false));
         semaphore.acquire();
@@ -164,6 +177,8 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)
                 .setShouldBackEndRegisterHaveBeenCalled(true)
+                .setShouldBackEndUnregisterDeviceHaveBeenCalled(false)
+                .setShouldBackEndUnregisterDeviceBeSuccessful(false)
                 .setShouldRegistrationHaveSucceeded(true);
          testParams.run(this);
     }
@@ -182,11 +197,11 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)
                 .setShouldBackEndRegisterHaveBeenCalled(false)
+                .setShouldBackEndUnregisterDeviceHaveBeenCalled(false)
+                .setShouldBackEndUnregisterDeviceBeSuccessful(false)
                 .setShouldRegistrationHaveSucceeded(false);
         testParams.run(this);
     }
-
-    // TODO - write test where there is a valid registered GCM id but the back-end is not registered
 
     public void testInitialGcmRegistrationPassedButInitialBackEndRegistrationFailed() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
@@ -202,6 +217,8 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)
                 .setShouldBackEndRegisterHaveBeenCalled(true)
+                .setShouldBackEndUnregisterDeviceHaveBeenCalled(false)
+                .setShouldBackEndUnregisterDeviceBeSuccessful(false)
                 .setShouldRegistrationHaveSucceeded(false);
         testParams.run(this);
     }
@@ -220,6 +237,8 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
                 .setShouldGcmProviderRegisterHaveBeenCalled(false)
                 .setShouldBackEndRegisterHaveBeenCalled(false)
+                .setShouldBackEndUnregisterDeviceHaveBeenCalled(false)
+                .setShouldBackEndUnregisterDeviceBeSuccessful(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run(this);
     }
@@ -238,6 +257,8 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
                 .setShouldGcmProviderRegisterHaveBeenCalled(false)
                 .setShouldBackEndRegisterHaveBeenCalled(true)
+                .setShouldBackEndUnregisterDeviceHaveBeenCalled(false)
+                .setShouldBackEndUnregisterDeviceBeSuccessful(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run(this);
     }
@@ -256,6 +277,8 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
                 .setShouldGcmProviderRegisterHaveBeenCalled(false)
                 .setShouldBackEndRegisterHaveBeenCalled(true)
+                .setShouldBackEndUnregisterDeviceHaveBeenCalled(false)
+                .setShouldBackEndUnregisterDeviceBeSuccessful(false)
                 .setShouldRegistrationHaveSucceeded(false);
         testParams.run(this);
     }
@@ -274,6 +297,8 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
                 .setShouldGcmProviderRegisterHaveBeenCalled(false)
                 .setShouldBackEndRegisterHaveBeenCalled(true)
+                .setShouldBackEndUnregisterDeviceHaveBeenCalled(false)
+                .setShouldBackEndUnregisterDeviceBeSuccessful(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run(this);
     }
@@ -292,6 +317,8 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)
                 .setShouldBackEndRegisterHaveBeenCalled(false)
+                .setShouldBackEndUnregisterDeviceHaveBeenCalled(false)
+                .setShouldBackEndUnregisterDeviceBeSuccessful(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run(this);
     }
@@ -310,6 +337,8 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)
                 .setShouldBackEndRegisterHaveBeenCalled(false)
+                .setShouldBackEndUnregisterDeviceHaveBeenCalled(false)
+                .setShouldBackEndUnregisterDeviceBeSuccessful(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run(this);
     }
@@ -328,10 +357,11 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)
                 .setShouldBackEndRegisterHaveBeenCalled(false)
+                .setShouldBackEndUnregisterDeviceHaveBeenCalled(false)
+                .setShouldBackEndUnregisterDeviceBeSuccessful(false)
                 .setShouldRegistrationHaveSucceeded(false);
         testParams.run(this);
     }
-
 
     public void testAppUpdatedAndGcmReregistrationReturnedNewIdButBackEndReregistrationFailed() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
@@ -347,6 +377,8 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)
                 .setShouldBackEndRegisterHaveBeenCalled(true)
+                .setShouldBackEndUnregisterDeviceHaveBeenCalled(true)
+                .setShouldBackEndUnregisterDeviceBeSuccessful(true)
                 .setShouldRegistrationHaveSucceeded(false);
         testParams.run(this);
     }
@@ -365,6 +397,48 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)
                 .setShouldBackEndRegisterHaveBeenCalled(true)
+                .setShouldBackEndUnregisterDeviceHaveBeenCalled(true)
+                .setShouldBackEndUnregisterDeviceBeSuccessful(true)
+                .setShouldRegistrationHaveSucceeded(true);
+        testParams.run(this);
+    }
+
+    public void testAppUpdatedAndDifferentGcmRegistrationIdWasReturnedButAppWasNeverRegisteredWithTheBackEnd() {
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+                .setGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
+                .setBackEndDeviceRegistrationIdInPreferences(null)
+                .setAppVersionInPreferences(1)
+                .setCurrentAppVersion(2)
+                .setGcmDeviceRegistrationIdFromServer(TEST_GCM_DEVICE_REGISTRATION_ID_2)
+                .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_2)
+                .setBackEndDeviceRegistrationIdFromServer(TEST_BACK_END_DEVICE_REGISTRATION_ID_2)
+                .setFinalBackEndDeviceRegistrationIdInPrefs(TEST_BACK_END_DEVICE_REGISTRATION_ID_2)
+                .setShouldAppVersionHaveBeenSaved(true)
+                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
+                .setShouldGcmProviderRegisterHaveBeenCalled(true)
+                .setShouldBackEndRegisterHaveBeenCalled(true)
+                .setShouldBackEndUnregisterDeviceHaveBeenCalled(false)
+                .setShouldBackEndUnregisterDeviceBeSuccessful(false)
+                .setShouldRegistrationHaveSucceeded(true);
+        testParams.run(this);
+    }
+
+    public void testAppUpdatedAndDifferentGcmRegistrationIdWasReturnedAndUnregisterFailed() {
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+                .setGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
+                .setBackEndDeviceRegistrationIdInPreferences(TEST_BACK_END_DEVICE_REGISTRATION_ID_1)
+                .setAppVersionInPreferences(1)
+                .setCurrentAppVersion(2)
+                .setGcmDeviceRegistrationIdFromServer(TEST_GCM_DEVICE_REGISTRATION_ID_2)
+                .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_2)
+                .setBackEndDeviceRegistrationIdFromServer(TEST_BACK_END_DEVICE_REGISTRATION_ID_2)
+                .setFinalBackEndDeviceRegistrationIdInPrefs(TEST_BACK_END_DEVICE_REGISTRATION_ID_2)
+                .setShouldAppVersionHaveBeenSaved(true)
+                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
+                .setShouldGcmProviderRegisterHaveBeenCalled(true)
+                .setShouldBackEndRegisterHaveBeenCalled(true)
+                .setShouldBackEndUnregisterDeviceHaveBeenCalled(true)
+                .setShouldBackEndUnregisterDeviceBeSuccessful(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run(this);
     }
@@ -383,6 +457,8 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)
                 .setShouldBackEndRegisterHaveBeenCalled(true)
+                .setShouldBackEndUnregisterDeviceHaveBeenCalled(true)
+                .setShouldBackEndUnregisterDeviceBeSuccessful(true)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run(this);
     }

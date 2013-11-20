@@ -7,6 +7,7 @@ import com.gopivotal.pushlib.PushLibParameters;
 import com.gopivotal.pushlib.model.BackEndApiRegistrationRequestData;
 import com.gopivotal.pushlib.model.BackEndApiRegistrationResponseData;
 import com.gopivotal.pushlib.network.NetworkWrapper;
+import com.gopivotal.pushlib.util.Const;
 import com.xtreme.commons.Logger;
 import com.xtreme.network.NetworkError;
 import com.xtreme.network.NetworkRequest;
@@ -17,8 +18,6 @@ import java.io.IOException;
 
 public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApiRequest {
 
-    private static final String REQUEST_URL = "http://ec2-54-234-124-123.compute-1.amazonaws.com:8080/v1/registration";
-
     private NetworkWrapper networkWrapper;
 
     public BackEndRegistrationApiRequestImpl(NetworkWrapper networkWrapper) {
@@ -28,7 +27,7 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
 
     private void verifyArguments(NetworkWrapper networkWrapper) {
         if (networkWrapper == null) {
-            throw new IllegalArgumentException("apiProvider may not be null");
+            throw new IllegalArgumentException("networkWrapper may not be null");
         }
     }
 
@@ -50,7 +49,7 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
         }
 
         Logger.i("Making network request to register this device with the back-end server");
-        final NetworkRequest networkRequest = new NetworkRequest(REQUEST_URL, getNetworkRequestListener(listener));
+        final NetworkRequest networkRequest = new NetworkRequest(Const.BACKEND_REGISTRATION_REQUEST_URL, getNetworkRequestListener(listener));
         networkRequest.setRequestType(NetworkRequest.RequestType.POST);
         networkRequest.setBodyData(getRequestBodyData(gcmDeviceRegistrationId, parameters));
         networkRequest.addHeaderParam("Content-Type", "application/json");
@@ -111,7 +110,6 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
                     return;
                 }
 
-                // TODO - pass back device_uuid from network response
                 Logger.i("Back-end Server registration succeeded.");
                 listener.onBackEndRegistrationSuccess(deviceUuid);
             }

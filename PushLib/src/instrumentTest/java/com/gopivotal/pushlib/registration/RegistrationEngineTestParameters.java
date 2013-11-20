@@ -5,7 +5,9 @@ import android.test.AndroidTestCase;
 
 import com.gopivotal.pushlib.PushLibParameters;
 import com.gopivotal.pushlib.backend.BackEndRegistrationApiRequestProvider;
+import com.gopivotal.pushlib.backend.BackEndUnregisterDeviceApiRequestProvider;
 import com.gopivotal.pushlib.backend.FakeBackEndRegistrationApiRequest;
+import com.gopivotal.pushlib.backend.FakeBackEndUnregisterDeviceApiRequest;
 import com.gopivotal.pushlib.gcm.FakeGcmProvider;
 import com.gopivotal.pushlib.gcm.FakeGcmRegistrationApiRequest;
 import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequestProvider;
@@ -25,19 +27,21 @@ public class RegistrationEngineTestParameters {
     private final DelayedLoop delayedLoop;
 
     private String gcmDeviceRegistrationIdInPrefs = null;
+    private String gcmDeviceRegistrationIdFromServer = null;
     private String backEndDeviceRegistrationIdInPrefs = null;
+    private String backEndDeviceRegistrationIdFromServer;
     private String finalGcmDeviceRegistrationIdInPrefs = null;
     private String finalBackEndDeviceRegistrationIdInPrefs = null;
-    private String gcmDeviceRegistrationIdFromServer = null;
-    private String backEndDeviceRegistrationIdFromServer;
 
     private boolean shouldGcmDeviceRegistrationSuccessful = false;
-    private boolean shouldRegistrationHaveSucceeded = true;
     private boolean shouldGcmDeviceRegistrationIdHaveBeenSaved = false;
     private boolean shouldGcmProviderRegisterHaveBeenCalled = false;
     private boolean shouldAppVersionHaveBeenSaved = false;
     private boolean shouldBackEndDeviceRegistrationBeSuccessful = false;
     private boolean shouldBackEndRegisterHaveBeenCalled = false;
+    private boolean shouldBackEndUnregisterDeviceBeSuccessful = false;
+    private boolean shouldBackEndUnregisterDeviceHaveBeenCalled = false;
+    private boolean shouldRegistrationHaveSucceeded = true;
 
     private int appVersionInPrefs = 0;
     private int currentAppVersion = 0;
@@ -55,8 +59,10 @@ public class RegistrationEngineTestParameters {
         final GcmRegistrationApiRequestProvider gcmRequestProvider = new GcmRegistrationApiRequestProvider(gcmRequest);
         final FakeVersionProvider versionProvider = new FakeVersionProvider(currentAppVersion);
         final FakeBackEndRegistrationApiRequest dummyBackEndRegistrationApiRequest = new FakeBackEndRegistrationApiRequest(backEndDeviceRegistrationIdFromServer, shouldBackEndDeviceRegistrationBeSuccessful);
+        final FakeBackEndUnregisterDeviceApiRequest dummyBackEndUnregisterDeviceApiRequest = new FakeBackEndUnregisterDeviceApiRequest(shouldBackEndUnregisterDeviceBeSuccessful);
         final BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider = new BackEndRegistrationApiRequestProvider(dummyBackEndRegistrationApiRequest);
-        final RegistrationEngine engine = new RegistrationEngine(context, gcmProvider, prefsProvider, gcmRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+        final BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider = new BackEndUnregisterDeviceApiRequestProvider(dummyBackEndUnregisterDeviceApiRequest);
+        final RegistrationEngine engine = new RegistrationEngine(context, gcmProvider, prefsProvider, gcmRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
         final PushLibParameters parameters = new PushLibParameters(TEST_SENDER_ID, TEST_RELEASE_UUID, TEST_RELEASE_SECRET, TEST_DEVICE_ALIAS);
 
         engine.registerDevice(parameters, new RegistrationListener() {
@@ -84,6 +90,7 @@ public class RegistrationEngineTestParameters {
         testCase.assertTrue(delayedLoop.isSuccess());
         testCase.assertEquals(shouldGcmProviderRegisterHaveBeenCalled, gcmProvider.wasRegisterCalled());
         testCase.assertEquals(shouldBackEndRegisterHaveBeenCalled, dummyBackEndRegistrationApiRequest.wasRegisterCalled());
+        testCase.assertEquals(shouldBackEndUnregisterDeviceHaveBeenCalled, dummyBackEndUnregisterDeviceApiRequest.wasUnregisterCalled());
         testCase.assertEquals(shouldAppVersionHaveBeenSaved, prefsProvider.wasAppVersionSaved());
         testCase.assertEquals(shouldGcmDeviceRegistrationIdHaveBeenSaved, prefsProvider.wasGcmDeviceRegistrationIdSaved());
         testCase.assertEquals(finalGcmDeviceRegistrationIdInPrefs, prefsProvider.loadGcmDeviceRegistrationId());
@@ -149,6 +156,16 @@ public class RegistrationEngineTestParameters {
 
     public RegistrationEngineTestParameters setShouldBackEndRegisterHaveBeenCalled(boolean b) {
         shouldBackEndRegisterHaveBeenCalled = b;
+        return this;
+    }
+
+    public RegistrationEngineTestParameters setShouldBackEndUnregisterDeviceHaveBeenCalled(boolean b) {
+        this.shouldBackEndUnregisterDeviceHaveBeenCalled = b;
+        return this;
+    }
+
+    public RegistrationEngineTestParameters setShouldBackEndUnregisterDeviceBeSuccessful(boolean b) {
+        this.shouldBackEndUnregisterDeviceBeSuccessful = b;
         return this;
     }
 

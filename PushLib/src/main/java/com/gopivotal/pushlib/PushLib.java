@@ -6,6 +6,9 @@ import android.content.Context;
 import com.gopivotal.pushlib.backend.BackEndRegistrationApiRequest;
 import com.gopivotal.pushlib.backend.BackEndRegistrationApiRequestImpl;
 import com.gopivotal.pushlib.backend.BackEndRegistrationApiRequestProvider;
+import com.gopivotal.pushlib.backend.BackEndUnregisterDeviceApiRequest;
+import com.gopivotal.pushlib.backend.BackEndUnregisterDeviceApiRequestImpl;
+import com.gopivotal.pushlib.backend.BackEndUnregisterDeviceApiRequestProvider;
 import com.gopivotal.pushlib.gcm.GcmProvider;
 import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequest;
 import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequestImpl;
@@ -87,8 +90,10 @@ public class PushLib {
         final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
         final BackEndRegistrationApiRequest dummyBackEndRegistrationApiRequest = new BackEndRegistrationApiRequestImpl(networkWrapper);
         final BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider = new BackEndRegistrationApiRequestProvider(dummyBackEndRegistrationApiRequest);
+        final BackEndUnregisterDeviceApiRequest dummyBackEndUnregisterDeviceApiRequest = new BackEndUnregisterDeviceApiRequestImpl(networkWrapper);
+        final BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider = new BackEndUnregisterDeviceApiRequestProvider(dummyBackEndUnregisterDeviceApiRequest);
         final VersionProvider versionProvider = new RealVersionProvider(context);
-        final RegistrationEngine registrationEngine = new RegistrationEngine(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+        final RegistrationEngine registrationEngine = new RegistrationEngine(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
         registrationEngine.registerDevice(parameters, listener);
     }
 }

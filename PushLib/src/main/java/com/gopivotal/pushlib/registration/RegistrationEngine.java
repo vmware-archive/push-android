@@ -6,6 +6,9 @@ import com.gopivotal.pushlib.PushLibParameters;
 import com.gopivotal.pushlib.backend.BackEndRegistrationApiRequest;
 import com.gopivotal.pushlib.backend.BackEndRegistrationApiRequestProvider;
 import com.gopivotal.pushlib.backend.BackEndRegistrationListener;
+import com.gopivotal.pushlib.backend.BackEndUnregisterDeviceApiRequest;
+import com.gopivotal.pushlib.backend.BackEndUnregisterDeviceApiRequestProvider;
+import com.gopivotal.pushlib.backend.BackEndUnregisterDeviceListener;
 import com.gopivotal.pushlib.gcm.GcmProvider;
 import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequest;
 import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequestProvider;
@@ -23,14 +26,15 @@ public class RegistrationEngine {
     private String previousBackEndDeviceRegistrationId = null;
     private GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider;
     private BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider;
+    private BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider;
     private VersionProvider versionProvider;
 
-    public RegistrationEngine(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, VersionProvider versionProvider) {
-        verifyArguments(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
-        saveArguments(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+    public RegistrationEngine(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider, VersionProvider versionProvider) {
+        verifyArguments(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, backEndUnregisterDeviceApiRequestProvider);
+        saveArguments(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, backEndUnregisterDeviceApiRequestProvider);
     }
 
-    private void verifyArguments(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, VersionProvider versionProvider) {
+    private void verifyArguments(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, VersionProvider versionProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
@@ -46,17 +50,21 @@ public class RegistrationEngine {
         if (backEndRegistrationApiRequestProvider == null) {
             throw new IllegalArgumentException("backEndRegistrationApiRequestProvider may not be null");
         }
+        if (backEndUnregisterDeviceApiRequestProvider == null) {
+            throw new IllegalArgumentException("backEndUnregisterDeviceApiRequestProvider may not be null");
+        }
         if (versionProvider == null) {
             throw new IllegalArgumentException("versionProvider may not be null");
         }
     }
 
-    private void saveArguments(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, VersionProvider versionProvider) {
+    private void saveArguments(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, VersionProvider versionProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
         this.context = context;
         this.gcmProvider = gcmProvider;
         this.preferencesProvider = preferencesProvider;
         this.gcmRegistrationApiRequestProvider = gcmRegistrationApiRequestProvider;
         this.backEndRegistrationApiRequestProvider = backEndRegistrationApiRequestProvider;
+        this.backEndUnregisterDeviceApiRequestProvider = backEndUnregisterDeviceApiRequestProvider;
         this.versionProvider = versionProvider;
         this.previousGcmDeviceRegistrationId = preferencesProvider.loadGcmDeviceRegistrationId();
         this.previousBackEndDeviceRegistrationId = preferencesProvider.loadBackEndDeviceRegistrationId();
@@ -160,7 +168,11 @@ public class RegistrationEngine {
                 }
 
                 if (isNewGcmDeviceRegistrationId) {
-                    registerDeviceWithBackEnd(gcmDeviceRegistrationId, parameters, listener);
+                    if (previousGcmDeviceRegistrationId != null && previousBackEndDeviceRegistrationId != null) {
+                        unregisterDeviceWithBackEnd(previousBackEndDeviceRegistrationId, gcmDeviceRegistrationId, parameters, listener);
+                    } else {
+                        registerDeviceWithBackEnd(gcmDeviceRegistrationId, parameters, listener);
+                    }
                 } else {
                     if (listener != null) {
                         listener.onRegistrationComplete();
@@ -175,6 +187,28 @@ public class RegistrationEngine {
                 }
             }
         });
+    }
+
+    private void unregisterDeviceWithBackEnd(final String backEndDeviceRegistrationId, String gcmDeviceRegistrationId, PushLibParameters parameters, final RegistrationListener listener) {
+        final BackEndUnregisterDeviceApiRequest backEndUnregisterDeviceApiRequest = backEndUnregisterDeviceApiRequestProvider.getRequest();
+        backEndUnregisterDeviceApiRequest.startUnregisterDevice(backEndDeviceRegistrationId, getBackEndUnregisterDeviceListener(gcmDeviceRegistrationId, parameters, listener));
+    }
+
+    private BackEndUnregisterDeviceListener getBackEndUnregisterDeviceListener(final String gcmDeviceRegistrationId, final PushLibParameters parameters, final RegistrationListener listener) {
+        return new BackEndUnregisterDeviceListener() {
+
+            @Override
+            public void onBackEndUnregisterDeviceSuccess() {
+                registerDeviceWithBackEnd(gcmDeviceRegistrationId, parameters, listener);
+            }
+
+            @Override
+            public void onBackEndUnregisterDeviceFailed(String reason) {
+                // Even if we couldn't unregister the old device ID we should still attempt
+                // to register the new one.
+                registerDeviceWithBackEnd(gcmDeviceRegistrationId, parameters, listener);
+            }
+        };
     }
 
     private void registerDeviceWithBackEnd(final String gcmDeviceRegistrationId, PushLibParameters parameters, final RegistrationListener listener) {
@@ -199,6 +233,7 @@ public class RegistrationEngine {
                 if (previousBackEndDeviceRegistrationId != null && previousBackEndDeviceRegistrationId.equals(backEndDeviceRegistrationId)) {
                     Logger.i("New backEndDeviceRegistrationId from server is the same as the previous one");
                 } else {
+                    Logger.i("Saving back-end device registration ID: " + backEndDeviceRegistrationId);
                     preferencesProvider.saveBackEndDeviceRegistrationId(backEndDeviceRegistrationId);
                 }
 

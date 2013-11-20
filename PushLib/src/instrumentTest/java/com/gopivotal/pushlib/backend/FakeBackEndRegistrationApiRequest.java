@@ -7,27 +7,24 @@ public class FakeBackEndRegistrationApiRequest implements BackEndRegistrationApi
     private final FakeBackEndRegistrationApiRequest originatingRequest;
     private final String backEndDeviceRegistrationId;
     private final boolean willBeSuccessfulRequest;
-    private boolean wasRegisterCalled;
+    private boolean wasRegisterCalled = false;
 
     public FakeBackEndRegistrationApiRequest(String backEndDeviceRegistrationId) {
         this.originatingRequest = null;
         this.backEndDeviceRegistrationId = backEndDeviceRegistrationId;
         this.willBeSuccessfulRequest = true;
-        this.wasRegisterCalled = false;
     }
 
     public FakeBackEndRegistrationApiRequest(String backEndDeviceRegistrationId, boolean willBeSuccessfulRequest) {
         this.originatingRequest = null;
         this.backEndDeviceRegistrationId = backEndDeviceRegistrationId;
         this.willBeSuccessfulRequest = willBeSuccessfulRequest;
-        this.wasRegisterCalled = false;
     }
 
     public FakeBackEndRegistrationApiRequest(FakeBackEndRegistrationApiRequest originatingRequest, String backEndDeviceRegistrationId, boolean willBeSuccessfulRequest) {
         this.originatingRequest = originatingRequest;
         this.backEndDeviceRegistrationId = backEndDeviceRegistrationId;
         this.willBeSuccessfulRequest = willBeSuccessfulRequest;
-        this.wasRegisterCalled = false;
     }
 
     @Override
