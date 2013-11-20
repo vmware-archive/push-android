@@ -19,17 +19,18 @@ public class RegistrationEngineTestParameters {
     private static final String TEST_SENDER_ID = "TEST_SENDER_ID";
     private static final String TEST_RELEASE_UUID = "TEST_RELEASE_UUID";
     private static final String TEST_RELEASE_SECRET = "TEST_RELEASE_SECRET";
+    private static final String TEST_DEVICE_ALIAS = "TEST_DEVICE_ALIAS";
 
     private final Context context;
     private final DelayedLoop delayedLoop;
+
     private String gcmDeviceRegistrationIdInPrefs = null;
     private String backEndDeviceRegistrationIdInPrefs = null;
     private String finalGcmDeviceRegistrationIdInPrefs = null;
     private String finalBackEndDeviceRegistrationIdInPrefs = null;
-    private int appVersionInPrefs = 0;
-    private int currentAppVersion = 0;
     private String gcmDeviceRegistrationIdFromServer = null;
     private String backEndDeviceRegistrationIdFromServer;
+
     private boolean shouldGcmDeviceRegistrationSuccessful = false;
     private boolean shouldRegistrationHaveSucceeded = true;
     private boolean shouldGcmDeviceRegistrationIdHaveBeenSaved = false;
@@ -37,6 +38,9 @@ public class RegistrationEngineTestParameters {
     private boolean shouldAppVersionHaveBeenSaved = false;
     private boolean shouldBackEndDeviceRegistrationBeSuccessful = false;
     private boolean shouldBackEndRegisterHaveBeenCalled = false;
+
+    private int appVersionInPrefs = 0;
+    private int currentAppVersion = 0;
 
     public RegistrationEngineTestParameters(Context context) {
         this.context = context;
@@ -53,7 +57,7 @@ public class RegistrationEngineTestParameters {
         final FakeBackEndRegistrationApiRequest dummyBackEndRegistrationApiRequest = new FakeBackEndRegistrationApiRequest(backEndDeviceRegistrationIdFromServer, shouldBackEndDeviceRegistrationBeSuccessful);
         final BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider = new BackEndRegistrationApiRequestProvider(dummyBackEndRegistrationApiRequest);
         final RegistrationEngine engine = new RegistrationEngine(context, gcmProvider, prefsProvider, gcmRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
-        final PushLibParameters parameters = new PushLibParameters(TEST_SENDER_ID, TEST_RELEASE_UUID, TEST_RELEASE_SECRET);
+        final PushLibParameters parameters = new PushLibParameters(TEST_SENDER_ID, TEST_RELEASE_UUID, TEST_RELEASE_SECRET, TEST_DEVICE_ALIAS);
 
         engine.registerDevice(parameters, new RegistrationListener() {
 

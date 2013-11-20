@@ -21,6 +21,7 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     private static final String TEST_SENDER_ID = "TEST_SENDER_ID";
     private static final String TEST_RELEASE_UUID = "TEST_RELEASE_UUID";
     private static final String TEST_RELEASE_SECRET = "TEST_RELEASE_SECRET";
+    private static final String TEST_DEVICE_ALIAS = "TEST_DEVICE_ALIAS";
     private static final long TEN_SECOND_TIMEOUT = 10000L;
     private static final long NO_DELAY = 0L;
     private static final long ONE_SECOND_DELAY = 1000L;
@@ -254,6 +255,6 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     }
 
     private PushLibParameters getParameters() {
-        return new PushLibParameters(TEST_SENDER_ID, TEST_RELEASE_UUID, TEST_RELEASE_SECRET);
+        return new PushLibParameters(TEST_SENDER_ID, TEST_RELEASE_UUID, TEST_RELEASE_SECRET, TEST_DEVICE_ALIAS);
     }
 }

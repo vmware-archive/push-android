@@ -136,18 +136,26 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
     }
 
     private String getRequestBodyData(String deviceRegistrationId, PushLibParameters parameters) {
-        // TODO - most of this data is bogus. I need to figure out what it's really supposed to look like.
+        final BackEndApiRegistrationRequestData data = getBackEndApiRegistrationRequestData(deviceRegistrationId, parameters);
+        final Gson gson = new Gson();
+        return gson.toJson(data);
+    }
+
+    private BackEndApiRegistrationRequestData getBackEndApiRegistrationRequestData(String deviceRegistrationId, PushLibParameters parameters) {
         final BackEndApiRegistrationRequestData data = new BackEndApiRegistrationRequestData();
         data.setReleaseUuid(parameters.getReleaseUuid());
         data.setSecret(parameters.getReleaseSecret());
-        data.setDeviceAlias("androidtest");
+        if (parameters.getDeviceAlias() == null) {
+            data.setDeviceAlias("");
+        } else {
+            data.setDeviceAlias(parameters.getDeviceAlias());
+        }
         data.setDeviceModel(getDeviceModel());
         data.setDeviceType("phone"); // TODO - put actual device type here
         data.setOs("android");
         data.setOsVersion(Build.VERSION.RELEASE);
         data.setRegistrationToken(deviceRegistrationId);
-        final Gson gson = new Gson();
-        return gson.toJson(data);
+        return data;
     }
 
     private String getDeviceModel() {
