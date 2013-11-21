@@ -48,11 +48,12 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
             throw new IllegalArgumentException("listener may not be null");
         }
 
-        Logger.i("Making network request to register this device with the back-end server");
         final NetworkRequest networkRequest = new NetworkRequest(Const.BACKEND_REGISTRATION_REQUEST_URL, getNetworkRequestListener(listener));
+        final String bodyData = getRequestBodyData(gcmDeviceRegistrationId, parameters);
         networkRequest.setRequestType(NetworkRequest.RequestType.POST);
-        networkRequest.setBodyData(getRequestBodyData(gcmDeviceRegistrationId, parameters));
+        networkRequest.setBodyData(bodyData);
         networkRequest.addHeaderParam("Content-Type", "application/json");
+        Logger.i("Making network request to register this device with the back-end server: " + bodyData);
         return networkRequest;
     }
 
@@ -149,7 +150,7 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
             data.setDeviceAlias(parameters.getDeviceAlias());
         }
         data.setDeviceModel(getDeviceModel());
-        data.setDeviceType("phone"); // TODO - put actual device type here
+        data.setDeviceType("phone"); // TODO - remove
         data.setOs("android");
         data.setOsVersion(Build.VERSION.RELEASE);
         data.setRegistrationToken(deviceRegistrationId);

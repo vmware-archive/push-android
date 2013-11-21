@@ -13,6 +13,7 @@ package com.gopivotal.pushlib.model;
         }
 */
 
+import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
 public class BackEndApiRegistrationRequestData {
