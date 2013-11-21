@@ -39,6 +39,7 @@ public class RegistrationEngineTestParameters {
     private boolean shouldGcmDeviceRegistrationIdHaveBeenSaved = false;
     private boolean shouldGcmProviderRegisterHaveBeenCalled = false;
     private boolean shouldAppVersionHaveBeenSaved = false;
+    private boolean shouldBackEndDeviceRegistrationHaveBeenSaved = false;
     private boolean shouldReleaseUuidHaveBeenSaved = false;
     private boolean shouldBackEndDeviceRegistrationBeSuccessful = false;
     private boolean shouldBackEndRegisterHaveBeenCalled = false;
@@ -94,6 +95,7 @@ public class RegistrationEngineTestParameters {
 
         testCase.assertTrue(delayedLoop.isSuccess());
         testCase.assertEquals(shouldGcmProviderRegisterHaveBeenCalled, gcmProvider.wasRegisterCalled());
+        testCase.assertEquals(shouldBackEndDeviceRegistrationHaveBeenSaved, prefsProvider.wasBackEndDeviceRegistrationIdSaved());
         testCase.assertEquals(shouldBackEndRegisterHaveBeenCalled, dummyBackEndRegistrationApiRequest.wasRegisterCalled());
         testCase.assertEquals(shouldBackEndUnregisterDeviceHaveBeenCalled, dummyBackEndUnregisterDeviceApiRequest.wasUnregisterCalled());
         testCase.assertEquals(shouldAppVersionHaveBeenSaved, prefsProvider.wasAppVersionSaved());
@@ -200,4 +202,10 @@ public class RegistrationEngineTestParameters {
         shouldReleaseUuidHaveBeenSaved = b;
         return this;
     }
+
+    public RegistrationEngineTestParameters setShouldBackEndDeviceRegistrationHaveBeenSaved(boolean b) {
+        shouldBackEndDeviceRegistrationHaveBeenSaved = b;
+        return this;
+    }
 }
+

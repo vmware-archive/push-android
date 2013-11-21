@@ -70,7 +70,6 @@ public class FakePreferencesProvider implements PreferencesProvider {
         return wasGcmDeviceRegistrationIdSaved;
     }
 
-    // TODO - use in some test
     public boolean wasBackEndDeviceRegistrationIdSaved() {
         return wasBackEndDeviceRegistrationIdSaved;
     }
@@ -79,7 +78,6 @@ public class FakePreferencesProvider implements PreferencesProvider {
         return wasAppVersionSaved;
     }
 
-    // TODO - use in some test
     public boolean wasReleaseUuidSaved() {
         return wasReleaseUuidSaved;
     }
