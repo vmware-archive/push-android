@@ -1,16 +1,15 @@
 package com.gopivotal.pushlib.model;
 
-// TODO - get new format from Ernst and Jesse
 /*
 {
-        "release_uuid": "9e60c311-f5c7-4416-aea2-d07bbc94f208",
-        "secret": "3c676b20-3c49-4215-be1a-3932e3458514",
-        "device_alias": "andoidtest",
-        "device_type": "phone",
-        "device_model": "meh",
+        "release_uuid": "guid_provided_by_developer",
+        "secret": "guid_provided_by_developer",
+        "device_alias": "developer-specific",
+        "device_type": "phone"|"tablet"|"phablet",
+        "device_model": "Nexus 4",
         "os": "android",
-        "os_version": "version",
-        "registration_token": "SomeString"
+        "os_version": "4.4",
+        "registration_token": "provided_by_GCM"
         }
 */
 

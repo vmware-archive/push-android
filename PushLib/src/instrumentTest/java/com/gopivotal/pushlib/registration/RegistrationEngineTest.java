@@ -24,7 +24,8 @@ public class RegistrationEngineTest extends AndroidTestCase {
     private static final String TEST_BACK_END_DEVICE_REGISTRATION_ID_2 = "TEST_BACK_END_DEVICE_REGISTRATION_ID_2";
     private static final String TEST_DEVICE_ALIAS = "TEST_DEVICE_ALIAS";
     private static final String TEST_SENDER_ID = "TEST_SENDER_ID";
-    private static final String TEST_RELEASE_UUID = "TEST_RELEASE_UUID";
+    private static final String TEST_RELEASE_UUID_1 = "TEST_RELEASE_UUID_1";
+    private static final String TEST_RELEASE_UUID_2 = "TEST_RELEASE_UUID_2";
     private static final String TEST_RELEASE_SECRET = "TEST_RELEASE_SECRET";
 
     private FakePreferencesProvider preferencesProvider;
@@ -40,7 +41,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
         super.setUp();
         gcmProvider = new FakeGcmProvider(TEST_GCM_DEVICE_REGISTRATION_ID_1);
         gcmApiRequestProvider = new GcmRegistrationApiRequestProvider(new FakeGcmRegistrationApiRequest(gcmProvider));
-        preferencesProvider = new FakePreferencesProvider(null, null, 0);
+        preferencesProvider = new FakePreferencesProvider(null, null, 0, null);
         versionProvider = new FakeVersionProvider(10);
         backEndRegistrationApiRequestProvider = new BackEndRegistrationApiRequestProvider(new FakeBackEndRegistrationApiRequest(TEST_BACK_END_DEVICE_REGISTRATION_ID_1));
         backEndUnregisterDeviceApiRequestProvider = new BackEndUnregisterDeviceApiRequestProvider(new FakeBackEndUnregisterDeviceApiRequest());
@@ -122,7 +123,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     public void testNullSenderId() {
         try {
             final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
-            engine.registerDevice(new PushLibParameters(null, TEST_RELEASE_UUID, TEST_RELEASE_SECRET, TEST_DEVICE_ALIAS), getListenerForRegistration(false));
+            engine.registerDevice(new PushLibParameters(null, TEST_RELEASE_UUID_1, TEST_RELEASE_SECRET, TEST_DEVICE_ALIAS), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -142,7 +143,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     public void testNullReleaseSecret() {
         try {
             final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
-            engine.registerDevice(new PushLibParameters(TEST_SENDER_ID, TEST_RELEASE_UUID, null, TEST_DEVICE_ALIAS), getListenerForRegistration(false));
+            engine.registerDevice(new PushLibParameters(TEST_SENDER_ID, TEST_RELEASE_UUID_1, null, TEST_DEVICE_ALIAS), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -151,14 +152,14 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullDeviceAlias() throws InterruptedException {
         final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
-        engine.registerDevice(new PushLibParameters(TEST_SENDER_ID, TEST_RELEASE_UUID, TEST_RELEASE_SECRET, null), getListenerForRegistration(true));
+        engine.registerDevice(new PushLibParameters(TEST_SENDER_ID, TEST_RELEASE_UUID_1, TEST_RELEASE_SECRET, null), getListenerForRegistration(true));
         semaphore.acquire();
     }
 
     public void testGooglePlayServicesNotAvailable() throws InterruptedException {
         gcmProvider.setIsGooglePlayServicesInstalled(false);
         final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
-        final PushLibParameters parameters = new PushLibParameters(TEST_SENDER_ID, TEST_RELEASE_UUID, TEST_RELEASE_SECRET, TEST_DEVICE_ALIAS);
+        final PushLibParameters parameters = new PushLibParameters(TEST_SENDER_ID, TEST_RELEASE_UUID_1, TEST_RELEASE_SECRET, TEST_DEVICE_ALIAS);
         engine.registerDevice(parameters, getListenerForRegistration(false));
         semaphore.acquire();
     }
@@ -173,6 +174,10 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setBackEndDeviceRegistrationIdFromServer(TEST_BACK_END_DEVICE_REGISTRATION_ID_1)
                 .setFinalBackEndDeviceRegistrationIdInPrefs(TEST_BACK_END_DEVICE_REGISTRATION_ID_1)
+                .setReleaseUuidFromUser(TEST_RELEASE_UUID_1)
+                .setReleaseUuidInPreferences(null)
+                .setFinalReleaseUuidInPrefs(TEST_RELEASE_UUID_1)
+                .setShouldReleaseUuidHaveBeenSaved(true)
                 .setShouldAppVersionHaveBeenSaved(true)
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)
@@ -193,6 +198,10 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setFinalGcmDeviceRegistrationIdInPreferences(null)
                 .setBackEndDeviceRegistrationIdFromServer(null)
                 .setFinalBackEndDeviceRegistrationIdInPrefs(null)
+                .setReleaseUuidFromUser(TEST_RELEASE_UUID_1)
+                .setReleaseUuidInPreferences(null)
+                .setFinalReleaseUuidInPrefs(null)
+                .setShouldReleaseUuidHaveBeenSaved(false)
                 .setShouldAppVersionHaveBeenSaved(false)
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)
@@ -213,6 +222,10 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setBackEndDeviceRegistrationIdFromServer(null)
                 .setFinalBackEndDeviceRegistrationIdInPrefs(null)
+                .setReleaseUuidFromUser(TEST_RELEASE_UUID_1)
+                .setReleaseUuidInPreferences(null)
+                .setFinalReleaseUuidInPrefs(null)
+                .setShouldReleaseUuidHaveBeenSaved(false)
                 .setShouldAppVersionHaveBeenSaved(true)
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)
@@ -233,12 +246,40 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setBackEndDeviceRegistrationIdFromServer(TEST_BACK_END_DEVICE_REGISTRATION_ID_1)
                 .setFinalBackEndDeviceRegistrationIdInPrefs(TEST_BACK_END_DEVICE_REGISTRATION_ID_1)
+                .setReleaseUuidFromUser(TEST_RELEASE_UUID_1)
+                .setReleaseUuidInPreferences(TEST_RELEASE_UUID_1)
+                .setFinalReleaseUuidInPrefs(TEST_RELEASE_UUID_1)
+                .setShouldReleaseUuidHaveBeenSaved(false)
                 .setShouldAppVersionHaveBeenSaved(false)
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
                 .setShouldGcmProviderRegisterHaveBeenCalled(false)
                 .setShouldBackEndRegisterHaveBeenCalled(false)
                 .setShouldBackEndUnregisterDeviceHaveBeenCalled(false)
                 .setShouldBackEndUnregisterDeviceBeSuccessful(false)
+                .setShouldRegistrationHaveSucceeded(true);
+        testParams.run(this);
+    }
+
+    public void testWasAlreadyRegisteredWithGcmAndBackendAndTheReleaseUuidIsChanged() {
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+                .setGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
+                .setBackEndDeviceRegistrationIdInPreferences(TEST_BACK_END_DEVICE_REGISTRATION_ID_1)
+                .setAppVersionInPreferences(1)
+                .setCurrentAppVersion(1)
+                .setGcmDeviceRegistrationIdFromServer(TEST_GCM_DEVICE_REGISTRATION_ID_1)
+                .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
+                .setBackEndDeviceRegistrationIdFromServer(TEST_BACK_END_DEVICE_REGISTRATION_ID_1)
+                .setFinalBackEndDeviceRegistrationIdInPrefs(TEST_BACK_END_DEVICE_REGISTRATION_ID_1)
+                .setReleaseUuidFromUser(TEST_RELEASE_UUID_2)
+                .setReleaseUuidInPreferences(TEST_RELEASE_UUID_1)
+                .setFinalReleaseUuidInPrefs(TEST_RELEASE_UUID_2)
+                .setShouldReleaseUuidHaveBeenSaved(true)
+                .setShouldAppVersionHaveBeenSaved(false)
+                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
+                .setShouldGcmProviderRegisterHaveBeenCalled(false)
+                .setShouldBackEndRegisterHaveBeenCalled(true)
+                .setShouldBackEndUnregisterDeviceHaveBeenCalled(true)
+                .setShouldBackEndUnregisterDeviceBeSuccessful(true)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run(this);
     }
@@ -253,6 +294,10 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setBackEndDeviceRegistrationIdFromServer(TEST_BACK_END_DEVICE_REGISTRATION_ID_1)
                 .setFinalBackEndDeviceRegistrationIdInPrefs(TEST_BACK_END_DEVICE_REGISTRATION_ID_1)
+                .setReleaseUuidFromUser(TEST_RELEASE_UUID_1)
+                .setReleaseUuidInPreferences(null)
+                .setFinalReleaseUuidInPrefs(TEST_RELEASE_UUID_1)
+                .setShouldReleaseUuidHaveBeenSaved(true)
                 .setShouldAppVersionHaveBeenSaved(false)
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
                 .setShouldGcmProviderRegisterHaveBeenCalled(false)
@@ -273,6 +318,10 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setBackEndDeviceRegistrationIdFromServer(null)
                 .setFinalBackEndDeviceRegistrationIdInPrefs(null)
+                .setReleaseUuidFromUser(TEST_RELEASE_UUID_1)
+                .setReleaseUuidInPreferences(null)
+                .setFinalReleaseUuidInPrefs(null)
+                .setShouldReleaseUuidHaveBeenSaved(false)
                 .setShouldAppVersionHaveBeenSaved(false)
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
                 .setShouldGcmProviderRegisterHaveBeenCalled(false)
@@ -280,26 +329,6 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldBackEndUnregisterDeviceHaveBeenCalled(false)
                 .setShouldBackEndUnregisterDeviceBeSuccessful(false)
                 .setShouldRegistrationHaveSucceeded(false);
-        testParams.run(this);
-    }
-
-    public void testWasAlreadyRegisteredWithGcmButNotRegisteredWithTheBackEnd() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
-                .setGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
-                .setBackEndDeviceRegistrationIdInPreferences(null)
-                .setAppVersionInPreferences(1)
-                .setCurrentAppVersion(1)
-                .setGcmDeviceRegistrationIdFromServer(TEST_GCM_DEVICE_REGISTRATION_ID_1)
-                .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
-                .setBackEndDeviceRegistrationIdFromServer(TEST_BACK_END_DEVICE_REGISTRATION_ID_1)
-                .setFinalBackEndDeviceRegistrationIdInPrefs(TEST_BACK_END_DEVICE_REGISTRATION_ID_1)
-                .setShouldAppVersionHaveBeenSaved(false)
-                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
-                .setShouldGcmProviderRegisterHaveBeenCalled(false)
-                .setShouldBackEndRegisterHaveBeenCalled(true)
-                .setShouldBackEndUnregisterDeviceHaveBeenCalled(false)
-                .setShouldBackEndUnregisterDeviceBeSuccessful(false)
-                .setShouldRegistrationHaveSucceeded(true);
         testParams.run(this);
     }
 
@@ -313,6 +342,10 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setBackEndDeviceRegistrationIdFromServer(TEST_BACK_END_DEVICE_REGISTRATION_ID_1)
                 .setFinalBackEndDeviceRegistrationIdInPrefs(TEST_BACK_END_DEVICE_REGISTRATION_ID_1)
+                .setReleaseUuidFromUser(TEST_RELEASE_UUID_1)
+                .setReleaseUuidInPreferences(TEST_RELEASE_UUID_1)
+                .setFinalReleaseUuidInPrefs(TEST_RELEASE_UUID_1)
+                .setShouldReleaseUuidHaveBeenSaved(false)
                 .setShouldAppVersionHaveBeenSaved(true)
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)
@@ -333,6 +366,10 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setBackEndDeviceRegistrationIdFromServer(TEST_BACK_END_DEVICE_REGISTRATION_ID_1)
                 .setFinalBackEndDeviceRegistrationIdInPrefs(TEST_BACK_END_DEVICE_REGISTRATION_ID_1)
+                .setReleaseUuidFromUser(TEST_RELEASE_UUID_1)
+                .setReleaseUuidInPreferences(TEST_RELEASE_UUID_1)
+                .setFinalReleaseUuidInPrefs(TEST_RELEASE_UUID_1)
+                .setShouldReleaseUuidHaveBeenSaved(false)
                 .setShouldAppVersionHaveBeenSaved(true)
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)
@@ -353,6 +390,10 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setBackEndDeviceRegistrationIdFromServer(null)
                 .setFinalBackEndDeviceRegistrationIdInPrefs(TEST_BACK_END_DEVICE_REGISTRATION_ID_1)
+                .setReleaseUuidFromUser(TEST_RELEASE_UUID_1)
+                .setReleaseUuidInPreferences(TEST_RELEASE_UUID_1)
+                .setFinalReleaseUuidInPrefs(TEST_RELEASE_UUID_1)
+                .setShouldReleaseUuidHaveBeenSaved(false)
                 .setShouldAppVersionHaveBeenSaved(false)
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)
@@ -372,7 +413,11 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setGcmDeviceRegistrationIdFromServer(TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setBackEndDeviceRegistrationIdFromServer(null)
-                .setFinalBackEndDeviceRegistrationIdInPrefs(TEST_BACK_END_DEVICE_REGISTRATION_ID_1)
+                .setFinalBackEndDeviceRegistrationIdInPrefs(null)
+                .setReleaseUuidFromUser(TEST_RELEASE_UUID_1)
+                .setReleaseUuidInPreferences(TEST_RELEASE_UUID_1)
+                .setFinalReleaseUuidInPrefs(null)
+                .setShouldReleaseUuidHaveBeenSaved(true)
                 .setShouldAppVersionHaveBeenSaved(true)
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)
@@ -393,6 +438,10 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setBackEndDeviceRegistrationIdFromServer(TEST_BACK_END_DEVICE_REGISTRATION_ID_2)
                 .setFinalBackEndDeviceRegistrationIdInPrefs(TEST_BACK_END_DEVICE_REGISTRATION_ID_2)
+                .setReleaseUuidFromUser(TEST_RELEASE_UUID_1)
+                .setReleaseUuidInPreferences(TEST_RELEASE_UUID_1)
+                .setFinalReleaseUuidInPrefs(TEST_RELEASE_UUID_1)
+                .setShouldReleaseUuidHaveBeenSaved(true)
                 .setShouldAppVersionHaveBeenSaved(true)
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)
@@ -403,7 +452,31 @@ public class RegistrationEngineTest extends AndroidTestCase {
         testParams.run(this);
     }
 
-    public void testAppUpdatedAndDifferentGcmRegistrationIdWasReturnedButAppWasNeverRegisteredWithTheBackEnd() {
+    public void testAppUpdatedAndDifferentGcmRegistrationIdWasReturnedButReleaseUuidFromPreviousRegistrationWasNotSaved() {
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+                .setGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
+                .setBackEndDeviceRegistrationIdInPreferences(TEST_BACK_END_DEVICE_REGISTRATION_ID_2)
+                .setAppVersionInPreferences(1)
+                .setCurrentAppVersion(2)
+                .setGcmDeviceRegistrationIdFromServer(TEST_GCM_DEVICE_REGISTRATION_ID_2)
+                .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_2)
+                .setBackEndDeviceRegistrationIdFromServer(TEST_BACK_END_DEVICE_REGISTRATION_ID_2)
+                .setFinalBackEndDeviceRegistrationIdInPrefs(TEST_BACK_END_DEVICE_REGISTRATION_ID_2)
+                .setReleaseUuidFromUser(TEST_RELEASE_UUID_1)
+                .setReleaseUuidInPreferences(null)
+                .setFinalReleaseUuidInPrefs(TEST_RELEASE_UUID_1)
+                .setShouldReleaseUuidHaveBeenSaved(true)
+                .setShouldAppVersionHaveBeenSaved(true)
+                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
+                .setShouldGcmProviderRegisterHaveBeenCalled(true)
+                .setShouldBackEndRegisterHaveBeenCalled(true)
+                .setShouldBackEndUnregisterDeviceHaveBeenCalled(false)
+                .setShouldBackEndUnregisterDeviceBeSuccessful(false)
+                .setShouldRegistrationHaveSucceeded(true);
+        testParams.run(this);
+    }
+
+    public void testAppUpdatedAndDifferentGcmRegistrationIdWasReturnedButBackEndRegistrationIdWasNotSaved() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
                 .setGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setBackEndDeviceRegistrationIdInPreferences(null)
@@ -413,6 +486,10 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setBackEndDeviceRegistrationIdFromServer(TEST_BACK_END_DEVICE_REGISTRATION_ID_2)
                 .setFinalBackEndDeviceRegistrationIdInPrefs(TEST_BACK_END_DEVICE_REGISTRATION_ID_2)
+                .setReleaseUuidFromUser(TEST_RELEASE_UUID_1)
+                .setReleaseUuidInPreferences(TEST_RELEASE_UUID_1)
+                .setFinalReleaseUuidInPrefs(TEST_RELEASE_UUID_1)
+                .setShouldReleaseUuidHaveBeenSaved(true)
                 .setShouldAppVersionHaveBeenSaved(true)
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)
@@ -433,6 +510,10 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setBackEndDeviceRegistrationIdFromServer(TEST_BACK_END_DEVICE_REGISTRATION_ID_2)
                 .setFinalBackEndDeviceRegistrationIdInPrefs(TEST_BACK_END_DEVICE_REGISTRATION_ID_2)
+                .setReleaseUuidFromUser(TEST_RELEASE_UUID_1)
+                .setReleaseUuidInPreferences(TEST_RELEASE_UUID_1)
+                .setFinalReleaseUuidInPrefs(TEST_RELEASE_UUID_1)
+                .setShouldReleaseUuidHaveBeenSaved(true)
                 .setShouldAppVersionHaveBeenSaved(true)
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)
@@ -453,6 +534,10 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setBackEndDeviceRegistrationIdFromServer(TEST_BACK_END_DEVICE_REGISTRATION_ID_2)
                 .setFinalBackEndDeviceRegistrationIdInPrefs(TEST_BACK_END_DEVICE_REGISTRATION_ID_2)
+                .setReleaseUuidFromUser(TEST_RELEASE_UUID_1)
+                .setReleaseUuidInPreferences(TEST_RELEASE_UUID_1)
+                .setFinalReleaseUuidInPrefs(TEST_RELEASE_UUID_1)
+                .setShouldReleaseUuidHaveBeenSaved(true)
                 .setShouldAppVersionHaveBeenSaved(true)
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)

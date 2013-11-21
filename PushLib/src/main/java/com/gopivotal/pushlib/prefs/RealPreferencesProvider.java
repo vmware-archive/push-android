@@ -10,6 +10,7 @@ public class RealPreferencesProvider implements PreferencesProvider {
     private static final String PROPERTY_GCM_DEVICE_REGISTRATION_ID = "gcm_device_registration_id";
     private static final String PROPERTY_BACKEND_DEVICE_REGISTRATION_ID = "backend_device_registration_id";
     private static final String PROPERTY_APP_VERSION = "app_version";
+    private static final String PROPERTY_RELEASE_UUID = "release_uuid";
 
     private final Context context;
 
@@ -59,6 +60,20 @@ public class RealPreferencesProvider implements PreferencesProvider {
         final SharedPreferences prefs = getSharedPreferences();
         SharedPreferences.Editor editor = prefs.edit();
         editor.putInt(PROPERTY_APP_VERSION, appVersion);
+        editor.commit();
+    }
+
+    @Override
+    public String loadReleaseUuid() {
+        final SharedPreferences prefs = getSharedPreferences();
+        return prefs.getString(PROPERTY_RELEASE_UUID, null);
+    }
+
+    @Override
+    public void saveReleaseUuid(String releaseUuid) {
+        final SharedPreferences prefs = getSharedPreferences();
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(PROPERTY_RELEASE_UUID, releaseUuid);
         editor.commit();
     }
 

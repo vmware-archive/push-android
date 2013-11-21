@@ -4,18 +4,22 @@ public class FakePreferencesProvider implements PreferencesProvider {
 
     private String gcmDeviceRegistrationId;
     private String backEndDeviceRegistrationId;
+    private String releaseUuid;
     private int appVersion;
     private boolean wasGcmDeviceRegistrationIdSaved;
     private boolean wasBackEndDeviceRegistrationIdSaved;
     private boolean wasAppVersionSaved;
+    private boolean wasReleaseUuidSaved;
 
-    public FakePreferencesProvider(String gcmDeviceRegistrationIdToLoad, String backEndDeviceRegistrationIdToLoad, int appVersionToLoad) {
+    public FakePreferencesProvider(String gcmDeviceRegistrationIdToLoad, String backEndDeviceRegistrationIdToLoad, int appVersionToLoad, String releaseUuidToLoad) {
         this.gcmDeviceRegistrationId = gcmDeviceRegistrationIdToLoad;
         this.backEndDeviceRegistrationId = backEndDeviceRegistrationIdToLoad;
         this.appVersion = appVersionToLoad;
+        this.releaseUuid = releaseUuidToLoad;
         this.wasGcmDeviceRegistrationIdSaved = false;
         this.wasBackEndDeviceRegistrationIdSaved = false;
         this.wasAppVersionSaved = false;
+        this.wasReleaseUuidSaved = false;
     }
 
     @Override
@@ -31,6 +35,11 @@ public class FakePreferencesProvider implements PreferencesProvider {
     @Override
     public int loadAppVersion() {
         return appVersion;
+    }
+
+    @Override
+    public String loadReleaseUuid() {
+        return releaseUuid;
     }
 
     @Override
@@ -51,15 +60,27 @@ public class FakePreferencesProvider implements PreferencesProvider {
         wasAppVersionSaved = true;
     }
 
+    @Override
+    public void saveReleaseUuid(String releaseUuid) {
+        this.releaseUuid = releaseUuid;
+        wasReleaseUuidSaved = true;
+    }
+
     public boolean wasGcmDeviceRegistrationIdSaved() {
         return wasGcmDeviceRegistrationIdSaved;
     }
 
+    // TODO - use in some test
     public boolean wasBackEndDeviceRegistrationIdSaved() {
         return wasBackEndDeviceRegistrationIdSaved;
     }
 
     public boolean wasAppVersionSaved() {
         return wasAppVersionSaved;
+    }
+
+    // TODO - use in some test
+    public boolean wasReleaseUuidSaved() {
+        return wasReleaseUuidSaved;
     }
 }

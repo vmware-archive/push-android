@@ -42,6 +42,4 @@ public class FakeGcmProvider implements GcmProvider {
     public boolean wasRegisterCalled() {
         return wasRegisterCalled;
     }
-
-    // TODO - needs unregister method
 }

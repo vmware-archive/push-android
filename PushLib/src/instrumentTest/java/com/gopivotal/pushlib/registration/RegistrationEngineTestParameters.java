@@ -19,7 +19,6 @@ public class RegistrationEngineTestParameters {
 
     private static final long TEN_SECOND_TIMEOUT = 10000L;
     private static final String TEST_SENDER_ID = "TEST_SENDER_ID";
-    private static final String TEST_RELEASE_UUID = "TEST_RELEASE_UUID";
     private static final String TEST_RELEASE_SECRET = "TEST_RELEASE_SECRET";
     private static final String TEST_DEVICE_ALIAS = "TEST_DEVICE_ALIAS";
 
@@ -30,13 +29,17 @@ public class RegistrationEngineTestParameters {
     private String gcmDeviceRegistrationIdFromServer = null;
     private String backEndDeviceRegistrationIdInPrefs = null;
     private String backEndDeviceRegistrationIdFromServer;
+    private String releaseUuidInPrefs = null;
+    private String releaseUuidFromUser = null;
     private String finalGcmDeviceRegistrationIdInPrefs = null;
     private String finalBackEndDeviceRegistrationIdInPrefs = null;
+    private String finalReleaseUuidInPrefs = null;
 
     private boolean shouldGcmDeviceRegistrationSuccessful = false;
     private boolean shouldGcmDeviceRegistrationIdHaveBeenSaved = false;
     private boolean shouldGcmProviderRegisterHaveBeenCalled = false;
     private boolean shouldAppVersionHaveBeenSaved = false;
+    private boolean shouldReleaseUuidHaveBeenSaved = false;
     private boolean shouldBackEndDeviceRegistrationBeSuccessful = false;
     private boolean shouldBackEndRegisterHaveBeenCalled = false;
     private boolean shouldBackEndUnregisterDeviceBeSuccessful = false;
@@ -54,7 +57,7 @@ public class RegistrationEngineTestParameters {
     public void run(AndroidTestCase testCase) {
 
         final FakeGcmProvider gcmProvider = new FakeGcmProvider(gcmDeviceRegistrationIdFromServer, !shouldGcmDeviceRegistrationSuccessful);
-        final FakePreferencesProvider prefsProvider = new FakePreferencesProvider(gcmDeviceRegistrationIdInPrefs, backEndDeviceRegistrationIdInPrefs, appVersionInPrefs);
+        final FakePreferencesProvider prefsProvider = new FakePreferencesProvider(gcmDeviceRegistrationIdInPrefs, backEndDeviceRegistrationIdInPrefs, appVersionInPrefs, releaseUuidInPrefs);
         final FakeGcmRegistrationApiRequest gcmRequest = new FakeGcmRegistrationApiRequest(gcmProvider);
         final GcmRegistrationApiRequestProvider gcmRequestProvider = new GcmRegistrationApiRequestProvider(gcmRequest);
         final FakeVersionProvider versionProvider = new FakeVersionProvider(currentAppVersion);
@@ -63,7 +66,9 @@ public class RegistrationEngineTestParameters {
         final BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider = new BackEndRegistrationApiRequestProvider(dummyBackEndRegistrationApiRequest);
         final BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider = new BackEndUnregisterDeviceApiRequestProvider(dummyBackEndUnregisterDeviceApiRequest);
         final RegistrationEngine engine = new RegistrationEngine(context, gcmProvider, prefsProvider, gcmRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
-        final PushLibParameters parameters = new PushLibParameters(TEST_SENDER_ID, TEST_RELEASE_UUID, TEST_RELEASE_SECRET, TEST_DEVICE_ALIAS);
+        final PushLibParameters parameters = new PushLibParameters(TEST_SENDER_ID, releaseUuidFromUser, TEST_RELEASE_SECRET, TEST_DEVICE_ALIAS);
+
+        // TODO write tests for when SENDER_ID, RELEASE_SECRET, or DEVICE_ALIAS changes.  These scenarios may demand re-registration.
 
         engine.registerDevice(parameters, new RegistrationListener() {
 
@@ -93,8 +98,15 @@ public class RegistrationEngineTestParameters {
         testCase.assertEquals(shouldBackEndUnregisterDeviceHaveBeenCalled, dummyBackEndUnregisterDeviceApiRequest.wasUnregisterCalled());
         testCase.assertEquals(shouldAppVersionHaveBeenSaved, prefsProvider.wasAppVersionSaved());
         testCase.assertEquals(shouldGcmDeviceRegistrationIdHaveBeenSaved, prefsProvider.wasGcmDeviceRegistrationIdSaved());
+        testCase.assertEquals(shouldReleaseUuidHaveBeenSaved, prefsProvider.wasReleaseUuidSaved());
         testCase.assertEquals(finalGcmDeviceRegistrationIdInPrefs, prefsProvider.loadGcmDeviceRegistrationId());
         testCase.assertEquals(finalBackEndDeviceRegistrationIdInPrefs, prefsProvider.loadBackEndDeviceRegistrationId());
+        testCase.assertEquals(finalReleaseUuidInPrefs, prefsProvider.loadReleaseUuid());
+    }
+
+    public RegistrationEngineTestParameters setReleaseUuidFromUser(String id) {
+        releaseUuidFromUser = id;
+        return this;
     }
 
     public RegistrationEngineTestParameters setGcmDeviceRegistrationIdInPreferences(String id) {
@@ -104,6 +116,11 @@ public class RegistrationEngineTestParameters {
 
     public RegistrationEngineTestParameters setBackEndDeviceRegistrationIdInPreferences(String id) {
         backEndDeviceRegistrationIdInPrefs = id;
+        return this;
+    }
+
+    public RegistrationEngineTestParameters setReleaseUuidInPreferences(String id) {
+        releaseUuidInPrefs = id;
         return this;
     }
 
@@ -144,8 +161,13 @@ public class RegistrationEngineTestParameters {
         return this;
     }
 
+    public RegistrationEngineTestParameters setFinalReleaseUuidInPrefs(String id) {
+        finalReleaseUuidInPrefs = id;
+        return this;
+    }
+
     public RegistrationEngineTestParameters setShouldGcmDeviceRegistrationIdHaveBeenSaved(boolean b) {
-        this.shouldGcmDeviceRegistrationIdHaveBeenSaved = b;
+        shouldGcmDeviceRegistrationIdHaveBeenSaved = b;
         return this;
     }
 
@@ -160,12 +182,12 @@ public class RegistrationEngineTestParameters {
     }
 
     public RegistrationEngineTestParameters setShouldBackEndUnregisterDeviceHaveBeenCalled(boolean b) {
-        this.shouldBackEndUnregisterDeviceHaveBeenCalled = b;
+        shouldBackEndUnregisterDeviceHaveBeenCalled = b;
         return this;
     }
 
     public RegistrationEngineTestParameters setShouldBackEndUnregisterDeviceBeSuccessful(boolean b) {
-        this.shouldBackEndUnregisterDeviceBeSuccessful = b;
+        shouldBackEndUnregisterDeviceBeSuccessful = b;
         return this;
     }
 
@@ -174,4 +196,8 @@ public class RegistrationEngineTestParameters {
         return this;
     }
 
+    public RegistrationEngineTestParameters setShouldReleaseUuidHaveBeenSaved(boolean b) {
+        shouldReleaseUuidHaveBeenSaved = b;
+        return this;
+    }
 }

@@ -13,4 +13,8 @@ public interface PreferencesProvider {
     int loadAppVersion();
 
     void saveAppVersion(int appVersion);
+
+    String loadReleaseUuid();
+
+    void saveReleaseUuid(String releaseUuid);
 }

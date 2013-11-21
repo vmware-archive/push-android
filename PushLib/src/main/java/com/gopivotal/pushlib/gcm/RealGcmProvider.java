@@ -37,6 +37,4 @@ public class RealGcmProvider implements GcmProvider {
         }
         return true;
     }
-
-    // TODO - needs unregister method
 }

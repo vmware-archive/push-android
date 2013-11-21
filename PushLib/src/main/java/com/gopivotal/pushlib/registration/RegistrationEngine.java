@@ -24,6 +24,7 @@ public class RegistrationEngine {
     private PreferencesProvider preferencesProvider;
     private String previousGcmDeviceRegistrationId = null;
     private String previousBackEndDeviceRegistrationId = null;
+    private String previousReleaseUuid;
     private GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider;
     private BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider;
     private BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider;
@@ -68,6 +69,7 @@ public class RegistrationEngine {
         this.versionProvider = versionProvider;
         this.previousGcmDeviceRegistrationId = preferencesProvider.loadGcmDeviceRegistrationId();
         this.previousBackEndDeviceRegistrationId = preferencesProvider.loadBackEndDeviceRegistrationId();
+        this.previousReleaseUuid = preferencesProvider.loadReleaseUuid();
     }
 
     // TODO - make this method asynchronous
@@ -84,7 +86,10 @@ public class RegistrationEngine {
                 }
             }
 
-        } else if (isBackEndRegistrationRequired()) {
+        } else if (isUnregisterDeviceWithBackEndRequired(previousGcmDeviceRegistrationId, parameters)) {
+            unregisterDeviceWithBackEnd(previousBackEndDeviceRegistrationId, previousGcmDeviceRegistrationId, parameters, listener);
+
+        } else if (isBackEndRegistrationRequired(parameters)) {
             registerDeviceWithBackEnd(previousGcmDeviceRegistrationId, parameters, listener);
 
         } else {
@@ -128,10 +133,38 @@ public class RegistrationEngine {
         return currentAppVersion != savedAppVersion;
     }
 
-    private boolean isBackEndRegistrationRequired() {
-        return (previousBackEndDeviceRegistrationId == null || previousBackEndDeviceRegistrationId.isEmpty());
+    private boolean isBackEndRegistrationRequired(PushLibParameters parameters) {
+        final boolean isPreviousGcmDeviceRegistrationIdEmpty = previousGcmDeviceRegistrationId == null || previousGcmDeviceRegistrationId.isEmpty();
+        final boolean isPreviousReleaseUuidEmpty = previousReleaseUuid == null || previousReleaseUuid.isEmpty();
+        final boolean isReleaseUuidUpdated = (isPreviousReleaseUuidEmpty && !parameters.getReleaseUuid().isEmpty()) || !parameters.getReleaseUuid().equals(previousReleaseUuid);
+        if (isPreviousGcmDeviceRegistrationIdEmpty) {
+            return true;
+        }
+        if (isPreviousReleaseUuidEmpty) {
+            return true;
+        }
+        if (isReleaseUuidUpdated) {
+            return true;
+        }
+        return false;
     }
 
+    private boolean isUnregisterDeviceWithBackEndRequired(String newGcmDeviceRegistrationId, PushLibParameters parameters) {
+        final boolean isPreviousGcmDeviceRegistrationIdEmpty = previousGcmDeviceRegistrationId == null || previousGcmDeviceRegistrationId.isEmpty();
+        final boolean isGcmDeviceRegistrationIdDifferent = isPreviousGcmDeviceRegistrationIdEmpty || !previousGcmDeviceRegistrationId.equals(newGcmDeviceRegistrationId);
+        final boolean isPreviousBackEndDeviceRegistrationIdEmpty = previousBackEndDeviceRegistrationId == null || previousBackEndDeviceRegistrationId.isEmpty();
+        final boolean isPreviousReleaseUuidEmpty = previousReleaseUuid == null || previousReleaseUuid.isEmpty();
+        final boolean isReleaseUuidUpdated = (isPreviousReleaseUuidEmpty && !parameters.getReleaseUuid().isEmpty()) || !parameters.getReleaseUuid().equals(previousReleaseUuid);
+        if (isPreviousBackEndDeviceRegistrationIdEmpty) {
+            return false;
+        }
+        if (isReleaseUuidUpdated || isGcmDeviceRegistrationIdDifferent) {
+            return true;
+        }
+        return false;
+    }
+
+    // TODO - find out why I'm not using this method anymore?
     private boolean isNewGcmDeviceRegistrationId(String gcmDeviceRegistrationId) {
         if (previousGcmDeviceRegistrationId == null && gcmDeviceRegistrationId != null) {
             return true;
@@ -167,16 +200,12 @@ public class RegistrationEngine {
                     preferencesProvider.saveAppVersion(versionProvider.getAppVersion());
                 }
 
-                if (isNewGcmDeviceRegistrationId) {
-                    if (previousGcmDeviceRegistrationId != null && previousBackEndDeviceRegistrationId != null) {
-                        unregisterDeviceWithBackEnd(previousBackEndDeviceRegistrationId, gcmDeviceRegistrationId, parameters, listener);
-                    } else {
-                        registerDeviceWithBackEnd(gcmDeviceRegistrationId, parameters, listener);
-                    }
-                } else {
-                    if (listener != null) {
-                        listener.onRegistrationComplete();
-                    }
+                if (isUnregisterDeviceWithBackEndRequired(gcmDeviceRegistrationId, parameters)) {
+                    unregisterDeviceWithBackEnd(previousBackEndDeviceRegistrationId, gcmDeviceRegistrationId, parameters, listener);
+                } else if (isNewGcmDeviceRegistrationId) {
+                    registerDeviceWithBackEnd(gcmDeviceRegistrationId, parameters, listener);
+                } else if (listener != null) {
+                    listener.onRegistrationComplete();
                 }
             }
 
@@ -199,6 +228,8 @@ public class RegistrationEngine {
 
             @Override
             public void onBackEndUnregisterDeviceSuccess() {
+                preferencesProvider.saveBackEndDeviceRegistrationId(null);
+                preferencesProvider.saveReleaseUuid(null);
                 registerDeviceWithBackEnd(gcmDeviceRegistrationId, parameters, listener);
             }
 
@@ -213,10 +244,10 @@ public class RegistrationEngine {
 
     private void registerDeviceWithBackEnd(final String gcmDeviceRegistrationId, PushLibParameters parameters, final RegistrationListener listener) {
         final BackEndRegistrationApiRequest backEndRegistrationApiRequest = backEndRegistrationApiRequestProvider.getRequest();
-        backEndRegistrationApiRequest.startDeviceRegistration(gcmDeviceRegistrationId, parameters, getBackEndRegistrationListener(listener));
+        backEndRegistrationApiRequest.startDeviceRegistration(gcmDeviceRegistrationId, parameters, getBackEndRegistrationListener(parameters, listener));
     }
 
-    private BackEndRegistrationListener getBackEndRegistrationListener(final RegistrationListener listener) {
+    private BackEndRegistrationListener getBackEndRegistrationListener(final PushLibParameters parameters, final RegistrationListener listener) {
         return new BackEndRegistrationListener() {
 
             @Override
@@ -230,12 +261,11 @@ public class RegistrationEngine {
                     return;
                 }
 
-                if (previousBackEndDeviceRegistrationId != null && previousBackEndDeviceRegistrationId.equals(backEndDeviceRegistrationId)) {
-                    Logger.i("New backEndDeviceRegistrationId from server is the same as the previous one");
-                } else {
-                    Logger.i("Saving back-end device registration ID: " + backEndDeviceRegistrationId);
-                    preferencesProvider.saveBackEndDeviceRegistrationId(backEndDeviceRegistrationId);
-                }
+                Logger.i("Saving back-end device registration ID: " + backEndDeviceRegistrationId);
+                preferencesProvider.saveBackEndDeviceRegistrationId(backEndDeviceRegistrationId);
+
+                Logger.i("Saving updated Release UUID");
+                preferencesProvider.saveReleaseUuid(parameters.getReleaseUuid());
 
                 if (listener != null) {
                     listener.onRegistrationComplete();
