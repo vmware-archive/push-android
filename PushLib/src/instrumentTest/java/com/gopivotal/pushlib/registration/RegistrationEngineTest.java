@@ -470,8 +470,8 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)
                 .setShouldBackEndRegisterHaveBeenCalled(true)
-                .setShouldBackEndUnregisterDeviceHaveBeenCalled(false)
-                .setShouldBackEndUnregisterDeviceBeSuccessful(false)
+                .setShouldBackEndUnregisterDeviceHaveBeenCalled(true)
+                .setShouldBackEndUnregisterDeviceBeSuccessful(true)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run(this);
     }
@@ -517,6 +517,30 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldAppVersionHaveBeenSaved(true)
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)
+                .setShouldBackEndRegisterHaveBeenCalled(true)
+                .setShouldBackEndUnregisterDeviceHaveBeenCalled(true)
+                .setShouldBackEndUnregisterDeviceBeSuccessful(false)
+                .setShouldRegistrationHaveSucceeded(true);
+        testParams.run(this);
+    }
+
+    public void testReleaseUuidUpdatedAndUnregisterFailed() {
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+                .setGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
+                .setBackEndDeviceRegistrationIdInPreferences(TEST_BACK_END_DEVICE_REGISTRATION_ID_1)
+                .setAppVersionInPreferences(1)
+                .setCurrentAppVersion(1)
+                .setGcmDeviceRegistrationIdFromServer(TEST_GCM_DEVICE_REGISTRATION_ID_1)
+                .setFinalGcmDeviceRegistrationIdInPreferences(TEST_GCM_DEVICE_REGISTRATION_ID_1)
+                .setBackEndDeviceRegistrationIdFromServer(TEST_BACK_END_DEVICE_REGISTRATION_ID_2)
+                .setFinalBackEndDeviceRegistrationIdInPrefs(TEST_BACK_END_DEVICE_REGISTRATION_ID_2)
+                .setReleaseUuidFromUser(TEST_RELEASE_UUID_2)
+                .setReleaseUuidInPreferences(TEST_RELEASE_UUID_1)
+                .setFinalReleaseUuidInPrefs(TEST_RELEASE_UUID_2)
+                .setShouldReleaseUuidHaveBeenSaved(true)
+                .setShouldAppVersionHaveBeenSaved(false)
+                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
+                .setShouldGcmProviderRegisterHaveBeenCalled(false)
                 .setShouldBackEndRegisterHaveBeenCalled(true)
                 .setShouldBackEndUnregisterDeviceHaveBeenCalled(true)
                 .setShouldBackEndUnregisterDeviceBeSuccessful(false)

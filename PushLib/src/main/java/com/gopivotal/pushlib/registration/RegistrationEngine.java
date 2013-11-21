@@ -137,13 +137,7 @@ public class RegistrationEngine {
         final boolean isPreviousGcmDeviceRegistrationIdEmpty = previousGcmDeviceRegistrationId == null || previousGcmDeviceRegistrationId.isEmpty();
         final boolean isPreviousReleaseUuidEmpty = previousReleaseUuid == null || previousReleaseUuid.isEmpty();
         final boolean isReleaseUuidUpdated = (isPreviousReleaseUuidEmpty && !parameters.getReleaseUuid().isEmpty()) || !parameters.getReleaseUuid().equals(previousReleaseUuid);
-        if (isPreviousGcmDeviceRegistrationIdEmpty) {
-            return true;
-        }
-        if (isPreviousReleaseUuidEmpty) {
-            return true;
-        }
-        if (isReleaseUuidUpdated) {
+        if (isPreviousGcmDeviceRegistrationIdEmpty || isPreviousReleaseUuidEmpty || isReleaseUuidUpdated) {
             return true;
         }
         return false;
@@ -162,14 +156,6 @@ public class RegistrationEngine {
             return true;
         }
         return false;
-    }
-
-    // TODO - find out why I'm not using this method anymore?
-    private boolean isNewGcmDeviceRegistrationId(String gcmDeviceRegistrationId) {
-        if (previousGcmDeviceRegistrationId == null && gcmDeviceRegistrationId != null) {
-            return true;
-        }
-        return !previousGcmDeviceRegistrationId.equals(gcmDeviceRegistrationId);
     }
 
     private void registerDeviceWithGcm(String senderId, final PushLibParameters parameters, final RegistrationListener listener) {
