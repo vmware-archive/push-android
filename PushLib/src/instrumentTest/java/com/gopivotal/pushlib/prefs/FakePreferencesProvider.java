@@ -20,8 +20,8 @@ public class FakePreferencesProvider implements PreferencesProvider {
         this.backEndDeviceRegistrationId = backEndDeviceRegistrationIdToLoad;
         this.appVersion = appVersionToLoad;
         this.releaseUuid = releaseUuidToLoad;
-        this.releaseSecret = releaseSecret;
-        this.deviceAlias = deviceAlias;
+        this.releaseSecret = releaseSecretToLoad;
+        this.deviceAlias = deviceAliasToLoad;
     }
 
     @Override

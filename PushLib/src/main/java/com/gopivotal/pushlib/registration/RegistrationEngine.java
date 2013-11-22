@@ -22,13 +22,15 @@ public class RegistrationEngine {
     private Context context;
     private GcmProvider gcmProvider;
     private PreferencesProvider preferencesProvider;
-    private String previousGcmDeviceRegistrationId = null;
-    private String previousBackEndDeviceRegistrationId = null;
-    private String previousReleaseUuid;
     private GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider;
     private BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider;
     private BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider;
     private VersionProvider versionProvider;
+    private String previousGcmDeviceRegistrationId = null;
+    private String previousBackEndDeviceRegistrationId = null;
+    private String previousReleaseUuid;
+    private String previousReleaseSecret;
+    private String previousDeviceAlias;
 
     public RegistrationEngine(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider, VersionProvider versionProvider) {
         verifyArguments(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, backEndUnregisterDeviceApiRequestProvider);
@@ -70,6 +72,8 @@ public class RegistrationEngine {
         this.previousGcmDeviceRegistrationId = preferencesProvider.loadGcmDeviceRegistrationId();
         this.previousBackEndDeviceRegistrationId = preferencesProvider.loadBackEndDeviceRegistrationId();
         this.previousReleaseUuid = preferencesProvider.loadReleaseUuid();
+        this.previousReleaseSecret = preferencesProvider.loadReleaseSecret();
+        this.previousDeviceAlias = preferencesProvider.loadDeviceAlias();
     }
 
     // TODO - make this method asynchronous
@@ -93,7 +97,6 @@ public class RegistrationEngine {
             registerDeviceWithBackEnd(previousGcmDeviceRegistrationId, parameters, listener);
 
         } else {
-
             Logger.i("Already registered with GCM and back-end");
             if (listener != null) {
                 listener.onRegistrationComplete();
@@ -123,7 +126,7 @@ public class RegistrationEngine {
         if (hasAppBeenUpdated()) {
             Logger.i("App version changed. Device registration with GCM will be required.");
             return true;
-        };
+        }
         return false;
     }
 
@@ -136,26 +139,31 @@ public class RegistrationEngine {
     private boolean isBackEndRegistrationRequired(PushLibParameters parameters) {
         final boolean isPreviousGcmDeviceRegistrationIdEmpty = previousGcmDeviceRegistrationId == null || previousGcmDeviceRegistrationId.isEmpty();
         final boolean isPreviousReleaseUuidEmpty = previousReleaseUuid == null || previousReleaseUuid.isEmpty();
-        final boolean isReleaseUuidUpdated = (isPreviousReleaseUuidEmpty && !parameters.getReleaseUuid().isEmpty()) || !parameters.getReleaseUuid().equals(previousReleaseUuid);
-        if (isPreviousGcmDeviceRegistrationIdEmpty || isPreviousReleaseUuidEmpty || isReleaseUuidUpdated) {
-            return true;
-        }
-        return false;
+        return isPreviousGcmDeviceRegistrationIdEmpty || isPreviousReleaseUuidEmpty || areRegistrationParametersUpdated(parameters);
     }
 
     private boolean isUnregisterDeviceWithBackEndRequired(String newGcmDeviceRegistrationId, PushLibParameters parameters) {
         final boolean isPreviousGcmDeviceRegistrationIdEmpty = previousGcmDeviceRegistrationId == null || previousGcmDeviceRegistrationId.isEmpty();
         final boolean isGcmDeviceRegistrationIdDifferent = isPreviousGcmDeviceRegistrationIdEmpty || !previousGcmDeviceRegistrationId.equals(newGcmDeviceRegistrationId);
         final boolean isPreviousBackEndDeviceRegistrationIdEmpty = previousBackEndDeviceRegistrationId == null || previousBackEndDeviceRegistrationId.isEmpty();
-        final boolean isPreviousReleaseUuidEmpty = previousReleaseUuid == null || previousReleaseUuid.isEmpty();
-        final boolean isReleaseUuidUpdated = (isPreviousReleaseUuidEmpty && !parameters.getReleaseUuid().isEmpty()) || !parameters.getReleaseUuid().equals(previousReleaseUuid);
         if (isPreviousBackEndDeviceRegistrationIdEmpty) {
             return false;
         }
-        if (isReleaseUuidUpdated || isGcmDeviceRegistrationIdDifferent) {
+        if (isGcmDeviceRegistrationIdDifferent || areRegistrationParametersUpdated(parameters)) {
             return true;
         }
         return false;
+    }
+
+    private boolean areRegistrationParametersUpdated(PushLibParameters parameters) {
+        final boolean isPreviousReleaseUuidEmpty = previousReleaseUuid == null || previousReleaseUuid.isEmpty();
+        final boolean isReleaseUuidUpdated = (isPreviousReleaseUuidEmpty && !parameters.getReleaseUuid().isEmpty()) || !parameters.getReleaseUuid().equals(previousReleaseUuid);
+        final boolean isPreviousReleaseSecretEmpty = previousReleaseSecret == null || previousReleaseSecret.isEmpty();
+        final boolean isReleaseSecretUpdated = (isPreviousReleaseSecretEmpty && !parameters.getReleaseSecret().isEmpty()) || !parameters.getReleaseSecret().equals(previousReleaseSecret);
+        final boolean isPreviousDeviceAliasEmpty = previousDeviceAlias == null || previousDeviceAlias.isEmpty();
+        final boolean isNewDeviceAliasEmpty = parameters.getDeviceAlias() == null || parameters.getDeviceAlias().isEmpty();
+        final boolean isDeviceAliasUpdated = (isPreviousDeviceAliasEmpty && !isNewDeviceAliasEmpty) || (!isPreviousDeviceAliasEmpty && isNewDeviceAliasEmpty) || !parameters.getDeviceAlias().equals(previousDeviceAlias);
+        return isDeviceAliasUpdated || isReleaseSecretUpdated || isReleaseUuidUpdated;
     }
 
     private void registerDeviceWithGcm(String senderId, final PushLibParameters parameters, final RegistrationListener listener) {
