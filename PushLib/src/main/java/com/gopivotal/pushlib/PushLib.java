@@ -25,9 +25,14 @@ import com.gopivotal.pushlib.version.RealVersionProvider;
 import com.gopivotal.pushlib.version.VersionProvider;
 import com.xtreme.commons.Logger;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+
 public class PushLib {
 
     private static PushLib instance;
+    private static final ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
     public static PushLib init(Context context, PushLibParameters parameters) {
         if (instance == null) {
@@ -82,7 +87,7 @@ public class PushLib {
      * @param listener Optional listener for receiving a callback after registration finishes. This callback may
      *                 be called on a background thread.
      */
-    public void startRegistration(RegistrationListener listener) {
+    public void startRegistration(final RegistrationListener listener) {
         final GcmProvider gcmProvider = new RealGcmProvider(context);
         final PreferencesProvider preferencesProvider = new RealPreferencesProvider(context);
         final GcmRegistrationApiRequest dummyGcmRegistrationApiRequest = new GcmRegistrationApiRequestImpl(context, gcmProvider);
@@ -93,7 +98,18 @@ public class PushLib {
         final BackEndUnregisterDeviceApiRequest dummyBackEndUnregisterDeviceApiRequest = new BackEndUnregisterDeviceApiRequestImpl(networkWrapper);
         final BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider = new BackEndUnregisterDeviceApiRequestProvider(dummyBackEndUnregisterDeviceApiRequest);
         final VersionProvider versionProvider = new RealVersionProvider(context);
-        final RegistrationEngine registrationEngine = new RegistrationEngine(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
-        registrationEngine.registerDevice(parameters, listener);
+        final Runnable runnable = new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    final RegistrationEngine registrationEngine = new RegistrationEngine(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
+                    registrationEngine.registerDevice(parameters, listener);
+                } catch (Exception e) {
+                    Logger.ex("PushLib registration failed", e);
+                }
+            }
+        };
+        threadPool.execute(runnable);
     }
 }

@@ -13,7 +13,6 @@ package com.gopivotal.pushlib.model;
         }
 */
 
-import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 
 public class BackEndApiRegistrationRequestData {
@@ -27,8 +26,8 @@ public class BackEndApiRegistrationRequestData {
     @SerializedName("device_alias")
     private String deviceAlias;
 
-    @SerializedName("device_type")
-    private String deviceType;
+    @SerializedName("device_manufacturer")
+    private String deviceManufacturer;
 
     @SerializedName("device_model")
     private String deviceModel;
@@ -69,12 +68,12 @@ public class BackEndApiRegistrationRequestData {
         this.deviceAlias = deviceAlias;
     }
 
-    public String getDeviceType() {
-        return deviceType;
+    public String getDeviceManufacturer() {
+        return deviceManufacturer;
     }
 
-    public void setDeviceType(String deviceType) {
-        this.deviceType = deviceType;
+    public void setDeviceManufacturer(String deviceManufacturer) {
+        this.deviceManufacturer = deviceManufacturer;
     }
 
     public String getDeviceModel() {

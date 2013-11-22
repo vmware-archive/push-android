@@ -12,7 +12,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-public class GcmRegistrationApiRequestImpl extends AsyncTask<Void, Void, String> implements GcmRegistrationApiRequest {
+public class GcmRegistrationApiRequestImpl implements GcmRegistrationApiRequest {
 
     private Context context;
     private String senderId;
@@ -41,8 +41,7 @@ public class GcmRegistrationApiRequestImpl extends AsyncTask<Void, Void, String>
     public void startRegistration(String senderId, GcmRegistrationListener listener) {
         verifyRegistrationArguments(senderId, listener);
         saveRegistrationArguments(senderId, listener);
-        // TODO - stop using a AsyncTask to implement this class since the calling mechanism will already be on its own worker thread
-        execute(null);
+        executeRegistration();
     }
 
     private void verifyRegistrationArguments(String senderId, GcmRegistrationListener listener) {
@@ -59,9 +58,7 @@ public class GcmRegistrationApiRequestImpl extends AsyncTask<Void, Void, String>
         this.listener = listener;
     }
 
-    @Override
-    protected String doInBackground(Void... v) {
-
+    private void executeRegistration() {
         try {
             final String deviceRegistrationId = gcmProvider.register(senderId);
             Logger.i("Device registered with GCM. Device registration ID:" + deviceRegistrationId);
@@ -72,7 +69,6 @@ public class GcmRegistrationApiRequestImpl extends AsyncTask<Void, Void, String>
             if (listener != null) {
                 listener.onGcmRegistrationComplete(deviceRegistrationId);
             }
-            return deviceRegistrationId;
 
         } catch (IOException ex) {
             Logger.ex("Error registering device with GCM:", ex);
@@ -82,7 +78,6 @@ public class GcmRegistrationApiRequestImpl extends AsyncTask<Void, Void, String>
             if (listener != null) {
                 listener.onGcmRegistrationFailed(ex.getLocalizedMessage());
             }
-            return null;
         }
     }
 
@@ -96,7 +91,7 @@ public class GcmRegistrationApiRequestImpl extends AsyncTask<Void, Void, String>
                 try {
                     final File externalFilesDir = context.getExternalFilesDir(null);
                     if (externalFilesDir == null) {
-                        Logger.i("Was not able to get the externalFilesDir");
+                        Logger.d("Was not able to get the externalFilesDir");
                         return;
                     }
                     final File dir = new File(externalFilesDir.getAbsolutePath() + File.separator + "pushlib");
@@ -107,7 +102,7 @@ public class GcmRegistrationApiRequestImpl extends AsyncTask<Void, Void, String>
                     pw = new PrintWriter(regIdFile);
                     pw.println(deviceRegistrationId);
                     pw.close();
-                    Logger.i("Saved registration ID to file: " + regIdFile.getAbsolutePath());
+                    Logger.d("Saved registration ID to file: " + regIdFile.getAbsolutePath());
                 } catch (Exception e) {
                     Logger.w("Was not able to save registration ID to filesystem. This error is not-fatal. " + e.getLocalizedMessage());
                 }

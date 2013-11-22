@@ -36,98 +36,91 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
     }
 
     public void startDeviceRegistration(String gcmDeviceRegistrationId, PushLibParameters parameters, BackEndRegistrationListener listener) {
-        final NetworkRequest request = getNetworkRequest(gcmDeviceRegistrationId, parameters, listener);
-        networkWrapper.getNetworkRequestLauncher().executeRequest(request);
+
+        verifyRegistrationArguments(gcmDeviceRegistrationId, listener);
+
+        final NetworkRequest request = getNetworkRequest(gcmDeviceRegistrationId, parameters);
+
+        try {
+            final NetworkResponse response = networkWrapper.getNetworkRequestLauncher().executeRequestSynchronously(request);
+            onSuccessfulNetworkRequest(response, listener);
+        } catch(Exception e) {
+            Logger.ex("Back-end device registration attempt failed", e);
+            listener.onBackEndRegistrationFailed(e.getLocalizedMessage());
+        }
     }
 
-    private NetworkRequest getNetworkRequest(String gcmDeviceRegistrationId, PushLibParameters parameters, final BackEndRegistrationListener listener) {
+    private void verifyRegistrationArguments(String gcmDeviceRegistrationId, BackEndRegistrationListener listener) {
         if (gcmDeviceRegistrationId == null) {
             throw new IllegalArgumentException("gcmDeviceRegistrationId may not be null");
         }
         if (listener == null) {
             throw new IllegalArgumentException("listener may not be null");
         }
+    }
 
-        final NetworkRequest networkRequest = new NetworkRequest(Const.BACKEND_REGISTRATION_REQUEST_URL, getNetworkRequestListener(listener));
+    private NetworkRequest getNetworkRequest(String gcmDeviceRegistrationId, PushLibParameters parameters) {
+        final NetworkRequest networkRequest = new NetworkRequest(Const.BACKEND_REGISTRATION_REQUEST_URL);
         final String bodyData = getRequestBodyData(gcmDeviceRegistrationId, parameters);
         networkRequest.setRequestType(NetworkRequest.RequestType.POST);
         networkRequest.setBodyData(bodyData);
         networkRequest.addHeaderParam("Content-Type", "application/json");
-        Logger.i("Making network request to register this device with the back-end server: " + bodyData);
+        Logger.v("Making network request to register this device with the back-end server: " + bodyData);
         return networkRequest;
     }
 
-    private NetworkRequestListener getNetworkRequestListener(final BackEndRegistrationListener listener) {
-        return new NetworkRequestListener() {
+    public void onSuccessfulNetworkRequest(NetworkResponse networkResponse, final BackEndRegistrationListener listener) {
 
-            @Override
-            public void onSuccess(NetworkResponse networkResponse) {
+        if (networkResponse == null) {
+            Logger.e("Back-end server registration failed: no networkResponse");
+            listener.onBackEndRegistrationFailed("No networkResponse from back-end server.");
+            return;
+        }
 
-                if (networkResponse == null) {
-                    Logger.e("Back-end server registration failed: no networkResponse");
-                    listener.onBackEndRegistrationFailed("No networkResponse from back-end server.");
-                    return;
-                }
+        if (networkResponse.getStatus() == null) {
+            Logger.e("Back-end server registration failed: no statusLine in networkResponse");
+            listener.onBackEndRegistrationFailed("Back-end no statusLine in networkResponse");
+            return;
+        }
 
-                if (networkResponse.getStatus() == null) {
-                    Logger.e("Back-end server registration failed: no statusLine in networkResponse");
-                    listener.onBackEndRegistrationFailed("Back-end no statusLine in networkResponse");
-                    return;
-                }
+        final int statusCode = networkResponse.getStatus().getStatusCode();
+        if (isFailureStatusCode(statusCode)) {
+            Logger.e("Back-end server registration failed: server returned HTTP status " + statusCode);
+            listener.onBackEndRegistrationFailed("Back-end server returned HTTP status " + statusCode);
+            return;
+        }
 
-                final int statusCode = networkResponse.getStatus().getStatusCode();
-                if (isFailureStatusCode(statusCode)) {
-                    Logger.e("Back-end server registration failed: server returned HTTP status " + statusCode);
-                    listener.onBackEndRegistrationFailed("Back-end server returned HTTP status " + statusCode);
-                    return;
-                }
+        final Gson gson = new Gson();
+        final String responseString;
+        try {
+            responseString = networkResponse.getResponseString();
+        } catch (IOException e) {
+            Logger.e("Back-end server registration failed: server response empty");
+            listener.onBackEndRegistrationFailed("Back-end server response empty");
+            return;
+        }
 
-                final Gson gson = new Gson();
-                final String responseString;
-                try {
-                    responseString = networkResponse.getResponseString();
-                } catch (IOException e) {
-                    Logger.e("Back-end server registration failed: server response empty");
-                    listener.onBackEndRegistrationFailed("Back-end server response empty");
-                    return;
-                }
-
-                final BackEndApiRegistrationResponseData responseData;
-                try {
-                    responseData = gson.fromJson(responseString, BackEndApiRegistrationResponseData.class);
-                    if (responseData == null) {
-                        throw new Exception("unable to parse server response");
-                    }
-                } catch (Exception e) {
-                    Logger.e("Back-end server registration failed: " + e.getLocalizedMessage());
-                    listener.onBackEndRegistrationFailed(e.getLocalizedMessage());
-                    return;
-                }
-
-                final String deviceUuid = responseData.getDeviceUuid();
-                if (deviceUuid == null || deviceUuid.isEmpty()) {
-                    Logger.e("Back-end server registration failed: did not return device_uuid");
-                    listener.onBackEndRegistrationFailed("Back-end server did not return device_uuid");
-                    return;
-                }
-
-                Logger.i("Back-end Server registration succeeded.");
-                listener.onBackEndRegistrationSuccess(deviceUuid);
+        final BackEndApiRegistrationResponseData responseData;
+        try {
+            responseData = gson.fromJson(responseString, BackEndApiRegistrationResponseData.class);
+            if (responseData == null) {
+                throw new Exception("unable to parse server response");
             }
+        } catch (Exception e) {
+            Logger.e("Back-end server registration failed: " + e.getLocalizedMessage());
+            listener.onBackEndRegistrationFailed(e.getLocalizedMessage());
+            return;
+        }
 
-            @Override
-            public void onFailure(NetworkError networkError) {
-                String reason = "Unknown failure reason";
-                if (networkError != null) {
-                    if (networkError.getException() != null) {
-                        reason = networkError.getException().getMessage();
-                    } else if (networkError.getHttpStatus() != null) {
-                        reason = "Back-end server returned HTTP status upon registration attempt " + networkError.getHttpStatus().getStatusCode();
-                    }
-                }
-                listener.onBackEndRegistrationFailed(reason);
-            }
-        };
+        final String deviceUuid = responseData.getDeviceUuid();
+        if (deviceUuid == null || deviceUuid.isEmpty()) {
+            Logger.e("Back-end server registration failed: did not return device_uuid");
+            listener.onBackEndRegistrationFailed("Back-end server did not return device_uuid");
+            return;
+        }
+
+        Logger.i("Back-end Server registration succeeded.");
+        listener.onBackEndRegistrationSuccess(deviceUuid);
     }
 
     private boolean isFailureStatusCode(int statusCode) {
@@ -149,34 +142,12 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
         } else {
             data.setDeviceAlias(parameters.getDeviceAlias());
         }
-        data.setDeviceModel(getDeviceModel());
-        data.setDeviceType("phone"); // TODO - remove
+        data.setDeviceModel(Build.MODEL);
+        data.setDeviceManufacturer(Build.MANUFACTURER);
         data.setOs("android");
         data.setOsVersion(Build.VERSION.RELEASE);
         data.setRegistrationToken(deviceRegistrationId);
         return data;
-    }
-
-    private String getDeviceModel() {
-        String manufacturer = Build.MANUFACTURER;
-        String model = Build.MODEL;
-        if (model.startsWith(manufacturer)) {
-            return capitalize(model);
-        } else {
-            return capitalize(manufacturer) + " " + model;
-        }
-    }
-
-    private String capitalize(String s) {
-        if (s == null || s.length() == 0) {
-            return "";
-        }
-        char first = s.charAt(0);
-        if (Character.isUpperCase(first)) {
-            return s;
-        } else {
-            return Character.toUpperCase(first) + s.substring(1);
-        }
     }
 
     @Override

@@ -5,8 +5,8 @@ package com.gopivotal.pushlib.model;
         "replicant_uuid": "9e60c311-f5c7-4416-aea2-d07bbc94f208",
         "secret": "3c676b20-3c49-4215-be1a-3932e3458514",
         "device_alias": "andoidtest",
-        "device_type": "phone",
-        "device_model": "meh",
+        "device_manufactur": "Phone Corp",
+        "device_model": "Ultimate Phono 1999",
         "os": "android",
         "os_version": "version",
         "registration_token": "SomeString"
@@ -26,8 +26,8 @@ public class BackEndApiRegistrationResponseData {
     @SerializedName("device_alias")
     private String deviceAlias;
 
-    @SerializedName("device_type")
-    private String deviceType;
+    @SerializedName("device_manufacturer")
+    private String deviceManufacturer;
 
     @SerializedName("device_model")
     private String deviceModel;
@@ -68,12 +68,12 @@ public class BackEndApiRegistrationResponseData {
         this.deviceAlias = deviceAlias;
     }
 
-    public String getDeviceType() {
-        return deviceType;
+    public String getDeviceManufacturer() {
+        return deviceManufacturer;
     }
 
-    public void setDeviceType(String deviceType) {
-        this.deviceType = deviceType;
+    public void setDeviceManufacturer(String deviceManufacturer) {
+        this.deviceManufacturer = deviceManufacturer;
     }
 
     public String getDeviceModel() {

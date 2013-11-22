@@ -35,11 +35,16 @@ public class BackEndUnregisterDeviceApiRequestImpl implements BackEndUnregisterD
         this.networkWrapper = networkWrapper;
     }
 
-
     @Override
     public void startUnregisterDevice(String backEndDeviceRegistrationId, BackEndUnregisterDeviceListener listener) {
         final NetworkRequest request = getNetworkRequest(backEndDeviceRegistrationId, listener);
-        networkWrapper.getNetworkRequestLauncher().executeRequest(request);
+        try {
+            final NetworkResponse networkResponse = networkWrapper.getNetworkRequestLauncher().executeRequestSynchronously(request);
+            onSuccessfulRequest(networkResponse, listener);
+        } catch(Exception e) {
+            Logger.ex("Back-end device unregistration attempt failed", e);
+            listener.onBackEndUnregisterDeviceFailed(e.getLocalizedMessage());
+        }
     }
 
     private NetworkRequest getNetworkRequest(String backEndDeviceRegistrationId, BackEndUnregisterDeviceListener listener) {
@@ -50,54 +55,35 @@ public class BackEndUnregisterDeviceApiRequestImpl implements BackEndUnregisterD
             throw new IllegalArgumentException("listener may not be null");
         }
 
-        Logger.i("Making network request to the back-end server to unregister the device ID:" + backEndDeviceRegistrationId);
-        final NetworkRequest networkRequest = new NetworkRequest(Const.BACKEND_REGISTRATION_REQUEST_URL + "/" + backEndDeviceRegistrationId, getNetworkRequestListener(listener));
+        Logger.v("Making network request to the back-end server to unregister the device ID:" + backEndDeviceRegistrationId);
+        final NetworkRequest networkRequest = new NetworkRequest(Const.BACKEND_REGISTRATION_REQUEST_URL + "/" + backEndDeviceRegistrationId);
         networkRequest.setRequestType(NetworkRequest.RequestType.DELETE);
         return networkRequest;
     }
 
-    private NetworkRequestListener getNetworkRequestListener(final BackEndUnregisterDeviceListener listener) {
-        return new NetworkRequestListener() {
+    public void onSuccessfulRequest(NetworkResponse networkResponse, BackEndUnregisterDeviceListener listener) {
 
-            @Override
-            public void onSuccess(NetworkResponse networkResponse) {
+        if (networkResponse == null) {
+            Logger.e("Back-end server unregistration failed: no networkResponse");
+            listener.onBackEndUnregisterDeviceFailed("No networkResponse from back-end server.");
+            return;
+        }
 
-                if (networkResponse == null) {
-                    Logger.e("Back-end server unregistration failed: no networkResponse");
-                    listener.onBackEndUnregisterDeviceFailed("No networkResponse from back-end server.");
-                    return;
-                }
+        if (networkResponse.getStatus() == null) {
+            Logger.e("Back-end server unregistration failed: no statusLine in networkResponse");
+            listener.onBackEndUnregisterDeviceFailed("Back-end no statusLine in networkResponse");
+            return;
+        }
 
-                if (networkResponse.getStatus() == null) {
-                    Logger.e("Back-end server unregistration failed: no statusLine in networkResponse");
-                    listener.onBackEndUnregisterDeviceFailed("Back-end no statusLine in networkResponse");
-                    return;
-                }
+        final int statusCode = networkResponse.getStatus().getStatusCode();
+        if (isFailureStatusCode(statusCode)) {
+            Logger.e("Back-end server unregistration failed: server returned HTTP status " + statusCode);
+            listener.onBackEndUnregisterDeviceFailed("Back-end server returned HTTP status " + statusCode);
+            return;
+        }
 
-                final int statusCode = networkResponse.getStatus().getStatusCode();
-                if (isFailureStatusCode(statusCode)) {
-                    Logger.e("Back-end server unregistration failed: server returned HTTP status " + statusCode);
-                    listener.onBackEndUnregisterDeviceFailed("Back-end server returned HTTP status " + statusCode);
-                    return;
-                }
-
-                Logger.i("Back-end Server device unregistration succeeded.");
-                listener.onBackEndUnregisterDeviceSuccess();
-            }
-
-            @Override
-            public void onFailure(NetworkError networkError) {
-                String reason = "Unknown failure reason";
-                if (networkError != null) {
-                    if (networkError.getException() != null) {
-                        reason = networkError.getException().getMessage();
-                    } else if (networkError.getHttpStatus() != null) {
-                        reason = "Back-end server returned HTTP status upon unregistration attempt " + networkError.getHttpStatus().getStatusCode();
-                    }
-                }
-                listener.onBackEndUnregisterDeviceFailed(reason);
-            }
-        };
+        Logger.i("Back-end Server device unregistration succeeded.");
+        listener.onBackEndUnregisterDeviceSuccess();
     }
 
     private boolean isFailureStatusCode(int statusCode) {

@@ -75,8 +75,6 @@ public class RegistrationEngineTestParameters {
         final RegistrationEngine engine = new RegistrationEngine(context, gcmProvider, prefsProvider, gcmRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
         final PushLibParameters parameters = new PushLibParameters(TEST_SENDER_ID, releaseUuidFromUser, releaseSecretFromUser, deviceAliasFromUser);
 
-        // TODO write tests for when SENDER_ID, RELEASE_SECRET, or DEVICE_ALIAS changes.  These scenarios may demand re-registration.
-
         engine.registerDevice(parameters, new RegistrationListener() {
 
             @Override
@@ -107,9 +105,13 @@ public class RegistrationEngineTestParameters {
         testCase.assertEquals(shouldAppVersionHaveBeenSaved, prefsProvider.wasAppVersionSaved());
         testCase.assertEquals(shouldGcmDeviceRegistrationIdHaveBeenSaved, prefsProvider.wasGcmDeviceRegistrationIdSaved());
         testCase.assertEquals(shouldReleaseUuidHaveBeenSaved, prefsProvider.wasReleaseUuidSaved());
+        testCase.assertEquals(shouldReleaseSecretHaveBeenSaved, prefsProvider.wasReleaseSecretSaved());
+        testCase.assertEquals(shouldDeviceAliasHaveBeenSaved, prefsProvider.wasDeviceAliasSaved());
         testCase.assertEquals(finalGcmDeviceRegistrationIdInPrefs, prefsProvider.loadGcmDeviceRegistrationId());
         testCase.assertEquals(finalBackEndDeviceRegistrationIdInPrefs, prefsProvider.loadBackEndDeviceRegistrationId());
         testCase.assertEquals(finalReleaseUuidInPrefs, prefsProvider.loadReleaseUuid());
+        testCase.assertEquals(finalReleaseSecretInPrefs, prefsProvider.loadReleaseSecret());
+        testCase.assertEquals(finalDeviceAliasInPrefs, prefsProvider.loadDeviceAlias());
     }
 
     public RegistrationEngineTestParameters setupReleaseSecret(String inPrefs, String fromUser, String finalValue, boolean shouldHaveBeenSaved) {
