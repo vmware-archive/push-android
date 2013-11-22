@@ -17,4 +17,12 @@ public interface PreferencesProvider {
     String loadReleaseUuid();
 
     void saveReleaseUuid(String releaseUuid);
+
+    String loadReleaseSecret();
+
+    void saveReleaseSecret(String releaseUuid);
+
+    String loadDeviceAlias();
+
+    void saveDeviceAlias(String deviceAlias);
 }

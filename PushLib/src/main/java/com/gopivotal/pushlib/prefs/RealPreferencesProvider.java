@@ -11,6 +11,8 @@ public class RealPreferencesProvider implements PreferencesProvider {
     private static final String PROPERTY_BACKEND_DEVICE_REGISTRATION_ID = "backend_device_registration_id";
     private static final String PROPERTY_APP_VERSION = "app_version";
     private static final String PROPERTY_RELEASE_UUID = "release_uuid";
+    private static final String PROPERTY_RELEASE_SECRET = "release_secret";
+    private static final String PROPERTY_DEVICE_ALIAS = "device_alias";
 
     private final Context context;
 
@@ -23,8 +25,7 @@ public class RealPreferencesProvider implements PreferencesProvider {
 
     @Override
     public String loadGcmDeviceRegistrationId() {
-        final SharedPreferences prefs = getSharedPreferences();
-        return prefs.getString(PROPERTY_GCM_DEVICE_REGISTRATION_ID, null);
+        return getSharedPreferences().getString(PROPERTY_GCM_DEVICE_REGISTRATION_ID, null);
     }
 
     @Override
@@ -37,8 +38,7 @@ public class RealPreferencesProvider implements PreferencesProvider {
 
     @Override
     public String loadBackEndDeviceRegistrationId() {
-        final SharedPreferences prefs = getSharedPreferences();
-        return prefs.getString(PROPERTY_BACKEND_DEVICE_REGISTRATION_ID, null);
+        return getSharedPreferences().getString(PROPERTY_BACKEND_DEVICE_REGISTRATION_ID, null);
     }
 
     @Override
@@ -51,8 +51,7 @@ public class RealPreferencesProvider implements PreferencesProvider {
 
     @Override
     public int loadAppVersion() {
-        final SharedPreferences prefs = getSharedPreferences();
-        return prefs.getInt(PROPERTY_APP_VERSION, -1);
+        return getSharedPreferences().getInt(PROPERTY_APP_VERSION, -1);
     }
 
     @Override
@@ -65,8 +64,7 @@ public class RealPreferencesProvider implements PreferencesProvider {
 
     @Override
     public String loadReleaseUuid() {
-        final SharedPreferences prefs = getSharedPreferences();
-        return prefs.getString(PROPERTY_RELEASE_UUID, null);
+        return getSharedPreferences().getString(PROPERTY_RELEASE_UUID, null);
     }
 
     @Override
@@ -74,6 +72,32 @@ public class RealPreferencesProvider implements PreferencesProvider {
         final SharedPreferences prefs = getSharedPreferences();
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(PROPERTY_RELEASE_UUID, releaseUuid);
+        editor.commit();
+    }
+
+    @Override
+    public String loadReleaseSecret() {
+        return getSharedPreferences().getString(PROPERTY_RELEASE_SECRET, null);
+    }
+
+    @Override
+    public void saveReleaseSecret(String releaseUuid) {
+        final SharedPreferences prefs = getSharedPreferences();
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(PROPERTY_RELEASE_SECRET, releaseUuid);
+        editor.commit();
+    }
+
+    @Override
+    public String loadDeviceAlias() {
+        return getSharedPreferences().getString(PROPERTY_DEVICE_ALIAS, null);
+    }
+
+    @Override
+    public void saveDeviceAlias(String deviceAlias) {
+        final SharedPreferences prefs = getSharedPreferences();
+        final SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(PROPERTY_DEVICE_ALIAS, deviceAlias);
         editor.commit();
     }
 

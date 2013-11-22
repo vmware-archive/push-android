@@ -19,8 +19,6 @@ public class RegistrationEngineTestParameters {
 
     private static final long TEN_SECOND_TIMEOUT = 10000L;
     private static final String TEST_SENDER_ID = "TEST_SENDER_ID";
-    private static final String TEST_RELEASE_SECRET = "TEST_RELEASE_SECRET";
-    private static final String TEST_DEVICE_ALIAS = "TEST_DEVICE_ALIAS";
 
     private final Context context;
     private final DelayedLoop delayedLoop;
@@ -31,16 +29,24 @@ public class RegistrationEngineTestParameters {
     private String backEndDeviceRegistrationIdFromServer;
     private String releaseUuidInPrefs = null;
     private String releaseUuidFromUser = null;
+    private String releaseSecretInPrefs = null;
+    private String releaseSecretFromUser = "S";
+    private String deviceAliasInPrefs = null;
+    private String deviceAliasFromUser = "S";
     private String finalGcmDeviceRegistrationIdInPrefs = null;
     private String finalBackEndDeviceRegistrationIdInPrefs = null;
     private String finalReleaseUuidInPrefs = null;
+    private String finalReleaseSecretInPrefs = null;
+    private String finalDeviceAliasInPrefs = null;
 
-    private boolean shouldGcmDeviceRegistrationSuccessful = false;
+    private boolean shouldGcmDeviceRegistrationBeSuccessful = false;
     private boolean shouldGcmDeviceRegistrationIdHaveBeenSaved = false;
     private boolean shouldGcmProviderRegisterHaveBeenCalled = false;
     private boolean shouldAppVersionHaveBeenSaved = false;
     private boolean shouldBackEndDeviceRegistrationHaveBeenSaved = false;
     private boolean shouldReleaseUuidHaveBeenSaved = false;
+    private boolean shouldReleaseSecretHaveBeenSaved = false;
+    private boolean shouldDeviceAliasHaveBeenSaved = false;
     private boolean shouldBackEndDeviceRegistrationBeSuccessful = false;
     private boolean shouldBackEndRegisterHaveBeenCalled = false;
     private boolean shouldBackEndUnregisterDeviceBeSuccessful = false;
@@ -57,8 +63,8 @@ public class RegistrationEngineTestParameters {
 
     public void run(AndroidTestCase testCase) {
 
-        final FakeGcmProvider gcmProvider = new FakeGcmProvider(gcmDeviceRegistrationIdFromServer, !shouldGcmDeviceRegistrationSuccessful);
-        final FakePreferencesProvider prefsProvider = new FakePreferencesProvider(gcmDeviceRegistrationIdInPrefs, backEndDeviceRegistrationIdInPrefs, appVersionInPrefs, releaseUuidInPrefs);
+        final FakeGcmProvider gcmProvider = new FakeGcmProvider(gcmDeviceRegistrationIdFromServer, !shouldGcmDeviceRegistrationBeSuccessful);
+        final FakePreferencesProvider prefsProvider = new FakePreferencesProvider(gcmDeviceRegistrationIdInPrefs, backEndDeviceRegistrationIdInPrefs, appVersionInPrefs, releaseSecretInPrefs, releaseUuidInPrefs, deviceAliasInPrefs);
         final FakeGcmRegistrationApiRequest gcmRequest = new FakeGcmRegistrationApiRequest(gcmProvider);
         final GcmRegistrationApiRequestProvider gcmRequestProvider = new GcmRegistrationApiRequestProvider(gcmRequest);
         final FakeVersionProvider versionProvider = new FakeVersionProvider(currentAppVersion);
@@ -67,7 +73,7 @@ public class RegistrationEngineTestParameters {
         final BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider = new BackEndRegistrationApiRequestProvider(dummyBackEndRegistrationApiRequest);
         final BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider = new BackEndUnregisterDeviceApiRequestProvider(dummyBackEndUnregisterDeviceApiRequest);
         final RegistrationEngine engine = new RegistrationEngine(context, gcmProvider, prefsProvider, gcmRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
-        final PushLibParameters parameters = new PushLibParameters(TEST_SENDER_ID, releaseUuidFromUser, TEST_RELEASE_SECRET, TEST_DEVICE_ALIAS);
+        final PushLibParameters parameters = new PushLibParameters(TEST_SENDER_ID, releaseUuidFromUser, releaseSecretFromUser, deviceAliasFromUser);
 
         // TODO write tests for when SENDER_ID, RELEASE_SECRET, or DEVICE_ALIAS changes.  These scenarios may demand re-registration.
 
@@ -106,65 +112,54 @@ public class RegistrationEngineTestParameters {
         testCase.assertEquals(finalReleaseUuidInPrefs, prefsProvider.loadReleaseUuid());
     }
 
-    public RegistrationEngineTestParameters setReleaseUuidFromUser(String id) {
-        releaseUuidFromUser = id;
+    public RegistrationEngineTestParameters setupReleaseSecret(String inPrefs, String fromUser, String finalValue, boolean shouldHaveBeenSaved) {
+        releaseSecretInPrefs = inPrefs;
+        releaseSecretFromUser = fromUser;
+        finalReleaseSecretInPrefs = finalValue;
+        shouldReleaseSecretHaveBeenSaved = shouldHaveBeenSaved;
         return this;
     }
 
-    public RegistrationEngineTestParameters setGcmDeviceRegistrationIdInPreferences(String id) {
-        gcmDeviceRegistrationIdInPrefs = id;
+    public RegistrationEngineTestParameters setupDeviceAlias(String inPrefs, String fromUser, String finalValue, boolean shouldHaveBeenSaved) {
+        deviceAliasInPrefs = inPrefs;
+        deviceAliasFromUser = fromUser;
+        finalDeviceAliasInPrefs = finalValue;
+        shouldDeviceAliasHaveBeenSaved = shouldHaveBeenSaved;
         return this;
     }
 
-    public RegistrationEngineTestParameters setBackEndDeviceRegistrationIdInPreferences(String id) {
-        backEndDeviceRegistrationIdInPrefs = id;
+    public RegistrationEngineTestParameters setupReleaseUuid(String inPrefs, String fromUser, String finalValue, boolean shouldHaveBeenSaved) {
+        releaseUuidInPrefs = inPrefs;
+        releaseUuidFromUser = fromUser;
+        finalReleaseUuidInPrefs = finalValue;
+        shouldReleaseUuidHaveBeenSaved = shouldHaveBeenSaved;
         return this;
     }
 
-    public RegistrationEngineTestParameters setReleaseUuidInPreferences(String id) {
-        releaseUuidInPrefs = id;
+    public RegistrationEngineTestParameters setupGcmDeviceRegistrationId(String inPrefs, String fromServer, String finalValue) {
+        gcmDeviceRegistrationIdInPrefs = inPrefs;
+        gcmDeviceRegistrationIdFromServer = fromServer;
+        finalGcmDeviceRegistrationIdInPrefs = finalValue;
+        shouldGcmDeviceRegistrationBeSuccessful = fromServer != null;
         return this;
     }
 
-    public RegistrationEngineTestParameters setAppVersionInPreferences(int ver) {
-        appVersionInPrefs = ver;
+    public RegistrationEngineTestParameters setupBackEndDeviceRegistrationId(String inPrefs, String fromServer, String finalValue) {
+        backEndDeviceRegistrationIdInPrefs = inPrefs;
+        backEndDeviceRegistrationIdFromServer = fromServer;
+        shouldBackEndDeviceRegistrationBeSuccessful = fromServer != null;
+        finalBackEndDeviceRegistrationIdInPrefs = finalValue;
         return this;
     }
 
-    public RegistrationEngineTestParameters setCurrentAppVersion(int ver) {
-        currentAppVersion = ver;
-        return this;
-    }
-
-    public RegistrationEngineTestParameters setGcmDeviceRegistrationIdFromServer(String id) {
-        gcmDeviceRegistrationIdFromServer = id;
-        shouldGcmDeviceRegistrationSuccessful = id != null;
-        return this;
-    }
-
-    public RegistrationEngineTestParameters setBackEndDeviceRegistrationIdFromServer(String id) {
-        backEndDeviceRegistrationIdFromServer = id;
-        shouldBackEndDeviceRegistrationBeSuccessful = id != null;
+    public RegistrationEngineTestParameters setupAppVersion(int versionInPrefs, int currentVersion) {
+        appVersionInPrefs = versionInPrefs;
+        currentAppVersion = currentVersion;
         return this;
     }
 
     public RegistrationEngineTestParameters setShouldRegistrationHaveSucceeded(boolean b) {
         shouldRegistrationHaveSucceeded = b;
-        return this;
-    }
-
-    public RegistrationEngineTestParameters setFinalGcmDeviceRegistrationIdInPreferences(String id) {
-        finalGcmDeviceRegistrationIdInPrefs = id;
-        return this;
-    }
-
-    public RegistrationEngineTestParameters setFinalBackEndDeviceRegistrationIdInPrefs(String id) {
-        finalBackEndDeviceRegistrationIdInPrefs = id;
-        return this;
-    }
-
-    public RegistrationEngineTestParameters setFinalReleaseUuidInPrefs(String id) {
-        finalReleaseUuidInPrefs = id;
         return this;
     }
 
@@ -195,11 +190,6 @@ public class RegistrationEngineTestParameters {
 
     public RegistrationEngineTestParameters setShouldAppVersionHaveBeenSaved(boolean b) {
         shouldAppVersionHaveBeenSaved = b;
-        return this;
-    }
-
-    public RegistrationEngineTestParameters setShouldReleaseUuidHaveBeenSaved(boolean b) {
-        shouldReleaseUuidHaveBeenSaved = b;
         return this;
     }
 
