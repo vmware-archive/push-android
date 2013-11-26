@@ -1,7 +1,6 @@
 package com.gopivotal.pushlib;
 
 import android.content.Context;
-import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,12 +11,11 @@ import java.util.List;
 
 public class LogAdapter extends BaseAdapter {
 
-    private final List<Pair<String, String>> messages;
+    private final List<LogItem> messages;
     private final LayoutInflater inflater;
-    private int[] rowColours = new int[]{0xffdddeff, 0xffaabbdd};
 
-    public LogAdapter(Context context, List<Pair<String, String>> messages) {
-        this.messages = messages;
+    public LogAdapter(Context context, List<LogItem> logItems) {
+        this.messages = logItems;
         this.inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     }
 
@@ -43,10 +41,14 @@ public class LogAdapter extends BaseAdapter {
             convertView.setTag(new ViewHolder(convertView));
         }
         final ViewHolder viewHolder = (ViewHolder) convertView.getTag();
-        final Pair<String, String> pair = (Pair<String, String>) getItem(position);
-        viewHolder.timestampView.setText(pair.first);
-        viewHolder.messageView.setText(pair.second);
-        convertView.setBackgroundColor(rowColours[position % rowColours.length]);
+        final LogItem logItem = (LogItem) getItem(position);
+        viewHolder.timestampView.setText(logItem.timestamp);
+        viewHolder.messageView.setText(logItem.message);
+        int rowColour = logItem.baseRowColour;
+        if (position % 2 == 0) {
+            rowColour -= 0x00111111;
+        }
+        convertView.setBackgroundColor(rowColour | 0xff000000);
         return convertView;
     }
 

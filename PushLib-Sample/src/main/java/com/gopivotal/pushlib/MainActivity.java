@@ -9,11 +9,7 @@ import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.widget.ArrayAdapter;
-import android.widget.BaseAdapter;
 import android.widget.ListView;
-import android.widget.ScrollView;
-import android.widget.TextView;
 
 import com.gopivotal.pushlib.registration.RegistrationListener;
 import com.gopivotal.pushlib.util.Const;
@@ -24,7 +20,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -34,21 +29,23 @@ public class MainActivity extends ActionBarActivity {
     private static final String DEVICE_ALIAS = "android_test_device_alias";
 
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("hh:mm:ss.SSS");
-    private static List<Pair<String, String>> listItems = new ArrayList<Pair<String, String>>();
+    private static List<LogItem> logItems = new ArrayList<LogItem>();
     private ListView listView;
     private LogAdapter adapter;
     private PushLib pushLib;
+    private int[] baseRowColours = new int[] {0xddeeff, 0xddffee, 0xffeedd};
+    private int currentBaseRowColour = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        adapter = new LogAdapter(getApplicationContext(), listItems);
+        adapter = new LogAdapter(getApplicationContext(), logItems);
         listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(adapter);
         listView.setDividerHeight(0);
         PushLibLogger.setListener(getLogListener());
-        if (listItems.isEmpty()) {
+        if (logItems.isEmpty()) {
             addLogMessage("Press the \"Register\" button to attempt registration");
         }
     }
@@ -64,7 +61,8 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void startRegistration() {
-        queueLogMessage("Starting registration...");
+        updateCurrentBaseRowColour();
+        addLogMessage("Starting registration...");
 
         final PushLibParameters parameters = new PushLibParameters(GCM_SENDER_ID, RELEASE_UUID, RELEASE_SECRET, DEVICE_ALIAS);
         pushLib = PushLib.init(this, parameters);
@@ -106,9 +104,14 @@ public class MainActivity extends ActionBarActivity {
 
     private void addLogMessage(String message) {
         final String timestamp = dateFormatter.format(new Date());
-        listItems.add(new Pair<String, String>(timestamp, message));
+        final LogItem logItem = new LogItem(timestamp, message, baseRowColours[currentBaseRowColour]);
+        logItems.add(logItem);
         adapter.notifyDataSetChanged();
-        listView.setSelection(listItems.size() - 1);
+        listView.setSelection(logItems.size() - 1);
+    }
+
+    private void updateCurrentBaseRowColour() {
+        currentBaseRowColour = (currentBaseRowColour + 1) % baseRowColours.length;
     }
 
     @Override
@@ -133,19 +136,21 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             public void onClickResult(int result) {
-                final SharedPreferences.Editor editor = getSharedPreferences(Const.TAG_NAME, Context.MODE_PRIVATE).edit();
-                if (result == ClearRegistrationDialogFragment.CLEAR_REGISTRATIONS_FROM_GCM || result == ClearRegistrationDialogFragment.CLEAR_REGISTRATIONS_FROM_BOTH) {
-                    addLogMessage("Clearing device registration from GCM");
-                    editor.remove("gcm_device_registration_id");
+                if (result != ClearRegistrationDialogFragment.CLEAR_REGISTRATIONS_CANCELLED) {
+                    final SharedPreferences.Editor editor = getSharedPreferences(Const.TAG_NAME, Context.MODE_PRIVATE).edit();
+                    if (result == ClearRegistrationDialogFragment.CLEAR_REGISTRATIONS_FROM_GCM || result == ClearRegistrationDialogFragment.CLEAR_REGISTRATIONS_FROM_BOTH) {
+                        addLogMessage("Clearing device registration from GCM");
+                        editor.remove("gcm_device_registration_id");
+                    }
+                    if (result == ClearRegistrationDialogFragment.CLEAR_REGISTRATIONS_FROM_BACK_END || result == ClearRegistrationDialogFragment.CLEAR_REGISTRATIONS_FROM_BOTH) {
+                        addLogMessage("Clearing device registration from the back-end");
+                        editor.remove("app_version");
+                        editor.remove("release_uuid");
+                        editor.remove("release_secret");
+                        editor.remove("device_alias");
+                    }
+                    editor.commit();
                 }
-                if (result == ClearRegistrationDialogFragment.CLEAR_REGISTRATIONS_FROM_BACK_END || result == ClearRegistrationDialogFragment.CLEAR_REGISTRATIONS_FROM_BOTH) {
-                    addLogMessage("Clearing device registration from the back-end");
-                    editor.remove("app_version");
-                    editor.remove("release_uuid");
-                    editor.remove("release_secret");
-                    editor.remove("device_alias");
-                }
-                editor.commit();
             }
         });
         dialog.show(getSupportFragmentManager(), "ClearRegistrationDialogFragment");
