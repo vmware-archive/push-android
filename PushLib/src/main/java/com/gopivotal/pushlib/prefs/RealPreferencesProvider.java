@@ -7,6 +7,8 @@ import com.gopivotal.pushlib.util.Const;
 
 public class RealPreferencesProvider implements PreferencesProvider {
 
+    // If you add or change any of these strings, then please also update their copies in the
+    // sample app's MainActivity::clearRegistration method.
     private static final String PROPERTY_GCM_DEVICE_REGISTRATION_ID = "gcm_device_registration_id";
     private static final String PROPERTY_BACKEND_DEVICE_REGISTRATION_ID = "backend_device_registration_id";
     private static final String PROPERTY_APP_VERSION = "app_version";

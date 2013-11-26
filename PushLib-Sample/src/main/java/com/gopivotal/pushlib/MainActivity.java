@@ -3,6 +3,7 @@ package com.gopivotal.pushlib;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
 import android.util.Pair;
 import android.view.Menu;
@@ -128,8 +129,25 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void clearRegistration() {
-        addLogMessage("Clearing device registration.");
-        final SharedPreferences prefs = getSharedPreferences(Const.TAG_NAME, Context.MODE_PRIVATE);
-        prefs.edit().clear().commit();
+        DialogFragment dialog = new ClearRegistrationDialogFragment(new ClearRegistrationDialogFragment.Listener() {
+
+            @Override
+            public void onClickResult(int result) {
+                final SharedPreferences.Editor editor = getSharedPreferences(Const.TAG_NAME, Context.MODE_PRIVATE).edit();
+                if (result == ClearRegistrationDialogFragment.CLEAR_REGISTRATIONS_FROM_GCM || result == ClearRegistrationDialogFragment.CLEAR_REGISTRATIONS_FROM_BOTH) {
+                    addLogMessage("Clearing device registration from GCM");
+                    editor.remove("gcm_device_registration_id");
+                }
+                if (result == ClearRegistrationDialogFragment.CLEAR_REGISTRATIONS_FROM_BACK_END || result == ClearRegistrationDialogFragment.CLEAR_REGISTRATIONS_FROM_BOTH) {
+                    addLogMessage("Clearing device registration from the back-end");
+                    editor.remove("app_version");
+                    editor.remove("release_uuid");
+                    editor.remove("release_secret");
+                    editor.remove("device_alias");
+                }
+                editor.commit();
+            }
+        });
+        dialog.show(getSupportFragmentManager(), "ClearRegistrationDialogFragment");
     }
 }
