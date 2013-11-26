@@ -21,13 +21,12 @@ import com.gopivotal.pushlib.prefs.RealPreferencesProvider;
 import com.gopivotal.pushlib.registration.RegistrationEngine;
 import com.gopivotal.pushlib.registration.RegistrationListener;
 import com.gopivotal.pushlib.util.Const;
+import com.gopivotal.pushlib.util.PushLibLogger;
 import com.gopivotal.pushlib.version.RealVersionProvider;
 import com.gopivotal.pushlib.version.VersionProvider;
-import com.xtreme.commons.Logger;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.ThreadPoolExecutor;
 
 public class PushLib {
 
@@ -48,8 +47,8 @@ public class PushLib {
         verifyArguments(context, parameters);
         saveArguments(context, parameters);
 
-        if (!Logger.isSetup()) {
-            Logger.setup(context, Const.TAG_NAME);
+        if (!PushLibLogger.isSetup()) {
+            PushLibLogger.setup(context, Const.TAG_NAME);
         }
     }
 
@@ -106,7 +105,7 @@ public class PushLib {
                     final RegistrationEngine registrationEngine = new RegistrationEngine(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
                     registrationEngine.registerDevice(parameters, listener);
                 } catch (Exception e) {
-                    Logger.ex("PushLib registration failed", e);
+                    PushLibLogger.ex("PushLib registration failed", e);
                 }
             }
         };

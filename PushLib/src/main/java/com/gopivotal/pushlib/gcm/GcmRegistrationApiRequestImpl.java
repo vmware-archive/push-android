@@ -2,13 +2,11 @@ package com.gopivotal.pushlib.gcm;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.os.AsyncTask;
 
+import com.gopivotal.pushlib.util.PushLibLogger;
 import com.xtreme.commons.DebugUtil;
-import com.xtreme.commons.Logger;
 
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 
@@ -61,7 +59,7 @@ public class GcmRegistrationApiRequestImpl implements GcmRegistrationApiRequest 
     private void executeRegistration() {
         try {
             final String deviceRegistrationId = gcmProvider.register(senderId);
-            Logger.i("Device registered with GCM. Device registration ID:" + deviceRegistrationId);
+            PushLibLogger.i("Device registered with GCM. Device registration ID:" + deviceRegistrationId);
 
             saveDeviceRegistrationIdToFilesystem(deviceRegistrationId);
 
@@ -71,7 +69,7 @@ public class GcmRegistrationApiRequestImpl implements GcmRegistrationApiRequest 
             }
 
         } catch (IOException ex) {
-            Logger.ex("Error registering device with GCM:", ex);
+            PushLibLogger.ex("Error registering device with GCM:", ex);
             // If there is an error, don't just keep trying to register.
             // Require the user to click a button again, or perform
             // exponential back-off.
@@ -91,7 +89,7 @@ public class GcmRegistrationApiRequestImpl implements GcmRegistrationApiRequest 
                 try {
                     final File externalFilesDir = context.getExternalFilesDir(null);
                     if (externalFilesDir == null) {
-                        Logger.d("Was not able to get the externalFilesDir");
+                        PushLibLogger.d("Was not able to get the externalFilesDir");
                         return;
                     }
                     final File dir = new File(externalFilesDir.getAbsolutePath() + File.separator + "pushlib");
@@ -102,9 +100,9 @@ public class GcmRegistrationApiRequestImpl implements GcmRegistrationApiRequest 
                     pw = new PrintWriter(regIdFile);
                     pw.println(deviceRegistrationId);
                     pw.close();
-                    Logger.d("Saved registration ID to file: " + regIdFile.getAbsolutePath());
+                    PushLibLogger.d("Saved registration ID to file: " + regIdFile.getAbsolutePath());
                 } catch (Exception e) {
-                    Logger.w("Was not able to save registration ID to filesystem. This error is not-fatal. " + e.getLocalizedMessage());
+                    PushLibLogger.w("Was not able to save registration ID to filesystem. This error is not-fatal. " + e.getLocalizedMessage());
                 }
             }
         }

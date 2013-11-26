@@ -1,11 +1,29 @@
 package com.gopivotal.pushlib;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Pair;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
+import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.ListView;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import com.gopivotal.pushlib.registration.RegistrationListener;
+import com.gopivotal.pushlib.util.Const;
+import com.gopivotal.pushlib.util.PushLibLogger;
 import com.xtreme.commons.ThreadUtil;
+
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class MainActivity extends ActionBarActivity {
 
@@ -14,18 +32,38 @@ public class MainActivity extends ActionBarActivity {
     private static final String RELEASE_SECRET = "d0bbddc5-f534-4a95-bb49-d90c8e8aec8c";
     private static final String DEVICE_ALIAS = "android_test_device_alias";
 
-    TextView outputText;
-
+    private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("hh:mm:ss.SSS");
+    private static List<Pair<String, String>> listItems = new ArrayList<Pair<String, String>>();
+    private ListView listView;
+    private LogAdapter adapter;
     private PushLib pushLib;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        adapter = new LogAdapter(getApplicationContext(), listItems);
+        listView = (ListView) findViewById(R.id.listView);
+        listView.setAdapter(adapter);
+        listView.setDividerHeight(0);
+        PushLibLogger.setListener(getLogListener());
+        if (listItems.isEmpty()) {
+            addLogMessage("Press the \"Register\" button to attempt registration");
+        }
+    }
 
-        outputText = (TextView) findViewById(R.id.outputText);
-        outputText.setText("");
-        addLogMessage("Starting registration...");
+    @Override
+    protected void onResume() {
+        super.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+    }
+
+    private void startRegistration() {
+        queueLogMessage("Starting registration...");
 
         final PushLibParameters parameters = new PushLibParameters(GCM_SENDER_ID, RELEASE_UUID, RELEASE_SECRET, DEVICE_ALIAS);
         pushLib = PushLib.init(this, parameters);
@@ -33,27 +71,65 @@ public class MainActivity extends ActionBarActivity {
 
             @Override
             public void onRegistrationComplete() {
-                addLogMessage("Registration successful.");
+                queueLogMessage("Registration successful.");
             }
 
             @Override
             public void onRegistrationFailed(String reason) {
-                addLogMessage("Registration failed. Reason is '" + reason + "'.");
+                queueLogMessage("Registration failed. Reason is '" + reason + "'.");
             }
         });
     }
 
-    private void addLogMessage(final String message) {
+    public PushLibLogger.Listener getLogListener() {
+        return new PushLibLogger.Listener() {
+            @Override
+            public void onLogMessage(String message) {
+                addLogMessage(message);
+            }
+        };
+    }
+
+    private void queueLogMessage(final String message) {
         if (ThreadUtil.isUIThread()) {
-            outputText.setText(outputText.getText() + message + "\n");
+            addLogMessage(message);
         } else {
             ThreadUtil.getUIThreadHandler().post(new Runnable() {
                 @Override
                 public void run() {
-                    outputText.setText(outputText.getText() + message + "\n");
+                    addLogMessage(message);
                 }
             });
         }
     }
 
+    private void addLogMessage(String message) {
+        final String timestamp = dateFormatter.format(new Date());
+        listItems.add(new Pair<String, String>(timestamp, message));
+        adapter.notifyDataSetChanged();
+        listView.setSelection(listItems.size() - 1);
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        final MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (item.getItemId() == R.id.action_register) {
+            startRegistration();
+        } else if (item.getItemId() == R.id.action_clear_registration) {
+            clearRegistration();
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void clearRegistration() {
+        addLogMessage("Clearing device registration.");
+        final SharedPreferences prefs = getSharedPreferences(Const.TAG_NAME, Context.MODE_PRIVATE);
+        prefs.edit().clear().commit();
+    }
 }
