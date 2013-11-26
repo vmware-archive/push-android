@@ -3,7 +3,7 @@ package com.gopivotal.pushlib.backend;
 import android.os.Build;
 
 import com.google.gson.Gson;
-import com.gopivotal.pushlib.PushLibParameters;
+import com.gopivotal.pushlib.RegistrationParameters;
 import com.gopivotal.pushlib.model.BackEndApiRegistrationRequestData;
 import com.gopivotal.pushlib.model.BackEndApiRegistrationResponseData;
 import com.gopivotal.pushlib.network.NetworkWrapper;
@@ -33,7 +33,7 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
         this.networkWrapper = networkWrapper;
     }
 
-    public void startDeviceRegistration(String gcmDeviceRegistrationId, PushLibParameters parameters, BackEndRegistrationListener listener) {
+    public void startDeviceRegistration(String gcmDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener) {
 
         verifyRegistrationArguments(gcmDeviceRegistrationId, listener);
 
@@ -57,7 +57,7 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
         }
     }
 
-    private NetworkRequest getNetworkRequest(String gcmDeviceRegistrationId, PushLibParameters parameters) {
+    private NetworkRequest getNetworkRequest(String gcmDeviceRegistrationId, RegistrationParameters parameters) {
         final NetworkRequest networkRequest = new NetworkRequest(Const.BACKEND_REGISTRATION_REQUEST_URL);
         final String bodyData = getRequestBodyData(gcmDeviceRegistrationId, parameters);
         networkRequest.setRequestType(NetworkRequest.RequestType.POST);
@@ -125,13 +125,13 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
         return (statusCode < 200 || statusCode >= 300);
     }
 
-    private String getRequestBodyData(String deviceRegistrationId, PushLibParameters parameters) {
+    private String getRequestBodyData(String deviceRegistrationId, RegistrationParameters parameters) {
         final BackEndApiRegistrationRequestData data = getBackEndApiRegistrationRequestData(deviceRegistrationId, parameters);
         final Gson gson = new Gson();
         return gson.toJson(data);
     }
 
-    private BackEndApiRegistrationRequestData getBackEndApiRegistrationRequestData(String deviceRegistrationId, PushLibParameters parameters) {
+    private BackEndApiRegistrationRequestData getBackEndApiRegistrationRequestData(String deviceRegistrationId, RegistrationParameters parameters) {
         final BackEndApiRegistrationRequestData data = new BackEndApiRegistrationRequestData();
         data.setReleaseUuid(parameters.getReleaseUuid());
         data.setSecret(parameters.getReleaseSecret());

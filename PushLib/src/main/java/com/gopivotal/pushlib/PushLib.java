@@ -33,49 +33,35 @@ public class PushLib {
     private static PushLib instance;
     private static final ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
-    public static PushLib init(Context context, PushLibParameters parameters) {
+    public static PushLib init(Context context) {
         if (instance == null) {
-            instance = new PushLib(context, parameters);
+            instance = new PushLib(context);
         }
         return instance;
     }
 
     private Context context;
-    private PushLibParameters parameters;
 
-    private PushLib(Context context, PushLibParameters parameters) {
-        verifyArguments(context, parameters);
-        saveArguments(context, parameters);
+    private PushLib(Context context) {
+        verifyArguments(context);
+        saveArguments(context);
 
         if (!PushLibLogger.isSetup()) {
             PushLibLogger.setup(context, Const.TAG_NAME);
         }
     }
 
-    private void saveArguments(Context context, PushLibParameters parameters) {
+    private void saveArguments(Context context) {
         if (!(context instanceof Application)) {
             this.context = context.getApplicationContext();
         } else {
             this.context = context;
         }
-        this.parameters = parameters;
     }
 
-    private void verifyArguments(Context context, PushLibParameters parameters) {
+    private void verifyArguments(Context context) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
-        }
-        if (parameters == null) {
-            throw new IllegalArgumentException("parameters may not be null");
-        }
-        if (parameters.getGcmSenderId() == null || parameters.getGcmSenderId().isEmpty()) {
-            throw new IllegalArgumentException("parameters.senderId may not be null or empty");
-        }
-        if (parameters.getReleaseUuid() == null || parameters.getReleaseUuid().isEmpty()) {
-            throw new IllegalArgumentException("parameters.releaseUuid may not be null or empty");
-        }
-        if (parameters.getReleaseSecret() == null || parameters.getReleaseSecret().isEmpty()) {
-            throw new IllegalArgumentException("parameters.releaseSecret may not be null or empty");
         }
     }
 
@@ -86,7 +72,8 @@ public class PushLib {
      * @param listener Optional listener for receiving a callback after registration finishes. This callback may
      *                 be called on a background thread.
      */
-    public void startRegistration(final RegistrationListener listener) {
+    public void startRegistration(final RegistrationParameters parameters, final RegistrationListener listener) {
+        verifyRegistrationArguments(parameters);
         final GcmProvider gcmProvider = new RealGcmProvider(context);
         final PreferencesProvider preferencesProvider = new RealPreferencesProvider(context);
         final GcmRegistrationApiRequest dummyGcmRegistrationApiRequest = new GcmRegistrationApiRequestImpl(context, gcmProvider);
@@ -110,5 +97,20 @@ public class PushLib {
             }
         };
         threadPool.execute(runnable);
+    }
+
+    private void verifyRegistrationArguments(RegistrationParameters parameters) {
+        if (parameters == null) {
+            throw new IllegalArgumentException("parameters may not be null");
+        }
+        if (parameters.getGcmSenderId() == null || parameters.getGcmSenderId().isEmpty()) {
+            throw new IllegalArgumentException("parameters.senderId may not be null or empty");
+        }
+        if (parameters.getReleaseUuid() == null || parameters.getReleaseUuid().isEmpty()) {
+            throw new IllegalArgumentException("parameters.releaseUuid may not be null or empty");
+        }
+        if (parameters.getReleaseSecret() == null || parameters.getReleaseSecret().isEmpty()) {
+            throw new IllegalArgumentException("parameters.releaseSecret may not be null or empty");
+        }
     }
 }

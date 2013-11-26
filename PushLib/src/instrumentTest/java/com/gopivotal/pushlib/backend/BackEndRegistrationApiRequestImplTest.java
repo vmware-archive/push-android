@@ -2,7 +2,7 @@ package com.gopivotal.pushlib.backend;
 
 import android.test.AndroidTestCase;
 
-import com.gopivotal.pushlib.PushLibParameters;
+import com.gopivotal.pushlib.RegistrationParameters;
 import com.gopivotal.pushlib.network.MockNetworkWrapper;
 import com.xtreme.commons.testing.DelayedLoop;
 import com.xtreme.network.MockNetworkRequestLauncher;
@@ -254,7 +254,7 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
         };
     }
 
-    private PushLibParameters getParameters() {
-        return new PushLibParameters(TEST_SENDER_ID, TEST_RELEASE_UUID, TEST_RELEASE_SECRET, TEST_DEVICE_ALIAS);
+    private RegistrationParameters getParameters() {
+        return new RegistrationParameters(TEST_SENDER_ID, TEST_RELEASE_UUID, TEST_RELEASE_SECRET, TEST_DEVICE_ALIAS);
     }
 }

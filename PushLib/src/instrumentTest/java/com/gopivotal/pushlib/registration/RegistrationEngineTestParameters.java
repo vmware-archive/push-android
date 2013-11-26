@@ -3,7 +3,7 @@ package com.gopivotal.pushlib.registration;
 import android.content.Context;
 import android.test.AndroidTestCase;
 
-import com.gopivotal.pushlib.PushLibParameters;
+import com.gopivotal.pushlib.RegistrationParameters;
 import com.gopivotal.pushlib.backend.BackEndRegistrationApiRequestProvider;
 import com.gopivotal.pushlib.backend.BackEndUnregisterDeviceApiRequestProvider;
 import com.gopivotal.pushlib.backend.FakeBackEndRegistrationApiRequest;
@@ -73,7 +73,7 @@ public class RegistrationEngineTestParameters {
         final BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider = new BackEndRegistrationApiRequestProvider(dummyBackEndRegistrationApiRequest);
         final BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider = new BackEndUnregisterDeviceApiRequestProvider(dummyBackEndUnregisterDeviceApiRequest);
         final RegistrationEngine engine = new RegistrationEngine(context, gcmProvider, prefsProvider, gcmRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
-        final PushLibParameters parameters = new PushLibParameters(TEST_SENDER_ID, releaseUuidFromUser, releaseSecretFromUser, deviceAliasFromUser);
+        final RegistrationParameters parameters = new RegistrationParameters(TEST_SENDER_ID, releaseUuidFromUser, releaseSecretFromUser, deviceAliasFromUser);
 
         engine.registerDevice(parameters, new RegistrationListener() {
 

@@ -2,7 +2,6 @@ package com.gopivotal.pushlib.backend;
 
 import android.test.AndroidTestCase;
 
-import com.gopivotal.pushlib.PushLibParameters;
 import com.gopivotal.pushlib.network.MockNetworkWrapper;
 import com.xtreme.commons.testing.DelayedLoop;
 import com.xtreme.network.MockNetworkRequestLauncher;

@@ -1,0 +1,54 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <PreferenceCategory
+        android:title="@string/pref_title_gcm_settings">
+
+        <EditTextPreference
+            android:key="test_gcm_sender_id"
+            android:title="@string/pref_title_gcm_sender_id"
+            android:defaultValue="@string/pref_default_gcm_sender_id"
+            android:persistent="true"
+            android:selectAllOnFocus="true"
+            android:inputType="text"
+            android:singleLine="true"
+            android:maxLines="1"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_title_backend_settings">
+
+        <EditTextPreference
+            android:key="test_release_uuid"
+            android:title="@string/pref_title_release_uuid"
+            android:defaultValue="@string/pref_default_release_uuid"
+            android:persistent="true"
+            android:selectAllOnFocus="true"
+            android:inputType="text"
+            android:singleLine="true"
+            android:maxLines="1"/>
+
+        <EditTextPreference
+            android:key="test_release_secret"
+            android:title="@string/pref_title_release_secret"
+            android:defaultValue="@string/pref_default_release_secret"
+            android:persistent="true"
+            android:selectAllOnFocus="true"
+            android:inputType="text"
+            android:singleLine="true"
+            android:maxLines="1"/>
+
+
+        <EditTextPreference
+            android:key="test_device_alias"
+            android:title="@string/pref_title_device_alias"
+            android:defaultValue="@string/pref_default_device_alias"
+            android:persistent="true"
+            android:selectAllOnFocus="true"
+            android:inputType="text"
+            android:singleLine="true"
+            android:maxLines="1"/>
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

@@ -13,4 +13,9 @@
           android:title="@string/action_clear_registration"
           app:showAsAction="always|withText" />
 
+    <item android:id="@+id/action_edit_registration_parameters"
+          android:icon="@drawable/ic_menu_preferences"
+          android:title="@string/action_edit_registration_parameters"
+          app:showAsAction="always|withText" />
+
 </menu>

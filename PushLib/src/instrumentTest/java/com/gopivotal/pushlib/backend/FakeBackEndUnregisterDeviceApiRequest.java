@@ -1,7 +1,5 @@
 package com.gopivotal.pushlib.backend;
 
-import com.gopivotal.pushlib.PushLibParameters;
-
 public class FakeBackEndUnregisterDeviceApiRequest implements BackEndUnregisterDeviceApiRequest {
 
     private final FakeBackEndUnregisterDeviceApiRequest originatingRequest;

@@ -3,11 +3,12 @@ package com.gopivotal.pushlib;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
-import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -34,12 +35,14 @@ public class MainActivity extends ActionBarActivity {
     private static final String DEVICE_ALIAS = "android_test_device_alias";
 
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("hh:mm:ss.SSS");
+    private static final int[] baseRowColours = new int[] {0xddeeff, 0xddffee, 0xffeedd};
+
+    private static int currentBaseRowColour = 0;
     private static List<LogItem> logItems = new ArrayList<LogItem>();
+
     private ListView listView;
     private LogAdapter adapter;
     private PushLib pushLib;
-    private int[] baseRowColours = new int[] {0xddeeff, 0xddffee, 0xffeedd};
-    private int currentBaseRowColour = 0;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -55,6 +58,7 @@ public class MainActivity extends ActionBarActivity {
         if (logItems.isEmpty()) {
             addLogMessage("Press the \"Register\" button to attempt registration");
         }
+        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
     }
 
     @Override
@@ -71,9 +75,16 @@ public class MainActivity extends ActionBarActivity {
         updateCurrentBaseRowColour();
         addLogMessage("Starting registration...");
 
-        final PushLibParameters parameters = new PushLibParameters(GCM_SENDER_ID, RELEASE_UUID, RELEASE_SECRET, DEVICE_ALIAS);
-        pushLib = PushLib.init(this, parameters);
-        pushLib.startRegistration(new RegistrationListener() {
+        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        final String gcmSenderId = prefs.getString(SettingsActivity.PREFERENCE_GCM_SENDER_ID, null);
+        final String releaseUuid = prefs.getString(SettingsActivity.PREFERENCE_RELEASE_UUID, null);
+        final String releaseSecret = prefs.getString(SettingsActivity.PREFERENCE_RELEASE_SECRET, null);
+        final String deviceAlias = prefs.getString(SettingsActivity.PREFERENCE_DEVICE_ALIAS, null);
+        addLogMessage("GCM Sender ID: '" + gcmSenderId + "'\nRelease UUID: '" + releaseUuid + "'\nRelease Secret: '" + releaseSecret + "'\nDevice Alias: '" + deviceAlias + "'");
+
+        final RegistrationParameters parameters = new RegistrationParameters(gcmSenderId, releaseUuid, releaseSecret, deviceAlias);
+        pushLib = PushLib.init(this);
+        pushLib.startRegistration(parameters, new RegistrationListener() {
 
             @Override
             public void onRegistrationComplete() {
@@ -134,6 +145,8 @@ public class MainActivity extends ActionBarActivity {
             startRegistration();
         } else if (item.getItemId() == R.id.action_clear_registration) {
             clearRegistration();
+        } else if (item.getItemId() == R.id.action_edit_registration_parameters) {
+            editRegistrationParameters();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -185,5 +198,10 @@ public class MainActivity extends ActionBarActivity {
                 return true;
             }
         };
+    }
+
+    private void editRegistrationParameters() {
+        final Intent intent = new Intent(this, SettingsActivity.class);
+        startActivity(intent);
     }
 }

@@ -5,5 +5,17 @@
     <string name="hello_world">Hello world!</string>
     <string name="action_register">Register</string>
     <string name="action_clear_registration">Clear Reg.</string>
+    <string name="action_edit_registration_parameters">Edit Reg. Params.</string>
+    <string name="title_activity_settings">Settings</string>
+    <string name="pref_title_gcm_settings">GCM Settings</string>
+    <string name="pref_title_gcm_sender_id">GCM Sender ID</string>
+    <string name="pref_default_gcm_sender_id">816486687340</string>
+    <string name="pref_title_backend_settings">Back-End Settings</string>
+    <string name="pref_title_release_uuid">Release UUID</string>
+    <string name="pref_default_release_uuid">efb9783f-a160-4cec-abf1-b51bca14b991</string>
+    <string name="pref_title_release_secret">Release Secret</string>
+    <string name="pref_default_release_secret">d0bbddc5-f534-4a95-bb49-d90c8e8aec8c</string>
+    <string name="pref_title_device_alias">Device Alias</string>
+    <string name="pref_default_device_alias">android_test_device_alias</string>
 
 </resources>

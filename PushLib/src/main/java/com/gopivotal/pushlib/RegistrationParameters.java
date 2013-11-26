@@ -3,7 +3,7 @@ package com.gopivotal.pushlib;
 /**
  * Parameters used to initialize the Cloud Foundry Push SDK
  */
-public class PushLibParameters {
+public class RegistrationParameters {
 
     private final String gcmSenderId;
     private final String releaseUuid;
@@ -20,7 +20,7 @@ public class PushLibParameters {
      *                      of devices, in push or notification campaigns. Optional. Set to `null` if not you are
      *                      not using the deviceAlias.
      */
-    public PushLibParameters(String gcmSenderId, String releaseUuid, String releaseSecret, String deviceAlias) {
+    public RegistrationParameters(String gcmSenderId, String releaseUuid, String releaseSecret, String deviceAlias) {
         this.gcmSenderId = gcmSenderId;
         this.releaseUuid = releaseUuid;
         this.releaseSecret = releaseSecret;
@@ -41,5 +41,33 @@ public class PushLibParameters {
 
     public String getDeviceAlias() {
         return deviceAlias;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+
+        if (o == null) {
+            return false;
+        }
+
+        if (!(o instanceof RegistrationParameters)) {
+            return false;
+        }
+
+        RegistrationParameters other = (RegistrationParameters)o;
+        if (!other.gcmSenderId.equals(gcmSenderId)) {
+            return false;
+        }
+        if (!other.releaseUuid.equals(releaseUuid)) {
+            return false;
+        }
+        if (!other.releaseSecret.equals(releaseSecret)) {
+            return false;
+        }
+        if (!other.deviceAlias.equals(deviceAlias)) {
+            return false;
+        }
+
+        return true;
     }
 }
