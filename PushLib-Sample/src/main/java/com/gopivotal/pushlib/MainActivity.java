@@ -1,5 +1,7 @@
 package com.gopivotal.pushlib;
 
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
@@ -9,7 +11,10 @@ import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
 
 import com.gopivotal.pushlib.registration.RegistrationListener;
 import com.gopivotal.pushlib.util.Const;
@@ -44,6 +49,8 @@ public class MainActivity extends ActionBarActivity {
         listView = (ListView) findViewById(R.id.listView);
         listView.setAdapter(adapter);
         listView.setDividerHeight(0);
+        listView.setLongClickable(true);
+        listView.setOnItemLongClickListener(getLogItemLongClickListener());
         PushLibLogger.setListener(getLogListener());
         if (logItems.isEmpty()) {
             addLogMessage("Press the \"Register\" button to attempt registration");
@@ -132,7 +139,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void clearRegistration() {
-        DialogFragment dialog = new ClearRegistrationDialogFragment(new ClearRegistrationDialogFragment.Listener() {
+        final DialogFragment dialog = new ClearRegistrationDialogFragment(new ClearRegistrationDialogFragment.Listener() {
 
             @Override
             public void onClickResult(int result) {
@@ -154,5 +161,29 @@ public class MainActivity extends ActionBarActivity {
             }
         });
         dialog.show(getSupportFragmentManager(), "ClearRegistrationDialogFragment");
+    }
+
+    public AdapterView.OnItemLongClickListener getLogItemLongClickListener() {
+        return new AdapterView.OnItemLongClickListener() {
+
+            @Override
+            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+                final LogItem logItem = (LogItem) adapter.getItem(position);
+                final DialogFragment dialog = new LogItemLongClickDialogFragment(new LogItemLongClickDialogFragment.Listener() {
+
+                    @Override
+                    public void onClickResult(int result) {
+                        if (result == LogItemLongClickDialogFragment.COPY) {
+                            final ClipData clipData = ClipData.newPlainText("log item text", logItem.message);
+                            final ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                            clipboardManager.setPrimaryClip(clipData);
+                            Toast.makeText(MainActivity.this, "Log item copied to clipboard", Toast.LENGTH_SHORT).show();
+                        }
+                    }
+                });
+                dialog.show(getSupportFragmentManager(), "LogItemLongClickDialogFragment");
+                return true;
+            }
+        };
     }
 }
