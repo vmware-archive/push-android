@@ -8,9 +8,10 @@ import android.support.v4.app.DialogFragment;
 
 public class LogItemLongClickDialogFragment extends DialogFragment{
 
-    public static final CharSequence[] items = new CharSequence[] {"Copy", "Cancel"};
-    public static final int COPY = 0;
-    public static final int CANCELLED = 1;
+    public static final CharSequence[] items = new CharSequence[] {"Copy Item", "Copy All Items", "Cancel"};
+    public static final int COPY_ITEM = 0;
+    public static final int COPY_ALL_ITEMS = 1;
+    public static final int CANCELLED = 2;
     private final Listener listener;
 
     public interface Listener {
@@ -25,6 +26,14 @@ public class LogItemLongClickDialogFragment extends DialogFragment{
     public Dialog onCreateDialog(Bundle savedInstanceState) {
         final AlertDialog.Builder builder = new AlertDialog.Builder(getActivity());
         builder.setTitle("Log Item");
+        builder.setOnCancelListener(new DialogInterface.OnCancelListener() {
+            @Override
+            public void onCancel(DialogInterface dialog) {
+                if (listener != null) {
+                    listener.onClickResult(CANCELLED);
+                }
+            }
+        });
         builder.setItems(items, new DialogInterface.OnClickListener() {
 
             @Override

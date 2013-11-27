@@ -5,6 +5,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
@@ -20,11 +21,13 @@ import android.widget.Toast;
 import com.gopivotal.pushlib.registration.RegistrationListener;
 import com.gopivotal.pushlib.util.Const;
 import com.gopivotal.pushlib.util.PushLibLogger;
+import com.xtreme.commons.StringUtil;
 import com.xtreme.commons.ThreadUtil;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 public class MainActivity extends ActionBarActivity {
@@ -43,6 +46,7 @@ public class MainActivity extends ActionBarActivity {
     private ListView listView;
     private LogAdapter adapter;
     private PushLib pushLib;
+    private String logAsString;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -180,17 +184,23 @@ public class MainActivity extends ActionBarActivity {
         return new AdapterView.OnItemLongClickListener() {
 
             @Override
-            public boolean onItemLongClick(AdapterView<?> parent, View view, int position, long id) {
+            public boolean onItemLongClick(AdapterView<?> parent, final View view, int position, long id) {
+                final int originalViewBackgroundColour = adapter.getBackgroundColour(position);
                 final LogItem logItem = (LogItem) adapter.getItem(position);
                 final DialogFragment dialog = new LogItemLongClickDialogFragment(new LogItemLongClickDialogFragment.Listener() {
 
                     @Override
                     public void onClickResult(int result) {
-                        if (result == LogItemLongClickDialogFragment.COPY) {
+                        if (result == LogItemLongClickDialogFragment.COPY_ITEM) {
                             final ClipData clipData = ClipData.newPlainText("log item text", logItem.message);
                             final ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                             clipboardManager.setPrimaryClip(clipData);
                             Toast.makeText(MainActivity.this, "Log item copied to clipboard", Toast.LENGTH_SHORT).show();
+                        } else if (result == LogItemLongClickDialogFragment.COPY_ALL_ITEMS) {
+                            final ClipData clipData = ClipData.newPlainText("log text", getLogAsString());
+                            final ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                            clipboardManager.setPrimaryClip(clipData);
+                            Toast.makeText(MainActivity.this, "Log copied to clipboard", Toast.LENGTH_SHORT).show();
                         }
                     }
                 });
@@ -203,5 +213,13 @@ public class MainActivity extends ActionBarActivity {
     private void editRegistrationParameters() {
         final Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
+    }
+
+    public String getLogAsString() {
+        final List<String> lines = new LinkedList<String>();
+        for (final LogItem logItem : logItems) {
+            lines.add(logItem.timestamp + "\t" + logItem.message);
+        }
+        return StringUtil.join(lines, "\n");
     }
 }

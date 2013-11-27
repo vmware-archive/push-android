@@ -34,6 +34,15 @@ public class LogAdapter extends BaseAdapter {
         return position;
     }
 
+    public int getBackgroundColour(int position) {
+        final LogItem logItem = (LogItem) getItem(position);
+        int rowColour = logItem.baseRowColour;
+        if (position % 2 == 0) {
+            rowColour -= 0x00111111;
+        }
+        return rowColour | 0xff000000;
+    }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
@@ -44,11 +53,7 @@ public class LogAdapter extends BaseAdapter {
         final LogItem logItem = (LogItem) getItem(position);
         viewHolder.timestampView.setText(logItem.timestamp);
         viewHolder.messageView.setText(logItem.message);
-        int rowColour = logItem.baseRowColour;
-        if (position % 2 == 0) {
-            rowColour -= 0x00111111;
-        }
-        convertView.setBackgroundColor(rowColour | 0xff000000);
+        convertView.setBackgroundColor(getBackgroundColour(position));
         return convertView;
     }
 
