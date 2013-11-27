@@ -14,6 +14,10 @@ public interface PreferencesProvider {
 
     void saveAppVersion(int appVersion);
 
+    String loadGcmSenderId();
+
+    void saveGcmSenderId(String gcmSenderId);
+
     String loadReleaseUuid();
 
     void saveReleaseUuid(String releaseUuid);

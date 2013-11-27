@@ -12,6 +12,7 @@ public class RealPreferencesProvider implements PreferencesProvider {
     private static final String PROPERTY_GCM_DEVICE_REGISTRATION_ID = "gcm_device_registration_id";
     private static final String PROPERTY_BACKEND_DEVICE_REGISTRATION_ID = "backend_device_registration_id";
     private static final String PROPERTY_APP_VERSION = "app_version";
+    private static final String PROPERTY_GCM_SENDER_ID = "gcm_sender_id";
     private static final String PROPERTY_RELEASE_UUID = "release_uuid";
     private static final String PROPERTY_RELEASE_SECRET = "release_secret";
     private static final String PROPERTY_DEVICE_ALIAS = "device_alias";
@@ -61,6 +62,19 @@ public class RealPreferencesProvider implements PreferencesProvider {
         final SharedPreferences prefs = getSharedPreferences();
         SharedPreferences.Editor editor = prefs.edit();
         editor.putInt(PROPERTY_APP_VERSION, appVersion);
+        editor.commit();
+    }
+
+    @Override
+    public String loadGcmSenderId() {
+        return getSharedPreferences().getString(PROPERTY_GCM_SENDER_ID, null);
+    }
+
+    @Override
+    public void saveGcmSenderId(String gcmSenderId) {
+        final SharedPreferences prefs = getSharedPreferences();
+        SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(PROPERTY_GCM_SENDER_ID, gcmSenderId);
         editor.commit();
     }
 

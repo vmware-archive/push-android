@@ -28,6 +28,7 @@ public class RegistrationEngine {
     private VersionProvider versionProvider;
     private String previousGcmDeviceRegistrationId = null;
     private String previousBackEndDeviceRegistrationId = null;
+    private String previousGcmSenderId;
     private String previousReleaseUuid;
     private String previousReleaseSecret;
     private String previousDeviceAlias;
@@ -71,6 +72,7 @@ public class RegistrationEngine {
         this.versionProvider = versionProvider;
         this.previousGcmDeviceRegistrationId = preferencesProvider.loadGcmDeviceRegistrationId();
         this.previousBackEndDeviceRegistrationId = preferencesProvider.loadBackEndDeviceRegistrationId();
+        this.previousGcmSenderId = preferencesProvider.loadGcmSenderId();
         this.previousReleaseUuid = preferencesProvider.loadReleaseUuid();
         this.previousReleaseSecret = preferencesProvider.loadReleaseSecret();
         this.previousDeviceAlias = preferencesProvider.loadDeviceAlias();
@@ -80,7 +82,7 @@ public class RegistrationEngine {
 
         verifyRegistrationArguments(parameters);
 
-        if (isGcmRegistrationRequired()) {
+        if (isGcmRegistrationRequired(parameters)) {
             if (gcmProvider.isGooglePlayServicesInstalled(context)) {
                 registerDeviceWithGcm(parameters.getGcmSenderId(), parameters, listener);
             } else {
@@ -118,14 +120,30 @@ public class RegistrationEngine {
         }
     }
 
-    private boolean isGcmRegistrationRequired() {
+    private boolean isGcmRegistrationRequired(RegistrationParameters parameters) {
         if (previousGcmDeviceRegistrationId == null || previousGcmDeviceRegistrationId.isEmpty()) {
             PushLibLogger.v("previousGcmDeviceRegistrationId is empty. Device registration with GCM will be required");
+            return true;
+        }
+        if (isUpdatedGcmSenderId(parameters)) {
+            PushLibLogger.v("previousGcmSenderId is empty or gcmSenderId has been updated. Device registration with GCM will be required");
             return true;
         }
         if (hasAppBeenUpdated()) {
             PushLibLogger.v("App version changed. Device registration with GCM will be required.");
             return true;
+        }
+        return false;
+    }
+
+    private boolean isUpdatedGcmSenderId(RegistrationParameters parameters) {
+        final boolean isPreviousGcmSenderIdEmpty = previousGcmSenderId == null || previousGcmSenderId.isEmpty();
+        if (isPreviousGcmSenderIdEmpty) {
+            return true;
+        }
+        if (!parameters.getGcmSenderId().equals(previousGcmSenderId)) {
+            return true;
+            // TODO - do we need to unregister from GCM here?
         }
         return false;
     }
@@ -202,6 +220,10 @@ public class RegistrationEngine {
                 } else {
                     preferencesProvider.saveGcmDeviceRegistrationId(gcmDeviceRegistrationId);
                     isNewGcmDeviceRegistrationId = true;
+                }
+
+                if (isUpdatedGcmSenderId(parameters)) {
+                    preferencesProvider.saveGcmSenderId(parameters.getGcmSenderId());
                 }
 
                 if (previousGcmDeviceRegistrationId == null || hasAppBeenUpdated()) {
