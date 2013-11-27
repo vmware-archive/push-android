@@ -58,17 +58,13 @@ public class MainActivity extends ActionBarActivity {
         if (logItems.isEmpty()) {
             addLogMessage("Press the \"Register\" button to attempt registration");
         }
-        PreferenceManager.setDefaultValues(this, R.xml.pref_general, false);
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
+        scrollToBottom();
     }
 
     private void startRegistration() {
@@ -125,6 +121,10 @@ public class MainActivity extends ActionBarActivity {
         final LogItem logItem = new LogItem(timestamp, message, baseRowColours[currentBaseRowColour]);
         logItems.add(logItem);
         adapter.notifyDataSetChanged();
+        scrollToBottom();
+    }
+
+    private void scrollToBottom() {
         listView.setSelection(logItems.size() - 1);
     }
 
