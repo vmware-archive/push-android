@@ -164,11 +164,12 @@ public class MainActivity extends ActionBarActivity {
                     final SharedPreferences.Editor editor = getSharedPreferences(Const.TAG_NAME, Context.MODE_PRIVATE).edit();
                     if (result == ClearRegistrationDialogFragment.CLEAR_REGISTRATIONS_FROM_GCM || result == ClearRegistrationDialogFragment.CLEAR_REGISTRATIONS_FROM_BOTH) {
                         addLogMessage("Clearing device registration from GCM");
+                        editor.remove("gcm_sender_id");
                         editor.remove("gcm_device_registration_id");
+                        editor.remove("app_version");
                     }
                     if (result == ClearRegistrationDialogFragment.CLEAR_REGISTRATIONS_FROM_BACK_END || result == ClearRegistrationDialogFragment.CLEAR_REGISTRATIONS_FROM_BOTH) {
                         addLogMessage("Clearing device registration from the back-end");
-                        editor.remove("app_version");
                         editor.remove("release_uuid");
                         editor.remove("release_secret");
                         editor.remove("device_alias");

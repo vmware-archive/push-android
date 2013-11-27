@@ -13,6 +13,10 @@ import com.gopivotal.pushlib.gcm.GcmProvider;
 import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequest;
 import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequestProvider;
 import com.gopivotal.pushlib.gcm.GcmRegistrationListener;
+import com.gopivotal.pushlib.gcm.GcmUnregistrationApiRequest;
+import com.gopivotal.pushlib.gcm.GcmUnregistrationApiRequestImpl;
+import com.gopivotal.pushlib.gcm.GcmUnregistrationApiRequestProvider;
+import com.gopivotal.pushlib.gcm.GcmUnregistrationListener;
 import com.gopivotal.pushlib.prefs.PreferencesProvider;
 import com.gopivotal.pushlib.util.PushLibLogger;
 import com.gopivotal.pushlib.version.VersionProvider;
@@ -23,6 +27,7 @@ public class RegistrationEngine {
     private GcmProvider gcmProvider;
     private PreferencesProvider preferencesProvider;
     private GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider;
+    private GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider;
     private BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider;
     private BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider;
     private VersionProvider versionProvider;
@@ -33,12 +38,12 @@ public class RegistrationEngine {
     private String previousReleaseSecret;
     private String previousDeviceAlias;
 
-    public RegistrationEngine(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider, VersionProvider versionProvider) {
-        verifyArguments(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, backEndUnregisterDeviceApiRequestProvider);
-        saveArguments(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, backEndUnregisterDeviceApiRequestProvider);
+    public RegistrationEngine(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider, VersionProvider versionProvider) {
+        verifyArguments(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, backEndUnregisterDeviceApiRequestProvider);
+        saveArguments(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, backEndUnregisterDeviceApiRequestProvider);
     }
 
-    private void verifyArguments(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, VersionProvider versionProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
+    private void verifyArguments(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, VersionProvider versionProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
@@ -51,6 +56,9 @@ public class RegistrationEngine {
         if (gcmRegistrationApiRequestProvider == null) {
             throw new IllegalArgumentException("gcmRegistrationApiRequestProvider may not be null");
         }
+        if (gcmUnregistrationApiRequestProvider == null) {
+            throw new IllegalArgumentException("gcmUnregistrationApiRequestProvider may not be null");
+        }
         if (backEndRegistrationApiRequestProvider == null) {
             throw new IllegalArgumentException("backEndRegistrationApiRequestProvider may not be null");
         }
@@ -62,11 +70,12 @@ public class RegistrationEngine {
         }
     }
 
-    private void saveArguments(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, VersionProvider versionProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
+    private void saveArguments(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, VersionProvider versionProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
         this.context = context;
         this.gcmProvider = gcmProvider;
         this.preferencesProvider = preferencesProvider;
         this.gcmRegistrationApiRequestProvider = gcmRegistrationApiRequestProvider;
+        this.gcmUnregistrationApiRequestProvider = gcmUnregistrationApiRequestProvider;
         this.backEndRegistrationApiRequestProvider = backEndRegistrationApiRequestProvider;
         this.backEndUnregisterDeviceApiRequestProvider = backEndUnregisterDeviceApiRequestProvider;
         this.versionProvider = versionProvider;
@@ -82,9 +91,12 @@ public class RegistrationEngine {
 
         verifyRegistrationArguments(parameters);
 
-        if (isGcmRegistrationRequired(parameters)) {
+        if (!isEmptyPreviousGcmSenderId() && isUpdatedGcmSenderId(parameters)) {
+          unregisterDeviceWithGcm(parameters, listener);
+
+        } else if (isGcmRegistrationRequired(parameters)) {
             if (gcmProvider.isGooglePlayServicesInstalled(context)) {
-                registerDeviceWithGcm(parameters.getGcmSenderId(), parameters, listener);
+                registerDeviceWithGcm(parameters, listener);
             } else {
                 if (listener != null) {
                     listener.onRegistrationFailed("Google Play Services is not available");
@@ -121,12 +133,16 @@ public class RegistrationEngine {
     }
 
     private boolean isGcmRegistrationRequired(RegistrationParameters parameters) {
-        if (previousGcmDeviceRegistrationId == null || previousGcmDeviceRegistrationId.isEmpty()) {
+        if (isEmptyPreviousGcmDeviceRegistrationId()) {
             PushLibLogger.v("previousGcmDeviceRegistrationId is empty. Device registration with GCM will be required");
             return true;
         }
+        if (isEmptyPreviousGcmSenderId()) {
+            PushLibLogger.v("previousGcmSenderId is empty. Device registration with GCM will be required");
+            return true;
+        }
         if (isUpdatedGcmSenderId(parameters)) {
-            PushLibLogger.v("previousGcmSenderId is empty or gcmSenderId has been updated. Device registration with GCM will be required");
+            PushLibLogger.v("gcmSenderId has been updated. Device unregistration and re-registration with GCM will be required");
             return true;
         }
         if (hasAppBeenUpdated()) {
@@ -136,16 +152,17 @@ public class RegistrationEngine {
         return false;
     }
 
-    private boolean isUpdatedGcmSenderId(RegistrationParameters parameters) {
+    private boolean isEmptyPreviousGcmDeviceRegistrationId() {
+        return previousGcmDeviceRegistrationId == null || previousGcmDeviceRegistrationId.isEmpty();
+    }
+
+    private boolean isEmptyPreviousGcmSenderId() {
         final boolean isPreviousGcmSenderIdEmpty = previousGcmSenderId == null || previousGcmSenderId.isEmpty();
-        if (isPreviousGcmSenderIdEmpty) {
-            return true;
-        }
-        if (!parameters.getGcmSenderId().equals(previousGcmSenderId)) {
-            return true;
-            // TODO - do we need to unregister from GCM here?
-        }
-        return false;
+        return isPreviousGcmSenderIdEmpty;
+    }
+
+    private boolean isUpdatedGcmSenderId(RegistrationParameters parameters) {
+        return !parameters.getGcmSenderId().equals(previousGcmSenderId);
     }
 
     private boolean hasAppBeenUpdated() {
@@ -155,20 +172,18 @@ public class RegistrationEngine {
     }
 
     private boolean isBackEndRegistrationRequired(RegistrationParameters parameters) {
-        final boolean isPreviousGcmDeviceRegistrationIdEmpty = previousGcmDeviceRegistrationId == null || previousGcmDeviceRegistrationId.isEmpty();
         final boolean isPreviousReleaseUuidEmpty = previousReleaseUuid == null || previousReleaseUuid.isEmpty();
-        if (isPreviousGcmDeviceRegistrationIdEmpty) {
+        if (isEmptyPreviousGcmDeviceRegistrationId()) {
             PushLibLogger.v("previousGcmDeviceRegistrationId is empty. Device registration with the back-end will be required.");
         }
         if (isPreviousReleaseUuidEmpty) {
             PushLibLogger.v("previousReleaseUuid is empty. Device registration with the back-end will be required.");
         }
-        return isPreviousGcmDeviceRegistrationIdEmpty || isPreviousReleaseUuidEmpty || areRegistrationParametersUpdated(parameters);
+        return isEmptyPreviousGcmDeviceRegistrationId() || isPreviousReleaseUuidEmpty || areRegistrationParametersUpdated(parameters);
     }
 
     private boolean isUnregisterDeviceWithBackEndRequired(String newGcmDeviceRegistrationId, RegistrationParameters parameters) {
-        final boolean isPreviousGcmDeviceRegistrationIdEmpty = previousGcmDeviceRegistrationId == null || previousGcmDeviceRegistrationId.isEmpty();
-        final boolean isGcmDeviceRegistrationIdDifferent = isPreviousGcmDeviceRegistrationIdEmpty || !previousGcmDeviceRegistrationId.equals(newGcmDeviceRegistrationId);
+        final boolean isGcmDeviceRegistrationIdDifferent = isEmptyPreviousGcmDeviceRegistrationId() || !previousGcmDeviceRegistrationId.equals(newGcmDeviceRegistrationId);
         final boolean isPreviousBackEndDeviceRegistrationIdEmpty = previousBackEndDeviceRegistrationId == null || previousBackEndDeviceRegistrationId.isEmpty();
         if (isPreviousBackEndDeviceRegistrationIdEmpty) {
             PushLibLogger.v("previousBackEndDeviceRegistrationId is empty. Device will NOT have to be unregistered with the back-end.");
@@ -197,10 +212,29 @@ public class RegistrationEngine {
         return isDeviceAliasUpdated || isReleaseSecretUpdated || isReleaseUuidUpdated;
     }
 
-    private void registerDeviceWithGcm(String senderId, final RegistrationParameters parameters, final RegistrationListener listener) {
+    private void unregisterDeviceWithGcm(final RegistrationParameters parameters, final RegistrationListener listener) {
+        PushLibLogger.i("GCM Sender ID has been changed. Unregistering sender ID with GCM.");
+        final GcmUnregistrationApiRequest gcmUnregistrationApiRequest = new GcmUnregistrationApiRequestImpl(context, gcmProvider);
+        gcmUnregistrationApiRequest.startUnregistration(new GcmUnregistrationListener() {
+            @Override
+            public void onGcmUnregistrationComplete() {
+                preferencesProvider.saveGcmDeviceRegistrationId(null);
+                preferencesProvider.saveGcmSenderId(null);
+                registerDeviceWithGcm(parameters, listener);
+            }
+
+            @Override
+            public void onGcmUnregistrationFailed(String reason) {
+                // Even if we couldn't unregister from GCM we should try to register with GCM.
+                registerDeviceWithGcm(parameters, listener);
+            }
+        });
+    }
+
+    private void registerDeviceWithGcm(final RegistrationParameters parameters, final RegistrationListener listener) {
         PushLibLogger.i("Initiating device registration with GCM.");
         final GcmRegistrationApiRequest gcmRegistrationApiRequest = gcmRegistrationApiRequestProvider.getRequest();
-        gcmRegistrationApiRequest.startRegistration(senderId, new GcmRegistrationListener() {
+        gcmRegistrationApiRequest.startRegistration(parameters.getGcmSenderId(), new GcmRegistrationListener() {
 
             @Override
             public void onGcmRegistrationComplete(String gcmDeviceRegistrationId) {
@@ -213,21 +247,16 @@ public class RegistrationEngine {
                     return;
                 }
 
+                preferencesProvider.saveGcmDeviceRegistrationId(gcmDeviceRegistrationId);
+                preferencesProvider.saveGcmSenderId(parameters.getGcmSenderId());
+                preferencesProvider.saveAppVersion(versionProvider.getAppVersion());
+
                 final boolean isNewGcmDeviceRegistrationId;
                 if (previousGcmDeviceRegistrationId != null && previousGcmDeviceRegistrationId.equals(gcmDeviceRegistrationId)) {
                     PushLibLogger.v("New gcmDeviceRegistrationId from GCM is the same as the previous one.");
                     isNewGcmDeviceRegistrationId = false;
                 } else {
-                    preferencesProvider.saveGcmDeviceRegistrationId(gcmDeviceRegistrationId);
                     isNewGcmDeviceRegistrationId = true;
-                }
-
-                if (isUpdatedGcmSenderId(parameters)) {
-                    preferencesProvider.saveGcmSenderId(parameters.getGcmSenderId());
-                }
-
-                if (previousGcmDeviceRegistrationId == null || hasAppBeenUpdated()) {
-                    preferencesProvider.saveAppVersion(versionProvider.getAppVersion());
                 }
 
                 if (isUnregisterDeviceWithBackEndRequired(gcmDeviceRegistrationId, parameters)) {

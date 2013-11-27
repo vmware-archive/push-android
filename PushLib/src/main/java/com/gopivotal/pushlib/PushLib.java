@@ -13,6 +13,9 @@ import com.gopivotal.pushlib.gcm.GcmProvider;
 import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequest;
 import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequestImpl;
 import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequestProvider;
+import com.gopivotal.pushlib.gcm.GcmUnregistrationApiRequest;
+import com.gopivotal.pushlib.gcm.GcmUnregistrationApiRequestImpl;
+import com.gopivotal.pushlib.gcm.GcmUnregistrationApiRequestProvider;
 import com.gopivotal.pushlib.gcm.RealGcmProvider;
 import com.gopivotal.pushlib.network.NetworkWrapper;
 import com.gopivotal.pushlib.network.NetworkWrapperImpl;
@@ -78,6 +81,8 @@ public class PushLib {
         final PreferencesProvider preferencesProvider = new RealPreferencesProvider(context);
         final GcmRegistrationApiRequest dummyGcmRegistrationApiRequest = new GcmRegistrationApiRequestImpl(context, gcmProvider);
         final GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider = new GcmRegistrationApiRequestProvider(dummyGcmRegistrationApiRequest);
+        final GcmUnregistrationApiRequest dummyGcmUnregistrationApiRequest = new GcmUnregistrationApiRequestImpl(context, gcmProvider);
+        final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(dummyGcmUnregistrationApiRequest);
         final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
         final BackEndRegistrationApiRequest dummyBackEndRegistrationApiRequest = new BackEndRegistrationApiRequestImpl(networkWrapper);
         final BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider = new BackEndRegistrationApiRequestProvider(dummyBackEndRegistrationApiRequest);
@@ -89,7 +94,7 @@ public class PushLib {
             @Override
             public void run() {
                 try {
-                    final RegistrationEngine registrationEngine = new RegistrationEngine(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
+                    final RegistrationEngine registrationEngine = new RegistrationEngine(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
                     registrationEngine.registerDevice(parameters, listener);
                 } catch (Exception e) {
                     PushLibLogger.ex("PushLib registration failed", e);

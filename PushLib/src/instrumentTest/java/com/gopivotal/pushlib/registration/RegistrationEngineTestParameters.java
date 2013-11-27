@@ -10,7 +10,9 @@ import com.gopivotal.pushlib.backend.FakeBackEndRegistrationApiRequest;
 import com.gopivotal.pushlib.backend.FakeBackEndUnregisterDeviceApiRequest;
 import com.gopivotal.pushlib.gcm.FakeGcmProvider;
 import com.gopivotal.pushlib.gcm.FakeGcmRegistrationApiRequest;
+import com.gopivotal.pushlib.gcm.FakeGcmUnregistrationApiRequest;
 import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequestProvider;
+import com.gopivotal.pushlib.gcm.GcmUnregistrationApiRequestProvider;
 import com.gopivotal.pushlib.prefs.FakePreferencesProvider;
 import com.gopivotal.pushlib.version.FakeVersionProvider;
 import com.xtreme.commons.testing.DelayedLoop;
@@ -42,8 +44,10 @@ public class RegistrationEngineTestParameters {
     private String finalDeviceAliasInPrefs = null;
 
     private boolean shouldGcmDeviceRegistrationBeSuccessful = false;
+    private boolean shouldGcmDeviceUnregistrationBeSuccessful = false;
     private boolean shouldGcmDeviceRegistrationIdHaveBeenSaved = false;
     private boolean shouldGcmProviderRegisterHaveBeenCalled = false;
+    private boolean shouldGcmProviderUnregisterHaveBeenCalled = false;
     private boolean shouldAppVersionHaveBeenSaved = false;
     private boolean shouldBackEndDeviceRegistrationHaveBeenSaved = false;
     private boolean shouldReleaseUuidHaveBeenSaved = false;
@@ -66,16 +70,18 @@ public class RegistrationEngineTestParameters {
 
     public void run(AndroidTestCase testCase) {
 
-        final FakeGcmProvider gcmProvider = new FakeGcmProvider(gcmDeviceRegistrationIdFromServer, !shouldGcmDeviceRegistrationBeSuccessful);
+        final FakeGcmProvider gcmProvider = new FakeGcmProvider(gcmDeviceRegistrationIdFromServer, !shouldGcmDeviceRegistrationBeSuccessful, !shouldGcmDeviceUnregistrationBeSuccessful);
         final FakePreferencesProvider prefsProvider = new FakePreferencesProvider(gcmDeviceRegistrationIdInPrefs, backEndDeviceRegistrationIdInPrefs, appVersionInPrefs, gcmSenderIdInPrefs, releaseUuidInPrefs, releaseSecretInPrefs, deviceAliasInPrefs);
-        final FakeGcmRegistrationApiRequest gcmRequest = new FakeGcmRegistrationApiRequest(gcmProvider);
-        final GcmRegistrationApiRequestProvider gcmRequestProvider = new GcmRegistrationApiRequestProvider(gcmRequest);
+        final FakeGcmRegistrationApiRequest gcmRegistrationApiRequest = new FakeGcmRegistrationApiRequest(gcmProvider);
+        final GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider = new GcmRegistrationApiRequestProvider(gcmRegistrationApiRequest);
+        final FakeGcmUnregistrationApiRequest gcmUnregistrationApiRequest = new FakeGcmUnregistrationApiRequest(gcmProvider);
+        final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(gcmUnregistrationApiRequest);
         final FakeVersionProvider versionProvider = new FakeVersionProvider(currentAppVersion);
         final FakeBackEndRegistrationApiRequest dummyBackEndRegistrationApiRequest = new FakeBackEndRegistrationApiRequest(backEndDeviceRegistrationIdFromServer, shouldBackEndDeviceRegistrationBeSuccessful);
         final FakeBackEndUnregisterDeviceApiRequest dummyBackEndUnregisterDeviceApiRequest = new FakeBackEndUnregisterDeviceApiRequest(shouldBackEndUnregisterDeviceBeSuccessful);
         final BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider = new BackEndRegistrationApiRequestProvider(dummyBackEndRegistrationApiRequest);
         final BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider = new BackEndUnregisterDeviceApiRequestProvider(dummyBackEndUnregisterDeviceApiRequest);
-        final RegistrationEngine engine = new RegistrationEngine(context, gcmProvider, prefsProvider, gcmRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
+        final RegistrationEngine engine = new RegistrationEngine(context, gcmProvider, prefsProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
         final RegistrationParameters parameters = new RegistrationParameters(gcmSenderIdFromUser, releaseUuidFromUser, releaseSecretFromUser, deviceAliasFromUser);
 
         engine.registerDevice(parameters, new RegistrationListener() {
@@ -102,6 +108,7 @@ public class RegistrationEngineTestParameters {
 
         testCase.assertTrue(delayedLoop.isSuccess());
         testCase.assertEquals(shouldGcmProviderRegisterHaveBeenCalled, gcmProvider.wasRegisterCalled());
+        testCase.assertEquals(shouldGcmProviderUnregisterHaveBeenCalled, gcmProvider.wasUnregisterCalled());
         testCase.assertEquals(shouldBackEndDeviceRegistrationHaveBeenSaved, prefsProvider.wasBackEndDeviceRegistrationIdSaved());
         testCase.assertEquals(shouldBackEndRegisterHaveBeenCalled, dummyBackEndRegistrationApiRequest.wasRegisterCalled());
         testCase.assertEquals(shouldBackEndUnregisterDeviceHaveBeenCalled, dummyBackEndUnregisterDeviceApiRequest.wasUnregisterCalled());
@@ -164,6 +171,12 @@ public class RegistrationEngineTestParameters {
         backEndDeviceRegistrationIdFromServer = fromServer;
         shouldBackEndDeviceRegistrationBeSuccessful = fromServer != null;
         finalBackEndDeviceRegistrationIdInPrefs = finalValue;
+        return this;
+    }
+
+    public RegistrationEngineTestParameters setupGcmUnregisterDevice(boolean shouldHaveBeenCalled, boolean shouldBeSuccessful) {
+        shouldGcmProviderUnregisterHaveBeenCalled = shouldHaveBeenCalled;
+        shouldGcmDeviceUnregistrationBeSuccessful = shouldBeSuccessful;
         return this;
     }
 

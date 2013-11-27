@@ -27,6 +27,11 @@ public class RealGcmProvider implements GcmProvider {
     }
 
     @Override
+    public void unregister() throws IOException {
+        gcm.unregister();
+    }
+
+    @Override
     public boolean isGooglePlayServicesInstalled(Context context) {
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
         if (resultCode != ConnectionResult.SUCCESS) {
