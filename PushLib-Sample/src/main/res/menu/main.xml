@@ -4,18 +4,28 @@
     tools:context=".MainActivity" >
     
     <item android:id="@+id/action_register"
-        android:icon="@drawable/ic_menu_play_clip"
+        android:icon="@drawable/ic_menu_add"
         android:title="@string/action_register"
         app:showAsAction="always|withText" />
+
+    <item android:id="@+id/action_send_message_via_back_end"
+          android:icon="@drawable/ic_menu_send"
+          android:title="@string/action_send_message_via_back_end"
+          app:showAsAction="always|withText" />
+
+    <item android:id="@+id/action_send_message_via_gcm"
+          android:icon="@drawable/ic_menu_play_clip"
+          android:title="@string/action_send_message_via_gcm"
+          app:showAsAction="always|withText" />
 
     <item android:id="@+id/action_clear_registration"
           android:icon="@drawable/ic_menu_delete"
           android:title="@string/action_clear_registration"
-          app:showAsAction="always|withText" />
+          app:showAsAction="withText" />
 
     <item android:id="@+id/action_edit_registration_parameters"
           android:icon="@drawable/ic_menu_preferences"
           android:title="@string/action_edit_registration_parameters"
-          app:showAsAction="always|withText" />
+          app:showAsAction="withText" />
 
 </menu>

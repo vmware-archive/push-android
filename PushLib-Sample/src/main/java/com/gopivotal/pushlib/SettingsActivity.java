@@ -14,12 +14,8 @@ import android.support.v4.app.NavUtils;
 
 public class SettingsActivity extends PreferenceActivity {
 
-    public static final String PREFERENCE_GCM_SENDER_ID = "test_gcm_sender_id";
-    public static final String PREFERENCE_RELEASE_UUID = "test_release_uuid";
-    public static final String PREFERENCE_RELEASE_SECRET = "test_release_secret";
-    public static final String PREFERENCE_DEVICE_ALIAS = "test_device_alias";
-
     private EditTextPreference gcmSenderIdPreference;
+    private EditTextPreference gcmBrowserApiPreference;
     private EditTextPreference releaseUuidPreference;
     private EditTextPreference releaseSecretPreference;
     private EditTextPreference deviceAliasPreference;
@@ -32,10 +28,11 @@ public class SettingsActivity extends PreferenceActivity {
         // NOTE - many of the method calls in this class show up as deprecated.  However, I still want my
         // app to run on old Android versions, so I'm going to leave them in here.
         addPreferencesFromResource(R.xml.preferences);
-        gcmSenderIdPreference = (EditTextPreference) getPreferenceScreen().findPreference(PREFERENCE_GCM_SENDER_ID);
-        releaseUuidPreference = (EditTextPreference) getPreferenceScreen().findPreference(PREFERENCE_RELEASE_UUID);
-        releaseSecretPreference = (EditTextPreference) getPreferenceScreen().findPreference(PREFERENCE_RELEASE_SECRET);
-        deviceAliasPreference = (EditTextPreference) getPreferenceScreen().findPreference(PREFERENCE_DEVICE_ALIAS);
+        gcmSenderIdPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.GCM_SENDER_ID);
+        gcmBrowserApiPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.GCM_BROWSER_API_KEY);
+        releaseUuidPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.RELEASE_UUID);
+        releaseSecretPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.RELEASE_SECRET);
+        deviceAliasPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.DEVICE_ALIAS);
         preferenceChangeListener = getPreferenceChangeListener();
     }
 
@@ -98,9 +95,10 @@ public class SettingsActivity extends PreferenceActivity {
 
     private void showCurrentPreferences() {
         final SharedPreferences prefs = getPreferenceScreen().getSharedPreferences();
-        gcmSenderIdPreference.setSummary(prefs.getString(SettingsActivity.PREFERENCE_GCM_SENDER_ID, null));
-        releaseUuidPreference.setSummary(prefs.getString(SettingsActivity.PREFERENCE_RELEASE_UUID, null));
-        releaseSecretPreference.setSummary(prefs.getString(SettingsActivity.PREFERENCE_RELEASE_SECRET, null));
-        deviceAliasPreference.setSummary(prefs.getString(SettingsActivity.PREFERENCE_DEVICE_ALIAS, null));
+        gcmSenderIdPreference.setSummary(prefs.getString(Settings.GCM_SENDER_ID, null));
+        gcmBrowserApiPreference.setSummary(prefs.getString(Settings.GCM_BROWSER_API_KEY, null));
+        releaseUuidPreference.setSummary(prefs.getString(Settings.RELEASE_UUID, null));
+        releaseSecretPreference.setSummary(prefs.getString(Settings.RELEASE_SECRET, null));
+        deviceAliasPreference.setSummary(prefs.getString(Settings.DEVICE_ALIAS, null));
     }
 }

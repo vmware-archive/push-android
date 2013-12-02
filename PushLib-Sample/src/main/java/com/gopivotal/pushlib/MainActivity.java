@@ -1,11 +1,11 @@
 package com.gopivotal.pushlib;
 
+import android.app.NotificationManager;
 import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
@@ -23,7 +23,16 @@ import com.gopivotal.pushlib.util.Const;
 import com.gopivotal.pushlib.util.PushLibLogger;
 import com.xtreme.commons.StringUtil;
 import com.xtreme.commons.ThreadUtil;
+import com.xtreme.network.NetworkError;
+import com.xtreme.network.NetworkRequest;
+import com.xtreme.network.NetworkRequestLauncher;
+import com.xtreme.network.NetworkRequestListener;
+import com.xtreme.network.NetworkResponse;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -32,13 +41,9 @@ import java.util.List;
 
 public class MainActivity extends ActionBarActivity {
 
-    private static final String GCM_SENDER_ID = "816486687340";
-    private static final String RELEASE_UUID = "efb9783f-a160-4cec-abf1-b51bca14b991";
-    private static final String RELEASE_SECRET = "d0bbddc5-f534-4a95-bb49-d90c8e8aec8c";
-    private static final String DEVICE_ALIAS = "android_test_device_alias";
-
-    private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("hh:mm:ss.SSS");
-    private static final int[] baseRowColours = new int[] {0xddeeff, 0xddffee, 0xffeedd};
+    private static final String GCM_SEND_MESSAGE_URL = "https://android.googleapis.com/gcm/send";
+    private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm:ss.SSS");
+    private static final int[] baseRowColours = new int[]{0xddeeff, 0xddffee, 0xffeedd};
 
     private static int currentBaseRowColour = 0;
     private static List<LogItem> logItems = new ArrayList<LogItem>();
@@ -58,9 +63,10 @@ public class MainActivity extends ActionBarActivity {
         listView.setDividerHeight(0);
         listView.setLongClickable(true);
         listView.setOnItemLongClickListener(getLogItemLongClickListener());
+        PushLibLogger.setup(this, Const.TAG_NAME);
         PushLibLogger.setListener(getLogListener());
         if (logItems.isEmpty()) {
-            addLogMessage("Press the \"Register\" button to attempt registration");
+            addLogMessage("Press the \"Register\" button to attempt registration.");
         }
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
     }
@@ -69,17 +75,22 @@ public class MainActivity extends ActionBarActivity {
     protected void onResume() {
         super.onResume();
         scrollToBottom();
+        clearNotifications();
+    }
+
+    private void clearNotifications() {
+        final NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.cancel(GcmIntentService.NOTIFICATION_ID);
     }
 
     private void startRegistration() {
         updateCurrentBaseRowColour();
         addLogMessage("Starting registration...");
 
-        final SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        final String gcmSenderId = prefs.getString(SettingsActivity.PREFERENCE_GCM_SENDER_ID, null);
-        final String releaseUuid = prefs.getString(SettingsActivity.PREFERENCE_RELEASE_UUID, null);
-        final String releaseSecret = prefs.getString(SettingsActivity.PREFERENCE_RELEASE_SECRET, null);
-        final String deviceAlias = prefs.getString(SettingsActivity.PREFERENCE_DEVICE_ALIAS, null);
+        final String gcmSenderId = Settings.getGcmSenderId(this);
+        final String releaseUuid = Settings.getReleaseUuid(this);
+        final String releaseSecret = Settings.getReleaseSecret(this);
+        final String deviceAlias = Settings.getDeviceAlias(this);
         addLogMessage("GCM Sender ID: '" + gcmSenderId + "'\nRelease UUID: '" + releaseUuid + "'\nRelease Secret: '" + releaseSecret + "'\nDevice Alias: '" + deviceAlias + "'");
 
         final RegistrationParameters parameters = new RegistrationParameters(gcmSenderId, releaseUuid, releaseSecret, deviceAlias);
@@ -121,11 +132,15 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void addLogMessage(String message) {
-        final String timestamp = dateFormatter.format(new Date());
+        final String timestamp = getTimestamp();
         final LogItem logItem = new LogItem(timestamp, message, baseRowColours[currentBaseRowColour]);
         logItems.add(logItem);
         adapter.notifyDataSetChanged();
         scrollToBottom();
+    }
+
+    private String getTimestamp() {
+        return dateFormatter.format(new Date());
     }
 
     private void scrollToBottom() {
@@ -145,14 +160,111 @@ public class MainActivity extends ActionBarActivity {
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == R.id.action_register) {
-            startRegistration();
-        } else if (item.getItemId() == R.id.action_clear_registration) {
-            clearRegistration();
-        } else if (item.getItemId() == R.id.action_edit_registration_parameters) {
-            editRegistrationParameters();
+        switch (item.getItemId()) {
+            case R.id.action_register:
+                startRegistration();
+                break;
+            case R.id.action_clear_registration:
+                clearRegistration();
+                break;
+            case R.id.action_edit_registration_parameters:
+                editRegistrationParameters();
+                break;
+            case R.id.action_send_message_via_gcm:
+                sendMessageViaGcm();
+                break;
+            case R.id.action_send_message_via_back_end:
+                sendMessageViaBackEnd();
+                break;
+            default:
+                return super.onOptionsItemSelected(item);
         }
-        return super.onOptionsItemSelected(item);
+        return true;
+    }
+
+    private void sendMessageViaBackEnd() {
+        updateCurrentBaseRowColour();
+        addLogMessage("Sending message via back-end server...");
+    }
+
+    private void sendMessageViaGcm() {
+        updateCurrentBaseRowColour();
+        final String regId = readRegistrationId();
+        if (regId == null) {
+            return;
+        }
+        final String data = "{\"registration_ids\":[\"" + regId + "\"], \"data\":{\"message\":\"This message was sent to GCM at " + getTimestamp() + ".\"}}";
+        queueLogMessage("Message body data: \"" + data + "\"");
+        final NetworkRequest networkRequest = new NetworkRequest(GCM_SEND_MESSAGE_URL, new NetworkRequestListener() {
+
+            @Override
+            public void onSuccess(NetworkResponse networkResponse) {
+                try {
+                    int statusCode = networkResponse.getStatus().getStatusCode();
+                    if (statusCode >= 200 && statusCode < 300) {
+                        queueLogMessage("GCM server accepted network request to send message. HTTP response status code is " + statusCode + ".");
+                    } else {
+                        queueLogMessage("GCM server rejected network request to send message. HTTP response status code is " + statusCode + ".");
+                    }
+                } catch (Exception e) {
+                    queueLogMessage("ERROR: got exception parsing network response from GCM server: " + e.getLocalizedMessage());
+                }
+            }
+
+            @Override
+            public void onFailure(NetworkError networkError) {
+                try {
+                    queueLogMessage("ERROR sending request to GCM server: " + networkError.getException().getLocalizedMessage());
+                } catch (Exception e) {
+                    queueLogMessage("ERROR got exception parsing network error: " + e.getLocalizedMessage());
+                }
+            }
+        });
+        networkRequest.setRequestType(NetworkRequest.RequestType.POST);
+        networkRequest.addHeaderParam("Content-Type", "application/json");
+        networkRequest.addHeaderParam("Authorization", "key=" + Settings.getGcmBrowserApiKey(this));
+        networkRequest.setBodyData(data);
+        NetworkRequestLauncher.getInstance().executeRequest(networkRequest);
+    }
+
+    private String readRegistrationId() {
+        final File externalFilesDir = getExternalFilesDir(null);
+        if (externalFilesDir == null) {
+            addLogMessage("ERROR: Was not able to get the externalFilesDir");
+            return null;
+        }
+        final File dir = new File(externalFilesDir.getAbsolutePath() + File.separator + "pushlib");
+        final File regIdFile = new File(dir, "regid.txt");
+        if (!regIdFile.exists() || !regIdFile.canRead()) {
+            addLogMessage("ERROR: registration ID file not found (" + regIdFile.getAbsoluteFile() + "). Have you registered with GCM successfully? Are you running a debug build? Is the external cache directory accessible?");
+            return null;
+        }
+        FileReader fr = null;
+        BufferedReader br = null;
+        try {
+            fr = new FileReader(regIdFile);
+            br = new BufferedReader(fr);
+            return br.readLine();
+
+        } catch (Exception e) {
+            addLogMessage("ERROR reading registration ID file:" + e.getLocalizedMessage());
+            return null;
+        } finally {
+            if (br != null) {
+                try {
+                    br.close();
+                } catch (IOException e) {
+                    // Swallow exception
+                }
+            }
+            if (fr != null) {
+                try {
+                    fr.close();
+                } catch (IOException e) {
+                    // Swallow exception
+                }
+            }
+        }
     }
 
     private void clearRegistration() {
