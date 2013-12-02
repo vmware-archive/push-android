@@ -202,6 +202,9 @@ public class MainActivity extends ActionBarActivity {
                             final ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
                             clipboardManager.setPrimaryClip(clipData);
                             Toast.makeText(MainActivity.this, "Log copied to clipboard", Toast.LENGTH_SHORT).show();
+                        } else if (result == LogItemLongClickDialogFragment.CLEAR_LOG) {
+                            logItems.clear();
+                            adapter.notifyDataSetChanged();
                         }
                     }
                 });
