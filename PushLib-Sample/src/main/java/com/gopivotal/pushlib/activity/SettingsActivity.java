@@ -1,4 +1,4 @@
-package com.gopivotal.pushlib;
+package com.gopivotal.pushlib.activity;
 
 import android.annotation.TargetApi;
 import android.content.SharedPreferences;
@@ -11,6 +11,9 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
+
+import com.gopivotal.pushlib.R;
+import com.gopivotal.pushlib.util.Settings;
 
 public class SettingsActivity extends PreferenceActivity {
 

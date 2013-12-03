@@ -1,4 +1,4 @@
-package com.gopivotal.pushlib;
+package com.gopivotal.pushlib.activity;
 
 import android.app.NotificationManager;
 import android.content.ClipData;
@@ -19,6 +19,16 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.gopivotal.pushlib.dialogfragment.SendMessageDialogFragment;
+import com.gopivotal.pushlib.service.GcmIntentService;
+import com.gopivotal.pushlib.adapter.LogAdapter;
+import com.gopivotal.pushlib.model.LogItem;
+import com.gopivotal.pushlib.PushLib;
+import com.gopivotal.pushlib.R;
+import com.gopivotal.pushlib.RegistrationParameters;
+import com.gopivotal.pushlib.util.Settings;
+import com.gopivotal.pushlib.dialogfragment.ClearRegistrationDialogFragment;
+import com.gopivotal.pushlib.dialogfragment.LogItemLongClickDialogFragment;
 import com.gopivotal.pushlib.model.BackEndMessageRequest;
 import com.gopivotal.pushlib.model.GcmMessageRequest;
 import com.gopivotal.pushlib.registration.RegistrationListener;
@@ -175,16 +185,27 @@ public class MainActivity extends ActionBarActivity {
             case R.id.action_edit_registration_parameters:
                 editRegistrationParameters();
                 break;
-            case R.id.action_send_message_via_gcm:
-                sendMessageViaGcm();
-                break;
-            case R.id.action_send_message_via_back_end:
-                sendMessageViaBackEnd();
+            case R.id.action_send_message:
+                sendMessage();
                 break;
             default:
                 return super.onOptionsItemSelected(item);
         }
         return true;
+    }
+
+    private void sendMessage() {
+        final DialogFragment dialog = new SendMessageDialogFragment(new SendMessageDialogFragment.Listener() {
+            @Override
+            public void onClickResult(int result) {
+                if (result == SendMessageDialogFragment.VIA_GCM) {
+                    sendMessageViaGcm();
+                } else if (result == SendMessageDialogFragment.VIA_BACK_END) {
+                    sendMessageViaBackEnd();
+                }
+            }
+        });
+        dialog.show(getSupportFragmentManager(), "SendMessageDialogFragment");
     }
 
     private void sendMessageViaBackEnd() {
@@ -229,8 +250,8 @@ public class MainActivity extends ActionBarActivity {
         final String platforms = "android";
         final String messageTitle = "Sample Message Title";
         final String messageBody = "This message was sent to the back-end at " + getTimestamp() + "." ;
-        final String appUuid = "b4d42adb-6e0a-41c9-9270-63f1ab334e64";
-        final String appSecretKey = "d34b5c44-2241-4913-8ad8-550c01ff09d7";
+        final String appUuid = Settings.getBackEndAppUuid(this);
+        final String appSecretKey = Settings.getBackEndAppSecretKey(this);
         final BackEndMessageRequest messageRequest = new BackEndMessageRequest(appUuid, appSecretKey, messageTitle, messageBody, platforms, devices);
         final Gson gson = new Gson();
         return gson.toJson(messageRequest);

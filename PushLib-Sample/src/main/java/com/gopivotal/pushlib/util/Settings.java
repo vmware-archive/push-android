@@ -1,4 +1,4 @@
-package com.gopivotal.pushlib;
+package com.gopivotal.pushlib.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -11,8 +11,8 @@ public class Settings {
     public static final String RELEASE_SECRET = "test_release_secret";
     public static final String DEVICE_ALIAS = "test_device_alias";
     public static final String GCM_BROWSER_API_KEY = "test_gcm_browser_api_key";
-    public static final String BACK_END_APP_UUID = "test_app_uuid";
-    public static final String BACK_END_APP_SECRET_KEY = "test_app_secret_key";
+    public static final String BACK_END_APP_UUID = "test_back_end_app_uuid";
+    public static final String BACK_END_APP_SECRET_KEY = "test_back_end_app_secret_key";
 
     public static String getGcmSenderId(Context context) {
         return getSharedPreferences(context).getString(GCM_SENDER_ID, null);

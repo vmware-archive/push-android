@@ -1,4 +1,4 @@
-package com.gopivotal.pushlib;
+package com.gopivotal.pushlib.model;
 
 public class LogItem {
 

@@ -1,4 +1,4 @@
-package com.gopivotal.pushlib;
+package com.gopivotal.pushlib.service;
 
 import android.app.Activity;
 import android.content.ComponentName;

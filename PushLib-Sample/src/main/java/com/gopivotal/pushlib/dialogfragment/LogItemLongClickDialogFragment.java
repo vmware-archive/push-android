@@ -1,4 +1,4 @@
-package com.gopivotal.pushlib;
+package com.gopivotal.pushlib.dialogfragment;
 
 import android.app.AlertDialog;
 import android.app.Dialog;

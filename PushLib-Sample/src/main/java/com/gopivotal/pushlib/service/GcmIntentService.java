@@ -1,4 +1,4 @@
-package com.gopivotal.pushlib;
+package com.gopivotal.pushlib.service;
 
 import android.app.IntentService;
 import android.app.NotificationManager;
@@ -6,12 +6,11 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.gopivotal.pushlib.util.Const;
+import com.gopivotal.pushlib.R;
+import com.gopivotal.pushlib.activity.MainActivity;
 import com.gopivotal.pushlib.util.PushLibLogger;
 
 public class GcmIntentService extends IntentService {
@@ -40,17 +39,17 @@ public class GcmIntentService extends IntentService {
              * recognize.
              */
             if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
-                PushLibLogger.i("Received message with type 'MESSAGE_TYPE_SEND_ERROR'");
+                PushLibLogger.i("Received message with type 'MESSAGE_TYPE_SEND_ERROR'.");
                 sendNotification("Send error: " + extras.toString());
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
-                PushLibLogger.i("Received message with type 'MESSAGE_TYPE_DELETED'");
+                PushLibLogger.i("Received message with type 'MESSAGE_TYPE_DELETED'.");
                 sendNotification("Deleted messages on server: " + extras.toString());
                 // If it's a regular GCM message, do some work.
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
                 // Post notification of received message.
                 String message;
                 if (extras.containsKey("message")) {
-                    message = "Received: " + extras.getString("message");
+                    message = "Received: \"" + extras.getString("message") + "\".";
                 } else {
                     message = "Received message with no extras.";
                 }
