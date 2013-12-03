@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 
 import com.gopivotal.pushlib.util.PushLibLogger;
+import com.gopivotal.pushlib.util.Util;
 import com.xtreme.commons.DebugUtil;
 
 import java.io.File;
@@ -61,7 +62,7 @@ public class GcmRegistrationApiRequestImpl implements GcmRegistrationApiRequest 
             final String deviceRegistrationId = gcmProvider.register(senderId);
             PushLibLogger.i("Device registered with GCM. Device registration ID:" + deviceRegistrationId);
 
-            saveDeviceRegistrationIdToFilesystem(deviceRegistrationId);
+            Util.saveIdToFilesystem(context, deviceRegistrationId, "gcm_registration_id");
 
             // Inform callback of registration success
             if (listener != null) {
@@ -75,35 +76,6 @@ public class GcmRegistrationApiRequestImpl implements GcmRegistrationApiRequest 
             // exponential back-off.
             if (listener != null) {
                 listener.onGcmRegistrationFailed(ex.getLocalizedMessage());
-            }
-        }
-    }
-
-    private void saveDeviceRegistrationIdToFilesystem(String deviceRegistrationId) {
-        // Saves the registration ID to the file system.  Useful for debugging
-        // only since the registration ID is not loaded anywhere.
-        if (DebugUtil.getInstance(context).isDebuggable()) {
-            int res = context.checkCallingOrSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE");
-            if (res == PackageManager.PERMISSION_GRANTED) {
-                final PrintWriter pw;
-                try {
-                    final File externalFilesDir = context.getExternalFilesDir(null);
-                    if (externalFilesDir == null) {
-                        PushLibLogger.d("Was not able to get the externalFilesDir");
-                        return;
-                    }
-                    final File dir = new File(externalFilesDir.getAbsolutePath() + File.separator + "pushlib");
-                    if (!dir.exists()) {
-                        dir.mkdir();
-                    }
-                    final File regIdFile = new File(dir, "regid.txt");
-                    pw = new PrintWriter(regIdFile);
-                    pw.println(deviceRegistrationId);
-                    pw.close();
-                    PushLibLogger.d("Saved registration ID to file: " + regIdFile.getAbsolutePath());
-                } catch (Exception e) {
-                    PushLibLogger.w("Was not able to save registration ID to filesystem. This error is not-fatal. " + e.getLocalizedMessage());
-                }
             }
         }
     }

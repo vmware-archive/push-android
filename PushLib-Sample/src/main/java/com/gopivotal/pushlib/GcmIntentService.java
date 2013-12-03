@@ -40,8 +40,10 @@ public class GcmIntentService extends IntentService {
              * recognize.
              */
             if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
+                PushLibLogger.i("Received message with type 'MESSAGE_TYPE_SEND_ERROR'");
                 sendNotification("Send error: " + extras.toString());
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
+                PushLibLogger.i("Received message with type 'MESSAGE_TYPE_DELETED'");
                 sendNotification("Deleted messages on server: " + extras.toString());
                 // If it's a regular GCM message, do some work.
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
@@ -50,11 +52,13 @@ public class GcmIntentService extends IntentService {
                 if (extras.containsKey("message")) {
                     message = "Received: " + extras.getString("message");
                 } else {
-                    message = "Received an empty message.";
+                    message = "Received message with no extras.";
                 }
                 PushLibLogger.i(message);
                 sendNotification(message);
             }
+        } else {
+            PushLibLogger.i("Received message with no content.");
         }
         // Release the wake lock provided by the WakefulBroadcastReceiver.
         GcmBroadcastReceiver.completeWakefulIntent(intent);

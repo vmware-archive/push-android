@@ -1,7 +1,7 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
 
     <PreferenceCategory
-        android:title="@string/pref_title_gcm_settings">
+        android:title="@string/pref_title_gcm_registration_settings">
 
         <EditTextPreference
             android:key="test_gcm_sender_id"
@@ -13,20 +13,10 @@
             android:singleLine="true"
             android:maxLines="1"/>
 
-        <EditTextPreference
-            android:key="test_gcm_browser_api_key"
-            android:title="@string/pref_title_gcm_browser_api_key"
-            android:defaultValue="@string/pref_default_gcm_browser_api_key"
-            android:persistent="true"
-            android:selectAllOnFocus="true"
-            android:inputType="text"
-            android:singleLine="true"
-            android:maxLines="1"/>
-
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/pref_title_backend_settings">
+        android:title="@string/pref_title_backend_registration_settings">
 
         <EditTextPreference
             android:key="test_release_uuid"
@@ -61,4 +51,43 @@
 
     </PreferenceCategory>
 
+    <PreferenceCategory
+        android:title="@string/pref_title_gcm_push_settings">
+
+        <EditTextPreference
+            android:key="test_gcm_browser_api_key"
+            android:title="@string/pref_title_gcm_browser_api_key"
+            android:defaultValue="@string/pref_default_gcm_browser_api_key"
+            android:persistent="true"
+            android:selectAllOnFocus="true"
+            android:inputType="text"
+            android:singleLine="true"
+            android:maxLines="1"/>
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        android:title="@string/pref_title_back_end_push_settings">
+
+        <EditTextPreference
+            android:key="test_back_end_app_uuid"
+            android:title="@string/pref_title_back_end_app_uuid"
+            android:defaultValue="@string/pref_default_back_end_app_uuid"
+            android:persistent="true"
+            android:selectAllOnFocus="true"
+            android:inputType="text"
+            android:singleLine="true"
+            android:maxLines="1"/>
+
+        <EditTextPreference
+            android:key="test_back_end_app_secret_key"
+            android:title="@string/pref_title_back_end_app_secret_key"
+            android:defaultValue="@string/pref_default_back_end_app_secret_key"
+            android:persistent="true"
+            android:selectAllOnFocus="true"
+            android:inputType="text"
+            android:singleLine="true"
+            android:maxLines="1"/>
+
+    </PreferenceCategory>
 </PreferenceScreen>

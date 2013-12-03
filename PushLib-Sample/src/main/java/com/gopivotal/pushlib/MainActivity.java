@@ -18,6 +18,9 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.gopivotal.pushlib.model.BackEndMessageRequest;
+import com.gopivotal.pushlib.model.GcmMessageRequest;
 import com.gopivotal.pushlib.registration.RegistrationListener;
 import com.gopivotal.pushlib.util.Const;
 import com.gopivotal.pushlib.util.PushLibLogger;
@@ -42,6 +45,8 @@ import java.util.List;
 public class MainActivity extends ActionBarActivity {
 
     private static final String GCM_SEND_MESSAGE_URL = "https://android.googleapis.com/gcm/send";
+    private static final String BACK_END_SEND_MESSAGE_URL = "http://ec2-54-234-124-123.compute-1.amazonaws.com:8090/v1/push";
+
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm:ss.SSS");
     private static final int[] baseRowColours = new int[]{0xddeeff, 0xddffee, 0xffeedd};
 
@@ -185,15 +190,55 @@ public class MainActivity extends ActionBarActivity {
     private void sendMessageViaBackEnd() {
         updateCurrentBaseRowColour();
         addLogMessage("Sending message via back-end server...");
+        final String data = getBackEndMessageRequestString();
+        queueLogMessage("Message body data: \"" + data + "\"");
+        final NetworkRequest networkRequest = new NetworkRequest(BACK_END_SEND_MESSAGE_URL, new NetworkRequestListener() {
+
+            @Override
+            public void onSuccess(NetworkResponse networkResponse) {
+                try {
+                    int statusCode = networkResponse.getStatus().getStatusCode();
+                    if (statusCode >= 200 && statusCode < 300) {
+                        queueLogMessage("Back-end server accepted network request to send message. HTTP response status code is " + statusCode + ".");
+                    } else {
+                        queueLogMessage("Back-end server rejected network request to send message. HTTP response status code is " + statusCode + ".");
+                    }
+                } catch (Exception e) {
+                    queueLogMessage("ERROR: got exception parsing network response from Back-end server: " + e.getLocalizedMessage());
+                }
+            }
+
+            @Override
+            public void onFailure(NetworkError networkError) {
+                try {
+                    queueLogMessage("ERROR sending request to Back-end server: " + networkError.getException().getLocalizedMessage());
+                } catch (Exception e) {
+                    queueLogMessage("ERROR got exception parsing network error: " + e.getLocalizedMessage());
+                }
+            }
+        });
+        networkRequest.setRequestType(NetworkRequest.RequestType.POST);
+        networkRequest.addHeaderParam("Content-Type", "application/json");
+        networkRequest.setBodyData(data);
+        NetworkRequestLauncher.getInstance().executeRequest(networkRequest);
+    }
+
+    private String getBackEndMessageRequestString() {
+        final String device_uuid = readIdFromFile("device_uuid");
+        final String[] devices = new String[]{device_uuid};
+        final String platforms = "android";
+        final String messageTitle = "Sample Message Title";
+        final String messageBody = "This message was sent to the back-end at " + getTimestamp() + "." ;
+        final String appUuid = "b4d42adb-6e0a-41c9-9270-63f1ab334e64";
+        final String appSecretKey = "d34b5c44-2241-4913-8ad8-550c01ff09d7";
+        final BackEndMessageRequest messageRequest = new BackEndMessageRequest(appUuid, appSecretKey, messageTitle, messageBody, platforms, devices);
+        final Gson gson = new Gson();
+        return gson.toJson(messageRequest);
     }
 
     private void sendMessageViaGcm() {
         updateCurrentBaseRowColour();
-        final String regId = readRegistrationId();
-        if (regId == null) {
-            return;
-        }
-        final String data = "{\"registration_ids\":[\"" + regId + "\"], \"data\":{\"message\":\"This message was sent to GCM at " + getTimestamp() + ".\"}}";
+        final String data = getGcmMessageRequestString();
         queueLogMessage("Message body data: \"" + data + "\"");
         final NetworkRequest networkRequest = new NetworkRequest(GCM_SEND_MESSAGE_URL, new NetworkRequestListener() {
 
@@ -227,16 +272,28 @@ public class MainActivity extends ActionBarActivity {
         NetworkRequestLauncher.getInstance().executeRequest(networkRequest);
     }
 
-    private String readRegistrationId() {
+    private String getGcmMessageRequestString() {
+        final String regId = readIdFromFile("gcm_registration_id");
+        if (regId == null) {
+            return null;
+        }
+        final String[] devices = new String[]{regId};
+        final String message = "This message was sent to GCM at " + getTimestamp() + ".";
+        final GcmMessageRequest messageRequest = new GcmMessageRequest(devices, message);
+        final Gson gson = new Gson();
+        return gson.toJson(messageRequest);
+    }
+
+    private String readIdFromFile(String idType) {
         final File externalFilesDir = getExternalFilesDir(null);
         if (externalFilesDir == null) {
             addLogMessage("ERROR: Was not able to get the externalFilesDir");
             return null;
         }
         final File dir = new File(externalFilesDir.getAbsolutePath() + File.separator + "pushlib");
-        final File regIdFile = new File(dir, "regid.txt");
+        final File regIdFile = new File(dir, idType + ".txt");
         if (!regIdFile.exists() || !regIdFile.canRead()) {
-            addLogMessage("ERROR: registration ID file not found (" + regIdFile.getAbsoluteFile() + "). Have you registered with GCM successfully? Are you running a debug build? Is the external cache directory accessible?");
+            addLogMessage("ERROR: " + idType + " file not found (" + regIdFile.getAbsoluteFile() + "). Have you registered with GCM and the back-end successfully? Are you running a debug build? Is the external cache directory accessible?");
             return null;
         }
         FileReader fr = null;
@@ -247,7 +304,7 @@ public class MainActivity extends ActionBarActivity {
             return br.readLine();
 
         } catch (Exception e) {
-            addLogMessage("ERROR reading registration ID file:" + e.getLocalizedMessage());
+            addLogMessage("ERROR reading " + idType + " file:" + e.getLocalizedMessage());
             return null;
         } finally {
             if (br != null) {

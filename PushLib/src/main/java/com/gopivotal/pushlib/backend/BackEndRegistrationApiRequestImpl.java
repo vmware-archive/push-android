@@ -1,5 +1,6 @@
 package com.gopivotal.pushlib.backend;
 
+import android.content.Context;
 import android.os.Build;
 
 import com.google.gson.Gson;
@@ -9,6 +10,7 @@ import com.gopivotal.pushlib.model.BackEndApiRegistrationResponseData;
 import com.gopivotal.pushlib.network.NetworkWrapper;
 import com.gopivotal.pushlib.util.Const;
 import com.gopivotal.pushlib.util.PushLibLogger;
+import com.gopivotal.pushlib.util.Util;
 import com.xtreme.network.NetworkRequest;
 import com.xtreme.network.NetworkResponse;
 
@@ -17,20 +19,25 @@ import java.io.IOException;
 public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApiRequest {
 
     private NetworkWrapper networkWrapper;
+    private Context context;
 
-    public BackEndRegistrationApiRequestImpl(NetworkWrapper networkWrapper) {
-        verifyArguments(networkWrapper);
-        saveArguments(networkWrapper);
+    public BackEndRegistrationApiRequestImpl(Context context, NetworkWrapper networkWrapper) {
+        verifyArguments(context, networkWrapper);
+        saveArguments(context, networkWrapper);
     }
 
-    private void verifyArguments(NetworkWrapper networkWrapper) {
+    private void verifyArguments(Context context, NetworkWrapper networkWrapper) {
         if (networkWrapper == null) {
             throw new IllegalArgumentException("networkWrapper may not be null");
         }
+        if (context == null) {
+            throw new IllegalArgumentException("context may not be null");
+        }
     }
 
-    private void saveArguments(NetworkWrapper networkWrapper) {
+    private void saveArguments(Context context, NetworkWrapper networkWrapper) {
         this.networkWrapper = networkWrapper;
+        this.context = context;
     }
 
     public void startDeviceRegistration(String gcmDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener) {
@@ -117,6 +124,8 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
             return;
         }
 
+        Util.saveIdToFilesystem(context, deviceUuid, "device_uuid");
+
         PushLibLogger.i("Back-end Server registration succeeded.");
         listener.onBackEndRegistrationSuccess(deviceUuid);
     }
@@ -150,6 +159,6 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
 
     @Override
     public BackEndRegistrationApiRequest copy() {
-        return new BackEndRegistrationApiRequestImpl(networkWrapper);
+        return new BackEndRegistrationApiRequestImpl(context, networkWrapper);
     }
 }

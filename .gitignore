@@ -21,7 +21,8 @@ local.properties
 # Temporary files
 *.swp
 *.pyc
-regid.txt
+device_uuid.txt
+gcm_registration_id.txt
 
 # Gradle files
 .gradle
