@@ -15,6 +15,9 @@ package com.gopivotal.pushlib.model;
 
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Model returned by the CF Mobile Services device registration API.
+ */
 public class BackEndApiRegistrationResponseData {
 
     @SerializedName("replicant_id")

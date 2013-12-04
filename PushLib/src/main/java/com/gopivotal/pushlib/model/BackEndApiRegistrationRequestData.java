@@ -15,6 +15,9 @@ package com.gopivotal.pushlib.model;
 
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Model used in the CF Mobile Services device registration API.
+ */
 public class BackEndApiRegistrationRequestData {
 
     @SerializedName("release_uuid")

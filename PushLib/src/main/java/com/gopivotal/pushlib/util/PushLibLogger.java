@@ -5,11 +5,17 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import com.gopivotal.pushlib.PushLib;
 import com.xtreme.commons.DebugUtil;
 
 import java.util.Locale;
 
+/**
+ * Used by the Push Library to log messages to the device log.  An optional 'listener'
+ * can be registered so an application can watch all the message traffic.
+ *
+ * If the "debuggable" flag is "false" in the application manifest file then only warning
+ * or error messages will be printed to the device log.
+ */
 public class PushLibLogger {
 
     private static final String UI_THREAD = "UI";

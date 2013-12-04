@@ -6,6 +6,9 @@ import com.gopivotal.pushlib.util.PushLibLogger;
 
 import java.io.IOException;
 
+/**
+ * API request for unregistering a device with the Google Cloud Messaging (GCM)
+ */
 public class GcmUnregistrationApiRequestImpl implements GcmUnregistrationApiRequest {
 
     private Context context;

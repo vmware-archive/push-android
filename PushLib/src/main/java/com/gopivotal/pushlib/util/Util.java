@@ -11,6 +11,12 @@ import java.io.PrintWriter;
 
 public class Util {
 
+    /**
+     * Reads the current application version code, as specified in the application's manifest file.
+     *
+     * @param context A context.
+     * @return The current application version code, as specified in the application's manifest file.
+     */
     public static int getAppVersion(Context context) {
         try {
             final PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
@@ -21,9 +27,18 @@ public class Util {
         }
     }
 
+    /**
+     * Saves the ID string to a plain-text file on the SD card if the application is considered
+     * debuggable and if it has WRITE_EXTERNAL_STORAGE permission.  Otherwise does nothing.
+     *
+     * Used for debugging, and by the sample application to send push message requests to GCM
+     * and to the back-end server.
+     *
+     * @param context A context.
+     * @param id      The ID string to save.
+     * @param idType  The type of ID - used as the filename and in log messages.
+     */
     public static void saveIdToFilesystem(Context context, String id, String idType) {
-        // Saves the device_uuid or GCM registration ID to the file system.  Useful for debugging
-        // only since the registration ID is not loaded anywhere.
         if (DebugUtil.getInstance(context).isDebuggable()) {
             int res = context.checkCallingOrSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE");
             if (res == PackageManager.PERMISSION_GRANTED) {

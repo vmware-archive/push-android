@@ -16,6 +16,9 @@ import com.xtreme.network.NetworkResponse;
 
 import java.io.IOException;
 
+/**
+ * API request for registering a device with the CF Mobile Services back-end server.
+ */
 public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApiRequest {
 
     private NetworkWrapper networkWrapper;

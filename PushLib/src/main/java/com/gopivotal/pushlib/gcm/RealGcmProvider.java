@@ -11,7 +11,6 @@ import java.io.IOException;
 
 public class RealGcmProvider implements GcmProvider {
 
-    private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private GoogleCloudMessaging gcm;
 
     public RealGcmProvider(Context context) {

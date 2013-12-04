@@ -1,16 +1,15 @@
 package com.gopivotal.pushlib.gcm;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
 
 import com.gopivotal.pushlib.util.PushLibLogger;
 import com.gopivotal.pushlib.util.Util;
-import com.xtreme.commons.DebugUtil;
 
-import java.io.File;
 import java.io.IOException;
-import java.io.PrintWriter;
 
+/**
+ * API request for registering a device with the Google Cloud Messaging (GCM)
+ */
 public class GcmRegistrationApiRequestImpl implements GcmRegistrationApiRequest {
 
     private Context context;

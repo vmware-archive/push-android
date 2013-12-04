@@ -5,6 +5,9 @@ import android.content.SharedPreferences;
 
 import com.gopivotal.pushlib.util.Const;
 
+/**
+ * Saves preferences to the SharedPreferences on the filesystem.
+ */
 public class RealPreferencesProvider implements PreferencesProvider {
 
     // If you add or change any of these strings, then please also update their copies in the

@@ -14,13 +14,41 @@ import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequest;
 import com.gopivotal.pushlib.gcm.GcmRegistrationApiRequestProvider;
 import com.gopivotal.pushlib.gcm.GcmRegistrationListener;
 import com.gopivotal.pushlib.gcm.GcmUnregistrationApiRequest;
-import com.gopivotal.pushlib.gcm.GcmUnregistrationApiRequestImpl;
 import com.gopivotal.pushlib.gcm.GcmUnregistrationApiRequestProvider;
 import com.gopivotal.pushlib.gcm.GcmUnregistrationListener;
 import com.gopivotal.pushlib.prefs.PreferencesProvider;
 import com.gopivotal.pushlib.util.PushLibLogger;
 import com.gopivotal.pushlib.version.VersionProvider;
 
+/**
+ * This class is responsible for all the business logic behind device registration.  For a description
+ * of its operation you can refer to the following diagrams:
+ *
+ *  1. Flow chart: https://docs.google.com/a/pivotallabs.com/drawings/d/1LFzm3BmQWBnHFnt5R4HGF4ki0qNF0FpXg_HYJgEvxvE
+ *  2. Sequence diagram: https://docs.google.com/a/pivotallabs.com/drawings/d/1hJYWt_bh8Vf2CPElDnxD1qcnpWRdEdIcGZWa6OYipz8/edit
+ *
+ *  In general, though, the Registration Engine tries to do as little work as it thinks is required.
+ *
+ *  If the device is already successfully registered and all of the registration parameters are the same as the
+ *  previous registration then the Registration Engine won't do anything.
+ *
+ *  On a fresh install, the Registration Engine will register with Google Cloud Messaging (GCM) and then with the
+ *  Cloud Foundry Mobile Services back-end server.
+ *
+ *  If the GCM Sender ID is different then the previous registration, then the Registration Engine will
+ *  attempt to unregister the device with GCM (Google Cloud Messaging) first.
+ *
+ *  If the application version code or the GCM Sender ID is updated since the previous registration, then the
+ *  Registration Engine will attempt to re-register with GCM.
+ *
+ *  If any of the CF registration parameters (release_uuid, release_secret, device_alias), or if a GCM registration
+ *  provides a different device registration ID than a previous install, then the Registration Engine will attempt
+ *  to unregister with the CF back-end server prior to re-registering.
+ *
+ *  The Registration Engine is also designed to successfully complete previous registrations that have failed. For
+ *  instance, if the previous registration attempt successfully registered with GCM but failed to complete the
+ *  registration with the back-end then it will simply try to re-register with the back-end if called again.
+ */
 public class RegistrationEngine {
 
     private Context context;
@@ -38,6 +66,20 @@ public class RegistrationEngine {
     private String previousReleaseSecret;
     private String previousDeviceAlias;
 
+    /**
+     * Instantiate an instance of the RegistrationEngine.
+     *
+     * All the parameters are required.  None may be null.
+     *
+     * @param context  A context
+     * @param gcmProvider  Some object that can provide the GCM services.
+     * @param preferencesProvider  Some object that can provide persistent storage of preferences.
+     * @param gcmRegistrationApiRequestProvider  Some object that can provide GCMRegistrationApiRequest objects.
+     * @param gcmUnregistrationApiRequestProvider  Some object that can provide GCMUnregistrationApiRequest objects.
+     * @param backEndRegistrationApiRequestProvider  Some object that can provide BackEndRegistrationApiRequest objects.
+     * @param backEndUnregisterDeviceApiRequestProvider  Some object that can provide BackEndUnregisterDeviceApiRequest objects.
+     * @param versionProvider  Some object that can provide the application version.
+     */
     public RegistrationEngine(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider, VersionProvider versionProvider) {
         verifyArguments(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, backEndUnregisterDeviceApiRequestProvider);
         saveArguments(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, backEndUnregisterDeviceApiRequestProvider);
@@ -87,6 +129,19 @@ public class RegistrationEngine {
         this.previousDeviceAlias = preferencesProvider.loadDeviceAlias();
     }
 
+    /**
+     * Start a registration attempt.  This method is asynchronous and will return before registration is complete.
+     * If you need to know when registration completes (successfully or not), then provide a listener.
+     *
+     * This class is NOT reentrant.  Do not try to call registerDevice again while some registration is
+     * already in progress.  It is best to create a new RegistrationEngine object entirely if you need to
+     * register again (though I don't know why you would want to register more than ONCE during the lifetime
+     * of a process - unless registration fails and you want to retry).
+     *
+     *
+     * @param parameters  The registration parameters.  May not be null.
+     * @param listener  An optional listener if you care to know when registration completes or fails.
+     */
     public void registerDevice(RegistrationParameters parameters, final RegistrationListener listener) {
 
         verifyRegistrationArguments(parameters);
