@@ -214,7 +214,7 @@ public class RegistrationEngine {
 
     private void unregisterDeviceWithGcm(final RegistrationParameters parameters, final RegistrationListener listener) {
         PushLibLogger.i("GCM Sender ID has been changed. Unregistering sender ID with GCM.");
-        final GcmUnregistrationApiRequest gcmUnregistrationApiRequest = new GcmUnregistrationApiRequestImpl(context, gcmProvider);
+        final GcmUnregistrationApiRequest gcmUnregistrationApiRequest = gcmUnregistrationApiRequestProvider.getRequest();
         gcmUnregistrationApiRequest.startUnregistration(new GcmUnregistrationListener() {
             @Override
             public void onGcmUnregistrationComplete() {
