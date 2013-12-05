@@ -8,7 +8,7 @@ import com.xtreme.network.NetworkResponse;
 import java.io.IOException;
 
 /**
- * API request for unregistering a device from the CF Mobile Services back-end server.
+ * API request for unregistering a device from the Omnia Mobile Services back-end server.
  */
 public class BackEndUnregisterDeviceApiRequestImpl implements BackEndUnregisterDeviceApiRequest {
 

@@ -1,7 +1,7 @@
 package com.gopivotal.pushlib;
 
 /**
- * Parameters used to register with the Cloud Foundry Mobile Services Push server.
+ * Parameters used to register with the Omnia Mobile Services Push server.
  */
 public class RegistrationParameters {
 
@@ -11,11 +11,12 @@ public class RegistrationParameters {
     private final String deviceAlias;
 
     /**
-     * Sets up parameters used by the Cloud Foundry Push SDK
+     * Sets up parameters used by the Omnia Push SDK
      *
      * @param gcmSenderId   The "sender ID" or "project ID", as defined by the Google Cloud Messaging.  May not be null or empty.
-     * @param releaseUuid   The "release_uuid", as defined by Cloud Foundry Push Services for your release.  May not be null or empty.
-     * @param releaseSecret The "release secret", as defined by Cloud Foundry Push Services for your release.  May not be null or empty.
+     *                      You can find it on the Google Cloud Console (https://cloud.google.com) for your project.
+     * @param releaseUuid   The "release_uuid", as defined by Omnia Push Services for your release.  May not be null or empty.
+     * @param releaseSecret The "release secret", as defined by Omnia Push Services for your release.  May not be null or empty.
      * @param deviceAlias   A developer-defined "device alias" which can be used to designate this device, or class.
      *                      of devices, in push or notification campaigns. Optional. Set to `null` if not you are
      *                      not using the deviceAlias.

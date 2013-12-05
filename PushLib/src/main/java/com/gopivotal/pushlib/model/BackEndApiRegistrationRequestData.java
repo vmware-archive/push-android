@@ -16,7 +16,7 @@ package com.gopivotal.pushlib.model;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Model used in the CF Mobile Services device registration API.
+ * Model used in the Omnia Mobile Services device registration API.
  */
 public class BackEndApiRegistrationRequestData {
 

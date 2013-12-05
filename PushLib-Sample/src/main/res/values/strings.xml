@@ -21,13 +21,4 @@
     <string name="pref_title_back_end_app_uuid">Back-End App UUID</string>
     <string name="pref_title_back_end_app_secret_key">Back-End App Secret Key</string>
 
-    <!-- Default values for settings: -->
-    <string name="pref_default_gcm_sender_id">816486687340</string>
-    <string name="pref_default_gcm_browser_api_key">AIzaSyCXEJN2mC0rAupa3Df5ZX-1O0ww5V308ZU</string>
-    <string name="pref_default_release_uuid">68018599-a7fa-4495-ae52-263b494a4a3e</string>
-    <string name="pref_default_release_secret">f1d91f1b-ab7e-4a67-9934-90ae50ac3110</string>
-    <string name="pref_default_device_alias">android_test_device_alias</string>
-    <string name="pref_default_back_end_app_uuid">b4d42adb-6e0a-41c9-9270-63f1ab334e64</string>
-    <string name="pref_default_back_end_app_secret_key">d34b5c44-2241-4913-8ad8-550c01ff09d7</string>
-
 </resources>

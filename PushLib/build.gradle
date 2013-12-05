@@ -11,7 +11,7 @@ buildscript {
 repositories {
     mavenCentral()
     maven {
-        url "http://maven.xtremelabs.com/artifactory/xl-libs"
+        url "https://maven.xtremelabs.com/artifactory/xl-libs"
 
         //
         // To provide your credentials to the maven artifactory, you will need
@@ -23,6 +23,9 @@ repositories {
         //     xlMavenPassword=<your.password.for.maven.xtremelabs.com>
         //
         // Please do not check in this file.  Keep your password a secret!
+        //
+        // Please note that, at this time, there is no anonymous access to this maven
+        // repository.
         //
         credentials {
             username xlMavenUser
