@@ -1,2 +1,1 @@
-include ':PushLib'
-include ':PushLib-Sample'
+include 'PushSDK', 'PushSDK-Sample'
