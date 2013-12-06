@@ -1,0 +1,12 @@
+package org.omnia.pushsdk.network;
+
+import android.content.Context;
+
+import com.xtreme.network.INetworkRequestLauncher;
+
+public interface NetworkWrapper {
+
+    INetworkRequestLauncher getNetworkRequestLauncher();
+
+    boolean isNetworkAvailable(Context context);
+}

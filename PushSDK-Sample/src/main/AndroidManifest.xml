@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.gopivotal.pushlib"
+    package="org.omnia.pushsdk"
     android:versionCode="1"
     android:versionName="1.0" >
 
@@ -9,13 +9,13 @@
         android:targetSdkVersion="19" />
 
     <!-- Elements required for host applications to include in their manifest for receiving messages -->
-    <!-- The demo package name 'com.gopivotal.pushlib' *MUST* be replaced with the package name of the host app -->
+    <!-- The demo package name 'org.omnia.pushsdk' *MUST* be replaced with the package name of the host app -->
     <!-- START -->
     <permission
-        android:name="com.gopivotal.pushlib.permission.C2D_MESSAGE"
+        android:name="org.omnia.pushsdk.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
 
-    <uses-permission android:name="com.gopivotal.pushlib.permission.C2D_MESSAGE" />
+    <uses-permission android:name="org.omnia.pushsdk.permission.C2D_MESSAGE" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <!-- END -->
@@ -31,7 +31,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".activity.MainActivity"
+            android:name="org.omnia.pushsdk.activity.MainActivity"
             android:configChanges="orientation"
             android:label="@string/app_name" >
             <intent-filter>
@@ -41,24 +41,24 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".activity.SettingsActivity"
+            android:name="org.omnia.pushsdk.activity.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName="com.gopivotal.pushlib.activity.MainActivity" >
+            android:parentActivityName="org.omnia.pushsdk.activity.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.gopivotal.pushlib.activity.MainActivity" />
+                android:value="org.omnia.pushsdk.activity.MainActivity" />
         </activity>
 
         <!-- BEGIN - definition of components for receiving messages -->
         <receiver
-            android:name=".service.GcmBroadcastReceiver"
+            android:name="org.omnia.pushsdk.service.GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
-                <category android:name="com.gopivotal.pushlib"/>
+                <category android:name="org.omnia.pushsdk"/>
             </intent-filter>
         </receiver>
-        <service android:name=".service.GcmIntentService"/>
+        <service android:name="org.omnia.pushsdk.service.GcmIntentService"/>
         <!-- END - definition of components for receiving messages -->
 
     </application>

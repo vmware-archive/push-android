@@ -16,7 +16,7 @@ import java.io.InputStream;
  * This mock class is used in unit tests to isolate the crash handler program from the network and to make the results
  * of network requests deterministic.
  * <p/>
- * Prior to using either the executeRequest or executeRequestSimultaneously methods to execute a {@link NetworkRequest},
+ * Prior to using either the executeRequest or executeRequestSimultaneously methods to execute a {@link com.xtreme.network.NetworkRequest},
  * preselect your desired outcome by providing the result, error, or exception with the setNetworkRequest method.
  *
  * @author rob
