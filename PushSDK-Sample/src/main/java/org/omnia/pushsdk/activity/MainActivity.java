@@ -382,6 +382,7 @@ public class MainActivity extends ActionBarActivity {
                         editor.remove("release_uuid");
                         editor.remove("release_secret");
                         editor.remove("device_alias");
+                        editor.remove("backend_device_registration_id");
                     }
                     editor.commit();
                 }
