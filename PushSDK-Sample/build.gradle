@@ -43,6 +43,21 @@ android {
         minSdkVersion 10
         targetSdkVersion 19
     }
+
+    signingConfigs {
+        release {
+            storeFile file("pushsdk.keystore")
+            storePassword "xtremelabs1"
+            keyAlias "pushsdk"
+            keyPassword "xtremelabs1"
+        }
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+        }
+    }
 }
 
 dependencies {
