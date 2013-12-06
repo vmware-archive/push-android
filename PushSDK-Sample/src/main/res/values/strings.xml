@@ -4,7 +4,7 @@
     <string name="app_name">PushLib</string>
     <string name="action_register">Register</string>
     <string name="action_clear_registration">Clear Registration</string>
-    <string name="action_edit_registration_parameters">Edit Registration Parameters</string>
+    <string name="action_edit_registration_parameters">Edit Parameters</string>
     <string name="action_reset_preferences">Reset to Defaults</string>
     <string name="action_send_message">Send Message</string>
     <string name="title_activity_settings">Settings</string>
