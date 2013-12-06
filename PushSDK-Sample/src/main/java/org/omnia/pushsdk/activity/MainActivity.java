@@ -124,19 +124,23 @@ public class MainActivity extends ActionBarActivity {
         addLogMessage("GCM Sender ID: '" + gcmSenderId + "'\nRelease UUID: '" + releaseUuid + "'\nRelease Secret: '" + releaseSecret + "'\nDevice Alias: '" + deviceAlias + "'");
 
         final RegistrationParameters parameters = new RegistrationParameters(gcmSenderId, releaseUuid, releaseSecret, deviceAlias);
-        pushLib = PushLib.init(this);
-        pushLib.startRegistration(parameters, new RegistrationListener() {
+        try {
+            pushLib = PushLib.init(this);
+            pushLib.startRegistration(parameters, new RegistrationListener() {
 
-            @Override
-            public void onRegistrationComplete() {
-                queueLogMessage("Registration successful.");
-            }
+                @Override
+                public void onRegistrationComplete() {
+                    queueLogMessage("Registration successful.");
+                }
 
-            @Override
-            public void onRegistrationFailed(String reason) {
-                queueLogMessage("Registration failed. Reason is '" + reason + "'.");
-            }
-        });
+                @Override
+                public void onRegistrationFailed(String reason) {
+                    queueLogMessage("Registration failed. Reason is '" + reason + "'.");
+                }
+            });
+        } catch (Exception e) {
+            queueLogMessage("Registration failed: " + e.getLocalizedMessage());
+        }
     }
 
     public PushLibLogger.Listener getLogListener() {
