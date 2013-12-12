@@ -16,6 +16,7 @@
 package org.omnia.pushsdk.activity;
 
 import android.annotation.TargetApi;
+import android.app.ActionBar;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
@@ -75,7 +76,10 @@ public class SettingsActivity extends PreferenceActivity {
     private void setupActionBar() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
             // Show the Up button in the action bar.
-            getActionBar().setDisplayHomeAsUpEnabled(true);
+            final ActionBar actionBar = getActionBar();
+            if (actionBar != null) {
+                actionBar.setDisplayHomeAsUpEnabled(true);
+            }
         }
     }
 
