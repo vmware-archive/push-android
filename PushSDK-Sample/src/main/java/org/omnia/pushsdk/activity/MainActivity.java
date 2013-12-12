@@ -221,6 +221,11 @@ public class MainActivity extends ActionBarActivity {
             Toast.makeText(this, "This feature does not work in release builds.", Toast.LENGTH_SHORT).show();
             return;
         }
+        final File externalFilesDir = getExternalFilesDir(null);
+        if (externalFilesDir == null) {
+            Toast.makeText(this, "This feature requires the SD-card to be mounted.", Toast.LENGTH_SHORT).show();
+            return;
+        }
         final DialogFragment dialog = new SendMessageDialogFragment(new SendMessageDialogFragment.Listener() {
             @Override
             public void onClickResult(int result) {
