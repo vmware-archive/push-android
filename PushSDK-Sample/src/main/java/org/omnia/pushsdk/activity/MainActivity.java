@@ -21,6 +21,7 @@ import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.DialogFragment;
@@ -409,14 +410,24 @@ public class MainActivity extends ActionBarActivity {
                     @Override
                     public void onClickResult(int result) {
                         if (result == LogItemLongClickDialogFragment.COPY_ITEM) {
-                            final ClipData clipData = ClipData.newPlainText("log item text", logItem.message);
-                            final ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                            clipboardManager.setPrimaryClip(clipData);
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                                final ClipData clipData = ClipData.newPlainText("log item text", logItem.message);
+                                final android.content.ClipboardManager clipboardManager = (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                                clipboardManager.setPrimaryClip(clipData);
+                            } else {
+                                final android.text.ClipboardManager clipboardManager = (android.text.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                                clipboardManager.setText(logItem.message);
+                            }
                             Toast.makeText(MainActivity.this, "Log item copied to clipboard", Toast.LENGTH_SHORT).show();
                         } else if (result == LogItemLongClickDialogFragment.COPY_ALL_ITEMS) {
-                            final ClipData clipData = ClipData.newPlainText("log text", getLogAsString());
-                            final ClipboardManager clipboardManager = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                            clipboardManager.setPrimaryClip(clipData);
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
+                                final ClipData clipData = ClipData.newPlainText("log text", getLogAsString());
+                                final android.content.ClipboardManager clipboardManager = (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                                clipboardManager.setPrimaryClip(clipData);
+                            } else {
+                                final android.text.ClipboardManager clipboardManager = (android.text.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
+                                clipboardManager.setText(getLogAsString());
+                            }
                             Toast.makeText(MainActivity.this, "Log copied to clipboard", Toast.LENGTH_SHORT).show();
                         } else if (result == LogItemLongClickDialogFragment.CLEAR_LOG) {
                             logItems.clear();
