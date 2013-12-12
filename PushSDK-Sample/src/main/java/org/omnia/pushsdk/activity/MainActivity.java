@@ -49,6 +49,8 @@ import org.omnia.pushsdk.model.GcmMessageRequest;
 import org.omnia.pushsdk.registration.RegistrationListener;
 import org.omnia.pushsdk.util.Const;
 import org.omnia.pushsdk.util.PushLibLogger;
+
+import com.xtreme.commons.DebugUtil;
 import com.xtreme.commons.StringUtil;
 import com.xtreme.commons.ThreadUtil;
 import com.xtreme.network.NetworkError;
@@ -214,6 +216,10 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void sendMessage() {
+        if (!DebugUtil.getInstance(this).isDebuggable()) {
+            Toast.makeText(this, "This feature does not work in release builds.", Toast.LENGTH_SHORT).show();
+            return;
+        }
         final DialogFragment dialog = new SendMessageDialogFragment(new SendMessageDialogFragment.Listener() {
             @Override
             public void onClickResult(int result) {
