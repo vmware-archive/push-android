@@ -28,13 +28,13 @@ public class LogItemLongClickDialogFragment extends DialogFragment{
     public static final int COPY_ALL_ITEMS = 1;
     public static final int CLEAR_LOG = 2;
     public static final int CANCELLED = 3;
-    private final Listener listener;
+    private Listener listener;
 
     public interface Listener {
         void onClickResult(int result);
     }
 
-    public LogItemLongClickDialogFragment(Listener listener) {
+    public void setListener(Listener listener) {
         this.listener = listener;
     }
 

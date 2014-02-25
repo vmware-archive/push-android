@@ -226,7 +226,7 @@ public class MainActivity extends ActionBarActivity {
             Toast.makeText(this, "This feature requires the SD-card to be mounted.", Toast.LENGTH_SHORT).show();
             return;
         }
-        final DialogFragment dialog = new SendMessageDialogFragment(new SendMessageDialogFragment.Listener() {
+        final SendMessageDialogFragment.Listener listener = new SendMessageDialogFragment.Listener() {
             @Override
             public void onClickResult(int result) {
                 if (result == SendMessageDialogFragment.VIA_GCM) {
@@ -235,7 +235,9 @@ public class MainActivity extends ActionBarActivity {
                     sendMessageViaBackEnd();
                 }
             }
-        });
+        };
+        final SendMessageDialogFragment dialog = new SendMessageDialogFragment();
+        dialog.setListener(listener);
         dialog.show(getSupportFragmentManager(), "SendMessageDialogFragment");
     }
 
@@ -377,7 +379,7 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void clearRegistration() {
-        final DialogFragment dialog = new ClearRegistrationDialogFragment(new ClearRegistrationDialogFragment.Listener() {
+        final ClearRegistrationDialogFragment.Listener listener = new ClearRegistrationDialogFragment.Listener() {
 
             @Override
             public void onClickResult(int result) {
@@ -399,7 +401,9 @@ public class MainActivity extends ActionBarActivity {
                     editor.commit();
                 }
             }
-        });
+        };
+        final ClearRegistrationDialogFragment dialog = new ClearRegistrationDialogFragment();
+        dialog.setListener(listener);
         dialog.show(getSupportFragmentManager(), "ClearRegistrationDialogFragment");
     }
 
@@ -410,7 +414,7 @@ public class MainActivity extends ActionBarActivity {
             public boolean onItemLongClick(AdapterView<?> parent, final View view, int position, long id) {
                 final int originalViewBackgroundColour = adapter.getBackgroundColour(position);
                 final LogItem logItem = (LogItem) adapter.getItem(position);
-                final DialogFragment dialog = new LogItemLongClickDialogFragment(new LogItemLongClickDialogFragment.Listener() {
+                final LogItemLongClickDialogFragment.Listener listener = new LogItemLongClickDialogFragment.Listener() {
 
                     @Override
                     public void onClickResult(int result) {
@@ -439,7 +443,9 @@ public class MainActivity extends ActionBarActivity {
                             adapter.notifyDataSetChanged();
                         }
                     }
-                });
+                };
+                final LogItemLongClickDialogFragment dialog = new LogItemLongClickDialogFragment();
+                dialog.setListener(listener);
                 dialog.show(getSupportFragmentManager(), "LogItemLongClickDialogFragment");
                 return true;
             }

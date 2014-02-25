@@ -27,13 +27,13 @@ public class SendMessageDialogFragment extends DialogFragment {
     public static final int VIA_GCM = 0;
     public static final int VIA_BACK_END = 1;
     public static final int CANCELLED = 2;
-    private final Listener listener;
+    private Listener listener;
 
     public interface Listener {
         void onClickResult(int result);
     }
 
-    public SendMessageDialogFragment(Listener listener) {
+    public void setListener(Listener listener) {
         this.listener = listener;
     }
 
