@@ -122,6 +122,20 @@ At this time, the library is hard coded to use the staging server on Amazon AWS.
 by looking at the `BACKEND_REGISTRATION_REQUEST_URL` string value in `Const.java`.  The intent is to change this value
 to point to a production server when it is available.
 
+Simple Demo Application
+-----------------------
+
+The Simple Demo Application is an example of the simplest application possible that uses the Omnia Push Client SDK.  At
+this time, it only demonstrates how to register for push notifications.
+
+This demo application registers for push notifications in the Activity object in order to make it easier to display the
+output on the screen.  It is probably more appropriate for you to register for push notifications in your Application
+object instead.
+
+This application may be expanded in the future to demonstrate how to receive push notifications but we may need to decide
+whether we want to expose the Omnia device ID (which is the "address" that push messages are delivered to).  This information
+is not really pertinent to client applications so we might not want to expose it.
+
 Sample Application
 ------------------
 

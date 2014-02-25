@@ -1,1 +1,3 @@
-include 'PushSDK', 'PushSDK-Sample'
+include ':PushSDK'
+include ':PushSDK-Sample'
+include ':PushSDK-SimpleDemoApp'

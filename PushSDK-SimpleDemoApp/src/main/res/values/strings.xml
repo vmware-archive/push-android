@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="long_app_name">Omnia PushSDK Simple Demo App</string>
+    <string name="short_app_name">Push Simple Demo</string>
+    <string name="label_text">Registering for notifications...</string>
+
+</resources>
