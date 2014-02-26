@@ -200,6 +200,9 @@ public class RegistrationEngine {
         if (parameters.getReleaseSecret() == null || parameters.getReleaseSecret().isEmpty()) {
             throw new IllegalArgumentException("parameters.releaseSecret may not be null or empty");
         }
+        if (parameters.getDeviceAlias() == null) {
+            throw new IllegalArgumentException("parameters.deviceAlias may not be null");
+        }
     }
 
     private boolean isGcmRegistrationRequired(RegistrationParameters parameters) {

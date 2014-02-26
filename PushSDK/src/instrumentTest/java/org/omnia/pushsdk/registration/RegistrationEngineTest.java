@@ -183,8 +183,18 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testNullDeviceAlias() throws InterruptedException {
+        try {
+            final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
+            engine.registerDevice(new RegistrationParameters(TEST_GCM_SENDER_ID_1, TEST_RELEASE_UUID_1, TEST_RELEASE_SECRET_1, null), getListenerForRegistration(false));
+            fail("should not have succeeded");
+        } catch (IllegalArgumentException e) {
+            // success
+        }
+    }
+
+    public void testEmptyDeviceAlias() throws InterruptedException {
         final RegistrationEngine engine = new RegistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider, versionProvider);
-        engine.registerDevice(new RegistrationParameters(TEST_GCM_SENDER_ID_1, TEST_RELEASE_UUID_1, TEST_RELEASE_SECRET_1, null), getListenerForRegistration(true));
+        engine.registerDevice(new RegistrationParameters(TEST_GCM_SENDER_ID_1, TEST_RELEASE_UUID_1, TEST_RELEASE_SECRET_1, ""), getListenerForRegistration(true));
         semaphore.acquire();
     }
 

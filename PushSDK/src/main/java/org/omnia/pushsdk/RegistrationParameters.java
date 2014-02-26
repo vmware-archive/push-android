@@ -33,8 +33,7 @@ public class RegistrationParameters {
      * @param releaseUuid   The "release_uuid", as defined by Omnia Push Services for your release.  May not be null or empty.
      * @param releaseSecret The "release secret", as defined by Omnia Push Services for your release.  May not be null or empty.
      * @param deviceAlias   A developer-defined "device alias" which can be used to designate this device, or class.
-     *                      of devices, in push or notification campaigns. Optional. Set to `null` if not you are
-     *                      not using the deviceAlias.
+     *                      of devices, in push or notification campaigns. May not be set to `null`. May be set to empty.
      */
     public RegistrationParameters(String gcmSenderId, String releaseUuid, String releaseSecret, String deviceAlias) {
         this.gcmSenderId = gcmSenderId;
