@@ -84,7 +84,6 @@ public class MainActivity extends ActionBarActivity {
     private ListView listView;
     private LogAdapter adapter;
     private PushLib pushLib;
-    private String logAsString;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -128,7 +127,9 @@ public class MainActivity extends ActionBarActivity {
 
         final RegistrationParameters parameters = new RegistrationParameters(gcmSenderId, releaseUuid, releaseSecret, deviceAlias);
         try {
-            pushLib = PushLib.init(this);
+            if (pushLib == null) {
+                pushLib = PushLib.init(this);
+            }
             pushLib.startRegistration(parameters, new RegistrationListener() {
 
                 @Override
