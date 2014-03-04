@@ -763,7 +763,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
             @Override
             public void onRegistrationFailed(String reason) {
                 if (isSuccessfulRegistration) {
-                    Logger.e("Test failed due to exception:" + reason);
+                    Logger.e("Test failed due to error:" + reason);
                 }
                 assertFalse(isSuccessfulRegistration);
                 semaphore.release();

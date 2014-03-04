@@ -20,5 +20,6 @@
     <string name="pref_title_back_end_push_settings">Back-End Push Settings</string>
     <string name="pref_title_back_end_app_uuid">Back-End App UUID</string>
     <string name="pref_title_back_end_app_secret_key">Back-End App Secret Key</string>
+    <string name="action_unregister">Unregister</string>
 
 </resources>

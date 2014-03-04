@@ -38,6 +38,8 @@ import org.omnia.pushsdk.prefs.PreferencesProvider;
 import org.omnia.pushsdk.prefs.RealPreferencesProvider;
 import org.omnia.pushsdk.registration.RegistrationEngine;
 import org.omnia.pushsdk.registration.RegistrationListener;
+import org.omnia.pushsdk.registration.UnregistrationEngine;
+import org.omnia.pushsdk.registration.UnregistrationListener;
 import org.omnia.pushsdk.util.Const;
 import org.omnia.pushsdk.util.PushLibLogger;
 import org.omnia.pushsdk.version.RealVersionProvider;
@@ -152,5 +154,34 @@ public class PushLib {
         if (parameters.getReleaseSecret() == null || parameters.getReleaseSecret().isEmpty()) {
             throw new IllegalArgumentException("parameters.releaseSecret may not be null or empty");
         }
+    }
+
+    /**
+     * Asynchronously unregisters the device and application from receiving push notifications.  If the application
+     *
+     * @param listener Optional listener for receiving a callback after un`registration finishes. This callback may
+     *                 be called on a background thread.  May be null.
+     */
+    public void startUnregistration(final UnregistrationListener listener) {
+        final GcmProvider gcmProvider = new RealGcmProvider(context);
+        final PreferencesProvider preferencesProvider = new RealPreferencesProvider(context);
+        final GcmUnregistrationApiRequest dummyGcmUnregistrationApiRequest = new GcmUnregistrationApiRequestImpl(context, gcmProvider);
+        final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(dummyGcmUnregistrationApiRequest);
+        final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
+        final BackEndUnregisterDeviceApiRequest dummyBackEndUnregisterDeviceApiRequest = new BackEndUnregisterDeviceApiRequestImpl(networkWrapper);
+        final BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider = new BackEndUnregisterDeviceApiRequestProvider(dummyBackEndUnregisterDeviceApiRequest);
+        final Runnable runnable = new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    final UnregistrationEngine unregistrationEngine = new UnregistrationEngine(context, gcmProvider, preferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
+                    unregistrationEngine.unregisterDevice(listener);
+                } catch (Exception e) {
+                    PushLibLogger.ex("PushLib unregistration failed", e);
+                }
+            }
+        };
+        threadPool.execute(runnable);
     }
 }

@@ -36,6 +36,7 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import org.omnia.pushsdk.dialogfragment.SendMessageDialogFragment;
+import org.omnia.pushsdk.registration.UnregistrationListener;
 import org.omnia.pushsdk.service.GcmIntentService;
 import org.omnia.pushsdk.adapter.LogAdapter;
 import org.omnia.pushsdk.model.LogItem;
@@ -101,6 +102,7 @@ public class MainActivity extends ActionBarActivity {
             addLogMessage("Press the \"Register\" button to attempt registration.");
         }
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+        pushLib = PushLib.init(this);
     }
 
     @Override
@@ -127,9 +129,6 @@ public class MainActivity extends ActionBarActivity {
 
         final RegistrationParameters parameters = new RegistrationParameters(gcmSenderId, releaseUuid, releaseSecret, deviceAlias);
         try {
-            if (pushLib == null) {
-                pushLib = PushLib.init(this);
-            }
             pushLib.startRegistration(parameters, new RegistrationListener() {
 
                 @Override
@@ -199,18 +198,27 @@ public class MainActivity extends ActionBarActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+
             case R.id.action_register:
                 startRegistration();
                 break;
+
             case R.id.action_clear_registration:
                 clearRegistration();
                 break;
+
             case R.id.action_edit_registration_parameters:
                 editRegistrationParameters();
                 break;
+
             case R.id.action_send_message:
                 sendMessage();
                 break;
+
+            case R.id.action_unregister:
+                unregister();
+                break;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -464,5 +472,26 @@ public class MainActivity extends ActionBarActivity {
             lines.add(logItem.timestamp + "\t" + logItem.message);
         }
         return StringUtil.join(lines, "\n");
+    }
+
+    private void unregister() {
+        updateCurrentBaseRowColour();
+        addLogMessage("Starting unregistration...");
+
+        try {
+            pushLib.startUnregistration(new UnregistrationListener() {
+                @Override
+                public void onUnregistrationComplete() {
+                    queueLogMessage("Unregistration successful.");
+                }
+
+                @Override
+                public void onUnregistrationFailed(String reason) {
+                    queueLogMessage("Unregistration failed. Reason is '" + reason + "'.");
+                }
+            });
+        } catch (Exception e) {
+            queueLogMessage("Unregistration failed: " + e.getLocalizedMessage());
+        }
     }
 }

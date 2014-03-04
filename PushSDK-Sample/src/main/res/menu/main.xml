@@ -16,6 +16,12 @@
         app:showAsAction="always|withText"/>
 
     <item
+        android:id="@+id/action_unregister"
+        android:icon="@drawable/ic_menu_stop"
+        android:title="@string/action_unregister"
+        app:showAsAction="withText"/>
+
+    <item
         android:id="@+id/action_clear_registration"
         android:icon="@drawable/ic_menu_delete"
         android:title="@string/action_clear_registration"
