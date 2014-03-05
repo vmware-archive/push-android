@@ -17,6 +17,8 @@ package org.omnia.pushsdk.prefs;
 
 public interface PreferencesProvider {
 
+    public static int NO_SAVED_VERSION = -1;
+
     String loadGcmDeviceRegistrationId();
 
     void saveGcmDeviceRegistrationId(String gcmDeviceRegistrationId);

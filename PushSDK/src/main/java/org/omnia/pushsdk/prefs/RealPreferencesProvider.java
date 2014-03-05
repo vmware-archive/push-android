@@ -72,7 +72,7 @@ public class RealPreferencesProvider implements PreferencesProvider {
 
     @Override
     public int loadAppVersion() {
-        return getSharedPreferences().getInt(PROPERTY_APP_VERSION, -1);
+        return getSharedPreferences().getInt(PROPERTY_APP_VERSION, NO_SAVED_VERSION);
     }
 
     @Override

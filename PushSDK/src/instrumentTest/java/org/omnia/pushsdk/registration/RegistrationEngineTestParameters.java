@@ -29,6 +29,7 @@ import org.omnia.pushsdk.gcm.FakeGcmUnregistrationApiRequest;
 import org.omnia.pushsdk.gcm.GcmRegistrationApiRequestProvider;
 import org.omnia.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
+import org.omnia.pushsdk.prefs.PreferencesProvider;
 import org.omnia.pushsdk.version.FakeVersionProvider;
 import com.xtreme.commons.testing.DelayedLoop;
 
@@ -75,8 +76,9 @@ public class RegistrationEngineTestParameters {
     private boolean shouldGcmSenderIdHaveBeenSaved = false;
     private boolean shouldRegistrationHaveSucceeded = true;
 
-    private int appVersionInPrefs = 0;
-    private int currentAppVersion = 0;
+    private int appVersionInPrefs = PreferencesProvider.NO_SAVED_VERSION;
+    private int currentAppVersion = PreferencesProvider.NO_SAVED_VERSION;
+    private int finalAppVersionInPrefs = PreferencesProvider.NO_SAVED_VERSION;
 
     public RegistrationEngineTestParameters(Context context) {
         this.context = context;
@@ -139,6 +141,7 @@ public class RegistrationEngineTestParameters {
         testCase.assertEquals(finalReleaseUuidInPrefs, prefsProvider.loadReleaseUuid());
         testCase.assertEquals(finalReleaseSecretInPrefs, prefsProvider.loadReleaseSecret());
         testCase.assertEquals(finalDeviceAliasInPrefs, prefsProvider.loadDeviceAlias());
+        testCase.assertEquals(finalAppVersionInPrefs, prefsProvider.loadAppVersion());
     }
 
     public RegistrationEngineTestParameters setupReleaseSecret(String inPrefs, String fromUser, String finalValue, boolean shouldHaveBeenSaved) {
@@ -195,9 +198,10 @@ public class RegistrationEngineTestParameters {
         return this;
     }
 
-    public RegistrationEngineTestParameters setupAppVersion(int versionInPrefs, int currentVersion) {
+    public RegistrationEngineTestParameters setupAppVersion(int versionInPrefs, int currentVersion, int finalValue) {
         appVersionInPrefs = versionInPrefs;
         currentAppVersion = currentVersion;
+        finalAppVersionInPrefs = finalValue;
         return this;
     }
 

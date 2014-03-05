@@ -293,6 +293,7 @@ public class RegistrationEngine {
             public void onGcmUnregistrationComplete() {
                 preferencesProvider.saveGcmDeviceRegistrationId(null);
                 preferencesProvider.saveGcmSenderId(null);
+                preferencesProvider.saveAppVersion(PreferencesProvider.NO_SAVED_VERSION);
                 registerDeviceWithGcm(parameters, listener);
             }
 
