@@ -8,19 +8,6 @@
         android:minSdkVersion="10"
         android:targetSdkVersion="19" />
 
-    <!-- Elements required for host applications to include in their manifest for receiving messages -->
-    <!-- The demo package name 'org.omnia.pushsdk' *MUST* be replaced with the package name of the host app -->
-    <!-- START -->
-    <permission
-        android:name="org.omnia.pushsdk.permission.C2D_MESSAGE"
-        android:protectionLevel="signature" />
-
-    <uses-permission android:name="org.omnia.pushsdk.permission.C2D_MESSAGE" />
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <!-- END -->
-
-
     <!-- optional permission - used for debugging only -->
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
@@ -35,7 +22,6 @@
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
@@ -48,17 +34,16 @@
                 android:value="org.omnia.pushsdk.activity.MainActivity" />
         </activity>
 
-        <!-- BEGIN - definition of components for receiving messages -->
+        <!-- This BroadcastReceiver is called whenever the Omnia Push SDK receives a push
+             notification from GCM targetted at your application.  You can call it whatever
+             you'd like in your application.  Make sure you add the action
+             "YOUR.PACKAGE.NAME.omniapushsdk.RECEIVE_PUSH" to the broadcast receiver here. -->
         <receiver
-            android:name="org.omnia.pushsdk.service.GcmBroadcastReceiver"
-            android:permission="com.google.android.c2dm.permission.SEND">
+            android:name=".broadcastreceiver.MyOmniaRemotePushLibBroadcastReceiver">
             <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
-                <category android:name="org.omnia.pushsdk"/>
+                <action android:name="org.omnia.pushsdk.omniapushsdk.RECEIVE_PUSH"/>
             </intent-filter>
         </receiver>
-        <service android:name="org.omnia.pushsdk.service.GcmIntentService"/>
-        <!-- END - definition of components for receiving messages -->
 
     </application>
 

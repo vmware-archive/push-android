@@ -17,14 +17,12 @@ package org.omnia.pushsdk.activity;
 
 import android.app.NotificationManager;
 import android.content.ClipData;
-import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v4.app.DialogFragment;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -35,6 +33,8 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+
+import org.omnia.pushsdk.broadcastreceiver.MyOmniaRemotePushLibBroadcastReceiver;
 import org.omnia.pushsdk.dialogfragment.SendMessageDialogFragment;
 import org.omnia.pushsdk.registration.UnregistrationListener;
 import org.omnia.pushsdk.service.GcmIntentService;
@@ -114,7 +114,7 @@ public class MainActivity extends ActionBarActivity {
 
     private void clearNotifications() {
         final NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(GcmIntentService.NOTIFICATION_ID);
+        notificationManager.cancel(MyOmniaRemotePushLibBroadcastReceiver.NOTIFICATION_ID);
     }
 
     private void startRegistration() {

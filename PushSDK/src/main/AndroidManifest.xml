@@ -9,11 +9,37 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
 
+    <!-- Elements required for host applications to include in their manifest for receiving messages -->
+    <!-- START -->
+    <permission
+        android:name="org.omnia.pushsdk.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+
+    <uses-permission android:name="org.omnia.pushsdk.permission.C2D_MESSAGE" />
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <!-- END -->
+
     <application android:allowBackup="true"
         android:label="@string/app_name"
         android:icon="@drawable/ic_launcher"
         android:theme="@style/AppTheme">
+
         <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
+
+
+        <!-- BEGIN - definition of components for receiving messages -->
+        <receiver
+            android:name=".service.GcmBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+                <category android:name="org.omnia.pushsdk"/>
+            </intent-filter>
+        </receiver>
+        <service android:name=".service.GcmIntentService"/>
+        <!-- END - definition of components for receiving messages -->
+
     </application>
 
 </manifest>

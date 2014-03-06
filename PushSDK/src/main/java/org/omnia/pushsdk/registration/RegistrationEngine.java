@@ -74,6 +74,7 @@ public class RegistrationEngine {
     private BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider;
     private BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider;
     private VersionProvider versionProvider;
+    private String packageName;
     private String previousGcmDeviceRegistrationId = null;
     private String previousBackEndDeviceRegistrationId = null;
     private String previousGcmSenderId;
@@ -87,6 +88,7 @@ public class RegistrationEngine {
      * All the parameters are required.  None may be null.
      *
      * @param context  A context
+     * @param packageName
      * @param gcmProvider  Some object that can provide the GCM services.
      * @param preferencesProvider  Some object that can provide persistent storage of preferences.
      * @param gcmRegistrationApiRequestProvider  Some object that can provide GCMRegistrationApiRequest objects.
@@ -95,14 +97,17 @@ public class RegistrationEngine {
      * @param backEndUnregisterDeviceApiRequestProvider  Some object that can provide BackEndUnregisterDeviceApiRequest objects.
      * @param versionProvider  Some object that can provide the application version.
      */
-    public RegistrationEngine(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider, VersionProvider versionProvider) {
-        verifyArguments(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, backEndUnregisterDeviceApiRequestProvider);
-        saveArguments(context, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, backEndUnregisterDeviceApiRequestProvider);
+    public RegistrationEngine(Context context, String packageName, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider, VersionProvider versionProvider) {
+        verifyArguments(context, packageName, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, backEndUnregisterDeviceApiRequestProvider);
+        saveArguments(context, packageName, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, backEndUnregisterDeviceApiRequestProvider);
     }
 
-    private void verifyArguments(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, VersionProvider versionProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
+    private void verifyArguments(Context context, String packageName, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, VersionProvider versionProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
+        }
+        if (packageName == null) {
+            throw new IllegalArgumentException("packageName may not be null");
         }
         if (gcmProvider == null) {
             throw new IllegalArgumentException("gcmProvider may not be null");
@@ -127,8 +132,9 @@ public class RegistrationEngine {
         }
     }
 
-    private void saveArguments(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, VersionProvider versionProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
+    private void saveArguments(Context context, String packageName, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, VersionProvider versionProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
         this.context = context;
+        this.packageName = packageName;
         this.gcmProvider = gcmProvider;
         this.preferencesProvider = preferencesProvider;
         this.gcmRegistrationApiRequestProvider = gcmRegistrationApiRequestProvider;
@@ -160,6 +166,9 @@ public class RegistrationEngine {
     public void registerDevice(RegistrationParameters parameters, final RegistrationListener listener) {
 
         verifyRegistrationArguments(parameters);
+
+        // Save the given package name so that the message receiver service can see it
+        preferencesProvider.savePackageName(packageName);
 
         if (!isEmptyPreviousGcmSenderId() && isUpdatedGcmSenderId(parameters)) {
           unregisterDeviceWithGcm(parameters, listener);

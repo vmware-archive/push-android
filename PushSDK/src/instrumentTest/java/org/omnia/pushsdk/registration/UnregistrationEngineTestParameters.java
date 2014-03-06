@@ -22,6 +22,7 @@ public class UnregistrationEngineTestParameters {
     private static final String DEVICE_ALIAS_IN_PREFS = "DEVICE ALIAS";
     private static final int APP_VERSION_IN_PREFS = 99;
     private static final String GCM_DEVICE_ID_IN_PREFS = "GCM DEVICE ID";
+    private static final String PACKAGE_NAME_IN_PREFS = "PACKAGE.NAME";
 
     private final Context context;
     private final DelayedLoop delayedLoop;
@@ -42,9 +43,9 @@ public class UnregistrationEngineTestParameters {
         final FakeGcmProvider gcmProvider = new FakeGcmProvider(null, true, !shouldGcmDeviceUnregistrationBeSuccessful);
         final FakePreferencesProvider prefsProvider;
         if (backEndDeviceRegistrationIdInPrefs == null) {
-            prefsProvider = new FakePreferencesProvider(null, backEndDeviceRegistrationIdInPrefs, -1, null, null, null, null);
+            prefsProvider = new FakePreferencesProvider(null, backEndDeviceRegistrationIdInPrefs, -1, null, null, null, null, null);
         } else {
-            prefsProvider = new FakePreferencesProvider(GCM_DEVICE_ID_IN_PREFS, backEndDeviceRegistrationIdInPrefs, APP_VERSION_IN_PREFS, GCM_SENDER_ID_IN_PREFS, RELEASE_UUID_IN_PREFS, RELEASE_SECRET_IN_PREFS, DEVICE_ALIAS_IN_PREFS);
+            prefsProvider = new FakePreferencesProvider(GCM_DEVICE_ID_IN_PREFS, backEndDeviceRegistrationIdInPrefs, APP_VERSION_IN_PREFS, GCM_SENDER_ID_IN_PREFS, RELEASE_UUID_IN_PREFS, RELEASE_SECRET_IN_PREFS, DEVICE_ALIAS_IN_PREFS, PACKAGE_NAME_IN_PREFS);
         }
         final FakeGcmUnregistrationApiRequest gcmUnregistrationApiRequest = new FakeGcmUnregistrationApiRequest(gcmProvider);
         final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(gcmUnregistrationApiRequest);
@@ -98,7 +99,7 @@ public class UnregistrationEngineTestParameters {
             testCase.assertNotNull(prefsProvider.loadReleaseSecret());
         }
 
-//        testCase.assertEquals(prefsProvider.loadBackEndDeviceRegistrationId(), backEndDeviceRegistrationIdResultant);
+        testCase.assertNull(prefsProvider.loadPackageName());
         testCase.assertEquals(shouldBackEndUnregisterHaveBeenCalled, dummyBackEndUnregisterDeviceApiRequest.wasUnregisterCalled());
         testCase.assertFalse(gcmProvider.wasRegisterCalled());
         testCase.assertTrue(gcmProvider.wasUnregisterCalled());

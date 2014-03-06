@@ -2,32 +2,33 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.omnia.pushsdk.simpledemoapp" >
 
-    <!-- Elements required for host applications to include in their manifest for receiving messages -->
-    <!-- The demo package name 'org.omnia.pushsdk' *MUST* be replaced with the package name of the host app -->
-    <!-- START -->
-    <permission
-        android:name="org.omnia.pushsdk.simpledemoapp.permission.C2D_MESSAGE"
-        android:protectionLevel="signature" />
-
-    <uses-permission android:name="org.omnia.pushsdk.simpledemoapp.permission.C2D_MESSAGE" />
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <!-- END -->
-
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/short_app_name"
         android:theme="@style/AppTheme" >
+
         <activity
             android:name="org.omnia.pushsdk.simpledemoapp.MainActivity"
             android:label="@string/long_app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
-
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- This BroadcastReceiver is called whenever the Omnia Push SDK receives a push
+             notification from GCM targetted at your application.  You can call it whatever
+             you'd like in your application.  Make sure you add the action
+             "YOUR.PACKAGE.NAME.omniapushsdk.RECEIVE_PUSH" to the broadcast receiver here. -->
+        <receiver
+            android:name=".broadcastreceiver.MyOmniaRemotePushLibBroadcastReceiver">
+            <intent-filter>
+                <action android:name="org.omnia.pushsdk.simpledemoapp.omniapushsdk.RECEIVE_PUSH"/>
+            </intent-filter>
+        </receiver>
+
+
     </application>
 
 </manifest>

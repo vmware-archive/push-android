@@ -46,4 +46,8 @@ public interface PreferencesProvider {
     String loadDeviceAlias();
 
     void saveDeviceAlias(String deviceAlias);
+
+    String loadPackageName();
+
+    void savePackageName(String packageName);
 }

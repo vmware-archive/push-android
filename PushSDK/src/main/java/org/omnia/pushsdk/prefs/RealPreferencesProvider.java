@@ -34,6 +34,7 @@ public class RealPreferencesProvider implements PreferencesProvider {
     private static final String PROPERTY_RELEASE_UUID = "release_uuid";
     private static final String PROPERTY_RELEASE_SECRET = "release_secret";
     private static final String PROPERTY_DEVICE_ALIAS = "device_alias";
+    private static final String PROPERTY_PACKAGE_NAME = "package_name";
 
     private final Context context;
 
@@ -132,6 +133,19 @@ public class RealPreferencesProvider implements PreferencesProvider {
         final SharedPreferences prefs = getSharedPreferences();
         final SharedPreferences.Editor editor = prefs.edit();
         editor.putString(PROPERTY_DEVICE_ALIAS, deviceAlias);
+        editor.commit();
+    }
+
+    @Override
+    public String loadPackageName() {
+        return getSharedPreferences().getString(PROPERTY_PACKAGE_NAME, null);
+    }
+
+    @Override
+    public void savePackageName(String packageName) {
+        final SharedPreferences prefs = getSharedPreferences();
+        final SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(PROPERTY_PACKAGE_NAME, packageName);
         editor.commit();
     }
 

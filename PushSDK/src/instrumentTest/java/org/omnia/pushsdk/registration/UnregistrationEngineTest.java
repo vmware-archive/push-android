@@ -9,7 +9,6 @@ import org.omnia.pushsdk.backend.FakeBackEndUnregisterDeviceApiRequest;
 import org.omnia.pushsdk.gcm.FakeGcmProvider;
 import org.omnia.pushsdk.gcm.FakeGcmUnregistrationApiRequest;
 import org.omnia.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
-import org.omnia.pushsdk.gcm.GcmUnregistrationListener;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
 
 import java.util.concurrent.Semaphore;
@@ -29,7 +28,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
         super.setUp();
         gcmProvider = new FakeGcmProvider(TEST_GCM_DEVICE_REGISTRATION_ID_1);
         gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(new FakeGcmUnregistrationApiRequest(gcmProvider));
-        preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null);
+        preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null);
         backEndUnregisterDeviceApiRequestProvider = new BackEndUnregisterDeviceApiRequestProvider(new FakeBackEndUnregisterDeviceApiRequest());
     }
 

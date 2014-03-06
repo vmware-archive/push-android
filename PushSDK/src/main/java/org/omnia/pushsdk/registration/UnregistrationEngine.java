@@ -66,6 +66,11 @@ public class UnregistrationEngine {
     }
 
     public void unregisterDevice(UnregistrationListener listener) {
+
+        // Clear the saved package name so that the message receiver service won't be able to send
+        // the application any more broadcasts
+        preferencesProvider.savePackageName(null);
+
         if (gcmProvider.isGooglePlayServicesInstalled(context)) {
             unregisterDeviceWithGcm(listener);
         } else {

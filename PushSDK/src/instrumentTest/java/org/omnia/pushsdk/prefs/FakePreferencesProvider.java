@@ -23,6 +23,7 @@ public class FakePreferencesProvider implements PreferencesProvider {
     private String releaseUuid;
     private String releaseSecret;
     private String deviceAlias;
+    private String packageName;
     private int appVersion;
     private boolean wasGcmDeviceRegistrationIdSaved = false;
     private boolean wasBackEndDeviceRegistrationIdSaved = false;
@@ -31,8 +32,9 @@ public class FakePreferencesProvider implements PreferencesProvider {
     private boolean wasReleaseUuidSaved = false;
     private boolean wasReleaseSecretSaved = false;
     private boolean wasDeviceAliasSaved = false;
+    private boolean wasPackageNameSaved = false;
 
-    public FakePreferencesProvider(String gcmDeviceRegistrationIdToLoad, String backEndDeviceRegistrationIdToLoad, int appVersionToLoad, String gcmSenderIdToLoad, String releaseUuidToLoad, String releaseSecretToLoad, String deviceAliasToLoad) {
+    public FakePreferencesProvider(String gcmDeviceRegistrationIdToLoad, String backEndDeviceRegistrationIdToLoad, int appVersionToLoad, String gcmSenderIdToLoad, String releaseUuidToLoad, String releaseSecretToLoad, String deviceAliasToLoad, String packageNameToLoad) {
         this.gcmDeviceRegistrationId = gcmDeviceRegistrationIdToLoad;
         this.backEndDeviceRegistrationId = backEndDeviceRegistrationIdToLoad;
         this.appVersion = appVersionToLoad;
@@ -40,6 +42,7 @@ public class FakePreferencesProvider implements PreferencesProvider {
         this.releaseUuid = releaseUuidToLoad;
         this.releaseSecret = releaseSecretToLoad;
         this.deviceAlias = deviceAliasToLoad;
+        this.packageName = packageNameToLoad;
     }
 
     @Override
@@ -75,6 +78,11 @@ public class FakePreferencesProvider implements PreferencesProvider {
     @Override
     public String loadDeviceAlias() {
         return deviceAlias;
+    }
+
+    @Override
+    public String loadPackageName() {
+        return packageName;
     }
 
     @Override
@@ -119,6 +127,12 @@ public class FakePreferencesProvider implements PreferencesProvider {
         wasDeviceAliasSaved = true;
     }
 
+    @Override
+    public void savePackageName(String packageName) {
+        this.packageName = packageName;
+        wasPackageNameSaved = true;
+    }
+
     public boolean wasGcmDeviceRegistrationIdSaved() {
         return wasGcmDeviceRegistrationIdSaved;
     }
@@ -145,5 +159,9 @@ public class FakePreferencesProvider implements PreferencesProvider {
 
     public boolean wasDeviceAliasSaved() {
         return wasDeviceAliasSaved;
+    }
+
+    public boolean isWasPackageNameSaved() {
+        return wasPackageNameSaved;
     }
 }
