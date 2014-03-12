@@ -4,7 +4,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.8.+'
+        classpath 'com.android.tools.build:gradle:0.9.+'
     }
 }
 
@@ -38,7 +38,7 @@ apply plugin: 'android-library'
 
 android {
     compileSdkVersion 19
-    buildToolsVersion "19.0.0"
+    buildToolsVersion "19.0.3"
 
     defaultConfig {
         minSdkVersion 10
@@ -51,5 +51,5 @@ dependencies {
     compile 'com.android.support:appcompat-v7:19.0.0' // TODO - decide if we can generalize the version for the appcompat to something like 19+
     compile 'com.xtremelabs:xl-commons-android:1.6.0-RELEASE'
     compile 'com.xtremelabs:xl-network-android:1.5.2-RELEASE'
-    compile 'com.google.android.gms:play-services:4.0.30'
+    compile 'com.google.android.gms:play-services:4.2.42'
 }

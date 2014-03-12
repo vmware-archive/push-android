@@ -3,7 +3,9 @@
     android:versionCode="2"
     android:versionName="0.2">
 
+	<!--
     <uses-sdk android:minSdkVersion="10" android:targetSdkVersion="19" />
+	-->
 
     <!-- Hopefully these permissions will be transferred to the host app via the AAR library file -->
     <uses-permission android:name="android.permission.INTERNET"/>
