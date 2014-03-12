@@ -18,6 +18,7 @@ package org.omnia.pushsdk.service;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.ResultReceiver;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
@@ -25,7 +26,21 @@ import org.omnia.pushsdk.prefs.PreferencesProvider;
 import org.omnia.pushsdk.prefs.RealPreferencesProvider;
 import org.omnia.pushsdk.util.PushLibLogger;
 
+import java.util.concurrent.Semaphore;
+
 public class GcmIntentService extends IntentService {
+
+    public static String KEY_RESULT_RECEIVER = "result_receiver";
+//    public static String KEY_RESULT_BUNDLE = "result_bundle";
+
+    public static int NO_RESULT = -1;
+    public static int RESULT_EMPTY_INTENT = 100;
+
+    // Use by unit tests
+    /* package */ static Semaphore semaphore = null;
+
+    private ResultReceiver resultReceiver = null;
+
 
     // TODO - write unit tests to cover this class
 
@@ -35,26 +50,55 @@ public class GcmIntentService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Bundle extras = intent.getExtras();
-        GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
-        // The getMessageType() intent parameter must be the intent you received
-        // in your BroadcastReceiver.
-        String messageType = gcm.getMessageType(intent);
 
-        if (!extras.isEmpty()) {  // has effect of unparcelling Bundle
-            /*
-             * Filter messages based on message type. Since it is likely that GCM
-             * will be extended in the future with new message types, just ignore
-             * any message types you're not interested in, or that you don't
-             * recognize.
-             */
-            notifyApplication(intent);
-        } else {
+        try {
+
+            doHandleIntent(intent);
+
+        } finally {
+
+            // Release the wake lock provided by the WakefulBroadcastReceiver.
+            if (intent != null) {
+                GcmBroadcastReceiver.completeWakefulIntent(intent);
+            }
+
+            // If unit tests are running then release them so that they can continue
+            if (GcmIntentService.semaphore != null) {
+                GcmIntentService.semaphore.release();
+            }
+        }
+    }
+
+    private void doHandleIntent(Intent intent) {
+
+        if (intent == null) {
+            return;
+        }
+        resultReceiver = intent.getParcelableExtra(KEY_RESULT_RECEIVER);
+
+        if (isBundleEmpty(intent)) {
             PushLibLogger.i("Received message with no content.");
+            sendResult(RESULT_EMPTY_INTENT);
+        } else {
+            notifyApplication(intent);
+        }
+    }
+
+    private boolean isBundleEmpty(Intent intent) {
+
+        final Bundle extras = intent.getExtras();
+
+        if (extras == null || extras.size() <= 0) {
+            return true;
         }
 
-        // Release the wake lock provided by the WakefulBroadcastReceiver.
-        GcmBroadcastReceiver.completeWakefulIntent(intent);
+        if (extras.keySet().contains(KEY_RESULT_RECEIVER)) {
+            // The result receiver extra is only used during unit tests so we don't
+            // count it as a populated intent in this case.
+            return true;
+        }
+
+        return false;
     }
 
     private void notifyApplication(Intent gcmIntent) {
@@ -76,6 +120,12 @@ public class GcmIntentService extends IntentService {
         } else {
             final String broadcastName = packageName + ".omniapushsdk.RECEIVE_PUSH";
             return broadcastName;
+        }
+    }
+
+    private void sendResult(int resultCode) {
+        if (resultReceiver != null) {
+            resultReceiver.send(resultCode, null);
         }
     }
 }
