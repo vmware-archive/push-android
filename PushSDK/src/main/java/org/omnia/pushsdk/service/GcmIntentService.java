@@ -20,8 +20,6 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 
-import com.google.android.gms.gcm.GoogleCloudMessaging;
-
 import org.omnia.pushsdk.prefs.PreferencesProvider;
 import org.omnia.pushsdk.prefs.RealPreferencesProvider;
 import org.omnia.pushsdk.util.PushLibLogger;
@@ -30,22 +28,28 @@ import java.util.concurrent.Semaphore;
 
 public class GcmIntentService extends IntentService {
 
-    public static String KEY_RESULT_RECEIVER = "result_receiver";
-//    public static String KEY_RESULT_BUNDLE = "result_bundle";
+    public static final String BROADCAST_NAME_SUFFIX = ".omniapushsdk.RECEIVE_PUSH";
+    public static final String KEY_RESULT_RECEIVER = "result_receiver";
+    public static final String KEY_GCM_INTENT = "gcm_intent";
 
-    public static int NO_RESULT = -1;
-    public static int RESULT_EMPTY_INTENT = 100;
+    public static final int NO_RESULT = -1;
+    public static final int RESULT_EMPTY_INTENT = 100;
+    public static final int RESULT_EMPTY_PACKAGE_NAME = 101;
+    public static final int RESULT_NOTIFIED_APPLICATION = 102;
 
-    // Use by unit tests
+    // Used by unit tests
     /* package */ static Semaphore semaphore = null;
+    /* package */ static PreferencesProvider preferencesProvider = null;
 
     private ResultReceiver resultReceiver = null;
-
 
     // TODO - write unit tests to cover this class
 
     public GcmIntentService() {
         super("GcmIntentService");
+        if (GcmIntentService.preferencesProvider == null) {
+            GcmIntentService.preferencesProvider = new RealPreferencesProvider(this);
+        }
     }
 
     @Override
@@ -74,7 +78,8 @@ public class GcmIntentService extends IntentService {
         if (intent == null) {
             return;
         }
-        resultReceiver = intent.getParcelableExtra(KEY_RESULT_RECEIVER);
+
+        getResultReceiver(intent);
 
         if (isBundleEmpty(intent)) {
             PushLibLogger.i("Received message with no content.");
@@ -84,47 +89,44 @@ public class GcmIntentService extends IntentService {
         }
     }
 
+    private void getResultReceiver(Intent intent) {
+        if (intent.hasExtra(KEY_RESULT_RECEIVER)) {
+            // Used by unit tests
+            resultReceiver = intent.getParcelableExtra(KEY_RESULT_RECEIVER);
+            intent.removeExtra(KEY_RESULT_RECEIVER);
+        }
+    }
+
     private boolean isBundleEmpty(Intent intent) {
-
         final Bundle extras = intent.getExtras();
-
-        if (extras == null || extras.size() <= 0) {
-            return true;
-        }
-
-        if (extras.keySet().contains(KEY_RESULT_RECEIVER)) {
-            // The result receiver extra is only used during unit tests so we don't
-            // count it as a populated intent in this case.
-            return true;
-        }
-
-        return false;
+        return (extras == null || extras.size() <= 0);
     }
 
     private void notifyApplication(Intent gcmIntent) {
         final String broadcastName = getBroadcastName();
         if (broadcastName != null) {
-            final Intent intent = new Intent();
-            intent.setAction(broadcastName);
-            intent.putExtra("gcm_intent", gcmIntent);
+            final Intent intent = new Intent(broadcastName);
+            intent.putExtra(KEY_GCM_INTENT, gcmIntent);
             sendBroadcast(intent);
+            sendResult(RESULT_NOTIFIED_APPLICATION);
+        } else {
+            sendResult(RESULT_EMPTY_PACKAGE_NAME);
         }
     }
 
     private String getBroadcastName() {
-        // TODO - find a way to get the FakePreferencesProvider here in unit tests
-        final PreferencesProvider preferencesProvider = new RealPreferencesProvider(this);
         final String packageName = preferencesProvider.loadPackageName();
         if (packageName == null) {
             return null;
         } else {
-            final String broadcastName = packageName + ".omniapushsdk.RECEIVE_PUSH";
+            final String broadcastName = packageName + BROADCAST_NAME_SUFFIX;
             return broadcastName;
         }
     }
 
     private void sendResult(int resultCode) {
         if (resultReceiver != null) {
+            // Used by unit tests
             resultReceiver.send(resultCode, null);
         }
     }

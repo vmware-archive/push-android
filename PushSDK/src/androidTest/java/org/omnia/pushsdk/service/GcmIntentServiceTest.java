@@ -1,18 +1,30 @@
 package org.omnia.pushsdk.service;
 
+import android.content.BroadcastReceiver;
+import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.test.ServiceTestCase;
 
-import com.xtreme.commons.Logger;
+import org.omnia.pushsdk.prefs.FakePreferencesProvider;
 
 import java.util.concurrent.Semaphore;
 
 public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
 
+    private static final String TEST_PACKAGE_NAME = "org.omnia.pushsdk.test";
+    private static final String TEST_MESSAGE = "some fancy message";
+    private static final String KEY_MESSAGE = "message";
+
     private int testResultCode = GcmIntentService.NO_RESULT;
+    private Intent intent;
+    private boolean didReceiveBroadcast = false;
+    private TestResultReceiver testResultReceiver;
+    private TestBroadcastReceiver testBroadcastReceiver;
+    private Intent receivedIntent;
 
     // Captures result codes from the service itself
     public class TestResultReceiver extends ResultReceiver {
@@ -27,7 +39,16 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
         }
     }
 
-    private TestResultReceiver testResultReceiver;
+    // Registers for broadcasts sent by the service
+    public class TestBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            receivedIntent = intent;
+            didReceiveBroadcast = true;
+            GcmIntentService.semaphore.release();
+        }
+    }
 
     public GcmIntentServiceTest() {
         super(GcmIntentService.class);
@@ -37,7 +58,12 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
     protected void setUp() throws Exception {
         super.setUp();
         GcmIntentService.semaphore = new Semaphore(0);
+        GcmIntentService.preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null);
         testResultReceiver = new TestResultReceiver(null);
+        testBroadcastReceiver = new TestBroadcastReceiver();
+        final IntentFilter intentFilter = new IntentFilter(TEST_PACKAGE_NAME + GcmIntentService.BROADCAST_NAME_SUFFIX);
+        getContext().registerReceiver(testBroadcastReceiver, intentFilter);
+        intent = getServiceIntent();
     }
 
     public void testReceiveNullIntent() throws InterruptedException {
@@ -47,10 +73,36 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
     }
 
     public void testReceiveEmptyIntent() throws InterruptedException {
-        final Intent intent = getServiceIntent();
         startService(intent);
         GcmIntentService.semaphore.acquire();
         assertEquals(GcmIntentService.RESULT_EMPTY_INTENT, testResultCode);
+    }
+
+    public void testEmptyPackageName() throws InterruptedException {
+        intent.putExtra(KEY_MESSAGE, TEST_MESSAGE);
+        startService(intent);
+        GcmIntentService.semaphore.acquire();
+        assertEquals(GcmIntentService.RESULT_EMPTY_PACKAGE_NAME, testResultCode);
+    }
+
+    public void testSendNotification() throws InterruptedException {
+        intent.putExtra(KEY_MESSAGE, TEST_MESSAGE);
+        GcmIntentService.preferencesProvider.savePackageName(TEST_PACKAGE_NAME);
+        startService(intent);
+        GcmIntentService.semaphore.acquire(2);
+
+        assertEquals(GcmIntentService.RESULT_NOTIFIED_APPLICATION, testResultCode);
+        assertTrue(didReceiveBroadcast);
+        assertNotNull(receivedIntent);
+        assertTrue(receivedIntent.hasExtra(GcmIntentService.KEY_GCM_INTENT));
+
+        final Intent gcmIntent = receivedIntent.getParcelableExtra(GcmIntentService.KEY_GCM_INTENT);
+        assertNotNull(gcmIntent);
+
+        final Bundle extras = gcmIntent.getExtras();
+        assertNotNull(extras);
+        assertTrue(extras.containsKey(KEY_MESSAGE));
+        assertEquals(TEST_MESSAGE, extras.getString(KEY_MESSAGE));
     }
 
     private Intent getServiceIntent() {
@@ -61,7 +113,9 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
 
     @Override
     protected void tearDown() throws Exception {
-        super.tearDown();
         GcmIntentService.semaphore = null;
+        GcmIntentService.preferencesProvider = null;
+        getContext().unregisterReceiver(testBroadcastReceiver);
+        super.tearDown();
     }
 }
