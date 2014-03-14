@@ -20,6 +20,10 @@ import android.content.Context;
 import com.xtreme.network.INetworkRequestLauncher;
 import com.xtreme.network.NetworkRequestLauncher;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 public class NetworkWrapperImpl implements NetworkWrapper {
 
     @Override
@@ -30,6 +34,11 @@ public class NetworkWrapperImpl implements NetworkWrapper {
     @Override
     public boolean isNetworkAvailable(Context context) {
         return NetworkUtil.getInstance(context).isNetworkAvailable();
+    }
+
+    @Override
+    public HttpURLConnection getHttpURLConnection(URL url) throws IOException {
+        return (HttpURLConnection) url.openConnection();
     }
 
 }

@@ -20,6 +20,10 @@ import android.content.Context;
 import com.xtreme.network.INetworkRequestLauncher;
 import com.xtreme.network.MockNetworkRequestLauncher;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 public class MockNetworkWrapper implements NetworkWrapper {
 
     private INetworkRequestLauncher networkRequestLauncher;
@@ -44,5 +48,10 @@ public class MockNetworkWrapper implements NetworkWrapper {
     @Override
     public boolean isNetworkAvailable(Context context) {
         return isNetworkAvailable;
+    }
+
+    @Override
+    public HttpURLConnection getHttpURLConnection(URL url) throws IOException {
+        return new MockHttpURLConnection(url);
     }
 }

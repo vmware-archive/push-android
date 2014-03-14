@@ -26,10 +26,20 @@ import org.omnia.pushsdk.network.NetworkWrapper;
 import org.omnia.pushsdk.util.Const;
 import org.omnia.pushsdk.util.PushLibLogger;
 import org.omnia.pushsdk.util.Util;
+
+import com.xtreme.commons.Logger;
 import com.xtreme.network.NetworkRequest;
 import com.xtreme.network.NetworkResponse;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * API request for registering a device with the Omnia Mobile Services back-end server.
@@ -62,12 +72,29 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
 
         verifyRegistrationArguments(gcmDeviceRegistrationId, listener);
 
-        final NetworkRequest request = getNetworkRequest(gcmDeviceRegistrationId, parameters);
-
         try {
-            final NetworkResponse response = networkWrapper.getNetworkRequestLauncher().executeRequestSynchronously(request);
-            onSuccessfulNetworkRequest(response, listener);
-        } catch(Exception e) {
+            final URL url = new URL(Const.BACKEND_REGISTRATION_REQUEST_URL);
+            final HttpURLConnection urlConnection = networkWrapper.getHttpURLConnection(url);
+            urlConnection.setDoOutput(true); // indicate "POST" request
+            urlConnection.setDoInput(true);
+            urlConnection.setReadTimeout(60000);
+            urlConnection.setConnectTimeout(60000);
+            urlConnection.setChunkedStreamingMode(0);
+            urlConnection.addRequestProperty("Content-Type", "application/json");
+            urlConnection.connect();
+
+            final OutputStream outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
+            final String requestBodyData = getRequestBodyData(gcmDeviceRegistrationId, parameters);
+            writeOutput(requestBodyData, outputStream);
+
+            final int statusCode = urlConnection.getResponseCode();
+
+            final InputStream inputStream = new BufferedInputStream(urlConnection.getInputStream());
+            final String responseString = readInput(inputStream);
+
+            onSuccessfulNetworkRequest(statusCode, responseString, listener);
+
+        } catch (Exception e) {
             PushLibLogger.ex("Back-end device registration attempt failed", e);
             listener.onBackEndRegistrationFailed(e.getLocalizedMessage());
         }
@@ -82,47 +109,45 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
         }
     }
 
-    private NetworkRequest getNetworkRequest(String gcmDeviceRegistrationId, RegistrationParameters parameters) {
-        final NetworkRequest networkRequest = new NetworkRequest(Const.BACKEND_REGISTRATION_REQUEST_URL);
-        final String bodyData = getRequestBodyData(gcmDeviceRegistrationId, parameters);
-        networkRequest.setRequestType(NetworkRequest.RequestType.POST);
-        networkRequest.setBodyData(bodyData);
-        networkRequest.addHeaderParam("Content-Type", "application/json");
-        PushLibLogger.v("Making network request to register this device with the back-end server: " + bodyData);
-        return networkRequest;
+    private void writeOutput(String requestBodyData, OutputStream outputStream) throws IOException {
+        final byte[] bytes = requestBodyData.getBytes();
+        for (byte b : bytes) {
+            outputStream.write(b);
+        }
+        outputStream.close();
     }
 
-    public void onSuccessfulNetworkRequest(NetworkResponse networkResponse, final BackEndRegistrationListener listener) {
+    private String readInput(InputStream inputStream) throws IOException {
+        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        byte[] buffer = new byte[256];
 
-        if (networkResponse == null) {
-            PushLibLogger.e("Back-end server registration failed: no networkResponse");
-            listener.onBackEndRegistrationFailed("No networkResponse from back-end server.");
-            return;
+        while (true) {
+            final int numberBytesRead = inputStream.read(buffer);
+            if (numberBytesRead < 0) {
+                break;
+            }
+            byteArrayOutputStream.write(buffer, 0, numberBytesRead);
         }
 
-        if (networkResponse.getStatus() == null) {
-            PushLibLogger.e("Back-end server registration failed: no statusLine in networkResponse");
-            listener.onBackEndRegistrationFailed("Back-end no statusLine in networkResponse");
-            return;
-        }
+        final String str = new String(byteArrayOutputStream.toByteArray());
+        return str;
+    }
 
-        final int statusCode = networkResponse.getStatus().getStatusCode();
+    public void onSuccessfulNetworkRequest(int statusCode, String responseString, final BackEndRegistrationListener listener) {
+
         if (isFailureStatusCode(statusCode)) {
             PushLibLogger.e("Back-end server registration failed: server returned HTTP status " + statusCode);
             listener.onBackEndRegistrationFailed("Back-end server returned HTTP status " + statusCode);
             return;
         }
 
-        final Gson gson = new Gson();
-        final String responseString;
-        try {
-            responseString = networkResponse.getResponseString();
-        } catch (IOException e) {
+        if (responseString == null) {
             PushLibLogger.e("Back-end server registration failed: server response empty");
             listener.onBackEndRegistrationFailed("Back-end server response empty");
             return;
         }
 
+        final Gson gson = new Gson();
         final BackEndApiRegistrationResponseData responseData;
         try {
             responseData = gson.fromJson(responseString, BackEndApiRegistrationResponseData.class);

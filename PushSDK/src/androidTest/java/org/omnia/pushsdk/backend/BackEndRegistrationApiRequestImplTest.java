@@ -18,14 +18,11 @@ package org.omnia.pushsdk.backend;
 import android.test.AndroidTestCase;
 
 import org.omnia.pushsdk.RegistrationParameters;
+import org.omnia.pushsdk.network.MockHttpURLConnection;
 import org.omnia.pushsdk.network.MockNetworkWrapper;
 import com.xtreme.commons.testing.DelayedLoop;
-import com.xtreme.network.MockNetworkRequestLauncher;
-import com.xtreme.network.MockNetworkRequestListener;
-import com.xtreme.network.MockNetworkResponse;
-import com.xtreme.network.NetworkError;
-import com.xtreme.network.NetworkRequest;
-import com.xtreme.network.NetworkResponse;
+
+import java.io.IOException;
 
 public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
 
@@ -36,11 +33,8 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     private static final String TEST_RELEASE_SECRET = "TEST_RELEASE_SECRET";
     private static final String TEST_DEVICE_ALIAS = "TEST_DEVICE_ALIAS";
     private static final long TEN_SECOND_TIMEOUT = 10000L;
-    private static final long NO_DELAY = 0L;
-    private static final long ONE_SECOND_DELAY = 1000L;
 
     private MockNetworkWrapper networkWrapper;
-    private MockNetworkRequestLauncher networkRequestLauncher;
     private DelayedLoop delayedLoop;
     private BackEndRegistrationListener backEndRegistrationListener;
 
@@ -48,8 +42,8 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         networkWrapper = new MockNetworkWrapper();
-        networkRequestLauncher = (MockNetworkRequestLauncher) networkWrapper.getNetworkRequestLauncher();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
+        MockHttpURLConnection.reset();
     }
 
     public void testRequiresContext() {
@@ -102,7 +96,7 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     }
 
     public void testSuccessfulRequest() {
-        makeListenersForSuccessfulRequestFromNetwork(NO_DELAY, true, 200);
+        makeListenersForSuccessfulRequestFromNetwork(true, 200);
         final BackEndRegistrationApiRequestImpl registrar = new BackEndRegistrationApiRequestImpl(getContext(), networkWrapper);
         registrar.startDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, getParameters(), backEndRegistrationListener);
         delayedLoop.startLoop();
@@ -110,7 +104,7 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     }
 
     public void testSuccessfulAsync() {
-        makeListenersForSuccessfulRequestFromNetwork(ONE_SECOND_DELAY, true, 200);
+        makeListenersForSuccessfulRequestFromNetwork(true, 200);
         final BackEndRegistrationApiRequestImpl registrar = new BackEndRegistrationApiRequestImpl(getContext(), networkWrapper);
         registrar.startDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, getParameters(), backEndRegistrationListener);
         delayedLoop.startLoop();
@@ -118,15 +112,7 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     }
 
     public void testNullResponse() {
-        makeListenersForSuccessfulNullResultFromNetwork(NO_DELAY);
-        final BackEndRegistrationApiRequestImpl registrar = new BackEndRegistrationApiRequestImpl(getContext(), networkWrapper);
-        registrar.startDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, getParameters(), backEndRegistrationListener);
-        delayedLoop.startLoop();
-        assertTrue(delayedLoop.isSuccess());
-    }
-
-    public void testNoStatusLine() {
-        makeListenersForSuccessfulWithNoStatusLineFromNetwork(NO_DELAY);
+        makeListenersForSuccessfulNullResultFromNetwork();
         final BackEndRegistrationApiRequestImpl registrar = new BackEndRegistrationApiRequestImpl(getContext(), networkWrapper);
         registrar.startDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, getParameters(), backEndRegistrationListener);
         delayedLoop.startLoop();
@@ -134,7 +120,7 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     }
 
     public void testSuccessful404() {
-        makeListenersForSuccessfulRequestFromNetwork(NO_DELAY, false, 404);
+        makeListenersForSuccessfulRequestFromNetwork(false, 404);
         final BackEndRegistrationApiRequestImpl registrar = new BackEndRegistrationApiRequestImpl(getContext(), networkWrapper);
         registrar.startDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, getParameters(), backEndRegistrationListener);
         delayedLoop.startLoop();
@@ -142,15 +128,7 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     }
 
     public void testCouldNotConnect() {
-        makeListenersFromFailedRequestFromNetwork(NO_DELAY, "Your server is busted", 0);
-        final BackEndRegistrationApiRequestImpl registrar = new BackEndRegistrationApiRequestImpl(getContext(), networkWrapper);
-        registrar.startDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, getParameters(), backEndRegistrationListener);
-        delayedLoop.startLoop();
-        assertTrue(delayedLoop.isSuccess());
-    }
-
-    public void testNullNetworkResponse() {
-        makeListenersWithEmptyNetworkResponse(NO_DELAY);
+        makeListenersFromFailedRequestFromNetwork("Your server is busted", 0);
         final BackEndRegistrationApiRequestImpl registrar = new BackEndRegistrationApiRequestImpl(getContext(), networkWrapper);
         registrar.startDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, getParameters(), backEndRegistrationListener);
         delayedLoop.startLoop();
@@ -158,7 +136,7 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     }
 
     public void testBadNetworkResponse() {
-        makeListenersWithBadNetworkResponse(NO_DELAY);
+        makeListenersWithBadNetworkResponse();
         final BackEndRegistrationApiRequestImpl registrar = new BackEndRegistrationApiRequestImpl(getContext(), networkWrapper);
         registrar.startDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, getParameters(), backEndRegistrationListener);
         delayedLoop.startLoop();
@@ -166,84 +144,46 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     }
 
     public void testNoDeviceUuidInResponse() {
-        makeListenersWithNoDeviceUuidInResponse(NO_DELAY);
+        makeListenersWithNoDeviceUuidInResponse();
         final BackEndRegistrationApiRequestImpl registrar = new BackEndRegistrationApiRequestImpl(getContext(), networkWrapper);
         registrar.startDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, getParameters(), backEndRegistrationListener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
 
-    private void makeListenersForSuccessfulRequestFromNetwork(long delay, boolean isSuccessfulResult, int expectedHttpStatusCode) {
+    private void makeListenersForSuccessfulRequestFromNetwork(boolean isSuccessfulResult, int expectedHttpStatusCode) {
         final String resultantJson = "{\"device_uuid\" : \"" + TEST_BACK_END_DEVICE_REGISTRATION_ID + "\"}";
-        final NetworkResponse response = networkRequestLauncher.getNetworkResponse(resultantJson, expectedHttpStatusCode);
-        makeNetworkRequestListenerForSuccessfulRequest(delay, response);
+        MockHttpURLConnection.setResponseData(resultantJson);
+        MockHttpURLConnection.setResponseCode(expectedHttpStatusCode);
         makeBackEndRegistrationApiRequestListener(isSuccessfulResult);
     }
 
-    private void makeListenersForSuccessfulNullResultFromNetwork(long delay) {
-        makeNetworkRequestListenerForSuccessfulRequest(delay, null);
+    private void makeListenersForSuccessfulNullResultFromNetwork() {
+        MockHttpURLConnection.setResponseData(null);
+        MockHttpURLConnection.setResponseCode(200);
         makeBackEndRegistrationApiRequestListener(false);
     }
 
-    private void makeListenersForSuccessfulWithNoStatusLineFromNetwork(long delay) {
-        final NetworkResponse response = networkRequestLauncher.getNetworkResponse(null, MockNetworkResponse.NO_STATUS_CODE);
-        makeNetworkRequestListenerForSuccessfulRequest(delay, response);
+    private void makeListenersWithBadNetworkResponse() {
+        MockHttpURLConnection.setResponseData("{{{{{{{");
+        MockHttpURLConnection.setResponseCode(200);
         makeBackEndRegistrationApiRequestListener(false);
     }
 
-    private void makeListenersWithEmptyNetworkResponse(long delay) {
-        final NetworkResponse response = networkRequestLauncher.getNetworkResponse(null, 200);
-        makeNetworkRequestListenerForSuccessfulRequest(delay, response);
+    private void makeListenersWithNoDeviceUuidInResponse() {
+        MockHttpURLConnection.setResponseData("{}");
+        MockHttpURLConnection.setResponseCode(200);
         makeBackEndRegistrationApiRequestListener(false);
     }
 
-    private void makeListenersWithBadNetworkResponse(long delay) {
-        final NetworkResponse response = networkRequestLauncher.getNetworkResponse("{{{{{{{", 200);
-        makeNetworkRequestListenerForSuccessfulRequest(delay, response);
-        makeBackEndRegistrationApiRequestListener(false);
-    }
-
-    private void makeListenersWithNoDeviceUuidInResponse(long delay) {
-        final NetworkResponse response = networkRequestLauncher.getNetworkResponse("{}", 200);
-        makeNetworkRequestListenerForSuccessfulRequest(delay, response);
-        makeBackEndRegistrationApiRequestListener(false);
-    }
-
-    private void makeNetworkRequestListenerForSuccessfulRequest(final long delay, final NetworkResponse response) {
-        networkRequestLauncher.setNextRequestResolution(new MockNetworkRequestListener() {
-
-            @Override
-            public void onSuccess(NetworkRequest networkRequest, NetworkResponse networkRequestResponse) {
-            }
-
-            @Override
-            public void onFailure(NetworkRequest networkRequest, NetworkError networkError) {
-                fail();
-            }
-        }, response, delay);
-    }
-
-    private void makeNetworkRequestListenerForFailedRequest(final NetworkError error, final long delay) {
-        networkRequestLauncher.setNextRequestResolution(new MockNetworkRequestListener() {
-
-            @Override
-            public void onSuccess(NetworkRequest networkRequest, NetworkResponse networkRequestResponse) {
-                fail();
-            }
-
-            @Override
-            public void onFailure(NetworkRequest networkRequest, NetworkError networkError) {
-            }
-        }, error, delay);
-    }
-
-    private void makeListenersFromFailedRequestFromNetwork(long delay, String exceptionText, int expectedHttpStatusCode) {
-        Exception exception = null;
+    private void makeListenersFromFailedRequestFromNetwork(String exceptionText, int expectedHttpStatusCode) {
+        IOException exception = null;
         if (exceptionText != null) {
-            exception = new Exception(exceptionText);
+            exception = new IOException(exceptionText);
         }
-        final NetworkError error = networkRequestLauncher.getNetworkError(exception, expectedHttpStatusCode);
-        makeNetworkRequestListenerForFailedRequest(error, delay);
+        MockHttpURLConnection.setConnectionException(exception);
+        MockHttpURLConnection.willThrowConnectionException(true);
+        MockHttpURLConnection.setResponseCode(expectedHttpStatusCode);
         makeBackEndRegistrationApiRequestListener(false);
     }
 

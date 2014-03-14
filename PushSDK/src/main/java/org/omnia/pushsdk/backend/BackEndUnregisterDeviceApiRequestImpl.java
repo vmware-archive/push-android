@@ -17,8 +17,9 @@ package org.omnia.pushsdk.backend;
 import org.omnia.pushsdk.network.NetworkWrapper;
 import org.omnia.pushsdk.util.Const;
 import org.omnia.pushsdk.util.PushLibLogger;
-import com.xtreme.network.NetworkRequest;
-import com.xtreme.network.NetworkResponse;
+
+import java.net.HttpURLConnection;
+import java.net.URL;
 
 /**
  * API request for unregistering a device from the Omnia Mobile Services back-end server.
@@ -44,45 +45,40 @@ public class BackEndUnregisterDeviceApiRequestImpl implements BackEndUnregisterD
 
     @Override
     public void startUnregisterDevice(String backEndDeviceRegistrationId, BackEndUnregisterDeviceListener listener) {
-        final NetworkRequest request = getNetworkRequest(backEndDeviceRegistrationId, listener);
+
+        verifyUnregistrationArguments(backEndDeviceRegistrationId, listener);
+
         try {
-            final NetworkResponse networkResponse = networkWrapper.getNetworkRequestLauncher().executeRequestSynchronously(request);
-            onSuccessfulRequest(networkResponse, listener);
-        } catch(Exception e) {
+            PushLibLogger.v("Making network request to the back-end server to unregister the device ID:" + backEndDeviceRegistrationId);
+            final URL url = new URL(Const.BACKEND_REGISTRATION_REQUEST_URL + "/" + backEndDeviceRegistrationId);
+            final HttpURLConnection urlConnection = networkWrapper.getHttpURLConnection(url);
+            urlConnection.setRequestMethod("DELETE");
+            urlConnection.setReadTimeout(60000);
+            urlConnection.setConnectTimeout(60000);
+            urlConnection.setChunkedStreamingMode(0);
+            urlConnection.connect();
+
+            final int statusCode = urlConnection.getResponseCode();
+
+            onSuccessfulRequest(statusCode, listener);
+
+        } catch (Exception e) {
             PushLibLogger.ex("Back-end device unregistration attempt failed", e);
             listener.onBackEndUnregisterDeviceFailed(e.getLocalizedMessage());
         }
     }
 
-    private NetworkRequest getNetworkRequest(String backEndDeviceRegistrationId, BackEndUnregisterDeviceListener listener) {
+    private void verifyUnregistrationArguments(String backEndDeviceRegistrationId, BackEndUnregisterDeviceListener listener) {
         if (backEndDeviceRegistrationId == null) {
             throw new IllegalArgumentException("backEndDeviceRegistrationId may not be null");
         }
         if (listener == null) {
             throw new IllegalArgumentException("listener may not be null");
         }
-
-        PushLibLogger.v("Making network request to the back-end server to unregister the device ID:" + backEndDeviceRegistrationId);
-        final NetworkRequest networkRequest = new NetworkRequest(Const.BACKEND_REGISTRATION_REQUEST_URL + "/" + backEndDeviceRegistrationId);
-        networkRequest.setRequestType(NetworkRequest.RequestType.DELETE);
-        return networkRequest;
     }
 
-    public void onSuccessfulRequest(NetworkResponse networkResponse, BackEndUnregisterDeviceListener listener) {
+    public void onSuccessfulRequest(int statusCode, BackEndUnregisterDeviceListener listener) {
 
-        if (networkResponse == null) {
-            PushLibLogger.e("Back-end server unregistration failed: no networkResponse");
-            listener.onBackEndUnregisterDeviceFailed("No networkResponse from back-end server.");
-            return;
-        }
-
-        if (networkResponse.getStatus() == null) {
-            PushLibLogger.e("Back-end server unregistration failed: no statusLine in networkResponse");
-            listener.onBackEndUnregisterDeviceFailed("Back-end no statusLine in networkResponse");
-            return;
-        }
-
-        final int statusCode = networkResponse.getStatus().getStatusCode();
         if (isFailureStatusCode(statusCode)) {
             PushLibLogger.e("Back-end server unregistration failed: server returned HTTP status " + statusCode);
             listener.onBackEndUnregisterDeviceFailed("Back-end server returned HTTP status " + statusCode);

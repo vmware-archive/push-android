@@ -19,9 +19,15 @@ import android.content.Context;
 
 import com.xtreme.network.INetworkRequestLauncher;
 
+import java.io.IOException;
+import java.net.HttpURLConnection;
+import java.net.URL;
+
 public interface NetworkWrapper {
 
     INetworkRequestLauncher getNetworkRequestLauncher();
 
     boolean isNetworkAvailable(Context context);
+
+    HttpURLConnection getHttpURLConnection(URL url) throws IOException;
 }
