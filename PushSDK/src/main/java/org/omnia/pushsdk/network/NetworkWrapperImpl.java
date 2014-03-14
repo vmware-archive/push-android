@@ -17,19 +17,11 @@ package org.omnia.pushsdk.network;
 
 import android.content.Context;
 
-import com.xtreme.network.INetworkRequestLauncher;
-import com.xtreme.network.NetworkRequestLauncher;
-
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 public class NetworkWrapperImpl implements NetworkWrapper {
-
-    @Override
-    public INetworkRequestLauncher getNetworkRequestLauncher() {
-        return NetworkRequestLauncher.getInstance();
-    }
 
     @Override
     public boolean isNetworkAvailable(Context context) {

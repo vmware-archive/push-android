@@ -27,10 +27,6 @@ import org.omnia.pushsdk.util.Const;
 import org.omnia.pushsdk.util.PushLibLogger;
 import org.omnia.pushsdk.util.Util;
 
-import com.xtreme.commons.Logger;
-import com.xtreme.network.NetworkRequest;
-import com.xtreme.network.NetworkResponse;
-
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -38,7 +34,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -85,6 +80,7 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
 
             final OutputStream outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
             final String requestBodyData = getRequestBodyData(gcmDeviceRegistrationId, parameters);
+            PushLibLogger.v("Making network request to register this device with the back-end server: " + requestBodyData);
             writeOutput(requestBodyData, outputStream);
 
             final int statusCode = urlConnection.getResponseCode();
