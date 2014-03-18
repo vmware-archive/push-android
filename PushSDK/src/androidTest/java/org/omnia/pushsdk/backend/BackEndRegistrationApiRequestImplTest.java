@@ -20,7 +20,7 @@ import android.test.AndroidTestCase;
 import org.omnia.pushsdk.RegistrationParameters;
 import org.omnia.pushsdk.network.MockHttpURLConnection;
 import org.omnia.pushsdk.network.MockNetworkWrapper;
-import com.xtreme.commons.testing.DelayedLoop;
+import org.omnia.pushsdk.util.DelayedLoop;
 
 import java.io.IOException;
 

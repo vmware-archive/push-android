@@ -20,8 +20,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import com.xtreme.commons.DebugUtil;
-
 import java.util.Locale;
 
 /**

@@ -43,6 +43,9 @@ In order to receive push messages from Omnia in your Android application you wil
 
         compile 'org.omnia:omnia-pushsdk-android:1.0.0-RELEASE'
 
+        TODO - decide where this library will get published.  It is not likely that the Xtreme Labs Maven Repository
+        will still be in use.
+
  4. Linking the library as an AAR file (as above) should add the appropriate permissions to your `AndroidManifest.xml`
     file.  If you are not able to link the library as an AAR file then you will need to add the following permissions
     manually in order to register your device with Omnia:
@@ -95,15 +98,8 @@ Building the SDK itself
 
 You can build this project directly from the command line using Gradle or in Android Studio.
 
-To satisfy this project's dependencies, you will need access to the Maven repository at
-https://maven.xtremelabs.com/artifactory/xl-libs.  At this time, there is no anonymous access to this repository.
-You will need to store your credentials in your `~/.gradle/gradle.properties` file.  Please see the `build.gradle`
-file in the `PushLib` directory for more details.
-
 The library depends on the following libraries:
 
- * xl-commons-android - in the Xtreme Labs Maven repository
- * xl-network-android - in the Xtreme Labs Maven repository
  * Google GSON - should be in the Maven Central repository
  * Google Play Services - should be provided in your Android SDK distribution. If you don't have iton your computer,
                           then run the Android SDK Manager (run `android` from your command line) and install it.  You

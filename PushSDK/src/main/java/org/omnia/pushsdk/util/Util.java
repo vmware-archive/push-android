@@ -19,8 +19,6 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
-import com.xtreme.commons.DebugUtil;
-
 import java.io.File;
 import java.io.PrintWriter;
 

@@ -10,28 +10,6 @@ buildscript {
 
 repositories {
     mavenCentral()
-    maven {
-        url "https://maven.xtremelabs.com/artifactory/xl-libs"
-
-        //
-        // To provide your credentials to the maven artifactory, you will need
-        // to create a file called 'gradle.properties' in the project base directory
-        // or in your ~/.gradle directory (if you want it to apply to all projects
-        // you build on your computer).  This file should contain the following settings:
-        //
-        //     xlMavenUser=<your.username.for.maven.xtremelabs.com>
-        //     xlMavenPassword=<your.password.for.maven.xtremelabs.com>
-        //
-        // Please do not check in this file.  Keep your password a secret!
-        //
-        // Please note that, at this time, there is no anonymous access to this maven
-        // repository.
-        //
-        credentials {
-            username xlMavenUser
-            password xlMavenPassword
-        }
-    }
 }
 
 apply plugin: 'android-library'
@@ -49,6 +27,5 @@ android {
 dependencies {
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'com.android.support:appcompat-v7:19.0.0' // TODO - decide if we can generalize the version for the appcompat to something like 19+
-    compile 'com.xtremelabs:xl-commons-android:1.6.0-RELEASE'
     compile 'com.google.android.gms:play-services:4.2.42'
 }

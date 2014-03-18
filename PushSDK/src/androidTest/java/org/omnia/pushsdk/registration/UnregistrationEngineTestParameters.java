@@ -4,14 +4,13 @@ import android.content.Context;
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
 
-import com.xtreme.commons.testing.DelayedLoop;
-
 import org.omnia.pushsdk.backend.BackEndUnregisterDeviceApiRequestProvider;
 import org.omnia.pushsdk.backend.FakeBackEndUnregisterDeviceApiRequest;
 import org.omnia.pushsdk.gcm.FakeGcmProvider;
 import org.omnia.pushsdk.gcm.FakeGcmUnregistrationApiRequest;
 import org.omnia.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
+import org.omnia.pushsdk.util.DelayedLoop;
 
 public class UnregistrationEngineTestParameters {
 

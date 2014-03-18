@@ -30,8 +30,8 @@ import org.omnia.pushsdk.gcm.GcmRegistrationApiRequestProvider;
 import org.omnia.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
 import org.omnia.pushsdk.prefs.PreferencesProvider;
+import org.omnia.pushsdk.util.DelayedLoop;
 import org.omnia.pushsdk.version.FakeVersionProvider;
-import com.xtreme.commons.testing.DelayedLoop;
 
 public class RegistrationEngineTestParameters {
 

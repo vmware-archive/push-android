@@ -43,6 +43,7 @@ import org.omnia.pushsdk.model.LogItem;
 import org.omnia.pushsdk.PushLib;
 import org.omnia.pushsdk.R;
 import org.omnia.pushsdk.RegistrationParameters;
+import org.omnia.pushsdk.util.DebugUtil;
 import org.omnia.pushsdk.util.Settings;
 import org.omnia.pushsdk.dialogfragment.ClearRegistrationDialogFragment;
 import org.omnia.pushsdk.dialogfragment.LogItemLongClickDialogFragment;
@@ -51,10 +52,8 @@ import org.omnia.pushsdk.model.GcmMessageRequest;
 import org.omnia.pushsdk.registration.RegistrationListener;
 import org.omnia.pushsdk.util.Const;
 import org.omnia.pushsdk.util.PushLibLogger;
-
-import com.xtreme.commons.DebugUtil;
-import com.xtreme.commons.StringUtil;
-import com.xtreme.commons.ThreadUtil;
+import org.omnia.pushsdk.util.StringUtil;
+import org.omnia.pushsdk.util.ThreadUtil;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -63,7 +62,6 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;

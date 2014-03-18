@@ -2,14 +2,13 @@ package org.omnia.pushsdk.registration;
 
 import android.test.AndroidTestCase;
 
-import com.xtreme.commons.Logger;
-
 import org.omnia.pushsdk.backend.BackEndUnregisterDeviceApiRequestProvider;
 import org.omnia.pushsdk.backend.FakeBackEndUnregisterDeviceApiRequest;
 import org.omnia.pushsdk.gcm.FakeGcmProvider;
 import org.omnia.pushsdk.gcm.FakeGcmUnregistrationApiRequest;
 import org.omnia.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
+import org.omnia.pushsdk.util.PushLibLogger;
 
 import java.util.concurrent.Semaphore;
 
@@ -136,7 +135,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
             @Override
             public void onUnregistrationFailed(String reason) {
                 if (isSuccessfulUnregistration) {
-                    Logger.e("Test failed due to error:" + reason);
+                    PushLibLogger.e("Test failed due to error:" + reason);
                 }
                 assertFalse(isSuccessfulUnregistration);
                 semaphore.release();

@@ -29,9 +29,9 @@ import org.omnia.pushsdk.gcm.GcmRegistrationApiRequestProvider;
 import org.omnia.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
 import org.omnia.pushsdk.prefs.PreferencesProvider;
+import org.omnia.pushsdk.util.PushLibLogger;
 import org.omnia.pushsdk.version.FakeVersionProvider;
 import org.omnia.pushsdk.version.VersionProvider;
-import com.xtreme.commons.Logger;
 
 import java.util.concurrent.Semaphore;
 
@@ -844,7 +844,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
             @Override
             public void onRegistrationFailed(String reason) {
                 if (isSuccessfulRegistration) {
-                    Logger.e("Test failed due to error:" + reason);
+                    PushLibLogger.e("Test failed due to error:" + reason);
                 }
                 assertFalse(isSuccessfulRegistration);
                 semaphore.release();
