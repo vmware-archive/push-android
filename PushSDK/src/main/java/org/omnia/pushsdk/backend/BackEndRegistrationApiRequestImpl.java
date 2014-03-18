@@ -29,8 +29,6 @@ import org.omnia.pushsdk.util.Util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -39,27 +37,23 @@ import java.net.URL;
 /**
  * API request for registering a device with the Omnia Mobile Services back-end server.
  */
-public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApiRequest {
+public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements BackEndRegistrationApiRequest {
 
-    private NetworkWrapper networkWrapper;
     private Context context;
 
     public BackEndRegistrationApiRequestImpl(Context context, NetworkWrapper networkWrapper) {
-        verifyArguments(context, networkWrapper);
-        saveArguments(context, networkWrapper);
+        super(networkWrapper);
+        verifyArguments(context);
+        saveArguments(context);
     }
 
-    private void verifyArguments(Context context, NetworkWrapper networkWrapper) {
-        if (networkWrapper == null) {
-            throw new IllegalArgumentException("networkWrapper may not be null");
-        }
+    private void verifyArguments(Context context) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
     }
 
-    private void saveArguments(Context context, NetworkWrapper networkWrapper) {
-        this.networkWrapper = networkWrapper;
+    private void saveArguments(Context context) {
         this.context = context;
     }
 
@@ -69,12 +63,9 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
 
         try {
             final URL url = new URL(Const.BACKEND_REGISTRATION_REQUEST_URL);
-            final HttpURLConnection urlConnection = networkWrapper.getHttpURLConnection(url);
+            final HttpURLConnection urlConnection = getHttpURLConnection(url);
             urlConnection.setDoOutput(true); // indicate "POST" request
             urlConnection.setDoInput(true);
-            urlConnection.setReadTimeout(60000);
-            urlConnection.setConnectTimeout(60000);
-            urlConnection.setChunkedStreamingMode(0);
             urlConnection.addRequestProperty("Content-Type", "application/json");
             urlConnection.connect();
 
@@ -103,30 +94,6 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
         if (listener == null) {
             throw new IllegalArgumentException("listener may not be null");
         }
-    }
-
-    private void writeOutput(String requestBodyData, OutputStream outputStream) throws IOException {
-        final byte[] bytes = requestBodyData.getBytes();
-        for (byte b : bytes) {
-            outputStream.write(b);
-        }
-        outputStream.close();
-    }
-
-    private String readInput(InputStream inputStream) throws IOException {
-        final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        byte[] buffer = new byte[256];
-
-        while (true) {
-            final int numberBytesRead = inputStream.read(buffer);
-            if (numberBytesRead < 0) {
-                break;
-            }
-            byteArrayOutputStream.write(buffer, 0, numberBytesRead);
-        }
-
-        final String str = new String(byteArrayOutputStream.toByteArray());
-        return str;
     }
 
     public void onSuccessfulNetworkRequest(int statusCode, String responseString, final BackEndRegistrationListener listener) {
@@ -167,10 +134,6 @@ public class BackEndRegistrationApiRequestImpl implements BackEndRegistrationApi
 
         PushLibLogger.i("Back-end Server registration succeeded.");
         listener.onBackEndRegistrationSuccess(deviceUuid);
-    }
-
-    private boolean isFailureStatusCode(int statusCode) {
-        return (statusCode < 200 || statusCode >= 300);
     }
 
     private String getRequestBodyData(String deviceRegistrationId, RegistrationParameters parameters) {

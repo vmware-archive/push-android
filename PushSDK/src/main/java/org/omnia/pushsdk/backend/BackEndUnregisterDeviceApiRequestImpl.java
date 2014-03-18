@@ -24,23 +24,10 @@ import java.net.URL;
 /**
  * API request for unregistering a device from the Omnia Mobile Services back-end server.
  */
-public class BackEndUnregisterDeviceApiRequestImpl implements BackEndUnregisterDeviceApiRequest {
-
-    private NetworkWrapper networkWrapper;
+public class BackEndUnregisterDeviceApiRequestImpl extends ApiRequestImpl implements BackEndUnregisterDeviceApiRequest {
 
     public BackEndUnregisterDeviceApiRequestImpl(NetworkWrapper networkWrapper) {
-        verifyArguments(networkWrapper);
-        saveArguments(networkWrapper);
-    }
-
-    private void verifyArguments(NetworkWrapper networkWrapper) {
-        if (networkWrapper == null) {
-            throw new IllegalArgumentException("networkWrapper may not be null");
-        }
-    }
-
-    private void saveArguments(NetworkWrapper networkWrapper) {
-        this.networkWrapper = networkWrapper;
+        super(networkWrapper);
     }
 
     @Override
@@ -51,11 +38,8 @@ public class BackEndUnregisterDeviceApiRequestImpl implements BackEndUnregisterD
         try {
             PushLibLogger.v("Making network request to the back-end server to unregister the device ID:" + backEndDeviceRegistrationId);
             final URL url = new URL(Const.BACKEND_REGISTRATION_REQUEST_URL + "/" + backEndDeviceRegistrationId);
-            final HttpURLConnection urlConnection = networkWrapper.getHttpURLConnection(url);
+            final HttpURLConnection urlConnection = getHttpURLConnection(url);
             urlConnection.setRequestMethod("DELETE");
-            urlConnection.setReadTimeout(60000);
-            urlConnection.setConnectTimeout(60000);
-            urlConnection.setChunkedStreamingMode(0);
             urlConnection.connect();
 
             final int statusCode = urlConnection.getResponseCode();
@@ -87,10 +71,6 @@ public class BackEndUnregisterDeviceApiRequestImpl implements BackEndUnregisterD
 
         PushLibLogger.i("Back-end Server device unregistration succeeded.");
         listener.onBackEndUnregisterDeviceSuccess();
-    }
-
-    private boolean isFailureStatusCode(int statusCode) {
-        return (statusCode < 200 || statusCode >= 300);
     }
 
     @Override
