@@ -44,6 +44,8 @@ public class BackEndUnregisterDeviceApiRequestImpl extends ApiRequestImpl implem
 
             final int statusCode = urlConnection.getResponseCode();
 
+            urlConnection.disconnect();
+
             onSuccessfulRequest(statusCode, listener);
 
         } catch (Exception e) {

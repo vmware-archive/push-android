@@ -29,6 +29,7 @@ import org.omnia.pushsdk.util.Util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
@@ -61,6 +62,7 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
 
         verifyRegistrationArguments(gcmDeviceRegistrationId, listener);
 
+        OutputStream outputStream = null;
         try {
             final URL url = new URL(Const.BACKEND_REGISTRATION_REQUEST_URL);
             final HttpURLConnection urlConnection = getHttpURLConnection(url);
@@ -69,7 +71,7 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
             urlConnection.addRequestProperty("Content-Type", "application/json");
             urlConnection.connect();
 
-            final OutputStream outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
+            outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
             final String requestBodyData = getRequestBodyData(gcmDeviceRegistrationId, parameters);
             PushLibLogger.v("Making network request to register this device with the back-end server: " + requestBodyData);
             writeOutput(requestBodyData, outputStream);
@@ -79,11 +81,21 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
             final InputStream inputStream = new BufferedInputStream(urlConnection.getInputStream());
             final String responseString = readInput(inputStream);
 
+            urlConnection.disconnect();
+
             onSuccessfulNetworkRequest(statusCode, responseString, listener);
 
         } catch (Exception e) {
             PushLibLogger.ex("Back-end device registration attempt failed", e);
             listener.onBackEndRegistrationFailed(e.getLocalizedMessage());
+        }
+
+        finally {
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {}
+            }
         }
     }
 

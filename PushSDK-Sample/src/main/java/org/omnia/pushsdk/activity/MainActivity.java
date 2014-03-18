@@ -20,6 +20,7 @@ import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -37,7 +38,6 @@ import com.google.gson.Gson;
 import org.omnia.pushsdk.broadcastreceiver.MyOmniaRemotePushLibBroadcastReceiver;
 import org.omnia.pushsdk.dialogfragment.SendMessageDialogFragment;
 import org.omnia.pushsdk.registration.UnregistrationListener;
-import org.omnia.pushsdk.service.GcmIntentService;
 import org.omnia.pushsdk.adapter.LogAdapter;
 import org.omnia.pushsdk.model.LogItem;
 import org.omnia.pushsdk.PushLib;
@@ -55,16 +55,16 @@ import org.omnia.pushsdk.util.PushLibLogger;
 import com.xtreme.commons.DebugUtil;
 import com.xtreme.commons.StringUtil;
 import com.xtreme.commons.ThreadUtil;
-import com.xtreme.network.NetworkError;
-import com.xtreme.network.NetworkRequest;
-import com.xtreme.network.NetworkRequestLauncher;
-import com.xtreme.network.NetworkRequestListener;
-import com.xtreme.network.NetworkResponse;
 
+import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -252,38 +252,56 @@ public class MainActivity extends ActionBarActivity {
 
     private void sendMessageViaBackEnd() {
         updateCurrentBaseRowColour();
-        addLogMessage("Sending message via back-end server...");
         final String data = getBackEndMessageRequestString();
-        queueLogMessage("Message body data: \"" + data + "\"");
-        final NetworkRequest networkRequest = new NetworkRequest(BACK_END_SEND_MESSAGE_URL, new NetworkRequestListener() {
+        addLogMessage("Sending message via back-end server...");
+        addLogMessage("Message body data: \"" + data + "\"");
 
+        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
-            public void onSuccess(NetworkResponse networkResponse) {
+            protected Void doInBackground(Void... params) {
+
+                OutputStream outputStream = null;
+
                 try {
-                    int statusCode = networkResponse.getStatus().getStatusCode();
+                    final URL url = new URL(BACK_END_SEND_MESSAGE_URL);
+                    final HttpURLConnection urlConnection = getUrlConnection(url);
+                    urlConnection.connect();
+
+                    outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
+                    writeConnectionOutput(data, outputStream);
+
+                    final int statusCode = urlConnection.getResponseCode();
                     if (statusCode >= 200 && statusCode < 300) {
                         queueLogMessage("Back-end server accepted network request to send message. HTTP response status code is " + statusCode + ".");
                     } else {
                         queueLogMessage("Back-end server rejected network request to send message. HTTP response status code is " + statusCode + ".");
                     }
-                } catch (Exception e) {
-                    queueLogMessage("ERROR: got exception parsing network response from Back-end server: " + e.getLocalizedMessage());
-                }
-            }
 
-            @Override
-            public void onFailure(NetworkError networkError) {
-                try {
-                    queueLogMessage("ERROR sending request to Back-end server: " + networkError.getException().getLocalizedMessage());
-                } catch (Exception e) {
-                    queueLogMessage("ERROR got exception parsing network error: " + e.getLocalizedMessage());
+                    urlConnection.disconnect();
+
+                } catch (IOException e) {
+                    queueLogMessage("ERROR: got exception parsing network response from Back-end server: " + e.getLocalizedMessage());
+
+                } finally {
+                    if (outputStream != null) {
+                        try {
+                            outputStream.close();
+                        } catch (IOException e) {}
+                    }
                 }
+                return null;
             }
-        });
-        networkRequest.setRequestType(NetworkRequest.RequestType.POST);
-        networkRequest.addHeaderParam("Content-Type", "application/json");
-        networkRequest.setBodyData(data);
-        NetworkRequestLauncher.getInstance().executeRequest(networkRequest);
+        };
+
+        asyncTask.execute((Void)null);
+    }
+
+    private void writeConnectionOutput(String requestBodyData, OutputStream outputStream) throws IOException {
+        final byte[] bytes = requestBodyData.getBytes();
+        for (byte b : bytes) {
+            outputStream.write(b);
+        }
+        outputStream.close();
     }
 
     private String getBackEndMessageRequestString() {
@@ -302,37 +320,56 @@ public class MainActivity extends ActionBarActivity {
     private void sendMessageViaGcm() {
         updateCurrentBaseRowColour();
         final String data = getGcmMessageRequestString();
-        queueLogMessage("Message body data: \"" + data + "\"");
-        final NetworkRequest networkRequest = new NetworkRequest(GCM_SEND_MESSAGE_URL, new NetworkRequestListener() {
+        addLogMessage("Sending message via GCM...");
+        addLogMessage("Message body data: \"" + data + "\"");
 
+        final AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
             @Override
-            public void onSuccess(NetworkResponse networkResponse) {
+            protected Void doInBackground(Void... params) {
+                OutputStream outputStream = null;
                 try {
-                    int statusCode = networkResponse.getStatus().getStatusCode();
+                    final URL url = new URL(GCM_SEND_MESSAGE_URL);
+                    final HttpURLConnection urlConnection = getUrlConnection(url);
+                    urlConnection.addRequestProperty("Authorization", "key=" + Settings.getGcmBrowserApiKey(MainActivity.this));
+                    urlConnection.connect();
+
+                    outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
+                    writeConnectionOutput(data, outputStream);
+
+                    final int statusCode = urlConnection.getResponseCode();
                     if (statusCode >= 200 && statusCode < 300) {
                         queueLogMessage("GCM server accepted network request to send message. HTTP response status code is " + statusCode + ".");
                     } else {
                         queueLogMessage("GCM server rejected network request to send message. HTTP response status code is " + statusCode + ".");
                     }
-                } catch (Exception e) {
-                    queueLogMessage("ERROR: got exception parsing network response from GCM server: " + e.getLocalizedMessage());
-                }
-            }
 
-            @Override
-            public void onFailure(NetworkError networkError) {
-                try {
-                    queueLogMessage("ERROR sending request to GCM server: " + networkError.getException().getLocalizedMessage());
+                    urlConnection.disconnect();
+
                 } catch (Exception e) {
-                    queueLogMessage("ERROR got exception parsing network error: " + e.getLocalizedMessage());
+                    queueLogMessage("ERROR: got exception posting message to GCM server: " + e.getLocalizedMessage());
                 }
+
+                finally {
+                    if (outputStream != null) {
+                        try {
+                            outputStream.close();
+                        } catch (IOException e) {}
+                    }
+                }
+                return null;
             }
-        });
-        networkRequest.setRequestType(NetworkRequest.RequestType.POST);
-        networkRequest.addHeaderParam("Content-Type", "application/json");
-        networkRequest.addHeaderParam("Authorization", "key=" + Settings.getGcmBrowserApiKey(this));
-        networkRequest.setBodyData(data);
-        NetworkRequestLauncher.getInstance().executeRequest(networkRequest);
+        };
+        asyncTask.execute((Void) null);
+    }
+
+    private HttpURLConnection getUrlConnection(URL url) throws IOException {
+        final HttpURLConnection urlConnection = (HttpURLConnection) url.openConnection();
+        urlConnection.setDoInput(true);
+        urlConnection.setRequestMethod("POST");
+        urlConnection.setConnectTimeout(60000);
+        urlConnection.setReadTimeout(60000);
+        urlConnection.addRequestProperty("Content-Type", "application/json");
+        return urlConnection;
     }
 
     private String getGcmMessageRequestString() {
