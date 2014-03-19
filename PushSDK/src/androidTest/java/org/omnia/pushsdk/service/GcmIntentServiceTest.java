@@ -18,6 +18,8 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
     private static final String TEST_PACKAGE_NAME = "org.omnia.pushsdk.test";
     private static final String TEST_MESSAGE = "some fancy message";
     private static final String KEY_MESSAGE = "message";
+    private static final String KEY_MESSAGE_UUID = "msg_uuid";
+    private static final String TEST_MESSAGE_UUID = "some-message-uuid";
 
     private int testResultCode = GcmIntentService.NO_RESULT;
     private Intent intent;
@@ -103,6 +105,18 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
         assertNotNull(extras);
         assertTrue(extras.containsKey(KEY_MESSAGE));
         assertEquals(TEST_MESSAGE, extras.getString(KEY_MESSAGE));
+    }
+
+    public void testSendsReceiptNotification() throws InterruptedException {
+        intent.putExtra(KEY_MESSAGE_UUID, TEST_MESSAGE_UUID);
+        GcmIntentService.preferencesProvider.savePackageName(TEST_PACKAGE_NAME);
+        startService(intent);
+        GcmIntentService.semaphore.acquire(2);
+
+        assertEquals(GcmIntentService.RESULT_NOTIFIED_APPLICATION, testResultCode);
+        assertTrue(didReceiveBroadcast);
+        assertNotNull(receivedIntent);
+        assertTrue(receivedIntent.hasExtra(GcmIntentService.KEY_GCM_INTENT));
     }
 
     private Intent getServiceIntent() {

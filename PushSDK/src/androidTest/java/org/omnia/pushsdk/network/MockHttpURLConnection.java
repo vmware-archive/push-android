@@ -54,7 +54,9 @@ public class MockHttpURLConnection extends HttpURLConnection {
 
     @Override
     public void connect() throws IOException {
-
+        if (MockHttpURLConnection.willThrowConnectionException) {
+            throw MockHttpURLConnection.connectionException;
+        }
     }
 
     @Override
@@ -65,11 +67,6 @@ public class MockHttpURLConnection extends HttpURLConnection {
 
     @Override
     public InputStream getInputStream() throws IOException {
-
-        if (MockHttpURLConnection.willThrowConnectionException) {
-            throw MockHttpURLConnection.connectionException;
-        }
-
         final ByteArrayInputStream inputStream = new ByteArrayInputStream(responseData.getBytes());
         return inputStream;
     }
