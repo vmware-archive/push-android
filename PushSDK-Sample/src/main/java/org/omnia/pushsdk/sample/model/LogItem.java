@@ -13,13 +13,17 @@
  * limitations under the License.
  */
 
-package org.omnia.pushsdk.backend;
+package org.omnia.pushsdk.sample.model;
 
-import org.omnia.pushsdk.RegistrationParameters;
+public class LogItem {
 
-public interface BackEndRegistrationApiRequest {
+    public final String timestamp;
+    public final String message;
+    public final int baseRowColour;
 
-    void startDeviceRegistration(String gcmDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener);
-    BackEndRegistrationApiRequest copy();
-
+    public LogItem(String timestamp, String message, int baseRowColour) {
+        this.timestamp = timestamp;
+        this.message = message;
+        this.baseRowColour = baseRowColour;
+    }
 }

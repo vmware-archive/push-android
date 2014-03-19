@@ -1,4 +1,4 @@
-package org.omnia.pushsdk.simpledemoapp.broadcastreceiver;
+package org.omnia.pushsdk.sample.broadcastreceiver;
 
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -10,24 +10,24 @@ import android.support.v4.content.WakefulBroadcastReceiver;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
-import org.omnia.pushsdk.R;
-import org.omnia.pushsdk.simpledemoapp.MainActivity;
+import org.omnia.pushsdk.sample.R;
+import org.omnia.pushsdk.sample.activity.MainActivity;
 import org.omnia.pushsdk.sample.util.PushLibLogger;
 
-/*
- * This BroadcastReceiver is called by the Omnia Push SDK whenever it receives a push message
- * from GCM targeted at your application.  The original intent received by the PushLib is in the
- * "gcm_intent" parcelable extra in the intent passed to the `onReceive` method.  The fields passed
- * in the push message itself are in the extras of the Intent in the `gcm_intent` extra.
- */
 public class MyOmniaRemotePushLibBroadcastReceiver extends WakefulBroadcastReceiver {
 
     public static final int NOTIFICATION_ID = 1;
 
-    private static final int NOTIFICATION_LIGHTS_COLOUR = 0xff55aaaa;
+    private static final int NOTIFICATION_LIGHTS_COLOUR = 0xffaa55aa;
     private static final int NOTIFICATION_LIGHTS_ON_MS = 500;
     private static final int NOTIFICATION_LIGHTS_OFF_MS = 1000;
 
+    /*
+     * This BroadcastReceiver is called by the Omnia Push SDK whenever it receives a push message
+     * from GCM targeted at your application.  The original intent received by the PushLib is in the
+     * "gcm_intent" parcelable extra in the intent passed to the `onReceive` method.  The fields passed
+     * in the push message itself are in the extras of the Intent in the `gcm_intent` extra.
+     */
     @Override
     public void onReceive(Context context, Intent intent) {
 
@@ -76,8 +76,8 @@ public class MyOmniaRemotePushLibBroadcastReceiver extends WakefulBroadcastRecei
 
         final NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.drawable.ic_launcher)
-                        .setContentTitle("Omnia Push Simple Demo App")
+                        .setSmallIcon(R.drawable.ic_stat_gcm)
+                        .setContentTitle("Omnia Push Notification")
                         .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
                         .setContentText(msg);
 

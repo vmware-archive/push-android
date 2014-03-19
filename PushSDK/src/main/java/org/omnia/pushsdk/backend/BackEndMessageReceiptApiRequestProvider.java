@@ -15,11 +15,15 @@
 
 package org.omnia.pushsdk.backend;
 
-import org.omnia.pushsdk.RegistrationParameters;
+public class BackEndMessageReceiptApiRequestProvider {
 
-public interface BackEndRegistrationApiRequest {
+    private final BackEndMessageReceiptApiRequest dummyRequest;
 
-    void startDeviceRegistration(String gcmDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener);
-    BackEndRegistrationApiRequest copy();
+    public BackEndMessageReceiptApiRequestProvider(BackEndMessageReceiptApiRequest dummyRequest) {
+        this.dummyRequest = dummyRequest;
+    }
 
+    public BackEndMessageReceiptApiRequest getRequest() {
+        return dummyRequest.copy();
+    }
 }

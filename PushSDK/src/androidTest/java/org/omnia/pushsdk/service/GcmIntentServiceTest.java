@@ -9,6 +9,8 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.test.ServiceTestCase;
 
+import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
+import org.omnia.pushsdk.backend.FakeBackEndMessageReceiptApiRequest;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
 
 import java.util.concurrent.Semaphore;
@@ -18,7 +20,6 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
     private static final String TEST_PACKAGE_NAME = "org.omnia.pushsdk.test";
     private static final String TEST_MESSAGE = "some fancy message";
     private static final String KEY_MESSAGE = "message";
-    private static final String KEY_MESSAGE_UUID = "msg_uuid";
     private static final String TEST_MESSAGE_UUID = "some-message-uuid";
 
     private int testResultCode = GcmIntentService.NO_RESULT;
@@ -27,6 +28,7 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
     private TestResultReceiver testResultReceiver;
     private TestBroadcastReceiver testBroadcastReceiver;
     private Intent receivedIntent;
+    private FakeBackEndMessageReceiptApiRequest backEndMessageReceiptApiRequest;
 
     // Captures result codes from the service itself
     public class TestResultReceiver extends ResultReceiver {
@@ -61,6 +63,8 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
         super.setUp();
         GcmIntentService.semaphore = new Semaphore(0);
         GcmIntentService.preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null);
+        backEndMessageReceiptApiRequest = new FakeBackEndMessageReceiptApiRequest();
+        GcmIntentService.backEndMessageReceiptApiRequestProvider = new BackEndMessageReceiptApiRequestProvider(backEndMessageReceiptApiRequest);
         testResultReceiver = new TestResultReceiver(null);
         testBroadcastReceiver = new TestBroadcastReceiver();
         final IntentFilter intentFilter = new IntentFilter(TEST_PACKAGE_NAME + GcmIntentService.BROADCAST_NAME_SUFFIX);
@@ -105,10 +109,12 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
         assertNotNull(extras);
         assertTrue(extras.containsKey(KEY_MESSAGE));
         assertEquals(TEST_MESSAGE, extras.getString(KEY_MESSAGE));
+        assertFalse(backEndMessageReceiptApiRequest.wasRequestAttempted());
     }
 
-    public void testSendsReceiptNotification() throws InterruptedException {
-        intent.putExtra(KEY_MESSAGE_UUID, TEST_MESSAGE_UUID);
+    public void testSendsReceiptNotificationSuccessfully() throws InterruptedException {
+        intent.putExtra(GcmIntentService.KEY_MESSAGE_UUID, TEST_MESSAGE_UUID);
+        backEndMessageReceiptApiRequest.setWillBeSuccessfulRequest(true);
         GcmIntentService.preferencesProvider.savePackageName(TEST_PACKAGE_NAME);
         startService(intent);
         GcmIntentService.semaphore.acquire(2);
@@ -117,6 +123,23 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
         assertTrue(didReceiveBroadcast);
         assertNotNull(receivedIntent);
         assertTrue(receivedIntent.hasExtra(GcmIntentService.KEY_GCM_INTENT));
+        assertTrue(backEndMessageReceiptApiRequest.wasRequestAttempted());
+        // no difference in success and fail behaviours, yet
+    }
+
+    public void testSendsReceiptNotificationFailure() throws InterruptedException {
+        intent.putExtra(GcmIntentService.KEY_MESSAGE_UUID, TEST_MESSAGE_UUID);
+        backEndMessageReceiptApiRequest.setWillBeSuccessfulRequest(false);
+        GcmIntentService.preferencesProvider.savePackageName(TEST_PACKAGE_NAME);
+        startService(intent);
+        GcmIntentService.semaphore.acquire(2);
+
+        assertEquals(GcmIntentService.RESULT_NOTIFIED_APPLICATION, testResultCode);
+        assertTrue(didReceiveBroadcast);
+        assertNotNull(receivedIntent);
+        assertTrue(receivedIntent.hasExtra(GcmIntentService.KEY_GCM_INTENT));
+        assertTrue(backEndMessageReceiptApiRequest.wasRequestAttempted());
+        // no difference in success and fail behaviours, yet
     }
 
     private Intent getServiceIntent() {

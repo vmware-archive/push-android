@@ -13,13 +13,20 @@
  * limitations under the License.
  */
 
-package org.omnia.pushsdk.backend;
+package org.omnia.pushsdk.sample.model;
 
-import org.omnia.pushsdk.RegistrationParameters;
+import com.google.gson.annotations.SerializedName;
 
-public interface BackEndRegistrationApiRequest {
+public class BackEndMessageRequestData {
 
-    void startDeviceRegistration(String gcmDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener);
-    BackEndRegistrationApiRequest copy();
+    @SerializedName("title")
+    public String title;
 
+    @SerializedName("body")
+    public String body;
+
+    public BackEndMessageRequestData(String title, String body) {
+        this.title = title;
+        this.body = body;
+    }
 }

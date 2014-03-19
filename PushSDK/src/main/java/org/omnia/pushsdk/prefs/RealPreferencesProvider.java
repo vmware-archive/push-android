@@ -18,7 +18,7 @@ package org.omnia.pushsdk.prefs;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import org.omnia.pushsdk.util.Const;
+import org.omnia.pushsdk.sample.util.Const;
 
 /**
  * Saves preferences to the SharedPreferences on the filesystem.

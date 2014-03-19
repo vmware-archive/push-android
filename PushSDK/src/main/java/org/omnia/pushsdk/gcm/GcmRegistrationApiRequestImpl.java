@@ -17,8 +17,8 @@ package org.omnia.pushsdk.gcm;
 
 import android.content.Context;
 
-import org.omnia.pushsdk.util.PushLibLogger;
-import org.omnia.pushsdk.util.Util;
+import org.omnia.pushsdk.sample.util.PushLibLogger;
+import org.omnia.pushsdk.sample.util.Util;
 
 import java.io.IOException;
 

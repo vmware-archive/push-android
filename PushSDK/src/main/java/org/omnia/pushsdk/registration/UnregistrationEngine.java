@@ -2,7 +2,6 @@ package org.omnia.pushsdk.registration;
 
 import android.content.Context;
 
-import org.omnia.pushsdk.RegistrationParameters;
 import org.omnia.pushsdk.backend.BackEndUnregisterDeviceApiRequest;
 import org.omnia.pushsdk.backend.BackEndUnregisterDeviceApiRequestProvider;
 import org.omnia.pushsdk.backend.BackEndUnregisterDeviceListener;
@@ -11,7 +10,7 @@ import org.omnia.pushsdk.gcm.GcmUnregistrationApiRequest;
 import org.omnia.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
 import org.omnia.pushsdk.gcm.GcmUnregistrationListener;
 import org.omnia.pushsdk.prefs.PreferencesProvider;
-import org.omnia.pushsdk.util.PushLibLogger;
+import org.omnia.pushsdk.sample.util.PushLibLogger;
 
 public class UnregistrationEngine {
 

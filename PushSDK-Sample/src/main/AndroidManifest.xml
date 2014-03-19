@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.omnia.pushsdk"
+    package="org.omnia.pushsdk.sample"
     android:versionCode="2"
     android:versionName="0.2" >
 
@@ -17,7 +17,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="org.omnia.pushsdk.activity.MainActivity"
+            android:name="org.omnia.pushsdk.sample.activity.MainActivity"
             android:configChanges="orientation"
             android:label="@string/app_name" >
             <intent-filter>
@@ -26,12 +26,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="org.omnia.pushsdk.activity.SettingsActivity"
+            android:name="org.omnia.pushsdk.sample.activity.SettingsActivity"
             android:label="@string/title_activity_settings"
-            android:parentActivityName="org.omnia.pushsdk.activity.MainActivity" >
+            android:parentActivityName="org.omnia.pushsdk.sample.activity.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="org.omnia.pushsdk.activity.MainActivity" />
+                android:value="org.omnia.pushsdk.sample.activity.MainActivity" />
         </activity>
 
         <!-- This BroadcastReceiver is called whenever the Omnia Push SDK receives a push
@@ -41,7 +41,7 @@
         <receiver
             android:name=".broadcastreceiver.MyOmniaRemotePushLibBroadcastReceiver">
             <intent-filter>
-                <action android:name="org.omnia.pushsdk.omniapushsdk.RECEIVE_PUSH"/>
+                <action android:name="org.omnia.pushsdk.sample.omniapushsdk.RECEIVE_PUSH"/>
             </intent-filter>
         </receiver>
 

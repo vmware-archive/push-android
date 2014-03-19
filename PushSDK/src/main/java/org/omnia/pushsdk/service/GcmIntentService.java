@@ -20,9 +20,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 
+import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequest;
+import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestImpl;
+import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
+import org.omnia.pushsdk.backend.BackEndMessageReceiptListener;
+import org.omnia.pushsdk.network.NetworkWrapperImpl;
 import org.omnia.pushsdk.prefs.PreferencesProvider;
 import org.omnia.pushsdk.prefs.RealPreferencesProvider;
-import org.omnia.pushsdk.util.PushLibLogger;
+import org.omnia.pushsdk.sample.util.PushLibLogger;
 
 import java.util.concurrent.Semaphore;
 
@@ -31,6 +36,7 @@ public class GcmIntentService extends IntentService {
     public static final String BROADCAST_NAME_SUFFIX = ".omniapushsdk.RECEIVE_PUSH";
     public static final String KEY_RESULT_RECEIVER = "result_receiver";
     public static final String KEY_GCM_INTENT = "gcm_intent";
+    public static final String KEY_MESSAGE_UUID = "message_uuid";
 
     public static final int NO_RESULT = -1;
     public static final int RESULT_EMPTY_INTENT = 100;
@@ -40,6 +46,7 @@ public class GcmIntentService extends IntentService {
     // Used by unit tests
     /* package */ static Semaphore semaphore = null;
     /* package */ static PreferencesProvider preferencesProvider = null;
+    /* package */ static BackEndMessageReceiptApiRequestProvider backEndMessageReceiptApiRequestProvider = null;
 
     private ResultReceiver resultReceiver = null;
 
@@ -49,6 +56,11 @@ public class GcmIntentService extends IntentService {
         super("GcmIntentService");
         if (GcmIntentService.preferencesProvider == null) {
             GcmIntentService.preferencesProvider = new RealPreferencesProvider(this);
+        }
+        if (GcmIntentService.backEndMessageReceiptApiRequestProvider == null) {
+            final NetworkWrapperImpl networkWrapper = new NetworkWrapperImpl();
+            final BackEndMessageReceiptApiRequestImpl dummyRequest = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
+            GcmIntentService.backEndMessageReceiptApiRequestProvider = new BackEndMessageReceiptApiRequestProvider(dummyRequest);
         }
     }
 
@@ -79,6 +91,10 @@ public class GcmIntentService extends IntentService {
             return;
         }
 
+        if (hasMessageUuid(intent)) {
+            sendReturnReceipt(intent);
+        }
+
         getResultReceiver(intent);
 
         if (isBundleEmpty(intent)) {
@@ -87,6 +103,29 @@ public class GcmIntentService extends IntentService {
         } else {
             notifyApplication(intent);
         }
+    }
+
+    private boolean hasMessageUuid(Intent intent) {
+        return intent.hasExtra(KEY_MESSAGE_UUID);
+    }
+
+    private void sendReturnReceipt(Intent intent) {
+        // TODO queue these receipts to send later to limit the number of server requests
+        final String messageUuid = intent.getStringExtra(KEY_MESSAGE_UUID);
+        final BackEndMessageReceiptApiRequest request = GcmIntentService.backEndMessageReceiptApiRequestProvider.getRequest();
+        request.startMessageReceipt(messageUuid, new BackEndMessageReceiptListener() {
+
+            @Override
+            public void onBackEndMessageReceiptSuccess() {
+                PushLibLogger.d("Sent message receipt successfully for msg_uuid \"" + messageUuid + "\".");
+            }
+
+            @Override
+            public void onBackEndMessageReceiptFailed(String reason) {
+                PushLibLogger.e("Got error trying to send message receipt for msg_uuid \"" + messageUuid + "\". Error: " + reason);
+                // TODO - save for later?
+            }
+        });
     }
 
     private void getResultReceiver(Intent intent) {

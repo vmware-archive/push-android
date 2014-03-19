@@ -1,14 +1,14 @@
 package org.omnia.pushsdk.backend;
 
 import org.omnia.pushsdk.network.NetworkWrapper;
-import org.omnia.pushsdk.util.Const;
-import org.omnia.pushsdk.util.PushLibLogger;
+import org.omnia.pushsdk.sample.util.Const;
+import org.omnia.pushsdk.sample.util.PushLibLogger;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
-public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl  {
+public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implements BackEndMessageReceiptApiRequest {
 
     public BackEndMessageReceiptApiRequestImpl(NetworkWrapper networkWrapper) {
         super(networkWrapper);
@@ -57,5 +57,10 @@ public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl  {
 
         PushLibLogger.i("Back-end Server message receipt succeeded.");
         listener.onBackEndMessageReceiptSuccess();
+    }
+
+    @Override
+    public BackEndMessageReceiptApiRequest copy() {
+        return new BackEndMessageReceiptApiRequestImpl(networkWrapper);
     }
 }
