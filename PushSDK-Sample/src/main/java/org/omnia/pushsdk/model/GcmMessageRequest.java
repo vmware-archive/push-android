@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-package org.omnia.pushsdk.sample.model;
+package org.omnia.pushsdk.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class BackEndMessageTarget {
+public class GcmMessageRequest {
 
-    @SerializedName("platforms")
-    public String platforms;
+    @SerializedName("registration_ids")
+    public String[] registrationIds;
 
-    @SerializedName("devices")
-    public String[] devices;
+    @SerializedName("data")
+    public GcmMessageRequestData data;
 
-    public BackEndMessageTarget(String platforms, String[] devices) {
-        this.platforms = platforms;
-        this.devices = devices;
+    public GcmMessageRequest(String[] registrationIds, String message) {
+        this.registrationIds = registrationIds;
+        this.data = new GcmMessageRequestData(message);
     }
 }

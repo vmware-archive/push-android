@@ -40,8 +40,8 @@ import org.omnia.pushsdk.registration.RegistrationEngine;
 import org.omnia.pushsdk.registration.RegistrationListener;
 import org.omnia.pushsdk.registration.UnregistrationEngine;
 import org.omnia.pushsdk.registration.UnregistrationListener;
-import org.omnia.pushsdk.sample.util.Const;
-import org.omnia.pushsdk.sample.util.PushLibLogger;
+import org.omnia.pushsdk.util.Const;
+import org.omnia.pushsdk.util.PushLibLogger;
 import org.omnia.pushsdk.version.RealVersionProvider;
 import org.omnia.pushsdk.version.VersionProvider;
 

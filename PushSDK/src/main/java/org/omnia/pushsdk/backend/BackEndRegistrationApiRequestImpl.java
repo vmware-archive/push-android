@@ -20,12 +20,12 @@ import android.os.Build;
 
 import com.google.gson.Gson;
 import org.omnia.pushsdk.RegistrationParameters;
-import org.omnia.pushsdk.sample.model.BackEndApiRegistrationRequestData;
-import org.omnia.pushsdk.sample.model.BackEndApiRegistrationResponseData;
+import org.omnia.pushsdk.model.BackEndApiRegistrationRequestData;
+import org.omnia.pushsdk.model.BackEndApiRegistrationResponseData;
 import org.omnia.pushsdk.network.NetworkWrapper;
-import org.omnia.pushsdk.sample.util.Const;
-import org.omnia.pushsdk.sample.util.PushLibLogger;
-import org.omnia.pushsdk.sample.util.Util;
+import org.omnia.pushsdk.util.Const;
+import org.omnia.pushsdk.util.PushLibLogger;
+import org.omnia.pushsdk.util.Util;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

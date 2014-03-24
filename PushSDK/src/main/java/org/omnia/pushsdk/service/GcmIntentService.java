@@ -27,7 +27,7 @@ import org.omnia.pushsdk.backend.BackEndMessageReceiptListener;
 import org.omnia.pushsdk.network.NetworkWrapperImpl;
 import org.omnia.pushsdk.prefs.PreferencesProvider;
 import org.omnia.pushsdk.prefs.RealPreferencesProvider;
-import org.omnia.pushsdk.sample.util.PushLibLogger;
+import org.omnia.pushsdk.util.PushLibLogger;
 
 import java.util.concurrent.Semaphore;
 
@@ -46,7 +46,6 @@ public class GcmIntentService extends IntentService {
     // Used by unit tests
     /* package */ static Semaphore semaphore = null;
     /* package */ static PreferencesProvider preferencesProvider = null;
-    /* package */ static BackEndMessageReceiptApiRequestProvider backEndMessageReceiptApiRequestProvider = null;
 
     private ResultReceiver resultReceiver = null;
 
@@ -56,11 +55,6 @@ public class GcmIntentService extends IntentService {
         super("GcmIntentService");
         if (GcmIntentService.preferencesProvider == null) {
             GcmIntentService.preferencesProvider = new RealPreferencesProvider(this);
-        }
-        if (GcmIntentService.backEndMessageReceiptApiRequestProvider == null) {
-            final NetworkWrapperImpl networkWrapper = new NetworkWrapperImpl();
-            final BackEndMessageReceiptApiRequestImpl dummyRequest = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
-            GcmIntentService.backEndMessageReceiptApiRequestProvider = new BackEndMessageReceiptApiRequestProvider(dummyRequest);
         }
     }
 
@@ -91,9 +85,9 @@ public class GcmIntentService extends IntentService {
             return;
         }
 
-        if (hasMessageUuid(intent)) {
-            sendReturnReceipt(intent);
-        }
+//        if (hasMessageUuid(intent)) {
+//            sendReturnReceipt(intent);
+//        }
 
         getResultReceiver(intent);
 
@@ -109,24 +103,24 @@ public class GcmIntentService extends IntentService {
         return intent.hasExtra(KEY_MESSAGE_UUID);
     }
 
-    private void sendReturnReceipt(Intent intent) {
-        // TODO queue these receipts to send later to limit the number of server requests
-        final String messageUuid = intent.getStringExtra(KEY_MESSAGE_UUID);
-        final BackEndMessageReceiptApiRequest request = GcmIntentService.backEndMessageReceiptApiRequestProvider.getRequest();
-        request.startMessageReceipt(messageUuid, new BackEndMessageReceiptListener() {
-
-            @Override
-            public void onBackEndMessageReceiptSuccess() {
-                PushLibLogger.d("Sent message receipt successfully for msg_uuid \"" + messageUuid + "\".");
-            }
-
-            @Override
-            public void onBackEndMessageReceiptFailed(String reason) {
-                PushLibLogger.e("Got error trying to send message receipt for msg_uuid \"" + messageUuid + "\". Error: " + reason);
-                // TODO - save for later?
-            }
-        });
-    }
+//    private void sendReturnReceipt(Intent intent) {
+//        // TODO queue these receipts to send later to limit the number of server requests
+//        final String messageUuid = intent.getStringExtra(KEY_MESSAGE_UUID);
+//        final BackEndMessageReceiptApiRequest request = GcmIntentService.backEndMessageReceiptApiRequestProvider.getRequest();
+//        request.startMessageReceipt(messageUuid, new BackEndMessageReceiptListener() {
+//
+//            @Override
+//            public void onBackEndMessageReceiptSuccess() {
+//                PushLibLogger.d("Sent message receipt successfully for msg_uuid \"" + messageUuid + "\".");
+//            }
+//
+//            @Override
+//            public void onBackEndMessageReceiptFailed(String reason) {
+//                PushLibLogger.e("Got error trying to send message receipt for msg_uuid \"" + messageUuid + "\". Error: " + reason);
+//                // TODO - save for later?
+//            }
+//        });
+//    }
 
     private void getResultReceiver(Intent intent) {
         if (intent.hasExtra(KEY_RESULT_RECEIVER)) {

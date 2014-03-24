@@ -18,7 +18,7 @@ package org.omnia.pushsdk.prefs;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import org.omnia.pushsdk.sample.util.Const;
+import org.omnia.pushsdk.util.Const;
 
 /**
  * Saves preferences to the SharedPreferences on the filesystem.
@@ -150,9 +150,6 @@ public class RealPreferencesProvider implements PreferencesProvider {
     }
 
     private SharedPreferences getSharedPreferences() {
-        // This sample app persists the registration ID in shared preferences, but
-        // how you store the regID in your app is up to you.
         return context.getSharedPreferences(Const.TAG_NAME, Context.MODE_PRIVATE);
     }
-
 }

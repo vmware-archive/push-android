@@ -13,20 +13,14 @@
  * limitations under the License.
  */
 
-package org.omnia.pushsdk.sample.model;
+package org.omnia.pushsdk.util;
 
-import com.google.gson.annotations.SerializedName;
+public class Const {
 
-public class BackEndMessageRequestData {
+    public static final String TAG_NAME = "OmniaPushSDK";
 
-    @SerializedName("title")
-    public String title;
-
-    @SerializedName("body")
-    public String body;
-
-    public BackEndMessageRequestData(String title, String body) {
-        this.title = title;
-        this.body = body;
-    }
+    // TODO - update this to the production server when it is set up.
+    public static final String BASE_SERVER_URL = "http://ec2-54-234-124-123.compute-1.amazonaws.com:8090/";
+    public static final String BACKEND_REGISTRATION_REQUEST_URL = BASE_SERVER_URL + "v1/registration";
+    public static final String BACKEND_MESSAGE_RECEIPT_URL = BASE_SERVER_URL + "v1/message_receipt";
 }

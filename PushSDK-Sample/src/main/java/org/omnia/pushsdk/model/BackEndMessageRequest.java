@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package org.omnia.pushsdk.sample.model;
+package org.omnia.pushsdk.model;
 
 import com.google.gson.annotations.SerializedName;
 

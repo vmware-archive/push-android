@@ -1,4 +1,4 @@
-package org.omnia.pushsdk.sample.util;
+package org.omnia.pushsdk.util;
 
 import java.util.Locale;
 

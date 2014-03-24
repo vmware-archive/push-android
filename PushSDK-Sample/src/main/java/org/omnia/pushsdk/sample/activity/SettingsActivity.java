@@ -29,7 +29,7 @@ import android.view.MenuItem;
 import android.support.v4.app.NavUtils;
 
 import org.omnia.pushsdk.sample.R;
-import org.omnia.pushsdk.sample.util.Settings;
+import org.omnia.pushsdk.util.Settings;
 
 public class SettingsActivity extends PreferenceActivity {
 

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package org.omnia.pushsdk.sample.util;
+package org.omnia.pushsdk.util;
 
 import android.content.Context;
 import android.os.Handler;

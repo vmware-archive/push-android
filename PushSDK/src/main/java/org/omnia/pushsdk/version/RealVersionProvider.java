@@ -17,7 +17,7 @@ package org.omnia.pushsdk.version;
 
 import android.content.Context;
 
-import org.omnia.pushsdk.sample.util.Util;
+import org.omnia.pushsdk.util.Util;
 
 public class RealVersionProvider implements VersionProvider {
 
