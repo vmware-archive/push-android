@@ -5,6 +5,7 @@ branches:
     only:
       - master
       - travis-test
+
 before_install:
     # Install base Android SDK
     - sudo apt-get update -qq
@@ -17,14 +18,9 @@ before_install:
     - unzip gradle-1.11-bin.zip
     - export GRADLE_HOME=$PWD/gradle-1.11
     - export PATH=$GRADLE_HOME/bin:$PATH
-      #- git clone https://github.com/mosabua/maven-android-sdk-deployer.git
-      #- ( cd maven-android-sdk-deployer ; mvn install -P 4.3 )
-      #- ( cd maven-android-sdk-deployer/add-ons/google-apis-18 ; mvn install )
-      #- ( cd maven-android-sdk-deployer/extras/google-play-services ; mvn clean install )
-      #- bash -ex setup.sh
 
 install:
     #- mvn install -DskipTests=true
 
 script: 
-    - gradle connectedInstrumentTest
+    - gradle connectedAndroidTest
