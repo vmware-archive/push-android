@@ -6,6 +6,9 @@ branches:
       - master
       - travis-test
 
+android_toolkit:
+  start_emulator: true
+
 before_install:
     # Install base Android SDK
     - sudo apt-get update -qq
@@ -14,13 +17,13 @@ before_install:
     - curl -L https://raw.github.com/embarkmobile/android-sdk-installer/version-1/android-sdk-installer | bash /dev/stdin --install=$COMPONENTS
     - source ~/.android-sdk-installer/env
     # Gradle
-    - wget http://services.gradle.org/distributions/gradle-1.11-bin.zip
-    - unzip gradle-1.11-bin.zip
-    - export GRADLE_HOME=$PWD/gradle-1.11
-    - export PATH=$GRADLE_HOME/bin:$PATH
+    #- wget http://services.gradle.org/distributions/gradle-1.11-bin.zip
+    #- unzip gradle-1.11-bin.zip
+    #- export GRADLE_HOME=$PWD/gradle-1.11
+    #- export PATH=$GRADLE_HOME/bin:$PATH
 
 install:
     #- mvn install -DskipTests=true
 
 script: 
-    - gradle connectedAndroidTest
+    - ./gradlew connectedCheck
