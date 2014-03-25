@@ -1,6 +1,7 @@
 package org.omnia.pushsdk.model;
 
 import android.test.AndroidTestCase;
+import android.test.MoreAsserts;
 import android.util.Log;
 
 import com.google.gson.Gson;
@@ -30,6 +31,79 @@ public class MessageReceiptDataTest extends AndroidTestCase {
     private static final int TEST_MINUTE_2 = 28;
     private static final int TEST_SECOND_2 = 34;
 
+    public void testEquals1() {
+        final MessageReceiptData model1 = getMessageReceiptData1();
+        final MessageReceiptData model2 = getMessageReceiptData1();
+        assertEquals(model1, model2);
+        assertEquals(model2, model1);
+    }
+
+    public void testNotEquals() {
+        final MessageReceiptData model1 = getMessageReceiptData1();
+        final MessageReceiptData model2 = getMessageReceiptData2();
+        MoreAsserts.assertNotEqual(model1, model2);
+        MoreAsserts.assertNotEqual(model2, model1);
+    }
+
+    public void testNotEquals2() {
+        final MessageReceiptData model1 = new MessageReceiptData();
+        model1.setTimestamp(getTestDate1());
+        model1.setMessageUuid(TEST_MESSAGE_UUID_1);
+        final MessageReceiptData model2 = new MessageReceiptData();
+        model1.setTimestamp(getTestDate2());
+        model1.setMessageUuid(TEST_MESSAGE_UUID_1);
+        MoreAsserts.assertNotEqual(model1, model2);
+        MoreAsserts.assertNotEqual(model2, model1);
+    }
+
+    public void testNotEquals3() {
+        final MessageReceiptData model1 = new MessageReceiptData();
+        model1.setTimestamp(getTestDate1());
+        model1.setMessageUuid(TEST_MESSAGE_UUID_1);
+        final MessageReceiptData model2 = new MessageReceiptData();
+        model1.setTimestamp(getTestDate1());
+        model1.setMessageUuid(TEST_MESSAGE_UUID_2);
+        MoreAsserts.assertNotEqual(model1, model2);
+        MoreAsserts.assertNotEqual(model2, model1);
+    }
+
+    public void testNotEquals4() {
+        final MessageReceiptData model1 = new MessageReceiptData();
+        model1.setTimestamp(getTestDate1());
+        model1.setMessageUuid(TEST_MESSAGE_UUID_1);
+        final MessageReceiptData model2 = new MessageReceiptData();
+        model1.setTimestamp((String)null);
+        model1.setMessageUuid(TEST_MESSAGE_UUID_1);
+        MoreAsserts.assertNotEqual(model1, model2);
+        MoreAsserts.assertNotEqual(model2, model1);
+    }
+
+    public void testNotEquals5() {
+        final MessageReceiptData model1 = new MessageReceiptData();
+        model1.setTimestamp(getTestDate1());
+        model1.setMessageUuid(TEST_MESSAGE_UUID_1);
+        final MessageReceiptData model2 = new MessageReceiptData();
+        model1.setTimestamp(TEST_MESSAGE_UUID_1);
+        model1.setMessageUuid(null);
+        MoreAsserts.assertNotEqual(model1, model2);
+        MoreAsserts.assertNotEqual(model2, model1);
+    }
+
+    public void testNotEqualsNull() {
+        final MessageReceiptData model1 = getMessageReceiptData1();
+        assertFalse(model1.equals(null));
+    }
+
+    public void testNotEqualsOtherObject() {
+        final MessageReceiptData model1 = getMessageReceiptData1();
+        assertFalse(model1.equals("INTERLOPER STRING"));
+    }
+
+    public void testHashCode() {
+        final MessageReceiptData model1 = getMessageReceiptData1();
+        final MessageReceiptData model2 = getMessageReceiptData1();
+        assertEquals(model1.hashCode(), model2.hashCode());
+    }
 
     public void testToJson() {
         final MessageReceiptData model = getMessageReceiptData1();
@@ -88,14 +162,14 @@ public class MessageReceiptDataTest extends AndroidTestCase {
         assertNull(str);
     }
 
-    private MessageReceiptData getMessageReceiptData1() {
+    public static MessageReceiptData getMessageReceiptData1() {
         final MessageReceiptData model = new MessageReceiptData();
         model.setMessageUuid(TEST_MESSAGE_UUID_1);
         model.setTimestamp(getTestDate1());
         return model;
     }
 
-    private MessageReceiptData getMessageReceiptData2() {
+    public static MessageReceiptData getMessageReceiptData2() {
         final MessageReceiptData model = new MessageReceiptData();
         model.setMessageUuid(TEST_MESSAGE_UUID_2);
         model.setTimestamp(getTestDate2());
@@ -114,7 +188,7 @@ public class MessageReceiptDataTest extends AndroidTestCase {
         return cal.getTime();
     }
 
-    private static String getTestListOfMessageReceipts() {
+    public static String getTestListOfMessageReceipts() {
         final StringBuilder sb = new StringBuilder();
         sb.append("[{\"msg_uuid\":\"");
         sb.append(TEST_MESSAGE_UUID_1);

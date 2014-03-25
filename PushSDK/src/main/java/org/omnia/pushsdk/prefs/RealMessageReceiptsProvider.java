@@ -6,6 +6,8 @@ import android.content.SharedPreferences;
 import org.omnia.pushsdk.model.MessageReceiptData;
 import org.omnia.pushsdk.util.Const;
 
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 public class RealMessageReceiptsProvider implements MessageReceiptsProvider {
@@ -14,6 +16,7 @@ public class RealMessageReceiptsProvider implements MessageReceiptsProvider {
     private static final String PROPERTY_MESSAGE_RECEIPTS = "message_receipts";
 
     private final Context context;
+    private List<MessageReceiptData> listMessageReceipts;
 
     public RealMessageReceiptsProvider(Context context) {
         if (context == null) {
@@ -23,30 +26,65 @@ public class RealMessageReceiptsProvider implements MessageReceiptsProvider {
     }
 
     @Override
-    public List<MessageReceiptData> loadMessageReceipts() {
-        final String str = getSharedPreferences().getString(PROPERTY_MESSAGE_RECEIPTS, null);
-        if (str == null) {
-            return null;
+    public synchronized List<MessageReceiptData> loadMessageReceipts() {
+        if (listMessageReceipts == null) {
+            loadMessageReceiptsFromSharedPreferences();
         }
-        final List<MessageReceiptData> list = MessageReceiptData.jsonStringToList(str);
-        return list;
+        // TODO - should we return an unmodifiable collection?
+        return listMessageReceipts;
+    }
+
+    private void loadMessageReceiptsFromSharedPreferences() {
+        final String str = getSharedPreferences().getString(PROPERTY_MESSAGE_RECEIPTS, null);
+        if (str != null) {
+            listMessageReceipts = MessageReceiptData.jsonStringToList(str);
+        } else {
+            listMessageReceipts = null;
+        }
     }
 
     @Override
-    public void saveMessageReceipts(List<MessageReceiptData> messageReceipts) {
+    public synchronized void saveMessageReceipts(List<MessageReceiptData> messageReceipts) {
+        if (messageReceipts != null) {
+            listMessageReceipts = new LinkedList<MessageReceiptData>(messageReceipts);
+        } else {
+            listMessageReceipts = null;
+        }
+        saveMessageReceiptsToSharedPreferences();
+    }
+
+    private void saveMessageReceiptsToSharedPreferences() {
         final SharedPreferences prefs = getSharedPreferences();
         final SharedPreferences.Editor editor = prefs.edit();
 
-        if (messageReceipts == null) {
+        if (listMessageReceipts == null) {
             editor.clear();
         } else {
-            final String str = MessageReceiptData.listToJsonString(messageReceipts);
+            final String str = MessageReceiptData.listToJsonString(listMessageReceipts);
             editor.putString(PROPERTY_MESSAGE_RECEIPTS, str);
         }
         editor.commit();
     }
 
+    @Override
+    public synchronized int numberOfMessageReceipts() {
+        if (listMessageReceipts == null) {
+            loadMessageReceiptsFromSharedPreferences();
+        }
+        if (listMessageReceipts == null) {
+            return 0;
+        } else {
+            return listMessageReceipts.size();
+        }
+    }
+
     private SharedPreferences getSharedPreferences() {
         return context.getSharedPreferences(MESSAGE_RECEIPTS_TAG, Context.MODE_PRIVATE);
+    }
+
+    @Override
+    public synchronized void clear() {
+        listMessageReceipts = null;
+        saveMessageReceiptsToSharedPreferences();
     }
 }

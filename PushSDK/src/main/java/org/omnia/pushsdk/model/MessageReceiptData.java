@@ -81,4 +81,47 @@ public class MessageReceiptData {
     private static Type getTypeToken() {
         return new TypeToken<List<MessageReceiptData>>(){}.getType();
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null) {
+            return false;
+        }
+
+        if (!(o instanceof MessageReceiptData)) {
+            return false;
+        }
+
+        MessageReceiptData other = (MessageReceiptData) o;
+
+        if (other.timestamp == null && timestamp != null) {
+            return false;
+        }
+        if (other.timestamp != null && timestamp == null) {
+            return false;
+        }
+        if (other.timestamp != null && timestamp != null && !(other.timestamp.equals(timestamp))) {
+            return false;
+        }
+
+        if (other.messageUuid == null && messageUuid != null) {
+            return false;
+        }
+        if (other.messageUuid != null && messageUuid == null) {
+            return false;
+        }
+        if (other.messageUuid != null && messageUuid != null && !(other.messageUuid.equals(messageUuid))) {
+            return false;
+        }
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = 17;
+        result = (result * 31) + (timestamp == null ? 0 : timestamp.hashCode());
+        result = (result * 31) + (messageUuid == null ? 0 : messageUuid.hashCode());
+        return result;
+    }
 }
