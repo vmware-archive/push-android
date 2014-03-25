@@ -53,6 +53,15 @@ public class RealMessageReceiptsProvider implements MessageReceiptsProvider {
         saveMessageReceiptsToSharedPreferences();
     }
 
+    @Override
+    public void addMessageReceipt(MessageReceiptData messageReceipt) {
+        if (listMessageReceipts == null) {
+            listMessageReceipts = new LinkedList<MessageReceiptData>();
+        }
+        listMessageReceipts.add(messageReceipt);
+        saveMessageReceiptsToSharedPreferences();
+    }
+
     private void saveMessageReceiptsToSharedPreferences() {
         final SharedPreferences prefs = getSharedPreferences();
         final SharedPreferences.Editor editor = prefs.edit();

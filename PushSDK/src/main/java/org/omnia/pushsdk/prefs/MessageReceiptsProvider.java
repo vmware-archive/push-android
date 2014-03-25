@@ -10,6 +10,8 @@ public interface MessageReceiptsProvider {
 
     void saveMessageReceipts(List<MessageReceiptData> messageReceipts);
 
+    void addMessageReceipt(MessageReceiptData messageReceipt);
+
     int numberOfMessageReceipts();
 
     void clear();

@@ -24,11 +24,15 @@ import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequest;
 import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestImpl;
 import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
 import org.omnia.pushsdk.backend.BackEndMessageReceiptListener;
+import org.omnia.pushsdk.model.MessageReceiptData;
 import org.omnia.pushsdk.network.NetworkWrapperImpl;
+import org.omnia.pushsdk.prefs.MessageReceiptsProvider;
 import org.omnia.pushsdk.prefs.PreferencesProvider;
+import org.omnia.pushsdk.prefs.RealMessageReceiptsProvider;
 import org.omnia.pushsdk.prefs.RealPreferencesProvider;
 import org.omnia.pushsdk.util.PushLibLogger;
 
+import java.util.Date;
 import java.util.concurrent.Semaphore;
 
 public class GcmIntentService extends IntentService {
@@ -46,6 +50,7 @@ public class GcmIntentService extends IntentService {
     // Used by unit tests
     /* package */ static Semaphore semaphore = null;
     /* package */ static PreferencesProvider preferencesProvider = null;
+    /* package */ static MessageReceiptsProvider messageReceiptsProvider = null;
 
     private ResultReceiver resultReceiver = null;
 
@@ -55,6 +60,9 @@ public class GcmIntentService extends IntentService {
         super("GcmIntentService");
         if (GcmIntentService.preferencesProvider == null) {
             GcmIntentService.preferencesProvider = new RealPreferencesProvider(this);
+        }
+        if (GcmIntentService.messageReceiptsProvider == null) {
+            GcmIntentService.messageReceiptsProvider = new RealMessageReceiptsProvider(this);
         }
     }
 
@@ -85,9 +93,9 @@ public class GcmIntentService extends IntentService {
             return;
         }
 
-//        if (hasMessageUuid(intent)) {
-//            sendReturnReceipt(intent);
-//        }
+        if (hasMessageUuid(intent)) {
+            enqueueReturnReceipt(intent);
+        }
 
         getResultReceiver(intent);
 
@@ -103,9 +111,12 @@ public class GcmIntentService extends IntentService {
         return intent.hasExtra(KEY_MESSAGE_UUID);
     }
 
-//    private void sendReturnReceipt(Intent intent) {
-//        // TODO queue these receipts to send later to limit the number of server requests
-//        final String messageUuid = intent.getStringExtra(KEY_MESSAGE_UUID);
+    private void enqueueReturnReceipt(Intent intent) {
+        final String messageUuid = intent.getStringExtra(KEY_MESSAGE_UUID);
+        final MessageReceiptData messageReceipt = new MessageReceiptData();
+        messageReceipt.setMessageUuid(messageUuid);
+        messageReceipt.setTimestamp(new Date());
+        GcmIntentService.messageReceiptsProvider.addMessageReceipt(messageReceipt);
 //        final BackEndMessageReceiptApiRequest request = GcmIntentService.backEndMessageReceiptApiRequestProvider.getRequest();
 //        request.startMessageReceipt(messageUuid, new BackEndMessageReceiptListener() {
 //
@@ -120,7 +131,7 @@ public class GcmIntentService extends IntentService {
 //                // TODO - save for later?
 //            }
 //        });
-//    }
+    }
 
     private void getResultReceiver(Intent intent) {
         if (intent.hasExtra(KEY_RESULT_RECEIVER)) {

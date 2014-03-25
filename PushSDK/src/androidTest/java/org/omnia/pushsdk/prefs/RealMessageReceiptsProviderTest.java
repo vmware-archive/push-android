@@ -41,4 +41,19 @@ public class RealMessageReceiptsProviderTest extends AndroidTestCase {
         assertEquals(0, messageReceiptsProvider.numberOfMessageReceipts());
         assertNull(messageReceiptsProvider.loadMessageReceipts());
     }
+
+    public void testAddAndAdd() {
+        final MessageReceiptData messageReceipt1 = MessageReceiptDataTest.getMessageReceiptData1();
+        final MessageReceiptData messageReceipt2 = MessageReceiptDataTest.getMessageReceiptData1();
+        assertEquals(0, messageReceiptsProvider.numberOfMessageReceipts());
+
+        messageReceiptsProvider.addMessageReceipt(messageReceipt1);
+        assertEquals(1, messageReceiptsProvider.numberOfMessageReceipts());
+        assertEquals(messageReceipt1, messageReceiptsProvider.loadMessageReceipts().get(0));
+
+        messageReceiptsProvider.addMessageReceipt(messageReceipt2);
+        assertEquals(2, messageReceiptsProvider.numberOfMessageReceipts());
+        assertEquals(messageReceipt1, messageReceiptsProvider.loadMessageReceipts().get(0));
+        assertEquals(messageReceipt1, messageReceiptsProvider.loadMessageReceipts().get(1));
+    }
 }

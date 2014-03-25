@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.test.ServiceTestCase;
 
+import org.omnia.pushsdk.prefs.FakeMessageReceiptsProvider;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
 
 import java.util.concurrent.Semaphore;
@@ -60,6 +61,7 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
         super.setUp();
         GcmIntentService.semaphore = new Semaphore(0);
         GcmIntentService.preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null);
+        GcmIntentService.messageReceiptsProvider = new FakeMessageReceiptsProvider(null);
         testResultReceiver = new TestResultReceiver(null);
         testBroadcastReceiver = new TestBroadcastReceiver();
         final IntentFilter intentFilter = new IntentFilter(TEST_PACKAGE_NAME + GcmIntentService.BROADCAST_NAME_SUFFIX);
@@ -71,12 +73,14 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
         startService(null);
         GcmIntentService.semaphore.acquire();
         assertEquals(GcmIntentService.NO_RESULT, testResultCode);
+        assertEquals(0, GcmIntentService.messageReceiptsProvider.numberOfMessageReceipts());
     }
 
     public void testReceiveEmptyIntent() throws InterruptedException {
         startService(intent);
         GcmIntentService.semaphore.acquire();
         assertEquals(GcmIntentService.RESULT_EMPTY_INTENT, testResultCode);
+        assertEquals(0, GcmIntentService.messageReceiptsProvider.numberOfMessageReceipts());
     }
 
     public void testEmptyPackageName() throws InterruptedException {
@@ -84,6 +88,7 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
         startService(intent);
         GcmIntentService.semaphore.acquire();
         assertEquals(GcmIntentService.RESULT_EMPTY_PACKAGE_NAME, testResultCode);
+        assertEquals(0, GcmIntentService.messageReceiptsProvider.numberOfMessageReceipts());
     }
 
     public void testSendNotification() throws InterruptedException {
@@ -104,9 +109,10 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
         assertNotNull(extras);
         assertTrue(extras.containsKey(KEY_MESSAGE));
         assertEquals(TEST_MESSAGE, extras.getString(KEY_MESSAGE));
+        assertEquals(0, GcmIntentService.messageReceiptsProvider.numberOfMessageReceipts());
     }
 
-    public void testSendsReceiptNotificationSuccessfully() throws InterruptedException {
+    public void testQueuesReceiptNotification() throws InterruptedException {
         intent.putExtra(GcmIntentService.KEY_MESSAGE_UUID, TEST_MESSAGE_UUID);
         GcmIntentService.preferencesProvider.savePackageName(TEST_PACKAGE_NAME);
         startService(intent);
@@ -116,20 +122,7 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
         assertTrue(didReceiveBroadcast);
         assertNotNull(receivedIntent);
         assertTrue(receivedIntent.hasExtra(GcmIntentService.KEY_GCM_INTENT));
-        // no difference in success and fail behaviours, yet
-    }
-
-    public void testSendsReceiptNotificationFailure() throws InterruptedException {
-        intent.putExtra(GcmIntentService.KEY_MESSAGE_UUID, TEST_MESSAGE_UUID);
-        GcmIntentService.preferencesProvider.savePackageName(TEST_PACKAGE_NAME);
-        startService(intent);
-        GcmIntentService.semaphore.acquire(2);
-
-        assertEquals(GcmIntentService.RESULT_NOTIFIED_APPLICATION, testResultCode);
-        assertTrue(didReceiveBroadcast);
-        assertNotNull(receivedIntent);
-        assertTrue(receivedIntent.hasExtra(GcmIntentService.KEY_GCM_INTENT));
-        // no difference in success and fail behaviours, yet
+        assertEquals(1, GcmIntentService.messageReceiptsProvider.numberOfMessageReceipts());
     }
 
     private Intent getServiceIntent() {
