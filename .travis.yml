@@ -6,9 +6,6 @@ branches:
       - master
       - travis-test
 
-android_toolkit:
-  start_emulator: true
-
 before_install:
     # Install base Android SDK
     - sudo apt-get update -qq
