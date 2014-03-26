@@ -30,7 +30,7 @@ public class FakeMessageReceiptsProvider implements MessageReceiptsProvider {
 
     @Override
     public void addMessageReceipt(MessageReceiptData messageReceipt) {
-        if (listMessageReceipts != null) {
+        if (listMessageReceipts == null) {
             listMessageReceipts = new LinkedList<MessageReceiptData>();
         }
         listMessageReceipts.add(messageReceipt);
