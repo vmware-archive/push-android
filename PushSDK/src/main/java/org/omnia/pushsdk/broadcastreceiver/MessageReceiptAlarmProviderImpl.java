@@ -1,17 +1,15 @@
-package org.omnia.pushsdk.alarm;
+package org.omnia.pushsdk.broadcastreceiver;
 
 import android.app.AlarmManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.os.SystemClock;
 
-import org.omnia.pushsdk.sample.util.PushLibLogger;
-
-public class AlarmProviderImpl implements AlarmProvider {
+public class MessageReceiptAlarmProviderImpl implements MessageReceiptAlarmProvider {
 
     private final Context context;
 
-    public AlarmProviderImpl(Context context) {
+    public MessageReceiptAlarmProviderImpl(Context context) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
@@ -20,7 +18,7 @@ public class AlarmProviderImpl implements AlarmProvider {
 
     @Override
     public void enableAlarm() {
-        final PendingIntent intent = AlarmReceiver.getPendingIntent(context);
+        final PendingIntent intent = MessageReceiptAlarmReceiver.getPendingIntent(context);
         final AlarmManager alarmManager = getAlarmManager();
         alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, getTriggerMillis(), getIntervalMillis(), intent);
     }
@@ -39,7 +37,7 @@ public class AlarmProviderImpl implements AlarmProvider {
 
     @Override
     public void disableAlarm() {
-        final PendingIntent intent = AlarmReceiver.getPendingIntent(context);
+        final PendingIntent intent = MessageReceiptAlarmReceiver.getPendingIntent(context);
         final AlarmManager alarmManager = getAlarmManager();
         alarmManager.cancel(intent);
     }

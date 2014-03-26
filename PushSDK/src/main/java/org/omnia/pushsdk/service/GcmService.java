@@ -20,8 +20,9 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 
-import org.omnia.pushsdk.alarm.AlarmProvider;
-import org.omnia.pushsdk.alarm.AlarmProviderImpl;
+import org.omnia.pushsdk.broadcastreceiver.GcmBroadcastReceiver;
+import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProvider;
+import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProviderImpl;
 import org.omnia.pushsdk.sample.model.MessageReceiptData;
 import org.omnia.pushsdk.prefs.MessageReceiptsProvider;
 import org.omnia.pushsdk.prefs.PreferencesProvider;
@@ -32,7 +33,7 @@ import org.omnia.pushsdk.sample.util.PushLibLogger;
 import java.util.Date;
 import java.util.concurrent.Semaphore;
 
-public class GcmIntentService extends IntentService {
+public class GcmService extends IntentService {
 
     public static final String BROADCAST_NAME_SUFFIX = ".omniapushsdk.RECEIVE_PUSH";
     public static final String KEY_RESULT_RECEIVER = "result_receiver";
@@ -48,22 +49,22 @@ public class GcmIntentService extends IntentService {
     /* package */ static Semaphore semaphore = null;
     /* package */ static PreferencesProvider preferencesProvider = null;
     /* package */ static MessageReceiptsProvider messageReceiptsProvider = null;
-    /* package */ static AlarmProvider alarmProvider = null;
+    /* package */ static MessageReceiptAlarmProvider messageReceiptAlarmProvider = null;
 
     private ResultReceiver resultReceiver = null;
 
     // TODO - write unit tests to cover this class
 
-    public GcmIntentService() {
-        super("GcmIntentService");
-        if (GcmIntentService.preferencesProvider == null) {
-            GcmIntentService.preferencesProvider = new RealPreferencesProvider(this);
+    public GcmService() {
+        super("GcmService");
+        if (GcmService.preferencesProvider == null) {
+            GcmService.preferencesProvider = new RealPreferencesProvider(this);
         }
-        if (GcmIntentService.messageReceiptsProvider == null) {
-            GcmIntentService.messageReceiptsProvider = new RealMessageReceiptsProvider(this);
+        if (GcmService.messageReceiptsProvider == null) {
+            GcmService.messageReceiptsProvider = new RealMessageReceiptsProvider(this);
         }
-        if (GcmIntentService.alarmProvider == null) {
-            GcmIntentService.alarmProvider = new AlarmProviderImpl(this);
+        if (GcmService.messageReceiptAlarmProvider == null) {
+            GcmService.messageReceiptAlarmProvider = new MessageReceiptAlarmProviderImpl(this);
         }
     }
 
@@ -76,14 +77,14 @@ public class GcmIntentService extends IntentService {
 
         } finally {
 
+            // If unit tests are running then release them so that they can continue
+            if (GcmService.semaphore != null) {
+                GcmService.semaphore.release();
+            }
+
             // Release the wake lock provided by the WakefulBroadcastReceiver.
             if (intent != null) {
                 GcmBroadcastReceiver.completeWakefulIntent(intent);
-            }
-
-            // If unit tests are running then release them so that they can continue
-            if (GcmIntentService.semaphore != null) {
-                GcmIntentService.semaphore.release();
             }
         }
     }
@@ -117,9 +118,9 @@ public class GcmIntentService extends IntentService {
         final MessageReceiptData messageReceipt = new MessageReceiptData();
         messageReceipt.setMessageUuid(messageUuid);
         messageReceipt.setTimestamp(new Date());
-        GcmIntentService.messageReceiptsProvider.addMessageReceipt(messageReceipt);
-        GcmIntentService.alarmProvider.enableAlarm();
-//        final BackEndMessageReceiptApiRequest request = GcmIntentService.backEndMessageReceiptApiRequestProvider.getRequest();
+        GcmService.messageReceiptsProvider.addMessageReceipt(messageReceipt);
+        GcmService.messageReceiptAlarmProvider.enableAlarm();
+//        final BackEndMessageReceiptApiRequest request = GcmService.backEndMessageReceiptApiRequestProvider.getRequest();
 //        request.startMessageReceipt(messageUuid, new BackEndMessageReceiptListener() {
 //
 //            @Override

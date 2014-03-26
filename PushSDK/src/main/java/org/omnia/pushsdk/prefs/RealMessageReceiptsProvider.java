@@ -53,7 +53,10 @@ public class RealMessageReceiptsProvider implements MessageReceiptsProvider {
     }
 
     @Override
-    public void addMessageReceipt(MessageReceiptData messageReceipt) {
+    public synchronized void addMessageReceipt(MessageReceiptData messageReceipt) {
+        if (listMessageReceipts == null) {
+            loadMessageReceiptsFromSharedPreferences();
+        }
         if (listMessageReceipts == null) {
             listMessageReceipts = new LinkedList<MessageReceiptData>();
         }
