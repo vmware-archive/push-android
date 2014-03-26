@@ -12,7 +12,7 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import org.omnia.pushsdk.sample.R;
 import org.omnia.pushsdk.sample.activity.MainActivity;
-import org.omnia.pushsdk.util.PushLibLogger;
+import org.omnia.pushsdk.sample.util.PushLibLogger;
 
 public class MyOmniaRemotePushLibBroadcastReceiver extends WakefulBroadcastReceiver {
 

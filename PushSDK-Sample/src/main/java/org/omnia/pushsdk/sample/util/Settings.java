@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package org.omnia.pushsdk.util;
+package org.omnia.pushsdk.sample.util;
 
 import android.content.Context;
 import android.content.SharedPreferences;

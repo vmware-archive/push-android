@@ -8,7 +8,7 @@ import org.omnia.pushsdk.gcm.FakeGcmProvider;
 import org.omnia.pushsdk.gcm.FakeGcmUnregistrationApiRequest;
 import org.omnia.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
-import org.omnia.pushsdk.util.PushLibLogger;
+import org.omnia.pushsdk.sample.util.PushLibLogger;
 
 import java.util.concurrent.Semaphore;
 

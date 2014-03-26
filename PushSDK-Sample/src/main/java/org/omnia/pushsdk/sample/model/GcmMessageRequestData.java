@@ -13,20 +13,22 @@
  * limitations under the License.
  */
 
-package org.omnia.pushsdk.model;
+package org.omnia.pushsdk.sample.model;
 
 import com.google.gson.annotations.SerializedName;
 
-public class GcmMessageRequest {
+import java.util.UUID;
 
-    @SerializedName("registration_ids")
-    public String[] registrationIds;
+public class GcmMessageRequestData {
 
-    @SerializedName("data")
-    public GcmMessageRequestData data;
+    @SerializedName("message")
+    public String message;
 
-    public GcmMessageRequest(String[] registrationIds, String message) {
-        this.registrationIds = registrationIds;
-        this.data = new GcmMessageRequestData(message);
+    @SerializedName("msg_uuid")
+    public String messageUuid;
+
+    public GcmMessageRequestData(String message) {
+        this.message = message;
+        this.messageUuid = UUID.randomUUID().toString();
     }
 }

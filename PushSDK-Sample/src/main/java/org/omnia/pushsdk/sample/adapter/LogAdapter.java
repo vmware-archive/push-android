@@ -22,7 +22,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import org.omnia.pushsdk.model.LogItem;
+import org.omnia.pushsdk.sample.model.LogItem;
 import org.omnia.pushsdk.sample.R;
 
 import java.util.List;

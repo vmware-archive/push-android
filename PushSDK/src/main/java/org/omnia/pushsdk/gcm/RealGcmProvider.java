@@ -20,7 +20,7 @@ import android.content.Context;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import org.omnia.pushsdk.util.PushLibLogger;
+import org.omnia.pushsdk.sample.util.PushLibLogger;
 
 import java.io.IOException;
 

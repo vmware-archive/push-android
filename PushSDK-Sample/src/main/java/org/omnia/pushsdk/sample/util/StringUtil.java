@@ -1,4 +1,4 @@
-package org.omnia.pushsdk.util;
+package org.omnia.pushsdk.sample.util;
 
 import java.util.ArrayList;
 import java.util.Collection;

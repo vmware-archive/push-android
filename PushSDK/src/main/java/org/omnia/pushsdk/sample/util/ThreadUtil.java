@@ -1,4 +1,4 @@
-package org.omnia.pushsdk.util;
+package org.omnia.pushsdk.sample.util;
 
 import android.os.Handler;
 import android.os.Looper;

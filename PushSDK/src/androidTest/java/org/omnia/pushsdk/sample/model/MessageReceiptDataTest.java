@@ -1,8 +1,7 @@
-package org.omnia.pushsdk.model;
+package org.omnia.pushsdk.sample.model;
 
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
-import android.util.Log;
 
 import com.google.gson.Gson;
 

@@ -1,7 +1,6 @@
-package org.omnia.pushsdk.model;
+package org.omnia.pushsdk.sample.model;
 
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 
@@ -24,6 +23,8 @@ public class MessageReceiptData {
 
     @SerializedName("timestamp")
     private String timestamp;
+
+    // Should we add a field for the app_uuid/release_uuid?
 
     private static SimpleDateFormat dateFormatter;
 

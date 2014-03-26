@@ -13,17 +13,20 @@
  * limitations under the License.
  */
 
-package org.omnia.pushsdk.model;
+package org.omnia.pushsdk.sample.model;
 
-public class LogItem {
+import com.google.gson.annotations.SerializedName;
 
-    public final String timestamp;
-    public final String message;
-    public final int baseRowColour;
+public class GcmMessageRequest {
 
-    public LogItem(String timestamp, String message, int baseRowColour) {
-        this.timestamp = timestamp;
-        this.message = message;
-        this.baseRowColour = baseRowColour;
+    @SerializedName("registration_ids")
+    public String[] registrationIds;
+
+    @SerializedName("data")
+    public GcmMessageRequestData data;
+
+    public GcmMessageRequest(String[] registrationIds, String message) {
+        this.registrationIds = registrationIds;
+        this.data = new GcmMessageRequestData(message);
     }
 }

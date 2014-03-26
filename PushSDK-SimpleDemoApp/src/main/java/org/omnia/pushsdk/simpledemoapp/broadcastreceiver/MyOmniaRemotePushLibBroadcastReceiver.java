@@ -12,7 +12,7 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import org.omnia.pushsdk.R;
 import org.omnia.pushsdk.simpledemoapp.MainActivity;
-import org.omnia.pushsdk.util.PushLibLogger;
+import org.omnia.pushsdk.sample.util.PushLibLogger;
 
 /*
  * This BroadcastReceiver is called by the Omnia Push SDK whenever it receives a push message

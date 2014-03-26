@@ -40,6 +40,7 @@
             </intent-filter>
         </receiver>
         <service android:name=".service.GcmIntentService"/>
+        <receiver android:name=".alarm.AlarmReceiver" />
         <!-- END - definition of components for receiving messages -->
 
     </application>

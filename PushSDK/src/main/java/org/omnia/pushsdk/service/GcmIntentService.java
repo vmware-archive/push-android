@@ -22,17 +22,12 @@ import android.os.ResultReceiver;
 
 import org.omnia.pushsdk.alarm.AlarmProvider;
 import org.omnia.pushsdk.alarm.AlarmProviderImpl;
-import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequest;
-import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestImpl;
-import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
-import org.omnia.pushsdk.backend.BackEndMessageReceiptListener;
-import org.omnia.pushsdk.model.MessageReceiptData;
-import org.omnia.pushsdk.network.NetworkWrapperImpl;
+import org.omnia.pushsdk.sample.model.MessageReceiptData;
 import org.omnia.pushsdk.prefs.MessageReceiptsProvider;
 import org.omnia.pushsdk.prefs.PreferencesProvider;
 import org.omnia.pushsdk.prefs.RealMessageReceiptsProvider;
 import org.omnia.pushsdk.prefs.RealPreferencesProvider;
-import org.omnia.pushsdk.util.PushLibLogger;
+import org.omnia.pushsdk.sample.util.PushLibLogger;
 
 import java.util.Date;
 import java.util.concurrent.Semaphore;
@@ -42,7 +37,7 @@ public class GcmIntentService extends IntentService {
     public static final String BROADCAST_NAME_SUFFIX = ".omniapushsdk.RECEIVE_PUSH";
     public static final String KEY_RESULT_RECEIVER = "result_receiver";
     public static final String KEY_GCM_INTENT = "gcm_intent";
-    public static final String KEY_MESSAGE_UUID = "message_uuid";
+    public static final String KEY_MESSAGE_UUID = "msg_uuid";
 
     public static final int NO_RESULT = -1;
     public static final int RESULT_EMPTY_INTENT = 100;
