@@ -1,10 +1,14 @@
 package org.omnia.pushsdk.backend;
 
+import org.omnia.pushsdk.sample.model.MessageReceiptData;
+
+import java.util.List;
+
 public class FakeBackEndMessageReceiptApiRequest implements BackEndMessageReceiptApiRequest {
 
     private final FakeBackEndMessageReceiptApiRequest originatingRequest;
     private boolean willBeSuccessfulRequest = false;
-    private String receivedMessageUuid = null;
+    private List<MessageReceiptData> receivedMessageReceipts = null;
     private boolean wasRequestAttempted = false;
 
     public FakeBackEndMessageReceiptApiRequest(FakeBackEndMessageReceiptApiRequest originatingRequest) {
@@ -17,13 +21,13 @@ public class FakeBackEndMessageReceiptApiRequest implements BackEndMessageReceip
     }
 
     @Override
-    public void startMessageReceipt(String messageUuid, BackEndMessageReceiptListener listener) {
+    public void startMessageReceipt(List<MessageReceiptData> messageReceipts, BackEndMessageReceiptListener listener) {
 
-        receivedMessageUuid = messageUuid;
+        receivedMessageReceipts = messageReceipts;
         wasRequestAttempted = true;
 
         if (originatingRequest != null) {
-            originatingRequest.receivedMessageUuid = messageUuid;
+            originatingRequest.receivedMessageReceipts = messageReceipts;
             originatingRequest.wasRequestAttempted = true;
         }
 

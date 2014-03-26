@@ -1,12 +1,18 @@
 package org.omnia.pushsdk.backend;
 
+import com.google.gson.Gson;
+
 import org.omnia.pushsdk.network.NetworkWrapper;
+import org.omnia.pushsdk.sample.model.MessageReceiptData;
 import org.omnia.pushsdk.sample.util.Const;
 import org.omnia.pushsdk.sample.util.PushLibLogger;
 
+import java.io.BufferedOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLEncoder;
+import java.util.List;
 
 public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implements BackEndMessageReceiptApiRequest {
 
@@ -14,28 +20,36 @@ public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implemen
         super(networkWrapper);
     }
 
-    public void startMessageReceipt(String messageUuid, BackEndMessageReceiptListener listener) {
-        verifyRequestArguments(messageUuid, listener);
-        processRequest(messageUuid, listener);
+    public void startMessageReceipt(List<MessageReceiptData> messageReceipts, BackEndMessageReceiptListener listener) {
+        verifyRequestArguments(messageReceipts, listener);
+        processRequest(messageReceipts, listener);
     }
 
-    private void verifyRequestArguments(String messageUuid, BackEndMessageReceiptListener listener) {
-        if (messageUuid == null || messageUuid.isEmpty()) {
-            throw new IllegalArgumentException("messageUuid may not be null or empty");
+    private void verifyRequestArguments(List<MessageReceiptData> messageReceipts, BackEndMessageReceiptListener listener) {
+        if (messageReceipts == null || messageReceipts.isEmpty()) {
+            throw new IllegalArgumentException("messageReceipts may not be null or empty");
         }
         if (listener == null) {
             throw new IllegalArgumentException("listener may not be null");
         }
     }
 
-    private void processRequest(String messageUuid, BackEndMessageReceiptListener listener) {
+    private void processRequest(List<MessageReceiptData> messageReceipts, BackEndMessageReceiptListener listener) {
+
+        OutputStream outputStream = null;
 
         try {
-            final String encodedMessageUuid = URLEncoder.encode(messageUuid, "UTF-8");
-            final URL url = new URL(Const.BACKEND_MESSAGE_RECEIPT_URL + "/" + encodedMessageUuid);
+            final URL url = new URL(Const.BACKEND_MESSAGE_RECEIPT_URL);
             final HttpURLConnection urlConnection = getHttpURLConnection(url);
+            urlConnection.addRequestProperty("Content-Type", "application/json");
             urlConnection.setRequestMethod("POST");
+            urlConnection.setDoInput(true);
             urlConnection.connect();
+
+            outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
+            final String requestBodyData = getRequestBodyData(messageReceipts);
+            PushLibLogger.v("Making network request to post message receipts to the back-end server: " + requestBodyData);
+            writeOutput(requestBodyData, outputStream);
 
             final int statusCode = urlConnection.getResponseCode();
             urlConnection.disconnect();
@@ -44,7 +58,20 @@ public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implemen
         } catch (Exception e) {
             PushLibLogger.ex("Back-end message receipt attempt failed", e);
             listener.onBackEndMessageReceiptFailed(e.getLocalizedMessage());
+
+        } finally {
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {}
+            }
         }
+    }
+
+    private String getRequestBodyData(List<MessageReceiptData> messageReceipts) {
+        final Gson gson = new Gson();
+        final String requestBodyData = gson.toJson(messageReceipts);
+        return requestBodyData;
     }
 
     private void onSuccessfulNetworkRequest(int statusCode, BackEndMessageReceiptListener listener) {

@@ -5,9 +5,14 @@ import android.test.AndroidTestCase;
 import org.omnia.pushsdk.network.MockHttpURLConnection;
 import org.omnia.pushsdk.network.MockNetworkWrapper;
 import org.omnia.pushsdk.network.NetworkWrapper;
+import org.omnia.pushsdk.sample.model.MessageReceiptData;
+import org.omnia.pushsdk.sample.model.MessageReceiptDataTest;
 import org.omnia.pushsdk.sample.util.DelayedLoop;
 
 import java.io.IOException;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.List;
 
 public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
 
@@ -17,12 +22,18 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
     private DelayedLoop delayedLoop;
     private static final long TEN_SECOND_TIMEOUT = 10000L;
 
+    private List<MessageReceiptData> emptyList;
+    private List<MessageReceiptData> listWithOneItem;
+
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         networkWrapper = new MockNetworkWrapper();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
         MockHttpURLConnection.reset();
+        emptyList = new LinkedList<MessageReceiptData>();
+        listWithOneItem = new LinkedList<MessageReceiptData>();
+        listWithOneItem.add(MessageReceiptDataTest.getMessageReceiptData1());
     }
 
     public void testRequiresNetworkWrapper() {
@@ -34,7 +45,7 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
         }
     }
 
-    public void testRequiresMessageUuid() {
+    public void testRequiresMessageReceipts() {
         try {
             final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
             makeBackEndMessageReceiptListener(true);
@@ -45,11 +56,11 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
         }
     }
 
-    public void testMessageUuidMayNotBeEmpty() {
+    public void testMessageReceiptsMayNotBeEmpty() {
         try {
             final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
             makeBackEndMessageReceiptListener(true);
-            request.startMessageReceipt("", backEndMessageReceiptListener);
+            request.startMessageReceipt(emptyList, backEndMessageReceiptListener);
             fail("Should not have succeeded");
         } catch (Exception e) {
             // Success
@@ -59,7 +70,7 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
     public void testRequiresListener() {
         try {
             final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
-            request.startMessageReceipt(TEST_MESSAGE_UUID, null);
+            request.startMessageReceipt(listWithOneItem, null);
             fail("Should not have succeeded");
         } catch (Exception e) {
             // Success
@@ -69,7 +80,7 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
     public void testSuccessfulRequest() {
         makeListenersForSuccessfulRequestFromNetwork(true, 200);
         final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
-        request.startMessageReceipt(TEST_MESSAGE_UUID, backEndMessageReceiptListener);
+        request.startMessageReceipt(listWithOneItem, backEndMessageReceiptListener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
@@ -77,7 +88,7 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
     public void testCouldNotConnect() {
         makeListenersFromFailedRequestFromNetwork("Your server is busted", 0);
         final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
-        request.startMessageReceipt(TEST_MESSAGE_UUID, backEndMessageReceiptListener);
+        request.startMessageReceipt(listWithOneItem, backEndMessageReceiptListener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
@@ -85,7 +96,7 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
     public void testSuccessful404() {
         makeListenersForSuccessfulRequestFromNetwork(false, 404);
         final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
-        request.startMessageReceipt(TEST_MESSAGE_UUID, backEndMessageReceiptListener);
+        request.startMessageReceipt(listWithOneItem, backEndMessageReceiptListener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
