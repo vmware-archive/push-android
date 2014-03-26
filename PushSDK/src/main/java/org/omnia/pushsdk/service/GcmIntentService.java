@@ -20,6 +20,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 
+import org.omnia.pushsdk.alarm.AlarmProvider;
+import org.omnia.pushsdk.alarm.AlarmProviderImpl;
 import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequest;
 import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestImpl;
 import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
@@ -51,6 +53,7 @@ public class GcmIntentService extends IntentService {
     /* package */ static Semaphore semaphore = null;
     /* package */ static PreferencesProvider preferencesProvider = null;
     /* package */ static MessageReceiptsProvider messageReceiptsProvider = null;
+    /* package */ static AlarmProvider alarmProvider = null;
 
     private ResultReceiver resultReceiver = null;
 
@@ -63,6 +66,9 @@ public class GcmIntentService extends IntentService {
         }
         if (GcmIntentService.messageReceiptsProvider == null) {
             GcmIntentService.messageReceiptsProvider = new RealMessageReceiptsProvider(this);
+        }
+        if (GcmIntentService.alarmProvider == null) {
+            GcmIntentService.alarmProvider = new AlarmProviderImpl(this);
         }
     }
 
@@ -117,6 +123,7 @@ public class GcmIntentService extends IntentService {
         messageReceipt.setMessageUuid(messageUuid);
         messageReceipt.setTimestamp(new Date());
         GcmIntentService.messageReceiptsProvider.addMessageReceipt(messageReceipt);
+        GcmIntentService.alarmProvider.enableAlarm();
 //        final BackEndMessageReceiptApiRequest request = GcmIntentService.backEndMessageReceiptApiRequestProvider.getRequest();
 //        request.startMessageReceipt(messageUuid, new BackEndMessageReceiptListener() {
 //

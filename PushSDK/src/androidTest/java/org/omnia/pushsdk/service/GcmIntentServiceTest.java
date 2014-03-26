@@ -9,6 +9,7 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.test.ServiceTestCase;
 
+import org.omnia.pushsdk.alarm.FakeAlarmProvider;
 import org.omnia.pushsdk.prefs.FakeMessageReceiptsProvider;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
 
@@ -27,6 +28,7 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
     private TestResultReceiver testResultReceiver;
     private TestBroadcastReceiver testBroadcastReceiver;
     private Intent receivedIntent;
+    private FakeAlarmProvider alarmProvider = new FakeAlarmProvider();
 
     // Captures result codes from the service itself
     public class TestResultReceiver extends ResultReceiver {
@@ -62,6 +64,7 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
         GcmIntentService.semaphore = new Semaphore(0);
         GcmIntentService.preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null);
         GcmIntentService.messageReceiptsProvider = new FakeMessageReceiptsProvider(null);
+        GcmIntentService.alarmProvider = alarmProvider;
         testResultReceiver = new TestResultReceiver(null);
         testBroadcastReceiver = new TestBroadcastReceiver();
         final IntentFilter intentFilter = new IntentFilter(TEST_PACKAGE_NAME + GcmIntentService.BROADCAST_NAME_SUFFIX);
@@ -74,6 +77,7 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
         GcmIntentService.semaphore.acquire();
         assertEquals(GcmIntentService.NO_RESULT, testResultCode);
         assertEquals(0, GcmIntentService.messageReceiptsProvider.numberOfMessageReceipts());
+        assertFalse(alarmProvider.isAlarmEnabled());
     }
 
     public void testReceiveEmptyIntent() throws InterruptedException {
@@ -81,6 +85,7 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
         GcmIntentService.semaphore.acquire();
         assertEquals(GcmIntentService.RESULT_EMPTY_INTENT, testResultCode);
         assertEquals(0, GcmIntentService.messageReceiptsProvider.numberOfMessageReceipts());
+        assertFalse(alarmProvider.isAlarmEnabled());
     }
 
     public void testEmptyPackageName() throws InterruptedException {
@@ -89,6 +94,7 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
         GcmIntentService.semaphore.acquire();
         assertEquals(GcmIntentService.RESULT_EMPTY_PACKAGE_NAME, testResultCode);
         assertEquals(0, GcmIntentService.messageReceiptsProvider.numberOfMessageReceipts());
+        assertFalse(alarmProvider.isAlarmEnabled());
     }
 
     public void testSendNotification() throws InterruptedException {
@@ -110,6 +116,7 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
         assertTrue(extras.containsKey(KEY_MESSAGE));
         assertEquals(TEST_MESSAGE, extras.getString(KEY_MESSAGE));
         assertEquals(0, GcmIntentService.messageReceiptsProvider.numberOfMessageReceipts());
+        assertFalse(alarmProvider.isAlarmEnabled());
     }
 
     public void testQueuesReceiptNotification() throws InterruptedException {
@@ -123,6 +130,7 @@ public class GcmIntentServiceTest extends ServiceTestCase<GcmIntentService> {
         assertNotNull(receivedIntent);
         assertTrue(receivedIntent.hasExtra(GcmIntentService.KEY_GCM_INTENT));
         assertEquals(1, GcmIntentService.messageReceiptsProvider.numberOfMessageReceipts());
+        assertTrue(alarmProvider.isAlarmEnabled());
     }
 
     private Intent getServiceIntent() {
