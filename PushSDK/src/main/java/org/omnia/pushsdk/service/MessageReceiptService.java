@@ -15,8 +15,8 @@ import org.omnia.pushsdk.network.NetworkWrapper;
 import org.omnia.pushsdk.network.NetworkWrapperImpl;
 import org.omnia.pushsdk.prefs.MessageReceiptsProvider;
 import org.omnia.pushsdk.prefs.MessageReceiptsProviderImpl;
-import org.omnia.pushsdk.sample.model.MessageReceiptData;
-import org.omnia.pushsdk.sample.util.PushLibLogger;
+import org.omnia.pushsdk.model.MessageReceiptData;
+import org.omnia.pushsdk.util.PushLibLogger;
 
 import java.util.List;
 import java.util.concurrent.Semaphore;

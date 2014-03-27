@@ -10,8 +10,8 @@ import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
 import org.omnia.pushsdk.backend.FakeBackEndMessageReceiptApiRequest;
 import org.omnia.pushsdk.broadcastreceiver.FakeMessageReceiptAlarmProvider;
 import org.omnia.pushsdk.prefs.FakeMessageReceiptsProvider;
-import org.omnia.pushsdk.sample.model.MessageReceiptData;
-import org.omnia.pushsdk.sample.model.MessageReceiptDataTest;
+import org.omnia.pushsdk.model.MessageReceiptData;
+import org.omnia.pushsdk.model.MessageReceiptDataTest;
 
 import java.util.LinkedList;
 import java.util.List;

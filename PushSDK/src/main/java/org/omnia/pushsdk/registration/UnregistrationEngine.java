@@ -10,7 +10,7 @@ import org.omnia.pushsdk.gcm.GcmUnregistrationApiRequest;
 import org.omnia.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
 import org.omnia.pushsdk.gcm.GcmUnregistrationListener;
 import org.omnia.pushsdk.prefs.PreferencesProvider;
-import org.omnia.pushsdk.sample.util.PushLibLogger;
+import org.omnia.pushsdk.util.PushLibLogger;
 
 public class UnregistrationEngine {
 

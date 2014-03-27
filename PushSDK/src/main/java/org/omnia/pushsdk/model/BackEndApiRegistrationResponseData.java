@@ -13,33 +13,33 @@
  * limitations under the License.
  */
 
-package org.omnia.pushsdk.sample.model;
+package org.omnia.pushsdk.model;
 
 /*
 {
-        "release_uuid": "guid_provided_by_developer",
-        "secret": "guid_provided_by_developer",
-        "device_alias": "developer-specific",
-        "device_type": "phone"|"tablet"|"phablet",
-        "device_model": "Nexus 4",
+        "replicant_uuid": "9e60c311-f5c7-4416-aea2-d07bbc94f208",
+        "secret": "3c676b20-3c49-4215-be1a-3932e3458514",
+        "device_alias": "andoidtest",
+        "device_manufactur": "Phone Corp",
+        "device_model": "Ultimate Phono 1999",
         "os": "android",
-        "os_version": "4.4",
-        "registration_token": "provided_by_GCM"
+        "os_version": "version",
+        "registration_token": "SomeString"
         }
 */
 
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Model used in the Omnia Mobile Services device registration API.
+ * Model returned by the Omnia Mobile Services device registration API.
  */
-public class BackEndApiRegistrationRequestData {
+public class BackEndApiRegistrationResponseData {
 
-    @SerializedName("release_uuid")
-    private String releaseUuid;
+    @SerializedName("replicant_id")
+    private String replicantId;
 
-    @SerializedName("secret")
-    private String secret;
+    @SerializedName("device_uuid")
+    private String deviceUuid;
 
     @SerializedName("device_alias")
     private String deviceAlias;
@@ -59,23 +59,23 @@ public class BackEndApiRegistrationRequestData {
     @SerializedName("registration_token")
     private String registrationToken;
 
-    public BackEndApiRegistrationRequestData() {
+    public BackEndApiRegistrationResponseData() {
     }
 
-    public String getReleaseUuid() {
-        return releaseUuid;
+    public String getReplicantId() {
+        return replicantId;
     }
 
-    public void setReleaseUuid(String releaseUuid) {
-        this.releaseUuid = releaseUuid;
+    public void setReplicantId(String replicantId) {
+        this.replicantId = replicantId;
     }
 
-    public String getSecret() {
-        return secret;
+    public String getDeviceUuid() {
+        return deviceUuid;
     }
 
-    public void setSecret(String secret) {
-        this.secret = secret;
+    public void setDeviceUuid(String deviceUuid) {
+        this.deviceUuid = deviceUuid;
     }
 
     public String getDeviceAlias() {

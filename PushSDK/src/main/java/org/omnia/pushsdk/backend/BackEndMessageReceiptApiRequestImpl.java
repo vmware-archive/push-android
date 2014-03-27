@@ -3,9 +3,9 @@ package org.omnia.pushsdk.backend;
 import com.google.gson.Gson;
 
 import org.omnia.pushsdk.network.NetworkWrapper;
-import org.omnia.pushsdk.sample.model.MessageReceiptData;
-import org.omnia.pushsdk.sample.util.Const;
-import org.omnia.pushsdk.sample.util.PushLibLogger;
+import org.omnia.pushsdk.model.MessageReceiptData;
+import org.omnia.pushsdk.util.Const;
+import org.omnia.pushsdk.util.PushLibLogger;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;

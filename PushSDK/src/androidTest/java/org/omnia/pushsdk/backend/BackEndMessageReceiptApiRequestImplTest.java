@@ -5,9 +5,9 @@ import android.test.AndroidTestCase;
 import org.omnia.pushsdk.network.MockHttpURLConnection;
 import org.omnia.pushsdk.network.MockNetworkWrapper;
 import org.omnia.pushsdk.network.NetworkWrapper;
-import org.omnia.pushsdk.sample.model.MessageReceiptData;
-import org.omnia.pushsdk.sample.model.MessageReceiptDataTest;
-import org.omnia.pushsdk.sample.util.DelayedLoop;
+import org.omnia.pushsdk.model.MessageReceiptData;
+import org.omnia.pushsdk.model.MessageReceiptDataTest;
+import org.omnia.pushsdk.util.DelayedLoop;
 
 import java.io.IOException;
 import java.util.LinkedList;

@@ -24,11 +24,11 @@ import org.omnia.pushsdk.broadcastreceiver.GcmBroadcastReceiver;
 import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProvider;
 import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProviderImpl;
 import org.omnia.pushsdk.prefs.PreferencesProviderImpl;
-import org.omnia.pushsdk.sample.model.MessageReceiptData;
+import org.omnia.pushsdk.model.MessageReceiptData;
 import org.omnia.pushsdk.prefs.MessageReceiptsProvider;
 import org.omnia.pushsdk.prefs.PreferencesProvider;
 import org.omnia.pushsdk.prefs.MessageReceiptsProviderImpl;
-import org.omnia.pushsdk.sample.util.PushLibLogger;
+import org.omnia.pushsdk.util.PushLibLogger;
 
 import java.util.Date;
 import java.util.concurrent.Semaphore;

@@ -3,8 +3,8 @@ package org.omnia.pushsdk.prefs;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import org.omnia.pushsdk.sample.model.MessageReceiptData;
-import org.omnia.pushsdk.sample.util.Const;
+import org.omnia.pushsdk.model.MessageReceiptData;
+import org.omnia.pushsdk.util.Const;
 
 import java.util.LinkedList;
 import java.util.List;

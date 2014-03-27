@@ -10,7 +10,7 @@ import org.omnia.pushsdk.gcm.FakeGcmProvider;
 import org.omnia.pushsdk.gcm.FakeGcmUnregistrationApiRequest;
 import org.omnia.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
-import org.omnia.pushsdk.sample.util.DelayedLoop;
+import org.omnia.pushsdk.util.DelayedLoop;
 
 public class UnregistrationEngineTestParameters {
 

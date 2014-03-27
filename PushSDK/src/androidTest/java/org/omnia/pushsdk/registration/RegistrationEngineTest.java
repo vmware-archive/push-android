@@ -29,7 +29,7 @@ import org.omnia.pushsdk.gcm.GcmRegistrationApiRequestProvider;
 import org.omnia.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
 import org.omnia.pushsdk.prefs.PreferencesProvider;
-import org.omnia.pushsdk.sample.util.PushLibLogger;
+import org.omnia.pushsdk.util.PushLibLogger;
 import org.omnia.pushsdk.version.FakeVersionProvider;
 import org.omnia.pushsdk.version.VersionProvider;
 

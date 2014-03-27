@@ -1,4 +1,4 @@
-package org.omnia.pushsdk.sample.util;
+package org.omnia.pushsdk.util;
 
 /**
  * This class simplifies the process of testing asynchronous code within unit tests.<br>

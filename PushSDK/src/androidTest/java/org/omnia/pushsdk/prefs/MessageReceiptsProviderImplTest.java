@@ -2,10 +2,9 @@ package org.omnia.pushsdk.prefs;
 
 import android.test.AndroidTestCase;
 
-import org.omnia.pushsdk.sample.model.MessageReceiptData;
-import org.omnia.pushsdk.sample.model.MessageReceiptDataTest;
+import org.omnia.pushsdk.model.MessageReceiptData;
+import org.omnia.pushsdk.model.MessageReceiptDataTest;
 
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 

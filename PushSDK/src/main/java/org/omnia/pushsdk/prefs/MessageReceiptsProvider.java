@@ -1,6 +1,6 @@
 package org.omnia.pushsdk.prefs;
 
-import org.omnia.pushsdk.sample.model.MessageReceiptData;
+import org.omnia.pushsdk.model.MessageReceiptData;
 
 import java.util.List;
 

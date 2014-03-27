@@ -1,4 +1,4 @@
-package org.omnia.pushsdk.sample.model;
+package org.omnia.pushsdk.model;
 
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
