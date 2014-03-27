@@ -21,17 +21,18 @@ public class FakeBackEndMessageReceiptApiRequest implements BackEndMessageReceip
     }
 
     @Override
-    public void startMessageReceipt(List<MessageReceiptData> messageReceipts, BackEndMessageReceiptListener listener) {
+    public void startSendMessageReceipts(List<MessageReceiptData> messageReceipts, BackEndMessageReceiptListener listener) {
 
-        receivedMessageReceipts = messageReceipts;
         wasRequestAttempted = true;
-
         if (originatingRequest != null) {
-            originatingRequest.receivedMessageReceipts = messageReceipts;
             originatingRequest.wasRequestAttempted = true;
         }
 
         if (willBeSuccessfulRequest) {
+            receivedMessageReceipts = messageReceipts;
+            if (originatingRequest != null) {
+                originatingRequest.receivedMessageReceipts = messageReceipts;
+            }
             listener.onBackEndMessageReceiptSuccess();
         } else {
             listener.onBackEndMessageReceiptFailed("The fake request failed fakely.");
@@ -40,7 +41,9 @@ public class FakeBackEndMessageReceiptApiRequest implements BackEndMessageReceip
 
     @Override
     public BackEndMessageReceiptApiRequest copy() {
-        return new FakeBackEndMessageReceiptApiRequest(this);
+        final FakeBackEndMessageReceiptApiRequest newRequest = new FakeBackEndMessageReceiptApiRequest(this);
+        newRequest.willBeSuccessfulRequest = willBeSuccessfulRequest;
+        return newRequest;
     }
 
     public boolean wasRequestAttempted() {
@@ -50,4 +53,12 @@ public class FakeBackEndMessageReceiptApiRequest implements BackEndMessageReceip
     public void setWillBeSuccessfulRequest(boolean b) {
         this.willBeSuccessfulRequest = b;
     }
+
+    public int numberOfMessageReceiptsSent() {
+        if (receivedMessageReceipts == null) {
+            return 0;
+        } else {
+            return receivedMessageReceipts.size();
+        }
+    };
 }

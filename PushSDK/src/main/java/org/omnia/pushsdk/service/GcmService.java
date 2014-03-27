@@ -23,11 +23,11 @@ import android.os.ResultReceiver;
 import org.omnia.pushsdk.broadcastreceiver.GcmBroadcastReceiver;
 import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProvider;
 import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProviderImpl;
+import org.omnia.pushsdk.prefs.PreferencesProviderImpl;
 import org.omnia.pushsdk.sample.model.MessageReceiptData;
 import org.omnia.pushsdk.prefs.MessageReceiptsProvider;
 import org.omnia.pushsdk.prefs.PreferencesProvider;
-import org.omnia.pushsdk.prefs.RealMessageReceiptsProvider;
-import org.omnia.pushsdk.prefs.RealPreferencesProvider;
+import org.omnia.pushsdk.prefs.MessageReceiptsProviderImpl;
 import org.omnia.pushsdk.sample.util.PushLibLogger;
 
 import java.util.Date;
@@ -58,10 +58,10 @@ public class GcmService extends IntentService {
     public GcmService() {
         super("GcmService");
         if (GcmService.preferencesProvider == null) {
-            GcmService.preferencesProvider = new RealPreferencesProvider(this);
+            GcmService.preferencesProvider = new PreferencesProviderImpl(this);
         }
         if (GcmService.messageReceiptsProvider == null) {
-            GcmService.messageReceiptsProvider = new RealMessageReceiptsProvider(this);
+            GcmService.messageReceiptsProvider = new MessageReceiptsProviderImpl(this);
         }
         if (GcmService.messageReceiptAlarmProvider == null) {
             GcmService.messageReceiptAlarmProvider = new MessageReceiptAlarmProviderImpl(this);
@@ -81,6 +81,8 @@ public class GcmService extends IntentService {
             if (GcmService.semaphore != null) {
                 GcmService.semaphore.release();
             }
+
+            cleanupStatics();
 
             // Release the wake lock provided by the WakefulBroadcastReceiver.
             if (intent != null) {
@@ -120,20 +122,7 @@ public class GcmService extends IntentService {
         messageReceipt.setTimestamp(new Date());
         GcmService.messageReceiptsProvider.addMessageReceipt(messageReceipt);
         GcmService.messageReceiptAlarmProvider.enableAlarm();
-//        final BackEndMessageReceiptApiRequest request = GcmService.backEndMessageReceiptApiRequestProvider.getRequest();
-//        request.startMessageReceipt(messageUuid, new BackEndMessageReceiptListener() {
-//
-//            @Override
-//            public void onBackEndMessageReceiptSuccess() {
-//                PushLibLogger.d("Sent message receipt successfully for msg_uuid \"" + messageUuid + "\".");
-//            }
-//
-//            @Override
-//            public void onBackEndMessageReceiptFailed(String reason) {
-//                PushLibLogger.e("Got error trying to send message receipt for msg_uuid \"" + messageUuid + "\". Error: " + reason);
-//                // TODO - save for later?
-//            }
-//        });
+        PushLibLogger.d("There are now " + GcmService.messageReceiptsProvider.numberOfMessageReceipts() + " message receipts queued to send to the server.");
     }
 
     private void getResultReceiver(Intent intent) {
@@ -176,5 +165,11 @@ public class GcmService extends IntentService {
             // Used by unit tests
             resultReceiver.send(resultCode, null);
         }
+    }
+
+    private void cleanupStatics() {
+        GcmService.preferencesProvider = null;
+        GcmService.messageReceiptsProvider = null;
+        GcmService.messageReceiptAlarmProvider = null;
     }
 }

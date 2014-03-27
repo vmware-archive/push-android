@@ -10,7 +10,6 @@ import org.omnia.pushsdk.sample.model.MessageReceiptDataTest;
 import org.omnia.pushsdk.sample.util.DelayedLoop;
 
 import java.io.IOException;
-import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -49,7 +48,7 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
         try {
             final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
             makeBackEndMessageReceiptListener(true);
-            request.startMessageReceipt(null, backEndMessageReceiptListener);
+            request.startSendMessageReceipts(null, backEndMessageReceiptListener);
             fail("Should not have succeeded");
         } catch (Exception e) {
             // Success
@@ -60,7 +59,7 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
         try {
             final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
             makeBackEndMessageReceiptListener(true);
-            request.startMessageReceipt(emptyList, backEndMessageReceiptListener);
+            request.startSendMessageReceipts(emptyList, backEndMessageReceiptListener);
             fail("Should not have succeeded");
         } catch (Exception e) {
             // Success
@@ -70,7 +69,7 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
     public void testRequiresListener() {
         try {
             final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
-            request.startMessageReceipt(listWithOneItem, null);
+            request.startSendMessageReceipts(listWithOneItem, null);
             fail("Should not have succeeded");
         } catch (Exception e) {
             // Success
@@ -80,7 +79,7 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
     public void testSuccessfulRequest() {
         makeListenersForSuccessfulRequestFromNetwork(true, 200);
         final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
-        request.startMessageReceipt(listWithOneItem, backEndMessageReceiptListener);
+        request.startSendMessageReceipts(listWithOneItem, backEndMessageReceiptListener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
@@ -88,15 +87,15 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
     public void testCouldNotConnect() {
         makeListenersFromFailedRequestFromNetwork("Your server is busted", 0);
         final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
-        request.startMessageReceipt(listWithOneItem, backEndMessageReceiptListener);
+        request.startSendMessageReceipts(listWithOneItem, backEndMessageReceiptListener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
 
-    public void testSuccessful404() {
-        makeListenersForSuccessfulRequestFromNetwork(false, 404);
+    public void testSuccessful400() {
+        makeListenersForSuccessfulRequestFromNetwork(false, 400);
         final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
-        request.startMessageReceipt(listWithOneItem, backEndMessageReceiptListener);
+        request.startSendMessageReceipts(listWithOneItem, backEndMessageReceiptListener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }

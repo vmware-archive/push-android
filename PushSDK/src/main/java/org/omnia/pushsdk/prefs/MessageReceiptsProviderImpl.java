@@ -9,7 +9,7 @@ import org.omnia.pushsdk.sample.util.Const;
 import java.util.LinkedList;
 import java.util.List;
 
-public class RealMessageReceiptsProvider implements MessageReceiptsProvider {
+public class MessageReceiptsProviderImpl implements MessageReceiptsProvider {
 
     private static final String MESSAGE_RECEIPTS_TAG = Const.TAG_NAME + "MessageReceipts";
     private static final String PROPERTY_MESSAGE_RECEIPTS = "message_receipts";
@@ -17,7 +17,7 @@ public class RealMessageReceiptsProvider implements MessageReceiptsProvider {
     private final Context context;
     private List<MessageReceiptData> listMessageReceipts;
 
-    public RealMessageReceiptsProvider(Context context) {
+    public MessageReceiptsProviderImpl(Context context) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
@@ -97,5 +97,23 @@ public class RealMessageReceiptsProvider implements MessageReceiptsProvider {
     public synchronized void clear() {
         listMessageReceipts = null;
         saveMessageReceiptsToSharedPreferences();
+    }
+
+    @Override
+    public synchronized int removeMessageReceipts(List<MessageReceiptData> messageReceipts) {
+        int numberOfItemsRemoved = 0;
+        if (messageReceipts == null || messageReceipts.size() <= 0 || listMessageReceipts == null || listMessageReceipts.size() <= 0) {
+            return 0;
+        }
+        for (MessageReceiptData messageReceipt : messageReceipts) {
+            if (listMessageReceipts.contains(messageReceipt)) {
+                listMessageReceipts.remove(messageReceipt);
+                numberOfItemsRemoved += 1;
+            }
+        }
+        if (numberOfItemsRemoved > 0) {
+            saveMessageReceiptsToSharedPreferences();
+        }
+        return numberOfItemsRemoved;
     }
 }

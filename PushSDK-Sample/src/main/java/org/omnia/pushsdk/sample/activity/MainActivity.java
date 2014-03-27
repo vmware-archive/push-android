@@ -251,6 +251,10 @@ public class MainActivity extends ActionBarActivity {
     private void sendMessageViaBackEnd() {
         updateCurrentBaseRowColour();
         final String data = getBackEndMessageRequestString();
+        if (data == null) {
+            addLogMessage("Can not send message. Please register first.");
+            return;
+        }
         addLogMessage("Sending message via back-end server...");
         addLogMessage("Message body data: \"" + data + "\"");
 
@@ -304,6 +308,9 @@ public class MainActivity extends ActionBarActivity {
 
     private String getBackEndMessageRequestString() {
         final String device_uuid = readIdFromFile("device_uuid");
+        if (device_uuid == null) {
+            return null;
+        }
         final String[] devices = new String[]{device_uuid};
         final String platforms = "android";
         final String messageTitle = "Sample Message Title";
@@ -318,6 +325,10 @@ public class MainActivity extends ActionBarActivity {
     private void sendMessageViaGcm() {
         updateCurrentBaseRowColour();
         final String data = getGcmMessageRequestString();
+        if (data == null) {
+            addLogMessage("Can not send message. Please register first.");
+            return;
+        }
         addLogMessage("Sending message via GCM...");
         addLogMessage("Message body data: \"" + data + "\"");
 

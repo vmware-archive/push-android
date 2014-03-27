@@ -23,7 +23,7 @@ import org.omnia.pushsdk.sample.util.Const;
 /**
  * Saves preferences to the SharedPreferences on the filesystem.
  */
-public class RealPreferencesProvider implements PreferencesProvider {
+public class PreferencesProviderImpl implements PreferencesProvider {
 
     // If you add or change any of these strings, then please also update their copies in the
     // sample app's MainActivity::clearRegistration method.
@@ -38,7 +38,7 @@ public class RealPreferencesProvider implements PreferencesProvider {
 
     private final Context context;
 
-    public RealPreferencesProvider(Context context) {
+    public PreferencesProviderImpl(Context context) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }

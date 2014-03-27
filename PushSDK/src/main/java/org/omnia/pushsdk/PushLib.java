@@ -35,7 +35,7 @@ import org.omnia.pushsdk.gcm.RealGcmProvider;
 import org.omnia.pushsdk.network.NetworkWrapper;
 import org.omnia.pushsdk.network.NetworkWrapperImpl;
 import org.omnia.pushsdk.prefs.PreferencesProvider;
-import org.omnia.pushsdk.prefs.RealPreferencesProvider;
+import org.omnia.pushsdk.prefs.PreferencesProviderImpl;
 import org.omnia.pushsdk.registration.RegistrationEngine;
 import org.omnia.pushsdk.registration.RegistrationListener;
 import org.omnia.pushsdk.registration.UnregistrationEngine;
@@ -115,7 +115,7 @@ public class PushLib {
     public void startRegistration(final RegistrationParameters parameters, final RegistrationListener listener) {
         verifyRegistrationArguments(parameters);
         final GcmProvider gcmProvider = new RealGcmProvider(context);
-        final PreferencesProvider preferencesProvider = new RealPreferencesProvider(context);
+        final PreferencesProvider preferencesProvider = new PreferencesProviderImpl(context);
         final GcmRegistrationApiRequest dummyGcmRegistrationApiRequest = new GcmRegistrationApiRequestImpl(context, gcmProvider);
         final GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider = new GcmRegistrationApiRequestProvider(dummyGcmRegistrationApiRequest);
         final GcmUnregistrationApiRequest dummyGcmUnregistrationApiRequest = new GcmUnregistrationApiRequestImpl(context, gcmProvider);
@@ -164,7 +164,7 @@ public class PushLib {
      */
     public void startUnregistration(final UnregistrationListener listener) {
         final GcmProvider gcmProvider = new RealGcmProvider(context);
-        final PreferencesProvider preferencesProvider = new RealPreferencesProvider(context);
+        final PreferencesProvider preferencesProvider = new PreferencesProviderImpl(context);
         final GcmUnregistrationApiRequest dummyGcmUnregistrationApiRequest = new GcmUnregistrationApiRequestImpl(context, gcmProvider);
         final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(dummyGcmUnregistrationApiRequest);
         final NetworkWrapper networkWrapper = new NetworkWrapperImpl();

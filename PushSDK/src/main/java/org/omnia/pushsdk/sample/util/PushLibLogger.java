@@ -229,7 +229,13 @@ public class PushLibLogger {
                 mainHandler.post(new Runnable() {
                     @Override
                     public void run() {
-                        localListener.onLogMessage(message.replaceFirst("^.*\\]\\s*", ""));
+                        int indexBracket = message.indexOf("] ");
+                        if (indexBracket == -1) {
+                            localListener.onLogMessage(message);
+                        } else {
+                            final String messageWithoutLeader = message.substring(indexBracket + 2);
+                            localListener.onLogMessage(messageWithoutLeader);
+                        }
                     }
                 });
             }

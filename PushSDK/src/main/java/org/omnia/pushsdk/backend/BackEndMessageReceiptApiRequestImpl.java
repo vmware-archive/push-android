@@ -20,7 +20,7 @@ public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implemen
         super(networkWrapper);
     }
 
-    public void startMessageReceipt(List<MessageReceiptData> messageReceipts, BackEndMessageReceiptListener listener) {
+    public void startSendMessageReceipts(List<MessageReceiptData> messageReceipts, BackEndMessageReceiptListener listener) {
         verifyRequestArguments(messageReceipts, listener);
         processRequest(messageReceipts, listener);
     }

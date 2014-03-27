@@ -20,14 +20,19 @@ public class MessageReceiptAlarmProviderImpl implements MessageReceiptAlarmProvi
     public void enableAlarm() {
         final PendingIntent intent = MessageReceiptAlarmReceiver.getPendingIntent(context);
         final AlarmManager alarmManager = getAlarmManager();
-        alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, getTriggerMillis(), getIntervalMillis(), intent);
+
+        // TODO - uncomment the next line once the server is able to accept message receipts
+
+//        alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, getTriggerMillis(), getIntervalMillis(), intent);
     }
 
     private long getTriggerMillis() {
+        // TODO - select a better alarm trigger time
         return SystemClock.elapsedRealtime() + 1000/*AlarmManager.INTERVAL_FIFTEEN_MINUTES*/;
     }
 
     private long getIntervalMillis() {
+        // TODO - select a better alarm interval time
         return 10000/*AlarmManager.INTERVAL_FIFTEEN_MINUTES*/;
     }
 

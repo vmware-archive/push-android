@@ -12,6 +12,8 @@ public interface MessageReceiptsProvider {
 
     void addMessageReceipt(MessageReceiptData messageReceipt);
 
+    int removeMessageReceipts(List<MessageReceiptData> messageReceipts);
+
     int numberOfMessageReceipts();
 
     void clear();
