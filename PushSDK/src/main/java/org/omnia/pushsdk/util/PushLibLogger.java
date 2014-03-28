@@ -128,6 +128,7 @@ public class PushLibLogger {
         if (isDebuggable) {
             Log.d(tagName, formattedString);
         }
+        sendMessageToListener(formattedString);
     }
 
     public static void e(String message) {

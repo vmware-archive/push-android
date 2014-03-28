@@ -57,15 +57,6 @@ public class GcmService extends IntentService {
 
     public GcmService() {
         super("GcmService");
-        if (GcmService.preferencesProvider == null) {
-            GcmService.preferencesProvider = new PreferencesProviderImpl(this);
-        }
-        if (GcmService.messageReceiptsProvider == null) {
-            GcmService.messageReceiptsProvider = new MessageReceiptsProviderImpl(this);
-        }
-        if (GcmService.messageReceiptAlarmProvider == null) {
-            GcmService.messageReceiptAlarmProvider = new MessageReceiptAlarmProviderImpl(this);
-        }
     }
 
     @Override
@@ -73,6 +64,7 @@ public class GcmService extends IntentService {
 
         try {
 
+            setupStatics();
             doHandleIntent(intent);
 
         } finally {
@@ -91,6 +83,24 @@ public class GcmService extends IntentService {
         }
     }
 
+    private void setupStatics() {
+        if (GcmService.preferencesProvider == null) {
+            GcmService.preferencesProvider = new PreferencesProviderImpl(this);
+        }
+        if (GcmService.messageReceiptsProvider == null) {
+            GcmService.messageReceiptsProvider = new MessageReceiptsProviderImpl(this);
+        }
+        if (GcmService.messageReceiptAlarmProvider == null) {
+            GcmService.messageReceiptAlarmProvider = new MessageReceiptAlarmProviderImpl(this);
+        }
+    }
+
+    private void cleanupStatics() {
+        GcmService.preferencesProvider = null;
+        GcmService.messageReceiptsProvider = null;
+        GcmService.messageReceiptAlarmProvider = null;
+    }
+
     private void doHandleIntent(Intent intent) {
 
         if (intent == null) {
@@ -104,7 +114,6 @@ public class GcmService extends IntentService {
         getResultReceiver(intent);
 
         if (isBundleEmpty(intent)) {
-            PushLibLogger.i("Received message with no content.");
             sendResult(RESULT_EMPTY_INTENT);
         } else {
             notifyApplication(intent);
@@ -165,11 +174,5 @@ public class GcmService extends IntentService {
             // Used by unit tests
             resultReceiver.send(resultCode, null);
         }
-    }
-
-    private void cleanupStatics() {
-        GcmService.preferencesProvider = null;
-        GcmService.messageReceiptsProvider = null;
-        GcmService.messageReceiptAlarmProvider = null;
     }
 }

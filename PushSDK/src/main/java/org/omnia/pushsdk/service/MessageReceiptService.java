@@ -40,6 +40,9 @@ public class MessageReceiptService extends IntentService {
 
     public MessageReceiptService() {
         super("MessageReceiptService");
+    }
+
+    private void setupStatics() {
         if (MessageReceiptService.messageReceiptsProvider == null) {
             MessageReceiptService.messageReceiptsProvider = new MessageReceiptsProviderImpl(this);
         }
@@ -53,44 +56,37 @@ public class MessageReceiptService extends IntentService {
         }
     }
 
-    @Override
-    protected void onHandleIntent(Intent intent) {
-        try {
-
-            doHandleIntent(intent);
-
-        } finally {
-
-            // If unit tests are running then release them so that they can continue
-            if (MessageReceiptService.semaphore != null) {
-                MessageReceiptService.semaphore.release();
-            }
-
-            cleanupStatics();
-
-            // Release the wake lock provided by the WakefulBroadcastReceiver.
-            if (intent != null) {
-                MessageReceiptAlarmReceiver.completeWakefulIntent(intent);
-            }
-        }
+    private void cleanupStatics() {
+        MessageReceiptService.messageReceiptsProvider = null;
+        MessageReceiptService.messageReceiptAlarmProvider = null;
+        MessageReceiptService.backEndMessageReceiptApiRequestProvider = null;
     }
 
-    private void doHandleIntent(Intent intent) {
+    @Override
+    protected void onHandleIntent(Intent intent) {
 
         if (intent == null) {
             MessageReceiptService.messageReceiptAlarmProvider.disableAlarm();
+            postProcessAfterService(intent);
             return;
         }
+
+        setupStatics();
 
         getResultReceiver(intent);
 
         PushLibLogger.d("MessageReceiptService: receipts available to send: " + MessageReceiptService.messageReceiptsProvider.numberOfMessageReceipts());
+
         if (MessageReceiptService.messageReceiptsProvider.numberOfMessageReceipts() > 0) {
+
             final List<MessageReceiptData> messageReceipts = MessageReceiptService.messageReceiptsProvider.loadMessageReceipts();
-            sendMessageReceipts(messageReceipts);
+            sendMessageReceipts(messageReceipts, intent);
+
         } else {
+            PushLibLogger.d("MessageReceiptService: found no receipts. Disabling alarm.");
             MessageReceiptService.messageReceiptAlarmProvider.disableAlarm();
             sendResult(RESULT_NO_WORK_TO_DO);
+            postProcessAfterService(intent);
         }
     }
 
@@ -102,22 +98,27 @@ public class MessageReceiptService extends IntentService {
         }
     }
 
-    private void sendMessageReceipts(final List<MessageReceiptData> messageReceipts) {
+    private void sendMessageReceipts(final List<MessageReceiptData> messageReceipts, final Intent intent) {
         final BackEndMessageReceiptApiRequest apiRequest = MessageReceiptService.backEndMessageReceiptApiRequestProvider.getRequest();
         apiRequest.startSendMessageReceipts(messageReceipts, new BackEndMessageReceiptListener() {
 
             @Override
             public void onBackEndMessageReceiptSuccess() {
-                MessageReceiptService.messageReceiptsProvider.removeMessageReceipts(messageReceipts);
-                if (MessageReceiptService.messageReceiptsProvider.numberOfMessageReceipts() <= 0) {
-                    MessageReceiptService.messageReceiptAlarmProvider.disableAlarm();
+                try {
+                    sendResult(RESULT_SENT_RECEIPTS_SUCCESSFULLY);
+                    postProcessAfterRequest(messageReceipts);
+                } finally {
+                    postProcessAfterService(intent);
                 }
-                sendResult(RESULT_SENT_RECEIPTS_SUCCESSFULLY);
             }
 
             @Override
             public void onBackEndMessageReceiptFailed(String reason) {
-                sendResult(RESULT_FAILED_TO_SEND_RECEIPTS);
+                try {
+                    sendResult(RESULT_FAILED_TO_SEND_RECEIPTS);
+                } finally {
+                    postProcessAfterService(intent);
+                }
             }
         });
     }
@@ -129,10 +130,37 @@ public class MessageReceiptService extends IntentService {
         }
     }
 
-    private void cleanupStatics() {
-        MessageReceiptService.messageReceiptsProvider = null;
-        MessageReceiptService.messageReceiptAlarmProvider = null;
-        MessageReceiptService.backEndMessageReceiptApiRequestProvider = null;
+    private void postProcessAfterRequest(final List<MessageReceiptData> messageReceipts) {
+        if (messageReceipts != null) {
+            MessageReceiptService.messageReceiptsProvider.removeMessageReceipts(messageReceipts);
+            if (MessageReceiptService.messageReceiptsProvider.numberOfMessageReceipts() <= 0) {
+                PushLibLogger.d("MessageReceiptService: no more messages left in queue. Disabling alarm.");
+                MessageReceiptService.messageReceiptAlarmProvider.disableAlarm();
+            } else {
+                PushLibLogger.fd("MessageReceiptService: there are still %d more message(s) left in queue. Leaving alarm enabled.", MessageReceiptService.messageReceiptsProvider.numberOfMessageReceipts());
+            }
+        }
+    }
+
+    private void postProcessAfterService(Intent intent) {
+
+        try {
+            // If unit tests are running then release them so that they can continue
+            if (MessageReceiptService.semaphore != null) {
+                MessageReceiptService.semaphore.release();
+            }
+
+            cleanupStatics();
+
+        } finally {
+
+            // Release the wake lock provided by the WakefulBroadcastReceiver.
+            // SUPER IMPORTANT! Make sure that this gets called EVERY time this service is invoked, but not until AFTER
+            // any requests are completed -- otherwise the device might return to sleep before the request is complete.
+            if (intent != null) {
+                MessageReceiptAlarmReceiver.completeWakefulIntent(intent);
+            }
+        }
     }
 
 }

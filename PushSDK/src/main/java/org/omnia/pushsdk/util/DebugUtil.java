@@ -26,9 +26,9 @@ public class DebugUtil {
 
 	private DebugUtil(Context context) {
 
-		PackageManager pm = context.getPackageManager();
-		ApplicationInfo applicationInfo;
 		try {
+            PackageManager pm = context.getPackageManager();
+            ApplicationInfo applicationInfo;
 			applicationInfo = pm.getApplicationInfo(context.getPackageName(), 0);
 			isDebuggable = (applicationInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
 		} catch (NameNotFoundException e) {
