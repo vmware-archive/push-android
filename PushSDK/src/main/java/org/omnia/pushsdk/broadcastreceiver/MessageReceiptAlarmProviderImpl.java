@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.os.SystemClock;
 
+import org.omnia.pushsdk.util.DebugUtil;
 import org.omnia.pushsdk.util.PushLibLogger;
 
 public class MessageReceiptAlarmProviderImpl implements MessageReceiptAlarmProvider {
@@ -23,18 +24,24 @@ public class MessageReceiptAlarmProviderImpl implements MessageReceiptAlarmProvi
         PushLibLogger.d("Message receipt sender alarm enabled.");
         final PendingIntent intent = MessageReceiptAlarmReceiver.getPendingIntent(context);
         final AlarmManager alarmManager = getAlarmManager();
-
-        // TODO - uncomment the next line once the server is able to accept message receipts
-//        alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, getTriggerMillis(), getIntervalMillis(), intent);
+        alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, getTriggerMillis(), getIntervalMillis(), intent);
     }
 
     private long getTriggerMillis() {
-        return SystemClock.elapsedRealtime() + 2 * AlarmManager.INTERVAL_HOUR;
+        if (DebugUtil.getInstance(context).isDebuggable()) {
+            return SystemClock.elapsedRealtime() + 2 * 60 * 1000; // 2 minutes
+        } else {
+            return SystemClock.elapsedRealtime() + 2 * AlarmManager.INTERVAL_HOUR;
+        }
         // TODO - add a jitter to the trigger time
     }
 
     private long getIntervalMillis() {
-        return AlarmManager.INTERVAL_HOUR;
+        if (DebugUtil.getInstance(context).isDebuggable()) {
+            return 60 * 1000; // 1 minute
+        } else {
+            return AlarmManager.INTERVAL_HOUR;
+        }
     }
 
     private AlarmManager getAlarmManager() {

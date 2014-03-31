@@ -39,20 +39,26 @@ public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implemen
         OutputStream outputStream = null;
 
         try {
-            final URL url = new URL(Const.BACKEND_MESSAGE_RECEIPT_URL);
-            final HttpURLConnection urlConnection = getHttpURLConnection(url);
-            urlConnection.addRequestProperty("Content-Type", "application/json");
-            urlConnection.setRequestMethod("POST");
-            urlConnection.setDoInput(true);
-            urlConnection.connect();
-
-            outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
+//            final URL url = new URL(Const.BACKEND_MESSAGE_RECEIPT_URL);
+//            final HttpURLConnection urlConnection = getHttpURLConnection(url);
+//            urlConnection.addRequestProperty("Content-Type", "application/json");
+//            urlConnection.setRequestMethod("POST");
+//            urlConnection.setDoInput(true);
+//            urlConnection.connect();
+//
+//            outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
             final String requestBodyData = getRequestBodyData(messageReceipts);
             PushLibLogger.v("Making network request to post message receipts to the back-end server: " + requestBodyData);
-            writeOutput(requestBodyData, outputStream);
+//            writeOutput(requestBodyData, outputStream);
+//
+//            final int statusCode = urlConnection.getResponseCode();
+//            urlConnection.disconnect();
 
-            final int statusCode = urlConnection.getResponseCode();
-            urlConnection.disconnect();
+            // TODO - restore the commented code above and stop hardcoding the statusCode once
+            // the server accepts message receipts
+
+            final int statusCode = 200; // <---- TODO! REMOVE!
+
             onSuccessfulNetworkRequest(statusCode, listener);
 
         } catch (Exception e) {
