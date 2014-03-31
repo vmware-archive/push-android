@@ -69,12 +69,12 @@ public class GcmService extends IntentService {
 
         } finally {
 
+            cleanupStatics();
+
             // If unit tests are running then release them so that they can continue
             if (GcmService.semaphore != null) {
                 GcmService.semaphore.release();
             }
-
-            cleanupStatics();
 
             // Release the wake lock provided by the WakefulBroadcastReceiver.
             if (intent != null) {

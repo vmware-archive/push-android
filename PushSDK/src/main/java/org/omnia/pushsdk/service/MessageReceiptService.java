@@ -145,12 +145,13 @@ public class MessageReceiptService extends IntentService {
     private void postProcessAfterService(Intent intent) {
 
         try {
+
+            cleanupStatics();
+
             // If unit tests are running then release them so that they can continue
             if (MessageReceiptService.semaphore != null) {
                 MessageReceiptService.semaphore.release();
             }
-
-            cleanupStatics();
 
         } finally {
 
