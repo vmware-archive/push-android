@@ -267,6 +267,7 @@ public class MainActivity extends ActionBarActivity {
                 try {
                     final URL url = new URL(BACK_END_SEND_MESSAGE_URL);
                     final HttpURLConnection urlConnection = getUrlConnection(url);
+                    urlConnection.setDoOutput(true);
                     urlConnection.connect();
 
                     outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
@@ -340,6 +341,7 @@ public class MainActivity extends ActionBarActivity {
                     final URL url = new URL(GCM_SEND_MESSAGE_URL);
                     final HttpURLConnection urlConnection = getUrlConnection(url);
                     urlConnection.addRequestProperty("Authorization", "key=" + Settings.getGcmBrowserApiKey(MainActivity.this));
+                    urlConnection.setDoOutput(true);
                     urlConnection.connect();
 
                     outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
