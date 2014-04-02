@@ -56,5 +56,4 @@ public class DebugUtil {
 				m.dalvikPrivateDirty, m.dalvikPss, m.dalvikSharedDirty, m.nativePrivateDirty, m.nativePss, m.nativeSharedDirty, m.otherPrivateDirty, m.otherPss, m.otherSharedDirty);
 		PushLibLogger.i(formattedMessage);
 	}
-
 }

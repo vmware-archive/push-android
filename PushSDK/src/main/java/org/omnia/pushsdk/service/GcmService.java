@@ -28,6 +28,7 @@ import org.omnia.pushsdk.model.MessageReceiptData;
 import org.omnia.pushsdk.prefs.MessageReceiptsProvider;
 import org.omnia.pushsdk.prefs.PreferencesProvider;
 import org.omnia.pushsdk.prefs.MessageReceiptsProviderImpl;
+import org.omnia.pushsdk.util.Const;
 import org.omnia.pushsdk.util.PushLibLogger;
 
 import java.util.Date;
@@ -63,7 +64,7 @@ public class GcmService extends IntentService {
     protected void onHandleIntent(Intent intent) {
 
         try {
-
+            setupLogger();
             setupStatics();
             doHandleIntent(intent);
 
@@ -80,6 +81,12 @@ public class GcmService extends IntentService {
             if (intent != null) {
                 GcmBroadcastReceiver.completeWakefulIntent(intent);
             }
+        }
+    }
+
+    private void setupLogger() {
+        if (!PushLibLogger.isSetup()) {
+            PushLibLogger.setup(this, Const.TAG_NAME);
         }
     }
 
@@ -102,6 +109,8 @@ public class GcmService extends IntentService {
     }
 
     private void doHandleIntent(Intent intent) {
+
+        PushLibLogger.fd("Package %s has received a push message from GCM.", getPackageName());
 
         if (intent == null) {
             return;

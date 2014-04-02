@@ -3,6 +3,7 @@ package org.omnia.pushsdk.service;
 import android.app.IntentService;
 import android.content.Intent;
 import android.os.ResultReceiver;
+import android.util.Log;
 
 import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequest;
 import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestImpl;
@@ -16,6 +17,8 @@ import org.omnia.pushsdk.network.NetworkWrapperImpl;
 import org.omnia.pushsdk.prefs.MessageReceiptsProvider;
 import org.omnia.pushsdk.prefs.MessageReceiptsProviderImpl;
 import org.omnia.pushsdk.model.MessageReceiptData;
+import org.omnia.pushsdk.util.Const;
+import org.omnia.pushsdk.util.DebugUtil;
 import org.omnia.pushsdk.util.PushLibLogger;
 
 import java.util.List;
@@ -65,6 +68,8 @@ public class MessageReceiptService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
 
+        setupLogger();
+
         if (intent == null) {
             MessageReceiptService.messageReceiptAlarmProvider.disableAlarm();
             postProcessAfterService(intent);
@@ -75,7 +80,7 @@ public class MessageReceiptService extends IntentService {
 
         getResultReceiver(intent);
 
-        PushLibLogger.d("MessageReceiptService: receipts available to send: " + MessageReceiptService.messageReceiptsProvider.numberOfMessageReceipts());
+        PushLibLogger.fd("MessageReceiptService: package %s: receipts available to send: %d", getPackageName(), MessageReceiptService.messageReceiptsProvider.numberOfMessageReceipts());
 
         if (MessageReceiptService.messageReceiptsProvider.numberOfMessageReceipts() > 0) {
 
@@ -87,6 +92,14 @@ public class MessageReceiptService extends IntentService {
             MessageReceiptService.messageReceiptAlarmProvider.disableAlarm();
             sendResult(RESULT_NO_WORK_TO_DO);
             postProcessAfterService(intent);
+        }
+    }
+
+    // If the service gets started in the background without the rest of the application running, then it will
+    // have to kick off the logger itself.
+    private void setupLogger() {
+        if (!PushLibLogger.isSetup()) {
+            PushLibLogger.setup(this, Const.TAG_NAME);
         }
     }
 

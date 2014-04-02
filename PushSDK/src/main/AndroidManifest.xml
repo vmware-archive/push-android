@@ -7,20 +7,16 @@
     <uses-sdk android:minSdkVersion="10" android:targetSdkVersion="19" />
 	-->
 
-    <!-- Hopefully these permissions will be transferred to the host app via the AAR library file -->
-    <uses-permission android:name="android.permission.INTERNET"/>
-    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
-
-    <!-- Elements required for host applications to include in their manifest for receiving messages -->
-    <!-- START -->
     <permission
         android:name="org.omnia.pushsdk.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
 
-    <uses-permission android:name="org.omnia.pushsdk.permission.C2D_MESSAGE" />
-    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+    <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
-    <!-- END -->
+    <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>
+    <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE"/>
+    <uses-permission android:name="org.omnia.pushsdk.permission.C2D_MESSAGE" />
 
     <application android:allowBackup="true"
         android:label="@string/app_name"
@@ -29,8 +25,6 @@
 
         <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
 
-
-        <!-- BEGIN - definition of components for receiving messages -->
         <receiver
             android:name=".broadcastreceiver.GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND">
@@ -39,10 +33,14 @@
                 <category android:name="org.omnia.pushsdk"/>
             </intent-filter>
         </receiver>
+        <receiver android:name=".broadcastreceiver.BootCompletedBroadcastReceiver" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
         <receiver android:name=".broadcastreceiver.MessageReceiptAlarmReceiver" />
         <service android:name=".service.GcmService"/>
         <service android:name=".service.MessageReceiptService"/>
-        <!-- END - definition of components for receiving messages -->
 
     </application>
 
