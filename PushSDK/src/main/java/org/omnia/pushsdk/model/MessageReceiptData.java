@@ -13,11 +13,12 @@ import java.util.TimeZone;
 public class MessageReceiptData {
 
     /* {
-     *    "msg_uuid" : "message-uuid-from-server",
+     *    "msg_uuid" : "message-uuid-from-server", // optional field
      *    "timestamp" : "2014-03-24T12:15:41+0000" (time message received - UTC - ISO 8601)
      * }
      */
 
+    // Optional field
     @SerializedName("msg_uuid")
     private String messageUuid;
 

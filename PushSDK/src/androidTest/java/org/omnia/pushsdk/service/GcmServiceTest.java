@@ -130,11 +130,11 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         assertNotNull(extras);
         assertTrue(extras.containsKey(KEY_MESSAGE));
         assertEquals(TEST_MESSAGE, extras.getString(KEY_MESSAGE));
-        assertEquals(0, messageReceiptsProvider.numberOfMessageReceipts());
-        assertFalse(alarmProvider.isAlarmEnabled());
+        assertEquals(1, messageReceiptsProvider.numberOfMessageReceipts());
+        assertTrue(alarmProvider.isAlarmEnabled());
     }
 
-    public void testQueuesReceiptNotification() throws InterruptedException {
+    public void testQueuesReceiptNotificationWithMessageUuid() throws InterruptedException {
         intent.putExtra(GcmService.KEY_MESSAGE_UUID, TEST_MESSAGE_UUID);
         GcmService.preferencesProvider.savePackageName(TEST_PACKAGE_NAME);
         startService(intent);
@@ -145,6 +145,7 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         assertNotNull(receivedIntent);
         assertTrue(receivedIntent.hasExtra(GcmService.KEY_GCM_INTENT));
         assertEquals(1, messageReceiptsProvider.numberOfMessageReceipts());
+        assertEquals(TEST_MESSAGE_UUID, messageReceiptsProvider.loadMessageReceipts().get(0).getMessageUuid());
         assertTrue(alarmProvider.isAlarmEnabled());
     }
 

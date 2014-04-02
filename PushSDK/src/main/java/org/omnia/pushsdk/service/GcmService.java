@@ -116,21 +116,20 @@ public class GcmService extends IntentService {
             return;
         }
 
-        if (hasMessageUuid(intent)) {
-            enqueueReturnReceipt(intent);
-        }
-
         getResultReceiver(intent);
 
         if (isBundleEmpty(intent)) {
             sendResult(RESULT_EMPTY_INTENT);
         } else {
+
+            if (getBroadcastName() == null) {
+                sendResult(RESULT_EMPTY_PACKAGE_NAME);
+                return;
+            }
+
+            enqueueReturnReceipt(intent);
             notifyApplication(intent);
         }
-    }
-
-    private boolean hasMessageUuid(Intent intent) {
-        return intent.hasExtra(KEY_MESSAGE_UUID);
     }
 
     private void enqueueReturnReceipt(Intent intent) {
