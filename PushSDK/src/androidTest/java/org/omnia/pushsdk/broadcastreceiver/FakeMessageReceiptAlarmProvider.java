@@ -5,16 +5,24 @@ public class FakeMessageReceiptAlarmProvider implements MessageReceiptAlarmProvi
     private boolean isAlarmEnabled = false;
 
     @Override
-    public void enableAlarm() {
+    public synchronized void enableAlarm() {
         isAlarmEnabled = true;
     }
 
     @Override
-    public void disableAlarm() {
+    public synchronized void disableAlarm() {
         isAlarmEnabled = false;
     }
 
-    public boolean isAlarmEnabled() {
+    @Override
+    public synchronized boolean isAlarmEnabled() {
         return isAlarmEnabled;
+    }
+
+    @Override
+    public synchronized void enableAlarmIfDisabled() {
+        if (!isAlarmEnabled()) {
+            enableAlarm();
+        }
     }
 }

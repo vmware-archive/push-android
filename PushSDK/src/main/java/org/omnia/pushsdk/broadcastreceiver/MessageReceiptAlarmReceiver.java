@@ -16,9 +16,8 @@ public class MessageReceiptAlarmReceiver extends WakefulBroadcastReceiver {
         WakefulBroadcastReceiver.startWakefulService(context, (intent.setComponent(comp)));
     }
 
-    public static PendingIntent getPendingIntent(Context context) {
+    public static PendingIntent getPendingIntent(Context context, int pendingIntentFlags) {
         final Intent alarmReceiverIntent = new Intent(context, MessageReceiptAlarmReceiver.class);
-        final PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, alarmReceiverIntent, PendingIntent.FLAG_CANCEL_CURRENT);
-        return pendingIntent;
+        return PendingIntent.getBroadcast(context, 1, alarmReceiverIntent, pendingIntentFlags);
     }
 }

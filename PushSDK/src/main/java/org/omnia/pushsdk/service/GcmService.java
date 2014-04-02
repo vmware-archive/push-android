@@ -130,7 +130,7 @@ public class GcmService extends IntentService {
         messageReceipt.setMessageUuid(messageUuid);
         messageReceipt.setTimestamp(new Date());
         GcmService.messageReceiptsProvider.addMessageReceipt(messageReceipt);
-        GcmService.messageReceiptAlarmProvider.enableAlarm();
+        GcmService.messageReceiptAlarmProvider.enableAlarmIfDisabled();
         PushLibLogger.d("There are now " + GcmService.messageReceiptsProvider.numberOfMessageReceipts() + " message receipts queued to send to the server.");
     }
 

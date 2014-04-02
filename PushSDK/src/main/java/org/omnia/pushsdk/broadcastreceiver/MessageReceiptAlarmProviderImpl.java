@@ -20,9 +20,9 @@ public class MessageReceiptAlarmProviderImpl implements MessageReceiptAlarmProvi
     }
 
     @Override
-    public void enableAlarm() {
+    public synchronized void enableAlarm() {
         PushLibLogger.d("Message receipt sender alarm enabled.");
-        final PendingIntent intent = MessageReceiptAlarmReceiver.getPendingIntent(context);
+        final PendingIntent intent = MessageReceiptAlarmReceiver.getPendingIntent(context, PendingIntent.FLAG_UPDATE_CURRENT);
         final AlarmManager alarmManager = getAlarmManager();
         alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, getTriggerMillis(), getIntervalMillis(), intent);
     }
@@ -49,10 +49,26 @@ public class MessageReceiptAlarmProviderImpl implements MessageReceiptAlarmProvi
     }
 
     @Override
-    public void disableAlarm() {
+    public synchronized void disableAlarm() {
         PushLibLogger.d("Message receipt sender alarm disabled.");
-        final PendingIntent intent = MessageReceiptAlarmReceiver.getPendingIntent(context);
+        final PendingIntent intent = MessageReceiptAlarmReceiver.getPendingIntent(context, PendingIntent.FLAG_UPDATE_CURRENT);
         final AlarmManager alarmManager = getAlarmManager();
         alarmManager.cancel(intent);
+        intent.cancel();
+    }
+
+    @Override
+    public synchronized boolean isAlarmEnabled() {
+        final PendingIntent intent = MessageReceiptAlarmReceiver.getPendingIntent(context, PendingIntent.FLAG_NO_CREATE);
+        final boolean isAlarmEnabled = (intent != null);
+        PushLibLogger.d("Message receipt sender alarm enabled: " + (isAlarmEnabled ? "yes." : "no."));
+        return isAlarmEnabled;
+    }
+
+    @Override
+    public synchronized void enableAlarmIfDisabled() {
+        if (!isAlarmEnabled()) {
+            enableAlarm();
+        }
     }
 }

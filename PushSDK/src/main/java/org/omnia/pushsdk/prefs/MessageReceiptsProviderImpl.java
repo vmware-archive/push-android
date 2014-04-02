@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import org.omnia.pushsdk.model.MessageReceiptData;
 import org.omnia.pushsdk.util.Const;
 
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -28,9 +29,11 @@ public class MessageReceiptsProviderImpl implements MessageReceiptsProvider {
     public synchronized List<MessageReceiptData> loadMessageReceipts() {
         if (listMessageReceipts == null) {
             loadMessageReceiptsFromSharedPreferences();
+            if (listMessageReceipts == null) {
+                return null;
+            }
         }
-        // TODO - should we return an unmodifiable collection?
-        return listMessageReceipts;
+        return Collections.unmodifiableList(listMessageReceipts);
     }
 
     private void loadMessageReceiptsFromSharedPreferences() {
@@ -105,13 +108,15 @@ public class MessageReceiptsProviderImpl implements MessageReceiptsProvider {
         if (messageReceipts == null || messageReceipts.size() <= 0 || listMessageReceipts == null || listMessageReceipts.size() <= 0) {
             return 0;
         }
+        final List<MessageReceiptData> newList = new LinkedList<MessageReceiptData>(listMessageReceipts);
         for (MessageReceiptData messageReceipt : messageReceipts) {
-            if (listMessageReceipts.contains(messageReceipt)) {
-                listMessageReceipts.remove(messageReceipt);
+            if (newList.contains(messageReceipt)) {
+                newList.remove(messageReceipt);
                 numberOfItemsRemoved += 1;
             }
         }
         if (numberOfItemsRemoved > 0) {
+            listMessageReceipts = newList;
             saveMessageReceiptsToSharedPreferences();
         }
         return numberOfItemsRemoved;
