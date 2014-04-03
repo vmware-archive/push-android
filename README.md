@@ -53,7 +53,27 @@ In order to receive push messages from Omnia in your Android application you wil
         <uses-permission android:name="android.permission.INTERNET"/>
         <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
 
- 5. Add the following lines of code to the initialization section of your application.  You will need a `Context` object
+ 5. You will need define and use the following `permission` in the `manifest` element of your application's
+    `AndroidManifest.xml` file.  Ensure that the base of the permission name is your application's package name:
+
+        <permission
+            android:name="YOUR.PACKAGE.NAME.permission.C2D_MESSAGE"
+            android:protectionLevel="signature" />
+        <uses-permission android:name="YOUR.PACKAGE.NAME.permission.C2D_MESSAGE" />
+
+ 6. You will need to add the following `receiver` to the `application` element of your application's
+    `AndroidManifest.xml` file.  Ensure that you set the category name to your application's package name:
+
+        <receiver
+            android:name="org.omnia.pushsdk.broadcastreceiver.GcmBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+                <category android:name="org.omnia.pushsdk.simpledemoapp"/>
+            </intent-filter>
+        </receiver>
+
+ 7. Add the following lines of code to the initialization section of your application.  You will need a `Context` object
     to pass to the `PushLib.init` method, so you should try to add this code to your `Application` class or to one of
     your `Activity` class.
 
@@ -77,20 +97,68 @@ In order to receive push messages from Omnia in your Android application you wil
         * Sending your registration ID to the back-end (i.e.: Omnia)
         * Re-registering after the application version, or any other registration parameters are updated.
 
- 6. The library is not set up, at this time, to receive push messages for you since Google has provided straightforward
-    boilerplate code that you can copy into your application.  In order to receive messages in your application, please
-    follow the instructions here:
+ 8. To receive push notifications in your application, you will need to add a `broadcast receiver` to your application.
+    The intent that GCM sends is provided in the "gcm_intent" parcelable extra of the intent passed to your receiver's
+    `onReceive` method.  Here is a simple example:
 
-         http://developer.android.com/google/gcm/client.html
+        public class MyBroadcastReceiver extends WakefulBroadcastReceiver {
 
-    The `INTERNET` and `GET_ACCOUNTS` permissions should already provided by the Omnia Push SDK itself (see step 4
-    above).
+            public static final int NOTIFICATION_ID = 1;
 
-    Make sure to add the other permissions, the `Service`, and `BroadcastReceiver`, though.  In particular, follow the
-    steps in the "Receiving Messages" section.
+            @Override
+            public void onReceive(Context context, Intent intent) {
 
-    Please ignore any instructions about registering your application (see step 5 above for the tasks that the Omnia
-    Push SDK takes care of for you).
+                final Intent gcmIntent = intent.getExtras().getParcelable("gcm_intent");
+                final Bundle extras = gcmIntent.getExtras();
+                final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
+                final String messageType = gcm.getMessageType(gcmIntent);
+
+                if (!extras.isEmpty()) {
+
+                    if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
+
+                        // Post notification of received message.
+                        String message;
+                        if (extras.containsKey("message")) {
+                            message = "Received: \"" + extras.getString("message") + "\".";
+                        } else {
+                            message = "Received message with no extras.";
+                        }
+                        sendNotification(context, message);
+                    }
+                }
+
+                MyBroadcastReceiver.completeWakefulIntent(intent);
+            }
+
+            // Put the message into a notification and post it.
+            private void sendNotification(Context context, String msg) {
+                final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+
+                // Set up the notification to open MainActivity when the user touches it
+                final PendingIntent contentIntent = PendingIntent.getActivity(context, 0, new Intent(context, MyActivity.class), 0);
+
+                final NotificationCompat.Builder builder =
+                        new NotificationCompat.Builder(context)
+                                .setSmallIcon(R.drawable.your icon)
+                                .setContentTitle("Your application name")
+                                .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
+                                .setContentText(msg);
+
+                builder.setContentIntent(contentIntent);
+                notificationManager.notify(NOTIFICATION_ID, builder.build());
+            }
+        }
+
+ 9. Finally, you will need to declare your broadcast receiver in your `AndroidManifest.xml` file.  The base of the
+    action name in the intent filter should be the same as your application's package name:
+
+         <receiver
+             android:name=".broadcastreceiver.MyBroadcastReceiver">
+             <intent-filter>
+                 <action android:name="YOUR.PACKAGE.NAME.omniapushsdk.RECEIVE_PUSH"/>
+             </intent-filter>
+         </receiver>
 
 
 Building the SDK itself

@@ -8,14 +8,48 @@
         android:minSdkVersion="10"
         android:targetSdkVersion="19" />
 
-    <!-- optional permission - used for debugging only -->
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <!-- =============================================================================================== -->
+    <!-- You must add this permission, with your package name, to your manifest in order to receive push -->
+    <!-- notifications.  The permission name must be YOUR.PACKAGE.NAME.permission.C2D_MESSAGE            -->
+    <permission
+        android:name="org.omnia.pushsdk.sample.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="org.omnia.pushsdk.sample.permission.C2D_MESSAGE" />
+    <!-- =============================================================================================== -->
 
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
+
+        <!-- =============================================================================================== -->
+        <!-- You must add this receiver, with your package name as the category in the intent-filter, to     -->
+        <!-- your manifest in order to receive push notifications.  Do not change the package name in the    -->
+        <!-- receiver name itself.                                                                           -->
+        <receiver
+            android:name="org.omnia.pushsdk.broadcastreceiver.GcmBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+                <category android:name="org.omnia.pushsdk.sample"/>
+            </intent-filter>
+        </receiver>
+        <!-- =============================================================================================== -->
+
+        <!-- =============================================================================================== -->
+        <!-- This BroadcastReceiver is called whenever the Omnia Push SDK receives a push notification from  -->
+        <!-- GCM targetted at your application.  You can call it whatever you'd like in your application.    -->
+        <!-- Make sure you add the action "YOUR.PACKAGE.NAME.omniapushsdk.RECEIVE_PUSH" to the broadcast     -->
+        <!-- receiver here.                                                                                  -->
+        <receiver
+            android:name=".broadcastreceiver.MyOmniaRemotePushLibBroadcastReceiver">
+            <intent-filter>
+                <action android:name="org.omnia.pushsdk.sample.omniapushsdk.RECEIVE_PUSH"/>
+            </intent-filter>
+        </receiver>
+        <!-- =============================================================================================== -->
+
         <activity
             android:name="org.omnia.pushsdk.sample.activity.MainActivity"
             android:configChanges="orientation"
@@ -25,6 +59,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
         <activity
             android:name="org.omnia.pushsdk.sample.activity.SettingsActivity"
             android:label="@string/title_activity_settings"
@@ -34,17 +69,9 @@
                 android:value="org.omnia.pushsdk.sample.activity.MainActivity" />
         </activity>
 
-        <!-- This BroadcastReceiver is called whenever the Omnia Push SDK receives a push
-             notification from GCM targetted at your application.  You can call it whatever
-             you'd like in your application.  Make sure you add the action
-             "YOUR.PACKAGE.NAME.omniapushsdk.RECEIVE_PUSH" to the broadcast receiver here. -->
-        <receiver
-            android:name=".broadcastreceiver.MyOmniaRemotePushLibBroadcastReceiver">
-            <intent-filter>
-                <action android:name="org.omnia.pushsdk.sample.omniapushsdk.RECEIVE_PUSH"/>
-            </intent-filter>
-        </receiver>
-
     </application>
+
+    <!-- optional permission - used for debugging only -->
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
 
 </manifest>

@@ -65,6 +65,8 @@ public class MyOmniaRemotePushLibBroadcastReceiver extends WakefulBroadcastRecei
         } else {
             PushLibLogger.i("Received message with no content.");
         }
+
+        MyOmniaRemotePushLibBroadcastReceiver.completeWakefulIntent(intent);
     }
 
     // Put the message into a notification and post it.
@@ -74,15 +76,15 @@ public class MyOmniaRemotePushLibBroadcastReceiver extends WakefulBroadcastRecei
         // Set up the notification to open MainActivity when the user touches it
         final PendingIntent contentIntent = PendingIntent.getActivity(context, 0, new Intent(context, MainActivity.class), 0);
 
-        final NotificationCompat.Builder mBuilder =
+        final NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(context)
                         .setSmallIcon(R.drawable.ic_launcher)
                         .setContentTitle("Omnia Push Simple Demo App")
                         .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
                         .setContentText(msg);
 
-        mBuilder.setContentIntent(contentIntent);
-        mBuilder.setLights(NOTIFICATION_LIGHTS_COLOUR, NOTIFICATION_LIGHTS_ON_MS, NOTIFICATION_LIGHTS_OFF_MS);
-        notificationManager.notify(NOTIFICATION_ID, mBuilder.build());
+        builder.setContentIntent(contentIntent);
+        builder.setLights(NOTIFICATION_LIGHTS_COLOUR, NOTIFICATION_LIGHTS_ON_MS, NOTIFICATION_LIGHTS_OFF_MS);
+        notificationManager.notify(NOTIFICATION_ID, builder.build());
     }
 }
