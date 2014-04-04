@@ -9,9 +9,10 @@ import android.test.ServiceTestCase;
 import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
 import org.omnia.pushsdk.backend.FakeBackEndMessageReceiptApiRequest;
 import org.omnia.pushsdk.broadcastreceiver.FakeMessageReceiptAlarmProvider;
+import org.omnia.pushsdk.model.MessageReceiptEvent;
+import org.omnia.pushsdk.model.MessageReceiptEventTest;
 import org.omnia.pushsdk.prefs.FakeMessageReceiptsProvider;
 import org.omnia.pushsdk.model.MessageReceiptData;
-import org.omnia.pushsdk.model.MessageReceiptDataTest;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -25,8 +26,8 @@ public class MessageReceiptServiceTest extends ServiceTestCase<MessageReceiptSer
     private TestResultReceiver testResultReceiver;
     private Intent intent;
     private FakeBackEndMessageReceiptApiRequest backEndMessageReceiptApiRequest;
-    private List<MessageReceiptData> listWithOneItem;
-    private List<MessageReceiptData> listWithOneOtherItem;
+    private List<MessageReceiptEvent> listWithOneItem;
+    private List<MessageReceiptEvent> listWithOneOtherItem;
 
     // Captures result codes from the service itself
     public class TestResultReceiver extends ResultReceiver {
@@ -54,10 +55,10 @@ public class MessageReceiptServiceTest extends ServiceTestCase<MessageReceiptSer
         messageReceiptAlarmProvider = new FakeMessageReceiptAlarmProvider();
         messageReceiptAlarmProvider.enableAlarm();
         backEndMessageReceiptApiRequest = new FakeBackEndMessageReceiptApiRequest();
-        listWithOneItem = new LinkedList<MessageReceiptData>();
-        listWithOneItem.add(MessageReceiptDataTest.getMessageReceiptData1());
-        listWithOneOtherItem = new LinkedList<MessageReceiptData>();
-        listWithOneOtherItem.add(MessageReceiptDataTest.getMessageReceiptData2());
+        listWithOneItem = new LinkedList<MessageReceiptEvent>();
+        listWithOneItem.add(MessageReceiptEventTest.getMessageReceiptEvent1());
+        listWithOneOtherItem = new LinkedList<MessageReceiptEvent>();
+        listWithOneOtherItem.add(MessageReceiptEventTest.getMessageReceiptEvent2());
         MessageReceiptService.semaphore = new Semaphore(0);
         MessageReceiptService.messageReceiptsProvider = messageReceiptsProvider;
         MessageReceiptService.backEndMessageReceiptApiRequestProvider = new BackEndMessageReceiptApiRequestProvider(backEndMessageReceiptApiRequest);

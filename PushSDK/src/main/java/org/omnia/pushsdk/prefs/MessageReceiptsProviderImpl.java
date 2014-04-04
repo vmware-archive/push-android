@@ -3,7 +3,7 @@ package org.omnia.pushsdk.prefs;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import org.omnia.pushsdk.model.MessageReceiptData;
+import org.omnia.pushsdk.model.MessageReceiptEvent;
 import org.omnia.pushsdk.util.Const;
 
 import java.util.Collections;
@@ -16,7 +16,7 @@ public class MessageReceiptsProviderImpl implements MessageReceiptsProvider {
     private static final String PROPERTY_MESSAGE_RECEIPTS = "message_receipts";
 
     private final Context context;
-    private List<MessageReceiptData> listMessageReceipts;
+    private List<MessageReceiptEvent> listMessageReceipts;
 
     public MessageReceiptsProviderImpl(Context context) {
         if (context == null) {
@@ -26,7 +26,7 @@ public class MessageReceiptsProviderImpl implements MessageReceiptsProvider {
     }
 
     @Override
-    public synchronized List<MessageReceiptData> loadMessageReceipts() {
+    public synchronized List<MessageReceiptEvent> loadMessageReceipts() {
         if (listMessageReceipts == null) {
             loadMessageReceiptsFromSharedPreferences();
             if (listMessageReceipts == null) {
@@ -39,16 +39,16 @@ public class MessageReceiptsProviderImpl implements MessageReceiptsProvider {
     private void loadMessageReceiptsFromSharedPreferences() {
         final String str = getSharedPreferences().getString(PROPERTY_MESSAGE_RECEIPTS, null);
         if (str != null) {
-            listMessageReceipts = MessageReceiptData.jsonStringToList(str);
+            listMessageReceipts = MessageReceiptEvent.jsonStringToList(str);
         } else {
             listMessageReceipts = null;
         }
     }
 
     @Override
-    public synchronized void saveMessageReceipts(List<MessageReceiptData> messageReceipts) {
+    public synchronized void saveMessageReceipts(List<MessageReceiptEvent> messageReceipts) {
         if (messageReceipts != null) {
-            listMessageReceipts = new LinkedList<MessageReceiptData>(messageReceipts);
+            listMessageReceipts = new LinkedList<MessageReceiptEvent>(messageReceipts);
         } else {
             listMessageReceipts = null;
         }
@@ -56,12 +56,12 @@ public class MessageReceiptsProviderImpl implements MessageReceiptsProvider {
     }
 
     @Override
-    public synchronized void addMessageReceipt(MessageReceiptData messageReceipt) {
+    public synchronized void addMessageReceipt(MessageReceiptEvent messageReceipt) {
         if (listMessageReceipts == null) {
             loadMessageReceiptsFromSharedPreferences();
         }
         if (listMessageReceipts == null) {
-            listMessageReceipts = new LinkedList<MessageReceiptData>();
+            listMessageReceipts = new LinkedList<MessageReceiptEvent>();
         }
         listMessageReceipts.add(messageReceipt);
         saveMessageReceiptsToSharedPreferences();
@@ -74,7 +74,7 @@ public class MessageReceiptsProviderImpl implements MessageReceiptsProvider {
         if (listMessageReceipts == null) {
             editor.clear();
         } else {
-            final String str = MessageReceiptData.listToJsonString(listMessageReceipts);
+            final String str = MessageReceiptEvent.listToJsonString(listMessageReceipts);
             editor.putString(PROPERTY_MESSAGE_RECEIPTS, str);
         }
         editor.commit();
@@ -103,13 +103,13 @@ public class MessageReceiptsProviderImpl implements MessageReceiptsProvider {
     }
 
     @Override
-    public synchronized int removeMessageReceipts(List<MessageReceiptData> messageReceipts) {
+    public synchronized int removeMessageReceipts(List<MessageReceiptEvent> messageReceipts) {
         int numberOfItemsRemoved = 0;
         if (messageReceipts == null || messageReceipts.size() <= 0 || listMessageReceipts == null || listMessageReceipts.size() <= 0) {
             return 0;
         }
-        final List<MessageReceiptData> newList = new LinkedList<MessageReceiptData>(listMessageReceipts);
-        for (MessageReceiptData messageReceipt : messageReceipts) {
+        final List<MessageReceiptEvent> newList = new LinkedList<MessageReceiptEvent>(listMessageReceipts);
+        for (MessageReceiptEvent messageReceipt : messageReceipts) {
             if (newList.contains(messageReceipt)) {
                 newList.remove(messageReceipt);
                 numberOfItemsRemoved += 1;

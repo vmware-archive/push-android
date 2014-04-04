@@ -12,6 +12,7 @@ import org.omnia.pushsdk.backend.BackEndMessageReceiptListener;
 import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProvider;
 import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProviderImpl;
 import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmReceiver;
+import org.omnia.pushsdk.model.MessageReceiptEvent;
 import org.omnia.pushsdk.network.NetworkWrapper;
 import org.omnia.pushsdk.network.NetworkWrapperImpl;
 import org.omnia.pushsdk.prefs.MessageReceiptsProvider;
@@ -84,7 +85,7 @@ public class MessageReceiptService extends IntentService {
 
         if (MessageReceiptService.messageReceiptsProvider.numberOfMessageReceipts() > 0) {
 
-            final List<MessageReceiptData> messageReceipts = MessageReceiptService.messageReceiptsProvider.loadMessageReceipts();
+            final List<MessageReceiptEvent> messageReceipts = MessageReceiptService.messageReceiptsProvider.loadMessageReceipts();
             sendMessageReceipts(messageReceipts, intent);
 
         } else {
@@ -111,7 +112,7 @@ public class MessageReceiptService extends IntentService {
         }
     }
 
-    private void sendMessageReceipts(final List<MessageReceiptData> messageReceipts, final Intent intent) {
+    private void sendMessageReceipts(final List<MessageReceiptEvent> messageReceipts, final Intent intent) {
         final BackEndMessageReceiptApiRequest apiRequest = MessageReceiptService.backEndMessageReceiptApiRequestProvider.getRequest();
         apiRequest.startSendMessageReceipts(messageReceipts, new BackEndMessageReceiptListener() {
 
@@ -143,7 +144,7 @@ public class MessageReceiptService extends IntentService {
         }
     }
 
-    private void postProcessAfterRequest(final List<MessageReceiptData> messageReceipts) {
+    private void postProcessAfterRequest(final List<MessageReceiptEvent> messageReceipts) {
         if (messageReceipts != null) {
             MessageReceiptService.messageReceiptsProvider.removeMessageReceipts(messageReceipts);
             if (MessageReceiptService.messageReceiptsProvider.numberOfMessageReceipts() <= 0) {

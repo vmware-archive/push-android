@@ -1,11 +1,11 @@
 package org.omnia.pushsdk.backend;
 
-import org.omnia.pushsdk.model.MessageReceiptData;
+import org.omnia.pushsdk.model.MessageReceiptEvent;
 
 import java.util.List;
 
 public interface BackEndMessageReceiptApiRequest {
 
-    void startSendMessageReceipts(List<MessageReceiptData> messageReceipts, BackEndMessageReceiptListener listener);
+    void startSendMessageReceipts(List<MessageReceiptEvent> messageReceipts, BackEndMessageReceiptListener listener);
     BackEndMessageReceiptApiRequest copy();
 }

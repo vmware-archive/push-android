@@ -23,6 +23,7 @@ import android.os.ResultReceiver;
 import org.omnia.pushsdk.broadcastreceiver.GcmBroadcastReceiver;
 import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProvider;
 import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProviderImpl;
+import org.omnia.pushsdk.model.MessageReceiptEvent;
 import org.omnia.pushsdk.prefs.PreferencesProviderImpl;
 import org.omnia.pushsdk.model.MessageReceiptData;
 import org.omnia.pushsdk.prefs.MessageReceiptsProvider;
@@ -134,9 +135,11 @@ public class GcmService extends IntentService {
 
     private void enqueueReturnReceipt(Intent intent) {
         final String messageUuid = intent.getStringExtra(KEY_MESSAGE_UUID);
-        final MessageReceiptData messageReceipt = new MessageReceiptData();
-        messageReceipt.setMessageUuid(messageUuid);
-        messageReceipt.setTimestamp(new Date());
+        final MessageReceiptEvent messageReceipt = new MessageReceiptEvent();
+        messageReceipt.setData(new MessageReceiptData());
+        messageReceipt.getData().setMessageUuid(messageUuid);
+        messageReceipt.setTime(new Date());
+        // TODO - populate the rest of the fields!
         GcmService.messageReceiptsProvider.addMessageReceipt(messageReceipt);
         GcmService.messageReceiptAlarmProvider.enableAlarmIfDisabled();
         PushLibLogger.d("There are now " + GcmService.messageReceiptsProvider.numberOfMessageReceipts() + " message receipts queued to send to the server.");

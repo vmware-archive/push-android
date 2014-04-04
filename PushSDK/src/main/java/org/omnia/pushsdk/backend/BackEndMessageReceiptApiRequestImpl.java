@@ -2,16 +2,12 @@ package org.omnia.pushsdk.backend;
 
 import com.google.gson.Gson;
 
+import org.omnia.pushsdk.model.MessageReceiptEvent;
 import org.omnia.pushsdk.network.NetworkWrapper;
-import org.omnia.pushsdk.model.MessageReceiptData;
-import org.omnia.pushsdk.util.Const;
 import org.omnia.pushsdk.util.PushLibLogger;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.List;
 
 public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implements BackEndMessageReceiptApiRequest {
@@ -20,12 +16,12 @@ public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implemen
         super(networkWrapper);
     }
 
-    public void startSendMessageReceipts(List<MessageReceiptData> messageReceipts, BackEndMessageReceiptListener listener) {
+    public void startSendMessageReceipts(List<MessageReceiptEvent> messageReceipts, BackEndMessageReceiptListener listener) {
         verifyRequestArguments(messageReceipts, listener);
         processRequest(messageReceipts, listener);
     }
 
-    private void verifyRequestArguments(List<MessageReceiptData> messageReceipts, BackEndMessageReceiptListener listener) {
+    private void verifyRequestArguments(List<MessageReceiptEvent> messageReceipts, BackEndMessageReceiptListener listener) {
         if (messageReceipts == null || messageReceipts.isEmpty()) {
             throw new IllegalArgumentException("messageReceipts may not be null or empty");
         }
@@ -34,7 +30,7 @@ public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implemen
         }
     }
 
-    private void processRequest(List<MessageReceiptData> messageReceipts, BackEndMessageReceiptListener listener) {
+    private void processRequest(List<MessageReceiptEvent> messageReceipts, BackEndMessageReceiptListener listener) {
 
         OutputStream outputStream = null;
 
@@ -74,7 +70,7 @@ public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implemen
         }
     }
 
-    private String getRequestBodyData(List<MessageReceiptData> messageReceipts) {
+    private String getRequestBodyData(List<MessageReceiptEvent> messageReceipts) {
         final Gson gson = new Gson();
         final String requestBodyData = gson.toJson(messageReceipts);
         return requestBodyData;

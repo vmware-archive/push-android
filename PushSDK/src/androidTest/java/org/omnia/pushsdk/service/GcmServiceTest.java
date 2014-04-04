@@ -145,7 +145,7 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         assertNotNull(receivedIntent);
         assertTrue(receivedIntent.hasExtra(GcmService.KEY_GCM_INTENT));
         assertEquals(1, messageReceiptsProvider.numberOfMessageReceipts());
-        assertEquals(TEST_MESSAGE_UUID, messageReceiptsProvider.loadMessageReceipts().get(0).getMessageUuid());
+        assertEquals(TEST_MESSAGE_UUID, messageReceiptsProvider.loadMessageReceipts().get(0).getData().getMessageUuid());
         assertTrue(alarmProvider.isAlarmEnabled());
     }
 

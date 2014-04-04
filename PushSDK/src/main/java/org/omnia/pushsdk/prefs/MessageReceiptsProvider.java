@@ -1,18 +1,18 @@
 package org.omnia.pushsdk.prefs;
 
-import org.omnia.pushsdk.model.MessageReceiptData;
+import org.omnia.pushsdk.model.MessageReceiptEvent;
 
 import java.util.List;
 
 public interface MessageReceiptsProvider {
 
-    List<MessageReceiptData> loadMessageReceipts();
+    List<MessageReceiptEvent> loadMessageReceipts();
 
-    void saveMessageReceipts(List<MessageReceiptData> messageReceipts);
+    void saveMessageReceipts(List<MessageReceiptEvent> messageReceipts);
 
-    void addMessageReceipt(MessageReceiptData messageReceipt);
+    void addMessageReceipt(MessageReceiptEvent messageReceipt);
 
-    int removeMessageReceipts(List<MessageReceiptData> messageReceipts);
+    int removeMessageReceipts(List<MessageReceiptEvent> messageReceipts);
 
     int numberOfMessageReceipts();
 

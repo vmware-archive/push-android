@@ -2,9 +2,8 @@ package org.omnia.pushsdk.broadcastreceiver;
 
 import android.content.Intent;
 import android.test.AndroidTestCase;
-import android.test.mock.MockContext;
 
-import org.omnia.pushsdk.model.MessageReceiptDataTest;
+import org.omnia.pushsdk.model.MessageReceiptEventTest;
 import org.omnia.pushsdk.prefs.FakeMessageReceiptsProvider;
 
 public class BootCompletedBroadcastReceiverTestCase extends AndroidTestCase {
@@ -38,7 +37,7 @@ public class BootCompletedBroadcastReceiverTestCase extends AndroidTestCase {
     }
 
     public void testMessageReceiptQueueWithOneItem() {
-        messageReceiptsProvider.addMessageReceipt(MessageReceiptDataTest.getMessageReceiptData1());
+        messageReceiptsProvider.addMessageReceipt(MessageReceiptEventTest.getMessageReceiptEvent1());
         broadcastReceiver.onReceive(getContext(), testIntent);
         assertTrue(messageReceiptAlarmProvider.isAlarmEnabled());
         assertEquals(1, messageReceiptsProvider.numberOfMessageReceipts());

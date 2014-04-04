@@ -2,11 +2,12 @@ package org.omnia.pushsdk.backend;
 
 import android.test.AndroidTestCase;
 
+import org.omnia.pushsdk.model.MessageReceiptEvent;
+import org.omnia.pushsdk.model.MessageReceiptEventTest;
 import org.omnia.pushsdk.network.MockHttpURLConnection;
 import org.omnia.pushsdk.network.MockNetworkWrapper;
 import org.omnia.pushsdk.network.NetworkWrapper;
 import org.omnia.pushsdk.model.MessageReceiptData;
-import org.omnia.pushsdk.model.MessageReceiptDataTest;
 import org.omnia.pushsdk.util.DelayedLoop;
 
 import java.io.IOException;
@@ -21,8 +22,8 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
     private DelayedLoop delayedLoop;
     private static final long TEN_SECOND_TIMEOUT = 10000L;
 
-    private List<MessageReceiptData> emptyList;
-    private List<MessageReceiptData> listWithOneItem;
+    private List<MessageReceiptEvent> emptyList;
+    private List<MessageReceiptEvent> listWithOneItem;
 
     @Override
     protected void setUp() throws Exception {
@@ -30,9 +31,9 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
         networkWrapper = new MockNetworkWrapper();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
         MockHttpURLConnection.reset();
-        emptyList = new LinkedList<MessageReceiptData>();
-        listWithOneItem = new LinkedList<MessageReceiptData>();
-        listWithOneItem.add(MessageReceiptDataTest.getMessageReceiptData1());
+        emptyList = new LinkedList<MessageReceiptEvent>();
+        listWithOneItem = new LinkedList<MessageReceiptEvent>();
+        listWithOneItem.add(MessageReceiptEventTest.getMessageReceiptEvent1());
     }
 
     public void testRequiresNetworkWrapper() {

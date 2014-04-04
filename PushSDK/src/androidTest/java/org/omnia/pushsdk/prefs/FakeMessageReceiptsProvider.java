@@ -1,30 +1,30 @@
 package org.omnia.pushsdk.prefs;
 
-import org.omnia.pushsdk.model.MessageReceiptData;
+import org.omnia.pushsdk.model.MessageReceiptEvent;
 
 import java.util.LinkedList;
 import java.util.List;
 
 public class FakeMessageReceiptsProvider implements MessageReceiptsProvider {
 
-    private List<MessageReceiptData> listMessageReceipts;
-    private List<MessageReceiptData> extraListOfMessageReceipts;
+    private List<MessageReceiptEvent> listMessageReceipts;
+    private List<MessageReceiptEvent> extraListOfMessageReceipts;
 
-    public FakeMessageReceiptsProvider(List<MessageReceiptData> listToLoad) {
+    public FakeMessageReceiptsProvider(List<MessageReceiptEvent> listToLoad) {
         saveMessageReceipts(listToLoad);
     }
 
-    public void loadExtraListOfMessageReceipts(List<MessageReceiptData> list) {
+    public void loadExtraListOfMessageReceipts(List<MessageReceiptEvent> list) {
         // Set up an "extra" list of message receipts to load after the existing list is loaded in order
         // to test that that MessageReceiptService only clears the items it knows about instead of
         // items that get added afterwards (say, if a message arrives while some receipts are being posted
         // to the server).
-        extraListOfMessageReceipts = new LinkedList<MessageReceiptData>(list);
+        extraListOfMessageReceipts = new LinkedList<MessageReceiptEvent>(list);
     }
 
     @Override
-    public synchronized List<MessageReceiptData> loadMessageReceipts() {
-        final List<MessageReceiptData> listToReturn = new LinkedList<MessageReceiptData>(listMessageReceipts);
+    public synchronized List<MessageReceiptEvent> loadMessageReceipts() {
+        final List<MessageReceiptEvent> listToReturn = new LinkedList<MessageReceiptEvent>(listMessageReceipts);
         if (extraListOfMessageReceipts != null) {
             listMessageReceipts.addAll(extraListOfMessageReceipts);
             extraListOfMessageReceipts = null;
@@ -33,29 +33,29 @@ public class FakeMessageReceiptsProvider implements MessageReceiptsProvider {
     }
 
     @Override
-    public synchronized void saveMessageReceipts(List<MessageReceiptData> messageReceipts) {
+    public synchronized void saveMessageReceipts(List<MessageReceiptEvent> messageReceipts) {
         if (messageReceipts != null) {
-            listMessageReceipts = new LinkedList<MessageReceiptData>(messageReceipts);
+            listMessageReceipts = new LinkedList<MessageReceiptEvent>(messageReceipts);
         } else {
             listMessageReceipts = null;
         }
     }
 
     @Override
-    public synchronized void addMessageReceipt(MessageReceiptData messageReceipt) {
+    public synchronized void addMessageReceipt(MessageReceiptEvent messageReceipt) {
         if (listMessageReceipts == null) {
-            listMessageReceipts = new LinkedList<MessageReceiptData>();
+            listMessageReceipts = new LinkedList<MessageReceiptEvent>();
         }
         listMessageReceipts.add(messageReceipt);
     }
 
     @Override
-    public synchronized int removeMessageReceipts(List<MessageReceiptData> messageReceipts) {
+    public synchronized int removeMessageReceipts(List<MessageReceiptEvent> messageReceipts) {
         int numberOfItemsRemoved = 0;
         if (messageReceipts == null || messageReceipts.size() <= 0 || listMessageReceipts == null || listMessageReceipts.size() <= 0) {
             return 0;
         }
-        for (MessageReceiptData messageReceipt : messageReceipts) {
+        for (MessageReceiptEvent messageReceipt : messageReceipts) {
             if (listMessageReceipts.contains(messageReceipt)) {
                 listMessageReceipts.remove(messageReceipt);
                 numberOfItemsRemoved += 1;
