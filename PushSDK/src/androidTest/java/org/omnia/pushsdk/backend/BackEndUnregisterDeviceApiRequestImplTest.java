@@ -78,8 +78,17 @@ public class BackEndUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
         assertTrue(delayedLoop.isSuccess());
     }
 
+    // 404 errors are not considered failures
     public void testSuccessful404() {
-        makeListenersForSuccessfulRequestFromNetwork(false, 404);
+        makeListenersForSuccessfulRequestFromNetwork(true, 404);
+        final BackEndUnregisterDeviceApiRequestImpl registrar = new BackEndUnregisterDeviceApiRequestImpl(networkWrapper);
+        registrar.startUnregisterDevice(TEST_BACK_END_DEVICE_REGISTRATION_ID, backEndUnregisterDeviceListener);
+        delayedLoop.startLoop();
+        assertTrue(delayedLoop.isSuccess());
+    }
+
+    public void testFailed403() {
+        makeListenersForSuccessfulRequestFromNetwork(false, 403);
         final BackEndUnregisterDeviceApiRequestImpl registrar = new BackEndUnregisterDeviceApiRequestImpl(networkWrapper);
         registrar.startUnregisterDevice(TEST_BACK_END_DEVICE_REGISTRATION_ID, backEndUnregisterDeviceListener);
         delayedLoop.startLoop();

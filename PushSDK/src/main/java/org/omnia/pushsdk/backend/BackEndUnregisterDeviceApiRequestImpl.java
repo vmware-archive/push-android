@@ -65,7 +65,9 @@ public class BackEndUnregisterDeviceApiRequestImpl extends ApiRequestImpl implem
 
     public void onSuccessfulRequest(int statusCode, BackEndUnregisterDeviceListener listener) {
 
-        if (isFailureStatusCode(statusCode)) {
+        // HTTP status 404 is not considered a failure.  If the server doesn't know about
+        // this device registration ID then the device can already been considered unregistered.
+        if (statusCode != 404 && isFailureStatusCode(statusCode)) {
             PushLibLogger.e("Back-end server unregistration failed: server returned HTTP status " + statusCode);
             listener.onBackEndUnregisterDeviceFailed("Back-end server returned HTTP status " + statusCode);
             return;
