@@ -25,7 +25,7 @@ public class MessageReceiptData {
     @SerializedName("timestamp")
     private String timestamp;
 
-    // Should we add a field for the app_uuid/release_uuid?
+    // TODO update to new format (includes variant_uuid)
 
     private static SimpleDateFormat dateFormatter;
 

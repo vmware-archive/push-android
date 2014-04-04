@@ -30,12 +30,12 @@ In order to receive push messages from Omnia in your Android application you wil
     You will need obtain the Project Number (AKA the "Sender ID") and register a "Web Application".  The Project
     Number is a parameter you most provide to the Push SDK when registering your device at run-time and to the Omnia
     console.  The Web Application on Google Cloud Console includes an "API Key" that you must supply to the Omnia
-    administration console when creating your release.
+    administration console when creating your variant.
 
- 2. Set up your project, application, and a release on the Omnia administration console.  This task is beyond the scope
+ 2. Set up your project, application, and a variant on the Omnia administration console.  This task is beyond the scope
     of this document, but please note that you will need the two parameters from Google Cloud Console above.
 
-    After setting up your release in Omnia, make sure to note the Release UUID and Release Secret parameters.  You will
+    After setting up your variant in Omnia, make sure to note the Variant UUID and Variant Secret parameters.  You will
     need them below.
 
  3. Link the library to your project.  If you are using Gradle to build your project and you have access to the Xtreme
@@ -77,11 +77,11 @@ In order to receive push messages from Omnia in your Android application you wil
     to pass to the `PushLib.init` method, so you should try to add this code to your `Application` class or to one of
     your `Activity` class.
 
-         RegistrationParameters parameters = new RegistrationParameters(gcmSenderId, releaseUuid, releaseSecret, deviceAlias);
+         RegistrationParameters parameters = new RegistrationParameters(gcmSenderId, variantUuid, variantSecret, deviceAlias);
          pushLib = PushLib.init((Context)this);
          pushLib.startRegistration(parameters, null);
 
-    The `gcmSenderId`, `releaseUuid`, and `releaseSecret` are described above.  The `deviceAlias` is a custom field that
+    The `gcmSenderId`, `variantUuid`, and `variantSecret` are described above.  The `deviceAlias` is a custom field that
     you can use to differentiate this device from others in your own push messaging campaigns.  You can leave it empty
     if you'd like.
 

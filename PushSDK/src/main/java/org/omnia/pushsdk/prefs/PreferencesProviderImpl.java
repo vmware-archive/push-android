@@ -31,8 +31,8 @@ public class PreferencesProviderImpl implements PreferencesProvider {
     private static final String PROPERTY_BACKEND_DEVICE_REGISTRATION_ID = "backend_device_registration_id";
     private static final String PROPERTY_APP_VERSION = "app_version";
     private static final String PROPERTY_GCM_SENDER_ID = "gcm_sender_id";
-    private static final String PROPERTY_RELEASE_UUID = "release_uuid";
-    private static final String PROPERTY_RELEASE_SECRET = "release_secret";
+    private static final String PROPERTY_VARIANT_UUID = "variant_uuid";
+    private static final String PROPERTY_VARIANT_SECRET = "variant_secret";
     private static final String PROPERTY_DEVICE_ALIAS = "device_alias";
     private static final String PROPERTY_PACKAGE_NAME = "package_name";
 
@@ -98,28 +98,28 @@ public class PreferencesProviderImpl implements PreferencesProvider {
     }
 
     @Override
-    public String loadReleaseUuid() {
-        return getSharedPreferences().getString(PROPERTY_RELEASE_UUID, null);
+    public String loadVariantUuid() {
+        return getSharedPreferences().getString(PROPERTY_VARIANT_UUID, null);
     }
 
     @Override
-    public void saveReleaseUuid(String releaseUuid) {
+    public void saveVariantUuid(String variantUuid) {
         final SharedPreferences prefs = getSharedPreferences();
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(PROPERTY_RELEASE_UUID, releaseUuid);
+        editor.putString(PROPERTY_VARIANT_UUID, variantUuid);
         editor.commit();
     }
 
     @Override
-    public String loadReleaseSecret() {
-        return getSharedPreferences().getString(PROPERTY_RELEASE_SECRET, null);
+    public String loadVariantSecret() {
+        return getSharedPreferences().getString(PROPERTY_VARIANT_SECRET, null);
     }
 
     @Override
-    public void saveReleaseSecret(String releaseUuid) {
+    public void saveVariantSecret(String variantUuid) {
         final SharedPreferences prefs = getSharedPreferences();
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(PROPERTY_RELEASE_SECRET, releaseUuid);
+        editor.putString(PROPERTY_VARIANT_SECRET, variantUuid);
         editor.commit();
     }
 

@@ -17,11 +17,11 @@ package org.omnia.pushsdk.model;
 
 /*
 {
-        "release_uuid": "guid_provided_by_developer",
+        "variant_uuid": "guid_provided_by_developer",
         "secret": "guid_provided_by_developer",
         "device_alias": "developer-specific",
-        "device_type": "phone"|"tablet"|"phablet",
-        "device_model": "Nexus 4",
+        "device_manufacturer": "ACME INC."
+        "device_model": "Nexus 5",
         "os": "android",
         "os_version": "4.4",
         "registration_token": "provided_by_GCM"
@@ -35,8 +35,8 @@ import com.google.gson.annotations.SerializedName;
  */
 public class BackEndApiRegistrationRequestData {
 
-    @SerializedName("release_uuid")
-    private String releaseUuid;
+    @SerializedName("variant_uuid")
+    private String variantUuid;
 
     @SerializedName("secret")
     private String secret;
@@ -62,12 +62,12 @@ public class BackEndApiRegistrationRequestData {
     public BackEndApiRegistrationRequestData() {
     }
 
-    public String getReleaseUuid() {
-        return releaseUuid;
+    public String getVariantUuid() {
+        return variantUuid;
     }
 
-    public void setReleaseUuid(String releaseUuid) {
-        this.releaseUuid = releaseUuid;
+    public void setVariantUuid(String variantUuid) {
+        this.variantUuid = variantUuid;
     }
 
     public String getSecret() {

@@ -120,8 +120,8 @@ public class UnregistrationEngine {
             @Override
             public void onBackEndUnregisterDeviceSuccess() {
                 preferencesProvider.saveBackEndDeviceRegistrationId(null);
-                preferencesProvider.saveReleaseUuid(null);
-                preferencesProvider.saveReleaseSecret(null);
+                preferencesProvider.saveVariantUuid(null);
+                preferencesProvider.saveVariantSecret(null);
                 preferencesProvider.saveDeviceAlias(null);
                 listener.onUnregistrationComplete();
             }

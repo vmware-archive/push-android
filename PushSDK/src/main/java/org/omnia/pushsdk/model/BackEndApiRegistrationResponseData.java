@@ -17,10 +17,10 @@ package org.omnia.pushsdk.model;
 
 /*
 {
-        "replicant_uuid": "9e60c311-f5c7-4416-aea2-d07bbc94f208",
+        "variant_uuid": "9e60c311-f5c7-4416-aea2-d07bbc94f208",
         "secret": "3c676b20-3c49-4215-be1a-3932e3458514",
         "device_alias": "andoidtest",
-        "device_manufactur": "Phone Corp",
+        "device_manufacturer": "Phone Corp",
         "device_model": "Ultimate Phono 1999",
         "os": "android",
         "os_version": "version",
@@ -35,8 +35,8 @@ import com.google.gson.annotations.SerializedName;
  */
 public class BackEndApiRegistrationResponseData {
 
-    @SerializedName("replicant_id")
-    private String replicantId;
+    @SerializedName("variant_uuid")
+    private String variantUuid;
 
     @SerializedName("device_uuid")
     private String deviceUuid;
@@ -62,12 +62,12 @@ public class BackEndApiRegistrationResponseData {
     public BackEndApiRegistrationResponseData() {
     }
 
-    public String getReplicantId() {
-        return replicantId;
+    public String getVariantUuid() {
+        return variantUuid;
     }
 
-    public void setReplicantId(String replicantId) {
-        this.replicantId = replicantId;
+    public void setVariantUuid(String variantUuid) {
+        this.variantUuid = variantUuid;
     }
 
     public String getDeviceUuid() {

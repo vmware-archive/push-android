@@ -89,13 +89,13 @@ public class UnregistrationEngineTestParameters {
         if (backEndDeviceRegistrationIdResultant == null) {
             testCase.assertNull(prefsProvider.loadBackEndDeviceRegistrationId());
             testCase.assertNull(prefsProvider.loadDeviceAlias());
-            testCase.assertNull(prefsProvider.loadReleaseSecret());
-            testCase.assertNull(prefsProvider.loadReleaseSecret());
+            testCase.assertNull(prefsProvider.loadVariantSecret());
+            testCase.assertNull(prefsProvider.loadVariantSecret());
         } else {
             testCase.assertNotNull(prefsProvider.loadBackEndDeviceRegistrationId());
             testCase.assertNotNull(prefsProvider.loadDeviceAlias());
-            testCase.assertNotNull(prefsProvider.loadReleaseSecret());
-            testCase.assertNotNull(prefsProvider.loadReleaseSecret());
+            testCase.assertNotNull(prefsProvider.loadVariantSecret());
+            testCase.assertNotNull(prefsProvider.loadVariantSecret());
         }
 
         testCase.assertNull(prefsProvider.loadPackageName());

@@ -35,13 +35,13 @@ public interface PreferencesProvider {
 
     void saveGcmSenderId(String gcmSenderId);
 
-    String loadReleaseUuid();
+    String loadVariantUuid();
 
-    void saveReleaseUuid(String releaseUuid);
+    void saveVariantUuid(String variantUuid);
 
-    String loadReleaseSecret();
+    String loadVariantSecret();
 
-    void saveReleaseSecret(String releaseUuid);
+    void saveVariantSecret(String variantUuid);
 
     String loadDeviceAlias();
 

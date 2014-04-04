@@ -156,8 +156,8 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
 
     private BackEndApiRegistrationRequestData getBackEndApiRegistrationRequestData(String deviceRegistrationId, RegistrationParameters parameters) {
         final BackEndApiRegistrationRequestData data = new BackEndApiRegistrationRequestData();
-        data.setReleaseUuid(parameters.getReleaseUuid());
-        data.setSecret(parameters.getReleaseSecret());
+        data.setVariantUuid(parameters.getVariantUuid());
+        data.setSecret(parameters.getVariantSecret());
         if (parameters.getDeviceAlias() == null) {
             data.setDeviceAlias("");
         } else {

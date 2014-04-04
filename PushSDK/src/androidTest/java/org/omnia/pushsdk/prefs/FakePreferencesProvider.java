@@ -20,8 +20,8 @@ public class FakePreferencesProvider implements PreferencesProvider {
     private String gcmDeviceRegistrationId;
     private String backEndDeviceRegistrationId;
     private String gcmSenderId;
-    private String releaseUuid;
-    private String releaseSecret;
+    private String variantUuid;
+    private String variantSecret;
     private String deviceAlias;
     private String packageName;
     private int appVersion;
@@ -29,18 +29,18 @@ public class FakePreferencesProvider implements PreferencesProvider {
     private boolean wasBackEndDeviceRegistrationIdSaved = false;
     private boolean wasAppVersionSaved = false;
     private boolean wasGcmSenderIdSaved = false;
-    private boolean wasReleaseUuidSaved = false;
-    private boolean wasReleaseSecretSaved = false;
+    private boolean wasVariantUuidSaved = false;
+    private boolean wasVariantSecretSaved = false;
     private boolean wasDeviceAliasSaved = false;
     private boolean wasPackageNameSaved = false;
 
-    public FakePreferencesProvider(String gcmDeviceRegistrationIdToLoad, String backEndDeviceRegistrationIdToLoad, int appVersionToLoad, String gcmSenderIdToLoad, String releaseUuidToLoad, String releaseSecretToLoad, String deviceAliasToLoad, String packageNameToLoad) {
+    public FakePreferencesProvider(String gcmDeviceRegistrationIdToLoad, String backEndDeviceRegistrationIdToLoad, int appVersionToLoad, String gcmSenderIdToLoad, String variantUuidToLoad, String variantSecretToLoad, String deviceAliasToLoad, String packageNameToLoad) {
         this.gcmDeviceRegistrationId = gcmDeviceRegistrationIdToLoad;
         this.backEndDeviceRegistrationId = backEndDeviceRegistrationIdToLoad;
         this.appVersion = appVersionToLoad;
         this.gcmSenderId = gcmSenderIdToLoad;
-        this.releaseUuid = releaseUuidToLoad;
-        this.releaseSecret = releaseSecretToLoad;
+        this.variantUuid = variantUuidToLoad;
+        this.variantSecret = variantSecretToLoad;
         this.deviceAlias = deviceAliasToLoad;
         this.packageName = packageNameToLoad;
     }
@@ -66,13 +66,13 @@ public class FakePreferencesProvider implements PreferencesProvider {
     }
 
     @Override
-    public String loadReleaseUuid() {
-        return releaseUuid;
+    public String loadVariantUuid() {
+        return variantUuid;
     }
 
     @Override
-    public String loadReleaseSecret() {
-        return releaseSecret;
+    public String loadVariantSecret() {
+        return variantSecret;
     }
 
     @Override
@@ -110,15 +110,15 @@ public class FakePreferencesProvider implements PreferencesProvider {
     }
 
     @Override
-    public void saveReleaseUuid(String releaseUuid) {
-        this.releaseUuid = releaseUuid;
-        wasReleaseUuidSaved = true;
+    public void saveVariantUuid(String variantUuid) {
+        this.variantUuid = variantUuid;
+        wasVariantUuidSaved = true;
     }
 
     @Override
-    public void saveReleaseSecret(String releaseSecret) {
-        this.releaseSecret = releaseSecret;
-        wasReleaseSecretSaved = true;
+    public void saveVariantSecret(String variantUuid) {
+        this.variantSecret = variantUuid;
+        wasVariantSecretSaved = true;
     }
 
     @Override
@@ -149,12 +149,12 @@ public class FakePreferencesProvider implements PreferencesProvider {
         return wasGcmSenderIdSaved;
     }
 
-    public boolean wasReleaseUuidSaved() {
-        return wasReleaseUuidSaved;
+    public boolean wasVariantUuidSaved() {
+        return wasVariantUuidSaved;
     }
 
-    public boolean wasReleaseSecretSaved() {
-        return wasReleaseSecretSaved;
+    public boolean wasVariantSecretSaved() {
+        return wasVariantSecretSaved;
     }
 
     public boolean wasDeviceAliasSaved() {

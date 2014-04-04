@@ -34,8 +34,8 @@ import org.omnia.pushsdk.sample.util.Settings;
 public class SettingsActivity extends PreferenceActivity {
 
     private EditTextPreference gcmSenderIdPreference;
-    private EditTextPreference releaseUuidPreference;
-    private EditTextPreference releaseSecretPreference;
+    private EditTextPreference variantUuidPreference;
+    private EditTextPreference variantSecretPreference;
     private EditTextPreference deviceAliasPreference;
     private EditTextPreference gcmBrowserApiPreference;
     private EditTextPreference backEndAppUuidPreference;
@@ -50,8 +50,8 @@ public class SettingsActivity extends PreferenceActivity {
         // app to run on old Android versions, so I'm going to leave them in here.
         addPreferencesFromResource(R.xml.preferences);
         gcmSenderIdPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.GCM_SENDER_ID);
-        releaseUuidPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.RELEASE_UUID);
-        releaseSecretPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.RELEASE_SECRET);
+        variantUuidPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.VARIANT_UUID);
+        variantSecretPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.VARIANT_SECRET);
         deviceAliasPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.DEVICE_ALIAS);
         gcmBrowserApiPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.GCM_BROWSER_API_KEY);
         backEndAppUuidPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.BACK_END_APP_UUID);
@@ -122,8 +122,8 @@ public class SettingsActivity extends PreferenceActivity {
     private void showCurrentPreferences() {
         final SharedPreferences prefs = getPreferenceScreen().getSharedPreferences();
         gcmSenderIdPreference.setSummary(prefs.getString(Settings.GCM_SENDER_ID, null));
-        releaseUuidPreference.setSummary(prefs.getString(Settings.RELEASE_UUID, null));
-        releaseSecretPreference.setSummary(prefs.getString(Settings.RELEASE_SECRET, null));
+        variantUuidPreference.setSummary(prefs.getString(Settings.VARIANT_UUID, null));
+        variantSecretPreference.setSummary(prefs.getString(Settings.VARIANT_SECRET, null));
         deviceAliasPreference.setSummary(prefs.getString(Settings.DEVICE_ALIAS, null));
         gcmBrowserApiPreference.setSummary(prefs.getString(Settings.GCM_BROWSER_API_KEY, null));
         backEndAppUuidPreference.setSummary(prefs.getString(Settings.BACK_END_APP_UUID, null));

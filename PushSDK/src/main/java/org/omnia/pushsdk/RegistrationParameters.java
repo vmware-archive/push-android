@@ -21,8 +21,8 @@ package org.omnia.pushsdk;
 public class RegistrationParameters {
 
     private final String gcmSenderId;
-    private final String releaseUuid;
-    private final String releaseSecret;
+    private final String variantUuid;
+    private final String variantSecret;
     private final String deviceAlias;
 
     /**
@@ -30,18 +30,18 @@ public class RegistrationParameters {
      *
      * @param gcmSenderId   The "sender ID" or "project ID", as defined by the Google Cloud Messaging.  May not be null or empty.
      *                      You can find it on the Google Cloud Console (https://cloud.google.com) for your project.
-     * @param releaseUuid   The "release_uuid", as defined by Omnia Push Services for your release.  May not be null or empty.
-     * @param releaseSecret The "release secret", as defined by Omnia Push Services for your release.  May not be null or empty.
+     * @param variantUuid   The "variant_uuid", as defined by Omnia Push Services for your variant.  May not be null or empty.
+     * @param variantSecret The "variant secret", as defined by Omnia Push Services for your variant.  May not be null or empty.
      * @param deviceAlias   A developer-defined "device alias" which can be used to designate this device, or class.
      *                      of devices, in push or notification campaigns. May not be set to `null`. May be set to empty.
      *
      *                      If any of the above parameters ae `null` then the PushLib.startRegistration call will throw
      *                      an exception.
      */
-    public RegistrationParameters(String gcmSenderId, String releaseUuid, String releaseSecret, String deviceAlias) {
+    public RegistrationParameters(String gcmSenderId, String variantUuid, String variantSecret, String deviceAlias) {
         this.gcmSenderId = gcmSenderId;
-        this.releaseUuid = releaseUuid;
-        this.releaseSecret = releaseSecret;
+        this.variantUuid = variantUuid;
+        this.variantSecret = variantSecret;
         this.deviceAlias = deviceAlias;
     }
 
@@ -49,12 +49,12 @@ public class RegistrationParameters {
         return gcmSenderId;
     }
 
-    public String getReleaseUuid() {
-        return releaseUuid;
+    public String getVariantUuid() {
+        return variantUuid;
     }
 
-    public String getReleaseSecret() {
-        return releaseSecret;
+    public String getVariantSecret() {
+        return variantSecret;
     }
 
     public String getDeviceAlias() {
@@ -76,10 +76,10 @@ public class RegistrationParameters {
         if (!other.gcmSenderId.equals(gcmSenderId)) {
             return false;
         }
-        if (!other.releaseUuid.equals(releaseUuid)) {
+        if (!other.variantUuid.equals(variantUuid)) {
             return false;
         }
-        if (!other.releaseSecret.equals(releaseSecret)) {
+        if (!other.variantSecret.equals(variantSecret)) {
             return false;
         }
         if (!other.deviceAlias.equals(deviceAlias)) {

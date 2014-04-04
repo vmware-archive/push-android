@@ -148,11 +148,11 @@ public class PushLib {
         if (parameters.getGcmSenderId() == null || parameters.getGcmSenderId().isEmpty()) {
             throw new IllegalArgumentException("parameters.senderId may not be null or empty");
         }
-        if (parameters.getReleaseUuid() == null || parameters.getReleaseUuid().isEmpty()) {
-            throw new IllegalArgumentException("parameters.releaseUuid may not be null or empty");
+        if (parameters.getVariantUuid() == null || parameters.getVariantUuid().isEmpty()) {
+            throw new IllegalArgumentException("parameters.variantUuid may not be null or empty");
         }
-        if (parameters.getReleaseSecret() == null || parameters.getReleaseSecret().isEmpty()) {
-            throw new IllegalArgumentException("parameters.releaseSecret may not be null or empty");
+        if (parameters.getVariantSecret() == null || parameters.getVariantSecret().isEmpty()) {
+            throw new IllegalArgumentException("parameters.variantSecret may not be null or empty");
         }
     }
 

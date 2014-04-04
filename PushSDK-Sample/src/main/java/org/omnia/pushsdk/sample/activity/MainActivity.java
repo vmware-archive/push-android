@@ -120,12 +120,12 @@ public class MainActivity extends ActionBarActivity {
         addLogMessage("Starting registration...");
 
         final String gcmSenderId = Settings.getGcmSenderId(this);
-        final String releaseUuid = Settings.getReleaseUuid(this);
-        final String releaseSecret = Settings.getReleaseSecret(this);
+        final String variantUuid = Settings.getVariantUuid(this);
+        final String variantSecret = Settings.getVariantSecret(this);
         final String deviceAlias = Settings.getDeviceAlias(this);
-        addLogMessage("GCM Sender ID: '" + gcmSenderId + "'\nRelease UUID: '" + releaseUuid + "'\nRelease Secret: '" + releaseSecret + "'\nDevice Alias: '" + deviceAlias + "'");
+        addLogMessage("GCM Sender ID: '" + gcmSenderId + "'\nVariant UUID: '" + variantUuid + "\nVariant Secret: '" + variantSecret + "'\nDevice Alias: '" + deviceAlias + "'");
 
-        final RegistrationParameters parameters = new RegistrationParameters(gcmSenderId, releaseUuid, releaseSecret, deviceAlias);
+        final RegistrationParameters parameters = new RegistrationParameters(gcmSenderId, variantUuid, variantSecret, deviceAlias);
         try {
             pushLib.startRegistration(parameters, new RegistrationListener() {
 
@@ -450,8 +450,8 @@ public class MainActivity extends ActionBarActivity {
                     }
                     if (result == ClearRegistrationDialogFragment.CLEAR_REGISTRATIONS_FROM_BACK_END || result == ClearRegistrationDialogFragment.CLEAR_REGISTRATIONS_FROM_BOTH) {
                         addLogMessage("Clearing device registration from the back-end");
-                        editor.remove("release_uuid");
-                        editor.remove("release_secret");
+                        editor.remove("variant_uuid");
+                        editor.remove("variant_secret");
                         editor.remove("device_alias");
                         editor.remove("backend_device_registration_id");
                     }
