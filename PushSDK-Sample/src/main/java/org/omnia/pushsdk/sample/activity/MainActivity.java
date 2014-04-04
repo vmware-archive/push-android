@@ -35,6 +35,8 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
+import org.omnia.pushsdk.prefs.MessageReceiptsProvider;
+import org.omnia.pushsdk.prefs.MessageReceiptsProviderImpl;
 import org.omnia.pushsdk.sample.broadcastreceiver.MyOmniaRemotePushLibBroadcastReceiver;
 import org.omnia.pushsdk.sample.dialogfragment.SendMessageDialogFragment;
 import org.omnia.pushsdk.registration.UnregistrationListener;
@@ -200,6 +202,10 @@ public class MainActivity extends ActionBarActivity {
 
             case R.id.action_register:
                 startRegistration();
+                break;
+
+            case R.id.action_clear_message_receipts:
+                clearMessageReceipts();
                 break;
 
             case R.id.action_clear_registration:
@@ -434,6 +440,12 @@ public class MainActivity extends ActionBarActivity {
                 }
             }
         }
+    }
+
+    private void clearMessageReceipts() {
+        addLogMessage("Clearing unsent message receipts.");
+        final MessageReceiptsProvider messageReceipts = new MessageReceiptsProviderImpl(getApplicationContext());
+        messageReceipts.clear();
     }
 
     private void clearRegistration() {
