@@ -19,11 +19,11 @@ import com.google.gson.annotations.SerializedName;
 
 public class BackEndMessageRequest {
 
-    @SerializedName("app_uuid")
-    public String appUuid;
+    @SerializedName("environment_uuid")
+    public String environmentUuid;
 
-    @SerializedName("app_secret_key")
-    public String appSecretKey;
+    @SerializedName("environment_key")
+    public String environmentKey;
 
     @SerializedName("message")
     public BackEndMessageRequestData message;
@@ -31,9 +31,9 @@ public class BackEndMessageRequest {
     @SerializedName("target")
     public BackEndMessageTarget target;
 
-    public BackEndMessageRequest(String appUuid, String appSecretKey, String messageTitle, String messageBody, String platforms, String[] devices) {
-        this.appUuid = appUuid;
-        this.appSecretKey = appSecretKey;
+    public BackEndMessageRequest(String environmentUuid, String environmentKey, String messageTitle, String messageBody, String platforms, String[] devices) {
+        this.environmentUuid = environmentUuid;
+        this.environmentKey = environmentKey;
         this.message = new BackEndMessageRequestData(messageTitle, messageBody);
         this.target = new BackEndMessageTarget(platforms, devices);
     }

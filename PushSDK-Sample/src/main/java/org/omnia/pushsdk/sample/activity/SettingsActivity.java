@@ -38,8 +38,8 @@ public class SettingsActivity extends PreferenceActivity {
     private EditTextPreference variantSecretPreference;
     private EditTextPreference deviceAliasPreference;
     private EditTextPreference gcmBrowserApiPreference;
-    private EditTextPreference backEndAppUuidPreference;
-    private EditTextPreference backEndAppSecretKeyPreference;
+    private EditTextPreference backEndEnvironmentUuidPreference;
+    private EditTextPreference backEndEnvironmentKeyPreference;
     private SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener;
 
     @Override
@@ -54,8 +54,8 @@ public class SettingsActivity extends PreferenceActivity {
         variantSecretPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.VARIANT_SECRET);
         deviceAliasPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.DEVICE_ALIAS);
         gcmBrowserApiPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.GCM_BROWSER_API_KEY);
-        backEndAppUuidPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.BACK_END_APP_UUID);
-        backEndAppSecretKeyPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.BACK_END_APP_SECRET_KEY);
+        backEndEnvironmentUuidPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.BACK_END_ENVIRONMENT_UUID);
+        backEndEnvironmentKeyPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.BACK_END_ENVIRONMENT_KEY);
         preferenceChangeListener = getPreferenceChangeListener();
     }
 
@@ -126,7 +126,7 @@ public class SettingsActivity extends PreferenceActivity {
         variantSecretPreference.setSummary(prefs.getString(Settings.VARIANT_SECRET, null));
         deviceAliasPreference.setSummary(prefs.getString(Settings.DEVICE_ALIAS, null));
         gcmBrowserApiPreference.setSummary(prefs.getString(Settings.GCM_BROWSER_API_KEY, null));
-        backEndAppUuidPreference.setSummary(prefs.getString(Settings.BACK_END_APP_UUID, null));
-        backEndAppSecretKeyPreference.setSummary(prefs.getString(Settings.BACK_END_APP_SECRET_KEY, null));
+        backEndEnvironmentUuidPreference.setSummary(prefs.getString(Settings.BACK_END_ENVIRONMENT_UUID, null));
+        backEndEnvironmentKeyPreference.setSummary(prefs.getString(Settings.BACK_END_ENVIRONMENT_KEY, null));
     }
 }

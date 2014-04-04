@@ -69,9 +69,9 @@
         android:title="@string/pref_title_back_end_push_settings">
 
         <EditTextPreference
-            android:key="test_back_end_app_uuid"
-            android:title="@string/pref_title_back_end_app_uuid"
-            android:defaultValue="@string/pref_default_back_end_app_uuid"
+            android:key="test_back_end_environment_uuid"
+            android:title="@string/pref_title_back_end_environment_uuid"
+            android:defaultValue="@string/pref_default_back_end_environment_uuid"
             android:persistent="true"
             android:selectAllOnFocus="true"
             android:inputType="text"
@@ -79,9 +79,9 @@
             android:maxLines="1"/>
 
         <EditTextPreference
-            android:key="test_back_end_app_secret_key"
-            android:title="@string/pref_title_back_end_app_secret_key"
-            android:defaultValue="@string/pref_default_back_end_app_secret_key"
+            android:key="test_back_end_environment_key"
+            android:title="@string/pref_title_back_end_environment_key"
+            android:defaultValue="@string/pref_default_back_end_environment_key"
             android:persistent="true"
             android:selectAllOnFocus="true"
             android:inputType="text"

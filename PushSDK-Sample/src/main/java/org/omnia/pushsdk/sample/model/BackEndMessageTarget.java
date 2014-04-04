@@ -19,14 +19,14 @@ import com.google.gson.annotations.SerializedName;
 
 public class BackEndMessageTarget {
 
-    @SerializedName("platforms")
-    public String platforms;
+    @SerializedName("platform")
+    public String platform;
 
     @SerializedName("devices")
     public String[] devices;
 
-    public BackEndMessageTarget(String platforms, String[] devices) {
-        this.platforms = platforms;
+    public BackEndMessageTarget(String platform, String[] devices) {
+        this.platform = platform;
         this.devices = devices;
     }
 }

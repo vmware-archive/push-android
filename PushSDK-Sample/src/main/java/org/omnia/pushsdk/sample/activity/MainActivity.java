@@ -72,7 +72,8 @@ import java.util.List;
 public class MainActivity extends ActionBarActivity {
 
     private static final String GCM_SEND_MESSAGE_URL = "https://android.googleapis.com/gcm/send";
-    private static final String BACK_END_SEND_MESSAGE_URL = "http://ec2-54-234-124-123.compute-1.amazonaws.com:8090/v1/push";
+//    private static final String BACK_END_SEND_MESSAGE_URL = "http://ec2-54-234-124-123.compute-1.amazonaws.com:8090/v1/push";
+    private static final String BACK_END_SEND_MESSAGE_URL = "http://cfms-push-service-staging.one.pepsi.cf-app.com/v1/push";
 
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm:ss.SSS");
     private static final int[] baseRowColours = new int[]{0xddeeff, 0xddffee, 0xffeedd};
@@ -316,9 +317,9 @@ public class MainActivity extends ActionBarActivity {
         final String platforms = "android";
         final String messageTitle = "Sample Message Title";
         final String messageBody = "This message was sent to the back-end at " + getTimestamp() + "." ;
-        final String appUuid = Settings.getBackEndAppUuid(this);
-        final String appSecretKey = Settings.getBackEndAppSecretKey(this);
-        final BackEndMessageRequest messageRequest = new BackEndMessageRequest(appUuid, appSecretKey, messageTitle, messageBody, platforms, devices);
+        final String environmentUuid = Settings.getBackEndEnvironmentUuid(this);
+        final String environmentKey = Settings.getBackEndEnvironmentKey(this);
+        final BackEndMessageRequest messageRequest = new BackEndMessageRequest(environmentUuid, environmentKey, messageTitle, messageBody, platforms, devices);
         final Gson gson = new Gson();
         return gson.toJson(messageRequest);
     }

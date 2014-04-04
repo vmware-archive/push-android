@@ -26,8 +26,8 @@ public class Settings {
     public static final String VARIANT_SECRET = "test_variant_secret";
     public static final String DEVICE_ALIAS = "test_device_alias";
     public static final String GCM_BROWSER_API_KEY = "test_gcm_browser_api_key";
-    public static final String BACK_END_APP_UUID = "test_back_end_app_uuid";
-    public static final String BACK_END_APP_SECRET_KEY = "test_back_end_app_secret_key";
+    public static final String BACK_END_ENVIRONMENT_UUID = "test_back_end_environment_uuid";
+    public static final String BACK_END_ENVIRONMENT_KEY = "test_back_end_environment_key";
 
     public static String getGcmSenderId(Context context) {
         return getSharedPreferences(context).getString(GCM_SENDER_ID, null);
@@ -49,12 +49,12 @@ public class Settings {
         return getSharedPreferences(context).getString(GCM_BROWSER_API_KEY, null);
     }
 
-    public static String getBackEndAppUuid(Context context) {
-        return getSharedPreferences(context).getString(BACK_END_APP_UUID, null);
+    public static String getBackEndEnvironmentUuid(Context context) {
+        return getSharedPreferences(context).getString(BACK_END_ENVIRONMENT_UUID, null);
     }
 
-    public static String getBackEndAppSecretKey(Context context) {
-        return getSharedPreferences(context).getString(BACK_END_APP_SECRET_KEY, null);
+    public static String getBackEndEnvironmentKey(Context context) {
+        return getSharedPreferences(context).getString(BACK_END_ENVIRONMENT_KEY, null);
     }
 
     private static SharedPreferences getSharedPreferences(Context context) {
