@@ -39,15 +39,15 @@ public class MessageReceiptEvent extends EventBase {
 
         final MessageReceiptEvent other = (MessageReceiptEvent) o;
 
-        if (other.data == null && data == null)
+        if (other.data == null && data != null) {
             return false;
-        if (other.data == null && data != null)
+        }
+        if (other.data != null && data == null) {
             return false;
-        if (other.data != null && data == null)
+        }
+        if (other.data != null && data != null && !data.equals(other.data)) {
             return false;
-
-        if (!data.equals(other.data))
-            return false;
+        }
 
         return true;
     }

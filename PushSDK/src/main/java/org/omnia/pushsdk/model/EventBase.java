@@ -39,7 +39,11 @@ public abstract class EventBase {
     }
 
     public void setTime(Date time) {
-        this.time = String.format("%d", time.getTime() / 1000L);
+        if (time != null) {
+            this.time = String.format("%d", time.getTime() / 1000L);
+        } else {
+            this.time = null;
+        }
     }
 
     public String getVariantUuid() {

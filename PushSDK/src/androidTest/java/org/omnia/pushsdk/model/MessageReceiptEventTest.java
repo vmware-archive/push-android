@@ -48,59 +48,87 @@ public class MessageReceiptEventTest extends AndroidTestCase {
         MoreAsserts.assertNotEqual(model2, model1);
     }
 
-    public void testNotEquals2() {
+    public void testNotEqualsWithDates() {
+
         final MessageReceiptEvent model1 = new MessageReceiptEvent();
         model1.setTime(getTestDate1());
-        model1.setData(new MessageReceiptData());
-        model1.getData().setMessageUuid(TEST_MESSAGE_UUID_1);
+
         final MessageReceiptEvent model2 = new MessageReceiptEvent();
         model2.setTime(getTestDate2());
-        model2.setData(new MessageReceiptData());
-        model2.getData().setMessageUuid(TEST_MESSAGE_UUID_1);
+
         MoreAsserts.assertNotEqual(model1, model2);
         MoreAsserts.assertNotEqual(model2, model1);
+
+        model1.setTime((String)null);
+        MoreAsserts.assertNotEqual(model1, model2);
+        MoreAsserts.assertNotEqual(model2, model1);
+
+        model1.setTime((Date)null);
+        MoreAsserts.assertNotEqual(model1, model2);
+        MoreAsserts.assertNotEqual(model2, model1);
+
+        model2.setTime((String)null);
+        assertEquals(model1, model2);
     }
 
-    public void testNotEquals3() {
+    public void testNotEqualsWithIds() {
+
+        final MessageReceiptEvent model1 = new MessageReceiptEvent();
+        model1.setId(TEST_EVENT_ID_1);
+
+        final MessageReceiptEvent model2 = new MessageReceiptEvent();
+        model2.setId(TEST_EVENT_ID_2);
+
+        MoreAsserts.assertNotEqual(model1, model2);
+        MoreAsserts.assertNotEqual(model2, model1);
+
+        model1.setId(null);
+        MoreAsserts.assertNotEqual(model1, model2);
+        MoreAsserts.assertNotEqual(model2, model1);
+
+        model2.setId(null);
+        assertEquals(model1, model2);
+    }
+
+    public void testNotEqualsWithVariantUuids() {
+
+        final MessageReceiptEvent model1 = new MessageReceiptEvent();
+        model1.setVariantUuid(TEST_EVENT_VARIANT_UUID_1);
+
+        final MessageReceiptEvent model2 = new MessageReceiptEvent();
+        model2.setVariantUuid(TEST_EVENT_VARIANT_UUID_2);
+
+        MoreAsserts.assertNotEqual(model1, model2);
+        MoreAsserts.assertNotEqual(model2, model1);
+
+        model1.setVariantUuid(null);
+        MoreAsserts.assertNotEqual(model1, model2);
+        MoreAsserts.assertNotEqual(model2, model1);
+
+        model2.setVariantUuid(null);
+        assertEquals(model1, model2);
+    }
+
+    public void testNotEqualsWithMessageUuids() {
+
         final MessageReceiptEvent model1 = new MessageReceiptEvent();
         model1.setData(new MessageReceiptData());
-        model1.setTime(getTestDate1());
         model1.getData().setMessageUuid(TEST_MESSAGE_UUID_1);
+
         final MessageReceiptEvent model2 = new MessageReceiptEvent();
         model2.setData(new MessageReceiptData());
-        model2.setTime(getTestDate1());
         model2.getData().setMessageUuid(TEST_MESSAGE_UUID_2);
+
         MoreAsserts.assertNotEqual(model1, model2);
         MoreAsserts.assertNotEqual(model2, model1);
-    }
 
-    public void testNotEquals4() {
-        final MessageReceiptEvent model1 = new MessageReceiptEvent();
-        model1.setData(new MessageReceiptData());
-        model1.setTime(getTestDate1());
-        model1.getData().setMessageUuid(TEST_MESSAGE_UUID_1);
-        final MessageReceiptEvent model2 = new MessageReceiptEvent();
-        model2.setData(new MessageReceiptData());
-        model2.setTime((String) null);
-        model2.getData().setMessageUuid(TEST_MESSAGE_UUID_1);
+        model1.getData().setMessageUuid(null);
         MoreAsserts.assertNotEqual(model1, model2);
         MoreAsserts.assertNotEqual(model2, model1);
-    }
 
-    public void testNotEquals5() {
-        final MessageReceiptEvent model1 = new MessageReceiptEvent();
-        model1.setData(new MessageReceiptData());
-        model1.setTime(getTestDate1());
-        model1.getData().setMessageUuid(TEST_MESSAGE_UUID_1);
-        final MessageReceiptEvent model2 = new MessageReceiptEvent();
-        model2.setData(new MessageReceiptData());
-        model2.setTime(TEST_MESSAGE_UUID_1);
         model2.getData().setMessageUuid(null);
-        MoreAsserts.assertNotEqual(model1, model2);
-        MoreAsserts.assertNotEqual(model2, model1);
+        assertEquals(model1, model2);
     }
-
-    // TODO - test more of the fields
 
     public void testNotEqualsNull() {
         final MessageReceiptEvent model1 = getMessageReceiptEvent1();
