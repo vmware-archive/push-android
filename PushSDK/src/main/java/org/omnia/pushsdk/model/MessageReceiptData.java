@@ -4,13 +4,12 @@ import com.google.gson.annotations.SerializedName;
 
 public class MessageReceiptData {
 
-    /* "data":{
-     *    "msg_uuid" : "message-uuid-from-server", // optional field
-     * }
-     */
+    public static class Columns {
+        public static final String MESSAGE_UUID = "msg_uuid";
+    }
 
     // Optional field
-    @SerializedName("msg_uuid")
+    @SerializedName(Columns.MESSAGE_UUID)
     private String messageUuid;
 
     public MessageReceiptData() {

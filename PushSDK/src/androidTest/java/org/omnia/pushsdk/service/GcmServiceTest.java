@@ -10,6 +10,8 @@ import android.os.ResultReceiver;
 import android.test.ServiceTestCase;
 
 import org.omnia.pushsdk.broadcastreceiver.FakeMessageReceiptAlarmProvider;
+import org.omnia.pushsdk.model.EventBase;
+import org.omnia.pushsdk.model.MessageReceiptEvent;
 import org.omnia.pushsdk.prefs.FakeMessageReceiptsProvider;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
 
@@ -146,8 +148,10 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         assertNotNull(receivedIntent);
         assertTrue(receivedIntent.hasExtra(GcmService.KEY_GCM_INTENT));
         assertEquals(1, messageReceiptsProvider.numberOfMessageReceipts());
-        assertEquals(TEST_MESSAGE_UUID, messageReceiptsProvider.loadMessageReceipts().get(0).getData().getMessageUuid());
-        assertEquals(TEST_VARIANT_UUID, messageReceiptsProvider.loadMessageReceipts().get(0).getVariantUuid());
+        final MessageReceiptEvent savedEvent = messageReceiptsProvider.loadMessageReceipts().get(0);
+        assertEquals(TEST_MESSAGE_UUID, savedEvent.getData().getMessageUuid());
+        assertEquals(TEST_VARIANT_UUID, savedEvent.getVariantUuid());
+        assertEquals(EventBase.Status.NOT_POSTED, savedEvent.getStatus());
         assertTrue(alarmProvider.isAlarmEnabled());
     }
 

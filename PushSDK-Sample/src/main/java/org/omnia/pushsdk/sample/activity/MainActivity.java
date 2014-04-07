@@ -54,7 +54,7 @@ import org.omnia.pushsdk.sample.model.GcmMessageRequest;
 import org.omnia.pushsdk.registration.RegistrationListener;
 import org.omnia.pushsdk.util.Const;
 import org.omnia.pushsdk.util.PushLibLogger;
-import org.omnia.pushsdk.sample.util.StringUtil;
+import org.omnia.pushsdk.util.StringUtil;
 import org.omnia.pushsdk.util.ThreadUtil;
 
 import java.io.BufferedOutputStream;

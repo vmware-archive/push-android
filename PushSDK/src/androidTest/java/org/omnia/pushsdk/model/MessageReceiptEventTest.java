@@ -1,9 +1,14 @@
 package org.omnia.pushsdk.model;
 
+import android.database.sqlite.SQLiteStatement;
+import android.provider.BaseColumns;
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
 
 import com.google.gson.Gson;
+
+import org.omnia.pushsdk.database.DatabaseConstants;
+import org.omnia.pushsdk.util.PushLibLogger;
 
 import java.util.Calendar;
 import java.util.Date;
@@ -130,6 +135,18 @@ public class MessageReceiptEventTest extends AndroidTestCase {
         assertEquals(model1, model2);
     }
 
+    public void testNotEqualsWithStatuses() {
+
+        final MessageReceiptEvent model1 = new MessageReceiptEvent();
+        model1.setStatus(EventBase.Status.POSTING_ERROR);
+
+        final MessageReceiptEvent model2 = new MessageReceiptEvent();
+        model1.setStatus(EventBase.Status.POSTING);
+
+        MoreAsserts.assertNotEqual(model1, model2);
+        MoreAsserts.assertNotEqual(model2, model1);
+    }
+
     public void testNotEqualsNull() {
         final MessageReceiptEvent model1 = getMessageReceiptEvent1();
         assertFalse(model1.equals(null));
@@ -191,7 +208,7 @@ public class MessageReceiptEventTest extends AndroidTestCase {
         list.add(getMessageReceiptEvent2());
         final String str = MessageReceiptEvent.listToJsonString(list);
         assertTrue(str.contains("\"data\":{\"msg_uuid\":"));
-        assertTrue(str.contains("\"type\":\"event_push_received\","));
+        assertTrue(str.contains("\"type\":\"event_push_received\""));
         assertTrue(str.contains("\"" + TEST_MESSAGE_UUID_1 + "\"}"));
         assertTrue(str.contains("\"" + TEST_MESSAGE_UUID_2 + "\"}"));
     }
@@ -205,6 +222,27 @@ public class MessageReceiptEventTest extends AndroidTestCase {
     public void testConvertListToStringNull() {
         final String str = MessageReceiptEvent.listToJsonString(null);
         assertNull(str);
+    }
+
+    public void testGetCreateTableSqlStatement() {
+        final String sql = MessageReceiptEvent.getCreateTableSqlStatement();
+        assertNotNull(sql);
+        PushLibLogger.i("Create table statement: " + sql);
+        assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS"));
+        assertTrue(sql.contains(DatabaseConstants.MESSAGE_RECEIPTS_TABLE_NAME));
+        assertTrue(sql.contains("'" + BaseColumns._ID + "'"));
+        assertTrue(sql.contains("'" + EventBase.Columns.EVENT_UUID + "'"));
+        assertTrue(sql.contains("'" + EventBase.Columns.VARIANT_UUID + "'"));
+        assertTrue(sql.contains("'" + EventBase.Columns.TIME + "'"));
+        assertTrue(sql.contains("'" + MessageReceiptData.Columns.MESSAGE_UUID + "'"));
+    }
+
+    public void testGetDropTableSqlStatement() {
+        final String sql = MessageReceiptEvent.getDropTableSqlStatement();
+        assertNotNull(sql);
+        PushLibLogger.i("Drop table statement: " + sql);
+        assertTrue(sql.contains("DROP TABLE IF EXISTS"));
+        assertTrue(sql.contains(DatabaseConstants.MESSAGE_RECEIPTS_TABLE_NAME));
     }
 
     public static MessageReceiptEvent getMessageReceiptEvent1() {

@@ -23,6 +23,7 @@ import android.os.ResultReceiver;
 import org.omnia.pushsdk.broadcastreceiver.GcmBroadcastReceiver;
 import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProvider;
 import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProviderImpl;
+import org.omnia.pushsdk.model.EventBase;
 import org.omnia.pushsdk.model.MessageReceiptEvent;
 import org.omnia.pushsdk.prefs.PreferencesProviderImpl;
 import org.omnia.pushsdk.model.MessageReceiptData;
@@ -143,12 +144,8 @@ public class GcmService extends IntentService {
 
     private MessageReceiptEvent getMessageReceiptEvent(Intent intent) {
         final String messageUuid = intent.getStringExtra(KEY_MESSAGE_UUID);
-        final MessageReceiptEvent event = new MessageReceiptEvent();
-        event.setData(new MessageReceiptData());
-        event.getData().setMessageUuid(messageUuid);
-        event.setTime(new Date());
-        event.setEventId(UUID.randomUUID().toString());
-        event.setVariantUuid(GcmService.preferencesProvider.getVariantUuid());
+        final String variantUuid = GcmService.preferencesProvider.getVariantUuid();
+        final MessageReceiptEvent event = MessageReceiptEvent.getMessageReceiptEvent(variantUuid, messageUuid);
         return event;
     }
 

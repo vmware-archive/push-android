@@ -24,6 +24,8 @@ import org.omnia.pushsdk.backend.BackEndRegistrationApiRequestProvider;
 import org.omnia.pushsdk.backend.BackEndUnregisterDeviceApiRequest;
 import org.omnia.pushsdk.backend.BackEndUnregisterDeviceApiRequestImpl;
 import org.omnia.pushsdk.backend.BackEndUnregisterDeviceApiRequestProvider;
+import org.omnia.pushsdk.database.EventsDatabaseHelper;
+import org.omnia.pushsdk.database.EventsDatabaseWrapper;
 import org.omnia.pushsdk.gcm.GcmProvider;
 import org.omnia.pushsdk.gcm.GcmRegistrationApiRequest;
 import org.omnia.pushsdk.gcm.GcmRegistrationApiRequestImpl;
@@ -85,6 +87,9 @@ public class PushLib {
         if (!PushLibLogger.isSetup()) {
             PushLibLogger.setup(context, Const.TAG_NAME);
         }
+
+        // TODO - may need to go on a background thread
+        initializeDatabase(context);
     }
 
     private void saveArguments(Context context) {
@@ -99,6 +104,11 @@ public class PushLib {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
+    }
+
+    private void initializeDatabase(Context context) {
+        EventsDatabaseHelper.init();
+        EventsDatabaseWrapper.createDatabaseInstance(context);
     }
 
     /**
