@@ -10,6 +10,7 @@ import android.os.ResultReceiver;
 import android.test.ServiceTestCase;
 
 import org.omnia.pushsdk.broadcastreceiver.FakeMessageReceiptAlarmProvider;
+import org.omnia.pushsdk.model.MessageReceiptEvent;
 import org.omnia.pushsdk.prefs.FakeMessageReceiptsProvider;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
 
@@ -18,9 +19,10 @@ import java.util.concurrent.Semaphore;
 public class GcmServiceTest extends ServiceTestCase<GcmService> {
 
     private static final String TEST_PACKAGE_NAME = "org.omnia.pushsdk.test";
+    private static final String TEST_MESSAGE_UUID = "some-message-uuid";
+    private static final String TEST_VARIANT_UUID = "some-variant-uuid";
     private static final String TEST_MESSAGE = "some fancy message";
     private static final String KEY_MESSAGE = "message";
-    private static final String TEST_MESSAGE_UUID = "some-message-uuid";
 
     private int testResultCode = GcmService.NO_RESULT;
     private Intent intent;
@@ -65,7 +67,7 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         super.setUp();
         alarmProvider = new FakeMessageReceiptAlarmProvider();
         messageReceiptsProvider = new FakeMessageReceiptsProvider(null);
-        preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null);
+        preferencesProvider = new FakePreferencesProvider(null, null, 0, null, TEST_VARIANT_UUID, null, null, null);
         GcmService.semaphore = new Semaphore(0);
         GcmService.preferencesProvider = preferencesProvider;
         GcmService.messageReceiptsProvider = messageReceiptsProvider;
@@ -146,6 +148,7 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         assertTrue(receivedIntent.hasExtra(GcmService.KEY_GCM_INTENT));
         assertEquals(1, messageReceiptsProvider.numberOfMessageReceipts());
         assertEquals(TEST_MESSAGE_UUID, messageReceiptsProvider.loadMessageReceipts().get(0).getData().getMessageUuid());
+        assertEquals(TEST_VARIANT_UUID, messageReceiptsProvider.loadMessageReceipts().get(0).getVariantUuid());
         assertTrue(alarmProvider.isAlarmEnabled());
     }
 

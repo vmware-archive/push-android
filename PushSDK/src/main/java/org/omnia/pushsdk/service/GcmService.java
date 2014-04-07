@@ -33,6 +33,7 @@ import org.omnia.pushsdk.util.Const;
 import org.omnia.pushsdk.util.PushLibLogger;
 
 import java.util.Date;
+import java.util.UUID;
 import java.util.concurrent.Semaphore;
 
 public class GcmService extends IntentService {
@@ -134,15 +135,21 @@ public class GcmService extends IntentService {
     }
 
     private void enqueueReturnReceipt(Intent intent) {
-        final String messageUuid = intent.getStringExtra(KEY_MESSAGE_UUID);
-        final MessageReceiptEvent messageReceipt = new MessageReceiptEvent();
-        messageReceipt.setData(new MessageReceiptData());
-        messageReceipt.getData().setMessageUuid(messageUuid);
-        messageReceipt.setTime(new Date());
-        // TODO - populate the rest of the fields!
+        final MessageReceiptEvent messageReceipt = getMessageReceiptEvent(intent);
         GcmService.messageReceiptsProvider.addMessageReceipt(messageReceipt);
         GcmService.messageReceiptAlarmProvider.enableAlarmIfDisabled();
         PushLibLogger.d("There are now " + GcmService.messageReceiptsProvider.numberOfMessageReceipts() + " message receipts queued to send to the server.");
+    }
+
+    private MessageReceiptEvent getMessageReceiptEvent(Intent intent) {
+        final String messageUuid = intent.getStringExtra(KEY_MESSAGE_UUID);
+        final MessageReceiptEvent event = new MessageReceiptEvent();
+        event.setData(new MessageReceiptData());
+        event.getData().setMessageUuid(messageUuid);
+        event.setTime(new Date());
+        event.setId(UUID.randomUUID().toString());
+        event.setVariantUuid(GcmService.preferencesProvider.loadVariantUuid());
+        return event;
     }
 
     private void getResultReceiver(Intent intent) {
