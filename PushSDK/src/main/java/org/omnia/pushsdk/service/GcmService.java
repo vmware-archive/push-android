@@ -147,7 +147,7 @@ public class GcmService extends IntentService {
         event.setData(new MessageReceiptData());
         event.getData().setMessageUuid(messageUuid);
         event.setTime(new Date());
-        event.setId(UUID.randomUUID().toString());
+        event.setEventId(UUID.randomUUID().toString());
         event.setVariantUuid(GcmService.preferencesProvider.getVariantUuid());
         return event;
     }

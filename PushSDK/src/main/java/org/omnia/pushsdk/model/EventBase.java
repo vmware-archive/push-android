@@ -7,7 +7,7 @@ import java.util.Date;
 public abstract class EventBase {
 
     @SerializedName("id")
-    private String id;
+    private String eventId;
     
     @SerializedName("type")
     private String type;
@@ -18,12 +18,12 @@ public abstract class EventBase {
     @SerializedName("variant_uuid")
     private String variantUuid;
 
-    public String getId() {
-        return id;
+    public String getEventId() {
+        return eventId;
     }
 
-    public void setId(String id) {
-        this.id = id;
+    public void setEventId(String id) {
+        this.eventId = id;
     }
 
     public String getType() {
@@ -73,13 +73,13 @@ public abstract class EventBase {
 
         final EventBase other = (EventBase) o;
 
-        if (other.id == null && id != null) {
+        if (other.eventId == null && eventId != null) {
             return false;
         }
-        if (other.id != null && id == null) {
+        if (other.eventId != null && eventId == null) {
             return false;
         }
-        if (other.id != null && id != null && !(other.id.equals(id))) {
+        if (other.eventId != null && eventId != null && !(other.eventId.equals(eventId))) {
             return false;
         }
 
@@ -119,7 +119,7 @@ public abstract class EventBase {
     @Override
     public int hashCode() {
         int result = 17;
-        result = (result * 31) + (id == null ? 0 : id.hashCode());
+        result = (result * 31) + (eventId == null ? 0 : eventId.hashCode());
         result = (result * 31) + (type == null ? 0 : type.hashCode());
         result = (result * 31) + (time == null ? 0 : time.hashCode());
         result = (result * 31) + (variantUuid == null ? 0 : variantUuid.hashCode());

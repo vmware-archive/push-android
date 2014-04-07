@@ -74,19 +74,19 @@ public class MessageReceiptEventTest extends AndroidTestCase {
     public void testNotEqualsWithIds() {
 
         final MessageReceiptEvent model1 = new MessageReceiptEvent();
-        model1.setId(TEST_EVENT_ID_1);
+        model1.setEventId(TEST_EVENT_ID_1);
 
         final MessageReceiptEvent model2 = new MessageReceiptEvent();
-        model2.setId(TEST_EVENT_ID_2);
+        model2.setEventId(TEST_EVENT_ID_2);
 
         MoreAsserts.assertNotEqual(model1, model2);
         MoreAsserts.assertNotEqual(model2, model1);
 
-        model1.setId(null);
+        model1.setEventId(null);
         MoreAsserts.assertNotEqual(model1, model2);
         MoreAsserts.assertNotEqual(model2, model1);
 
-        model2.setId(null);
+        model2.setEventId(null);
         assertEquals(model1, model2);
     }
 
@@ -210,7 +210,7 @@ public class MessageReceiptEventTest extends AndroidTestCase {
     public static MessageReceiptEvent getMessageReceiptEvent1() {
         final MessageReceiptEvent event = new MessageReceiptEvent();
         final MessageReceiptData data = new MessageReceiptData();
-        event.setId(TEST_EVENT_ID_1);
+        event.setEventId(TEST_EVENT_ID_1);
         event.setVariantUuid(TEST_EVENT_VARIANT_UUID_1);
         event.setTime(getTestDate1());
         event.setData(data);
@@ -221,7 +221,7 @@ public class MessageReceiptEventTest extends AndroidTestCase {
     public static MessageReceiptEvent getMessageReceiptEvent2() {
         final MessageReceiptEvent event = new MessageReceiptEvent();
         final MessageReceiptData data = new MessageReceiptData();
-        event.setId(TEST_EVENT_ID_2);
+        event.setEventId(TEST_EVENT_ID_2);
         event.setVariantUuid(TEST_EVENT_VARIANT_UUID_2);
         event.setTime(getTestDate1());
         event.setData(data);
