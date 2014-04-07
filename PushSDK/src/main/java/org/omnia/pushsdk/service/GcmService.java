@@ -148,7 +148,7 @@ public class GcmService extends IntentService {
         event.getData().setMessageUuid(messageUuid);
         event.setTime(new Date());
         event.setId(UUID.randomUUID().toString());
-        event.setVariantUuid(GcmService.preferencesProvider.loadVariantUuid());
+        event.setVariantUuid(GcmService.preferencesProvider.getVariantUuid());
         return event;
     }
 
@@ -178,7 +178,7 @@ public class GcmService extends IntentService {
     }
 
     private String getBroadcastName() {
-        final String packageName = preferencesProvider.loadPackageName();
+        final String packageName = preferencesProvider.getPackageName();
         if (packageName == null) {
             return null;
         } else {

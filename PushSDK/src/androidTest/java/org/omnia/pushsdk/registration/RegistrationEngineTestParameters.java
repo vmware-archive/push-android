@@ -140,14 +140,14 @@ public class RegistrationEngineTestParameters {
         testCase.assertEquals(shouldVariantSecretHaveBeenSaved, prefsProvider.wasVariantSecretSaved());
         testCase.assertEquals(shouldDeviceAliasHaveBeenSaved, prefsProvider.wasDeviceAliasSaved());
         testCase.assertEquals(shouldPackageNameHaveBeenSaved, prefsProvider.isWasPackageNameSaved());
-        testCase.assertEquals(finalGcmDeviceRegistrationIdInPrefs, prefsProvider.loadGcmDeviceRegistrationId());
-        testCase.assertEquals(finalBackEndDeviceRegistrationIdInPrefs, prefsProvider.loadBackEndDeviceRegistrationId());
-        testCase.assertEquals(finalGcmSenderIdInPrefs, prefsProvider.loadGcmSenderId());
-        testCase.assertEquals(finalVariantUuidInPrefs, prefsProvider.loadVariantUuid());
-        testCase.assertEquals(finalVariantSecretInPrefs, prefsProvider.loadVariantSecret());
-        testCase.assertEquals(finalDeviceAliasInPrefs, prefsProvider.loadDeviceAlias());
-        testCase.assertEquals(finalAppVersionInPrefs, prefsProvider.loadAppVersion());
-        testCase.assertEquals(finalPackageNameInPrefs, prefsProvider.loadPackageName());
+        testCase.assertEquals(finalGcmDeviceRegistrationIdInPrefs, prefsProvider.getGcmDeviceRegistrationId());
+        testCase.assertEquals(finalBackEndDeviceRegistrationIdInPrefs, prefsProvider.getBackEndDeviceRegistrationId());
+        testCase.assertEquals(finalGcmSenderIdInPrefs, prefsProvider.getGcmSenderId());
+        testCase.assertEquals(finalVariantUuidInPrefs, prefsProvider.getVariantUuid());
+        testCase.assertEquals(finalVariantSecretInPrefs, prefsProvider.getVariantSecret());
+        testCase.assertEquals(finalDeviceAliasInPrefs, prefsProvider.getDeviceAlias());
+        testCase.assertEquals(finalAppVersionInPrefs, prefsProvider.getAppVersion());
+        testCase.assertEquals(finalPackageNameInPrefs, prefsProvider.getPackageName());
     }
 
     public RegistrationEngineTestParameters setupPackageName(String inPrefs, String fromUser, String finalValue, boolean shouldHaveBeenSaved) {

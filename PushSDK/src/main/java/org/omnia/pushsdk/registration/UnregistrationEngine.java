@@ -61,14 +61,14 @@ public class UnregistrationEngine {
         this.preferencesProvider = preferencesProvider;
         this.gcmUnregistrationApiRequestProvider = gcmUnregistrationApiRequestProvider;
         this.backEndUnregisterDeviceApiRequestProvider = backEndUnregisterDeviceApiRequestProvider;
-        this.previousBackEndDeviceRegistrationId = preferencesProvider.loadBackEndDeviceRegistrationId();
+        this.previousBackEndDeviceRegistrationId = preferencesProvider.getBackEndDeviceRegistrationId();
     }
 
     public void unregisterDevice(UnregistrationListener listener) {
 
         // Clear the saved package name so that the message receiver service won't be able to send
         // the application any more broadcasts
-        preferencesProvider.savePackageName(null);
+        preferencesProvider.setPackageName(null);
 
         if (gcmProvider.isGooglePlayServicesInstalled(context)) {
             unregisterDeviceWithGcm(listener);
@@ -89,9 +89,9 @@ public class UnregistrationEngine {
         return new GcmUnregistrationListener() {
             @Override
             public void onGcmUnregistrationComplete() {
-                preferencesProvider.saveGcmDeviceRegistrationId(null);
-                preferencesProvider.saveGcmSenderId(null);
-                preferencesProvider.saveAppVersion(-1);
+                preferencesProvider.setGcmDeviceRegistrationId(null);
+                preferencesProvider.setGcmSenderId(null);
+                preferencesProvider.setAppVersion(-1);
                 unregisterDeviceWithBackEnd(previousBackEndDeviceRegistrationId, listener);
             }
 
@@ -119,10 +119,10 @@ public class UnregistrationEngine {
 
             @Override
             public void onBackEndUnregisterDeviceSuccess() {
-                preferencesProvider.saveBackEndDeviceRegistrationId(null);
-                preferencesProvider.saveVariantUuid(null);
-                preferencesProvider.saveVariantSecret(null);
-                preferencesProvider.saveDeviceAlias(null);
+                preferencesProvider.setBackEndDeviceRegistrationId(null);
+                preferencesProvider.setVariantUuid(null);
+                preferencesProvider.setVariantSecret(null);
+                preferencesProvider.setDeviceAlias(null);
                 listener.onUnregistrationComplete();
             }
 

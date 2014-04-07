@@ -19,35 +19,35 @@ public interface PreferencesProvider {
 
     public static int NO_SAVED_VERSION = -1;
 
-    String loadGcmDeviceRegistrationId();
+    String getGcmDeviceRegistrationId();
 
-    void saveGcmDeviceRegistrationId(String gcmDeviceRegistrationId);
+    void setGcmDeviceRegistrationId(String gcmDeviceRegistrationId);
 
-    String loadBackEndDeviceRegistrationId();
+    String getBackEndDeviceRegistrationId();
 
-    void saveBackEndDeviceRegistrationId(String backendDeviceRegistrationId);
+    void setBackEndDeviceRegistrationId(String backendDeviceRegistrationId);
 
-    int loadAppVersion();
+    int getAppVersion();
 
-    void saveAppVersion(int appVersion);
+    void setAppVersion(int appVersion);
 
-    String loadGcmSenderId();
+    String getGcmSenderId();
 
-    void saveGcmSenderId(String gcmSenderId);
+    void setGcmSenderId(String gcmSenderId);
 
-    String loadVariantUuid();
+    String getVariantUuid();
 
-    void saveVariantUuid(String variantUuid);
+    void setVariantUuid(String variantUuid);
 
-    String loadVariantSecret();
+    String getVariantSecret();
 
-    void saveVariantSecret(String variantUuid);
+    void setVariantSecret(String variantUuid);
 
-    String loadDeviceAlias();
+    String getDeviceAlias();
 
-    void saveDeviceAlias(String deviceAlias);
+    void setDeviceAlias(String deviceAlias);
 
-    String loadPackageName();
+    String getPackageName();
 
-    void savePackageName(String packageName);
+    void setPackageName(String packageName);
 }

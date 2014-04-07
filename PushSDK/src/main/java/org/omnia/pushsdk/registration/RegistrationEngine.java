@@ -142,12 +142,12 @@ public class RegistrationEngine {
         this.backEndRegistrationApiRequestProvider = backEndRegistrationApiRequestProvider;
         this.backEndUnregisterDeviceApiRequestProvider = backEndUnregisterDeviceApiRequestProvider;
         this.versionProvider = versionProvider;
-        this.previousGcmDeviceRegistrationId = preferencesProvider.loadGcmDeviceRegistrationId();
-        this.previousBackEndDeviceRegistrationId = preferencesProvider.loadBackEndDeviceRegistrationId();
-        this.previousGcmSenderId = preferencesProvider.loadGcmSenderId();
-        this.previousVariantUuid = preferencesProvider.loadVariantUuid();
-        this.previousVariantSecret = preferencesProvider.loadVariantSecret();
-        this.previousDeviceAlias = preferencesProvider.loadDeviceAlias();
+        this.previousGcmDeviceRegistrationId = preferencesProvider.getGcmDeviceRegistrationId();
+        this.previousBackEndDeviceRegistrationId = preferencesProvider.getBackEndDeviceRegistrationId();
+        this.previousGcmSenderId = preferencesProvider.getGcmSenderId();
+        this.previousVariantUuid = preferencesProvider.getVariantUuid();
+        this.previousVariantSecret = preferencesProvider.getVariantSecret();
+        this.previousDeviceAlias = preferencesProvider.getDeviceAlias();
     }
 
     /**
@@ -168,7 +168,7 @@ public class RegistrationEngine {
         verifyRegistrationArguments(parameters);
 
         // Save the given package name so that the message receiver service can see it
-        preferencesProvider.savePackageName(packageName);
+        preferencesProvider.setPackageName(packageName);
 
         if (!isEmptyPreviousGcmSenderId() && isUpdatedGcmSenderId(parameters)) {
           unregisterDeviceWithGcm(parameters, listener);
@@ -249,7 +249,7 @@ public class RegistrationEngine {
 
     private boolean hasAppBeenUpdated() {
         final int currentAppVersion = versionProvider.getAppVersion();
-        final int savedAppVersion = preferencesProvider.loadAppVersion();
+        final int savedAppVersion = preferencesProvider.getAppVersion();
         return currentAppVersion != savedAppVersion;
     }
 
@@ -300,9 +300,9 @@ public class RegistrationEngine {
         gcmUnregistrationApiRequest.startUnregistration(new GcmUnregistrationListener() {
             @Override
             public void onGcmUnregistrationComplete() {
-                preferencesProvider.saveGcmDeviceRegistrationId(null);
-                preferencesProvider.saveGcmSenderId(null);
-                preferencesProvider.saveAppVersion(PreferencesProvider.NO_SAVED_VERSION);
+                preferencesProvider.setGcmDeviceRegistrationId(null);
+                preferencesProvider.setGcmSenderId(null);
+                preferencesProvider.setAppVersion(PreferencesProvider.NO_SAVED_VERSION);
                 registerDeviceWithGcm(parameters, listener);
             }
 
@@ -330,9 +330,9 @@ public class RegistrationEngine {
                     return;
                 }
 
-                preferencesProvider.saveGcmDeviceRegistrationId(gcmDeviceRegistrationId);
-                preferencesProvider.saveGcmSenderId(parameters.getGcmSenderId());
-                preferencesProvider.saveAppVersion(versionProvider.getAppVersion());
+                preferencesProvider.setGcmDeviceRegistrationId(gcmDeviceRegistrationId);
+                preferencesProvider.setGcmSenderId(parameters.getGcmSenderId());
+                preferencesProvider.setAppVersion(versionProvider.getAppVersion());
 
                 final boolean isNewGcmDeviceRegistrationId;
                 if (previousGcmDeviceRegistrationId != null && previousGcmDeviceRegistrationId.equals(gcmDeviceRegistrationId)) {
@@ -371,10 +371,10 @@ public class RegistrationEngine {
 
             @Override
             public void onBackEndUnregisterDeviceSuccess() {
-                preferencesProvider.saveBackEndDeviceRegistrationId(null);
-                preferencesProvider.saveVariantUuid(null);
-                preferencesProvider.saveVariantSecret(null);
-                preferencesProvider.saveDeviceAlias(null);
+                preferencesProvider.setBackEndDeviceRegistrationId(null);
+                preferencesProvider.setVariantUuid(null);
+                preferencesProvider.setVariantSecret(null);
+                preferencesProvider.setDeviceAlias(null);
                 registerDeviceWithBackEnd(gcmDeviceRegistrationId, parameters, listener);
             }
 
@@ -408,12 +408,12 @@ public class RegistrationEngine {
                 }
 
                 PushLibLogger.i("Saving back-end device registration ID: " + backEndDeviceRegistrationId);
-                preferencesProvider.saveBackEndDeviceRegistrationId(backEndDeviceRegistrationId);
+                preferencesProvider.setBackEndDeviceRegistrationId(backEndDeviceRegistrationId);
 
                 PushLibLogger.v("Saving updated variantUuid, variantSecret, and deviceAlias");
-                preferencesProvider.saveVariantUuid(parameters.getVariantUuid());
-                preferencesProvider.saveVariantSecret(parameters.getVariantSecret());
-                preferencesProvider.saveDeviceAlias(parameters.getDeviceAlias());
+                preferencesProvider.setVariantUuid(parameters.getVariantUuid());
+                preferencesProvider.setVariantSecret(parameters.getVariantSecret());
+                preferencesProvider.setDeviceAlias(parameters.getDeviceAlias());
 
                 if (listener != null) {
                     listener.onRegistrationComplete();

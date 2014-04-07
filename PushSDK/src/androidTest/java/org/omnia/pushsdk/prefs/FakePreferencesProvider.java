@@ -46,89 +46,89 @@ public class FakePreferencesProvider implements PreferencesProvider {
     }
 
     @Override
-    public String loadGcmDeviceRegistrationId() {
+    public String getGcmDeviceRegistrationId() {
         return gcmDeviceRegistrationId;
     }
 
     @Override
-    public String loadBackEndDeviceRegistrationId() {
+    public String getBackEndDeviceRegistrationId() {
         return backEndDeviceRegistrationId;
     }
 
     @Override
-    public int loadAppVersion() {
+    public int getAppVersion() {
         return appVersion;
     }
 
     @Override
-    public String loadGcmSenderId() {
+    public String getGcmSenderId() {
         return gcmSenderId;
     }
 
     @Override
-    public String loadVariantUuid() {
+    public String getVariantUuid() {
         return variantUuid;
     }
 
     @Override
-    public String loadVariantSecret() {
+    public String getVariantSecret() {
         return variantSecret;
     }
 
     @Override
-    public String loadDeviceAlias() {
+    public String getDeviceAlias() {
         return deviceAlias;
     }
 
     @Override
-    public String loadPackageName() {
+    public String getPackageName() {
         return packageName;
     }
 
     @Override
-    public void saveBackEndDeviceRegistrationId(String backendDeviceRegistrationId) {
+    public void setBackEndDeviceRegistrationId(String backendDeviceRegistrationId) {
         this.backEndDeviceRegistrationId = backendDeviceRegistrationId;
         wasBackEndDeviceRegistrationIdSaved = true;
     }
 
     @Override
-    public void saveAppVersion(int appVersion) {
+    public void setAppVersion(int appVersion) {
         this.appVersion = appVersion;
         wasAppVersionSaved = true;
     }
 
     @Override
-    public void saveGcmSenderId(String gcmSenderId) {
+    public void setGcmSenderId(String gcmSenderId) {
         this.gcmSenderId = gcmSenderId;
         wasGcmSenderIdSaved = true;
     }
 
     @Override
-    public void saveGcmDeviceRegistrationId(String gcmDeviceRegistrationId) {
+    public void setGcmDeviceRegistrationId(String gcmDeviceRegistrationId) {
         this.gcmDeviceRegistrationId = gcmDeviceRegistrationId;
         wasGcmDeviceRegistrationIdSaved = true;
     }
 
     @Override
-    public void saveVariantUuid(String variantUuid) {
+    public void setVariantUuid(String variantUuid) {
         this.variantUuid = variantUuid;
         wasVariantUuidSaved = true;
     }
 
     @Override
-    public void saveVariantSecret(String variantUuid) {
+    public void setVariantSecret(String variantUuid) {
         this.variantSecret = variantUuid;
         wasVariantSecretSaved = true;
     }
 
     @Override
-    public void saveDeviceAlias(String deviceAlias) {
+    public void setDeviceAlias(String deviceAlias) {
         this.deviceAlias = deviceAlias;
         wasDeviceAliasSaved = true;
     }
 
     @Override
-    public void savePackageName(String packageName) {
+    public void setPackageName(String packageName) {
         this.packageName = packageName;
         wasPackageNameSaved = true;
     }

@@ -77,28 +77,28 @@ public class UnregistrationEngineTestParameters {
         testCase.assertTrue(delayedLoop.isSuccess());
 
         if (shouldGcmDeviceUnregistrationBeSuccessful) {
-            testCase.assertNull(prefsProvider.loadGcmDeviceRegistrationId());
-            testCase.assertNull(prefsProvider.loadGcmSenderId());
-            testCase.assertEquals(-1, prefsProvider.loadAppVersion());
+            testCase.assertNull(prefsProvider.getGcmDeviceRegistrationId());
+            testCase.assertNull(prefsProvider.getGcmSenderId());
+            testCase.assertEquals(-1, prefsProvider.getAppVersion());
         } else {
-            testCase.assertNotNull(prefsProvider.loadGcmDeviceRegistrationId());
-            testCase.assertNotNull(prefsProvider.loadGcmSenderId());
-            MoreAsserts.assertNotEqual(-1, prefsProvider.loadAppVersion());
+            testCase.assertNotNull(prefsProvider.getGcmDeviceRegistrationId());
+            testCase.assertNotNull(prefsProvider.getGcmSenderId());
+            MoreAsserts.assertNotEqual(-1, prefsProvider.getAppVersion());
         }
 
         if (backEndDeviceRegistrationIdResultant == null) {
-            testCase.assertNull(prefsProvider.loadBackEndDeviceRegistrationId());
-            testCase.assertNull(prefsProvider.loadDeviceAlias());
-            testCase.assertNull(prefsProvider.loadVariantSecret());
-            testCase.assertNull(prefsProvider.loadVariantSecret());
+            testCase.assertNull(prefsProvider.getBackEndDeviceRegistrationId());
+            testCase.assertNull(prefsProvider.getDeviceAlias());
+            testCase.assertNull(prefsProvider.getVariantSecret());
+            testCase.assertNull(prefsProvider.getVariantSecret());
         } else {
-            testCase.assertNotNull(prefsProvider.loadBackEndDeviceRegistrationId());
-            testCase.assertNotNull(prefsProvider.loadDeviceAlias());
-            testCase.assertNotNull(prefsProvider.loadVariantSecret());
-            testCase.assertNotNull(prefsProvider.loadVariantSecret());
+            testCase.assertNotNull(prefsProvider.getBackEndDeviceRegistrationId());
+            testCase.assertNotNull(prefsProvider.getDeviceAlias());
+            testCase.assertNotNull(prefsProvider.getVariantSecret());
+            testCase.assertNotNull(prefsProvider.getVariantSecret());
         }
 
-        testCase.assertNull(prefsProvider.loadPackageName());
+        testCase.assertNull(prefsProvider.getPackageName());
         testCase.assertEquals(shouldBackEndUnregisterHaveBeenCalled, dummyBackEndUnregisterDeviceApiRequest.wasUnregisterCalled());
         testCase.assertFalse(gcmProvider.wasRegisterCalled());
         testCase.assertTrue(gcmProvider.wasUnregisterCalled());

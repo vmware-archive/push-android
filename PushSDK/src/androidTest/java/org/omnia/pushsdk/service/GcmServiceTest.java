@@ -10,7 +10,6 @@ import android.os.ResultReceiver;
 import android.test.ServiceTestCase;
 
 import org.omnia.pushsdk.broadcastreceiver.FakeMessageReceiptAlarmProvider;
-import org.omnia.pushsdk.model.MessageReceiptEvent;
 import org.omnia.pushsdk.prefs.FakeMessageReceiptsProvider;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
 
@@ -116,7 +115,7 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
 
     public void testSendNotification() throws InterruptedException {
         intent.putExtra(KEY_MESSAGE, TEST_MESSAGE);
-        GcmService.preferencesProvider.savePackageName(TEST_PACKAGE_NAME);
+        GcmService.preferencesProvider.setPackageName(TEST_PACKAGE_NAME);
         startService(intent);
         GcmService.semaphore.acquire(2);
 
@@ -138,7 +137,7 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
 
     public void testQueuesReceiptNotificationWithMessageUuid() throws InterruptedException {
         intent.putExtra(GcmService.KEY_MESSAGE_UUID, TEST_MESSAGE_UUID);
-        GcmService.preferencesProvider.savePackageName(TEST_PACKAGE_NAME);
+        GcmService.preferencesProvider.setPackageName(TEST_PACKAGE_NAME);
         startService(intent);
         GcmService.semaphore.acquire(2);
 

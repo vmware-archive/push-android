@@ -46,12 +46,12 @@ public class PreferencesProviderImpl implements PreferencesProvider {
     }
 
     @Override
-    public String loadGcmDeviceRegistrationId() {
+    public String getGcmDeviceRegistrationId() {
         return getSharedPreferences().getString(PROPERTY_GCM_DEVICE_REGISTRATION_ID, null);
     }
 
     @Override
-    public void saveGcmDeviceRegistrationId(String gcmDeviceRegistrationId) {
+    public void setGcmDeviceRegistrationId(String gcmDeviceRegistrationId) {
         final SharedPreferences prefs = getSharedPreferences();
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(PROPERTY_GCM_DEVICE_REGISTRATION_ID, gcmDeviceRegistrationId);
@@ -59,12 +59,12 @@ public class PreferencesProviderImpl implements PreferencesProvider {
     }
 
     @Override
-    public String loadBackEndDeviceRegistrationId() {
+    public String getBackEndDeviceRegistrationId() {
         return getSharedPreferences().getString(PROPERTY_BACKEND_DEVICE_REGISTRATION_ID, null);
     }
 
     @Override
-    public void saveBackEndDeviceRegistrationId(String backendDeviceRegistrationId) {
+    public void setBackEndDeviceRegistrationId(String backendDeviceRegistrationId) {
         final SharedPreferences prefs = getSharedPreferences();
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(PROPERTY_BACKEND_DEVICE_REGISTRATION_ID, backendDeviceRegistrationId);
@@ -72,12 +72,12 @@ public class PreferencesProviderImpl implements PreferencesProvider {
     }
 
     @Override
-    public int loadAppVersion() {
+    public int getAppVersion() {
         return getSharedPreferences().getInt(PROPERTY_APP_VERSION, NO_SAVED_VERSION);
     }
 
     @Override
-    public void saveAppVersion(int appVersion) {
+    public void setAppVersion(int appVersion) {
         final SharedPreferences prefs = getSharedPreferences();
         SharedPreferences.Editor editor = prefs.edit();
         editor.putInt(PROPERTY_APP_VERSION, appVersion);
@@ -85,12 +85,12 @@ public class PreferencesProviderImpl implements PreferencesProvider {
     }
 
     @Override
-    public String loadGcmSenderId() {
+    public String getGcmSenderId() {
         return getSharedPreferences().getString(PROPERTY_GCM_SENDER_ID, null);
     }
 
     @Override
-    public void saveGcmSenderId(String gcmSenderId) {
+    public void setGcmSenderId(String gcmSenderId) {
         final SharedPreferences prefs = getSharedPreferences();
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(PROPERTY_GCM_SENDER_ID, gcmSenderId);
@@ -98,12 +98,12 @@ public class PreferencesProviderImpl implements PreferencesProvider {
     }
 
     @Override
-    public String loadVariantUuid() {
+    public String getVariantUuid() {
         return getSharedPreferences().getString(PROPERTY_VARIANT_UUID, null);
     }
 
     @Override
-    public void saveVariantUuid(String variantUuid) {
+    public void setVariantUuid(String variantUuid) {
         final SharedPreferences prefs = getSharedPreferences();
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(PROPERTY_VARIANT_UUID, variantUuid);
@@ -111,12 +111,12 @@ public class PreferencesProviderImpl implements PreferencesProvider {
     }
 
     @Override
-    public String loadVariantSecret() {
+    public String getVariantSecret() {
         return getSharedPreferences().getString(PROPERTY_VARIANT_SECRET, null);
     }
 
     @Override
-    public void saveVariantSecret(String variantUuid) {
+    public void setVariantSecret(String variantUuid) {
         final SharedPreferences prefs = getSharedPreferences();
         SharedPreferences.Editor editor = prefs.edit();
         editor.putString(PROPERTY_VARIANT_SECRET, variantUuid);
@@ -124,12 +124,12 @@ public class PreferencesProviderImpl implements PreferencesProvider {
     }
 
     @Override
-    public String loadDeviceAlias() {
+    public String getDeviceAlias() {
         return getSharedPreferences().getString(PROPERTY_DEVICE_ALIAS, null);
     }
 
     @Override
-    public void saveDeviceAlias(String deviceAlias) {
+    public void setDeviceAlias(String deviceAlias) {
         final SharedPreferences prefs = getSharedPreferences();
         final SharedPreferences.Editor editor = prefs.edit();
         editor.putString(PROPERTY_DEVICE_ALIAS, deviceAlias);
@@ -137,12 +137,12 @@ public class PreferencesProviderImpl implements PreferencesProvider {
     }
 
     @Override
-    public String loadPackageName() {
+    public String getPackageName() {
         return getSharedPreferences().getString(PROPERTY_PACKAGE_NAME, null);
     }
 
     @Override
-    public void savePackageName(String packageName) {
+    public void setPackageName(String packageName) {
         final SharedPreferences prefs = getSharedPreferences();
         final SharedPreferences.Editor editor = prefs.edit();
         editor.putString(PROPERTY_PACKAGE_NAME, packageName);
