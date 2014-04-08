@@ -9,10 +9,11 @@ import android.test.ServiceTestCase;
 import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
 import org.omnia.pushsdk.backend.FakeBackEndMessageReceiptApiRequest;
 import org.omnia.pushsdk.broadcastreceiver.FakeMessageReceiptAlarmProvider;
+import org.omnia.pushsdk.database.EventsStorage;
+import org.omnia.pushsdk.database.FakeEventsStorage;
+import org.omnia.pushsdk.model.EventBase;
 import org.omnia.pushsdk.model.MessageReceiptEvent;
 import org.omnia.pushsdk.model.MessageReceiptEventTest;
-import org.omnia.pushsdk.prefs.FakeMessageReceiptsProvider;
-import org.omnia.pushsdk.model.MessageReceiptData;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -20,17 +21,19 @@ import java.util.concurrent.Semaphore;
 
 public class MessageReceiptServiceTest extends ServiceTestCase<MessageReceiptService> {
 
-    private FakeMessageReceiptsProvider messageReceiptsProvider;
+    private FakeEventsStorage eventsStorage;
     private FakeMessageReceiptAlarmProvider messageReceiptAlarmProvider;
     private int testResultCode = MessageReceiptService.NO_RESULT;
     private TestResultReceiver testResultReceiver;
-    private Intent intent;
     private FakeBackEndMessageReceiptApiRequest backEndMessageReceiptApiRequest;
-    private List<MessageReceiptEvent> listWithOneItem;
-    private List<MessageReceiptEvent> listWithOneOtherItem;
+    private List<MessageReceiptEvent> unpostedItemList;
+    private List<MessageReceiptEvent> anotherUnpostedItemList;
+    private List<MessageReceiptEvent> postingItemList;
 
     // Captures result codes from the service itself
     public class TestResultReceiver extends ResultReceiver {
+
+        public List<MessageReceiptEvent> extraEventsToAdd = null;
 
         public TestResultReceiver(Handler handler) {
             super(handler);
@@ -39,6 +42,9 @@ public class MessageReceiptServiceTest extends ServiceTestCase<MessageReceiptSer
         @Override
         protected void onReceiveResult(int resultCode, Bundle resultData) {
             testResultCode = resultCode;
+            if (extraEventsToAdd != null) {
+                saveMessageReceipts(extraEventsToAdd);
+            }
         }
     }
 
@@ -49,18 +55,27 @@ public class MessageReceiptServiceTest extends ServiceTestCase<MessageReceiptSer
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        intent = getServiceIntent();
+
+        eventsStorage = new FakeEventsStorage();
         testResultReceiver = new TestResultReceiver(null);
-        messageReceiptsProvider = new FakeMessageReceiptsProvider(null);
+        backEndMessageReceiptApiRequest = new FakeBackEndMessageReceiptApiRequest();
+
         messageReceiptAlarmProvider = new FakeMessageReceiptAlarmProvider();
         messageReceiptAlarmProvider.enableAlarm();
-        backEndMessageReceiptApiRequest = new FakeBackEndMessageReceiptApiRequest();
-        listWithOneItem = new LinkedList<MessageReceiptEvent>();
-        listWithOneItem.add(MessageReceiptEventTest.getMessageReceiptEvent1());
-        listWithOneOtherItem = new LinkedList<MessageReceiptEvent>();
-        listWithOneOtherItem.add(MessageReceiptEventTest.getMessageReceiptEvent2());
+
+        unpostedItemList = new LinkedList<MessageReceiptEvent>();
+        unpostedItemList.add(MessageReceiptEventTest.getMessageReceiptEvent1());
+
+        anotherUnpostedItemList = new LinkedList<MessageReceiptEvent>();
+        anotherUnpostedItemList.add(MessageReceiptEventTest.getMessageReceiptEvent1());
+        anotherUnpostedItemList.get(0).setEventId("ANOTHER EVENT ID");
+
+        postingItemList = new LinkedList<MessageReceiptEvent>();
+        postingItemList.add(MessageReceiptEventTest.getMessageReceiptEvent2());
+        postingItemList.get(0).setStatus(EventBase.Status.POSTING);
+
         MessageReceiptService.semaphore = new Semaphore(0);
-        MessageReceiptService.messageReceiptsProvider = messageReceiptsProvider;
+        MessageReceiptService.eventsStorage = eventsStorage;
         MessageReceiptService.backEndMessageReceiptApiRequestProvider = new BackEndMessageReceiptApiRequestProvider(backEndMessageReceiptApiRequest);
         MessageReceiptService.messageReceiptAlarmProvider = messageReceiptAlarmProvider;
     }
@@ -68,7 +83,7 @@ public class MessageReceiptServiceTest extends ServiceTestCase<MessageReceiptSer
     @Override
     protected void tearDown() throws Exception {
         MessageReceiptService.semaphore = null;
-        MessageReceiptService.messageReceiptsProvider = null;
+        MessageReceiptService.eventsStorage = null;
         MessageReceiptService.backEndMessageReceiptApiRequestProvider = null;
         MessageReceiptService.messageReceiptAlarmProvider = null;
         super.tearDown();
@@ -78,7 +93,7 @@ public class MessageReceiptServiceTest extends ServiceTestCase<MessageReceiptSer
         startService(null);
         MessageReceiptService.semaphore.acquire();
         assertEquals(MessageReceiptService.NO_RESULT, testResultCode);
-        assertEquals(0, messageReceiptsProvider.numberOfMessageReceipts());
+        assertNumberOfMessageReceiptsInStorage(0);
         assertFalse(backEndMessageReceiptApiRequest.wasRequestAttempted());
         assertFalse(messageReceiptAlarmProvider.isAlarmEnabled());
     }
@@ -87,43 +102,59 @@ public class MessageReceiptServiceTest extends ServiceTestCase<MessageReceiptSer
         startService(getServiceIntent());
         MessageReceiptService.semaphore.acquire();
         assertEquals(MessageReceiptService.RESULT_NO_WORK_TO_DO, testResultCode);
-        assertEquals(0, messageReceiptsProvider.numberOfMessageReceipts());
+        assertNumberOfMessageReceiptsInStorage(0);
         assertFalse(backEndMessageReceiptApiRequest.wasRequestAttempted());
         assertFalse(messageReceiptAlarmProvider.isAlarmEnabled());
     }
 
     public void testSuccessfulSendWithOneItem() throws InterruptedException {
-        messageReceiptsProvider.saveMessageReceipts(listWithOneItem);
+        saveMessageReceipts(unpostedItemList);
         backEndMessageReceiptApiRequest.setWillBeSuccessfulRequest(true);
         startService(getServiceIntent());
         MessageReceiptService.semaphore.acquire();
         assertEquals(MessageReceiptService.RESULT_SENT_RECEIPTS_SUCCESSFULLY, testResultCode);
-        assertEquals(0, messageReceiptsProvider.numberOfMessageReceipts());
+        assertNumberOfMessageReceiptsInStorage(0);
         assertTrue(backEndMessageReceiptApiRequest.wasRequestAttempted());
         assertEquals(1, backEndMessageReceiptApiRequest.numberOfMessageReceiptsSent());
         assertFalse(messageReceiptAlarmProvider.isAlarmEnabled());
     }
 
     public void testFailedSendWithOneItem() throws InterruptedException {
-        messageReceiptsProvider.saveMessageReceipts(listWithOneItem);
+        saveMessageReceipts(unpostedItemList);
         backEndMessageReceiptApiRequest.setWillBeSuccessfulRequest(false);
         startService(getServiceIntent());
         MessageReceiptService.semaphore.acquire();
         assertEquals(MessageReceiptService.RESULT_FAILED_TO_SEND_RECEIPTS, testResultCode);
-        assertEquals(1, messageReceiptsProvider.numberOfMessageReceipts());
+        assertNumberOfMessageReceiptsInStorage(1);
         assertTrue(backEndMessageReceiptApiRequest.wasRequestAttempted());
         assertEquals(0, backEndMessageReceiptApiRequest.numberOfMessageReceiptsSent());
         assertTrue(messageReceiptAlarmProvider.isAlarmEnabled());
     }
 
-    public void testSuccessfulSendWithOneItemWhileAnExtraItemIsAddedToTheList() throws InterruptedException {
-        messageReceiptsProvider.saveMessageReceipts(listWithOneItem);
-        messageReceiptsProvider.loadExtraListOfMessageReceipts(listWithOneOtherItem);
+    public void testSuccessfulSendWithOneItemWithAnotherPostingItemAlreadyInTheDatabase() throws InterruptedException {
+        saveMessageReceipts(unpostedItemList);
+        saveMessageReceipts(postingItemList);
+        assertNumberOfMessageReceiptsInStorage(2);
         backEndMessageReceiptApiRequest.setWillBeSuccessfulRequest(true);
         startService(getServiceIntent());
         MessageReceiptService.semaphore.acquire();
         assertEquals(MessageReceiptService.RESULT_SENT_RECEIPTS_SUCCESSFULLY, testResultCode);
-        assertEquals(1, messageReceiptsProvider.numberOfMessageReceipts());
+        assertNumberOfMessageReceiptsInStorage(1);
+        assertTrue(backEndMessageReceiptApiRequest.wasRequestAttempted());
+        assertEquals(1, backEndMessageReceiptApiRequest.numberOfMessageReceiptsSent());
+        assertFalse(messageReceiptAlarmProvider.isAlarmEnabled());
+    }
+
+    public void testSuccessfulSendWithOneItemWithAnotherNotPostedItemWasInTheDatabase() throws InterruptedException {
+        saveMessageReceipts(unpostedItemList);
+        saveMessageReceipts(postingItemList);
+        testResultReceiver.extraEventsToAdd = anotherUnpostedItemList;
+        assertNumberOfMessageReceiptsInStorage(2);
+        backEndMessageReceiptApiRequest.setWillBeSuccessfulRequest(true);
+        startService(getServiceIntent());
+        MessageReceiptService.semaphore.acquire();
+        assertEquals(MessageReceiptService.RESULT_SENT_RECEIPTS_SUCCESSFULLY, testResultCode);
+        assertNumberOfMessageReceiptsInStorage(2);
         assertTrue(backEndMessageReceiptApiRequest.wasRequestAttempted());
         assertEquals(1, backEndMessageReceiptApiRequest.numberOfMessageReceiptsSent());
         assertTrue(messageReceiptAlarmProvider.isAlarmEnabled());
@@ -133,5 +164,15 @@ public class MessageReceiptServiceTest extends ServiceTestCase<MessageReceiptSer
         final Intent intent = new Intent(getContext(), GcmService.class);
         intent.putExtra(MessageReceiptService.KEY_RESULT_RECEIVER, testResultReceiver);
         return intent;
+    }
+
+    private void saveMessageReceipts(List<MessageReceiptEvent> events) {
+        for (final MessageReceiptEvent event : events) {
+            eventsStorage.saveEvent(getContext(), event, EventsStorage.EventType.MESSAGE_RECEIPTS);
+        }
+    }
+
+    private void assertNumberOfMessageReceiptsInStorage(int expected) {
+        assertEquals(expected, eventsStorage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS));
     }
 }

@@ -23,18 +23,16 @@ import android.os.ResultReceiver;
 import org.omnia.pushsdk.broadcastreceiver.GcmBroadcastReceiver;
 import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProvider;
 import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProviderImpl;
-import org.omnia.pushsdk.model.EventBase;
+import org.omnia.pushsdk.database.DatabaseEventsStorage;
+import org.omnia.pushsdk.database.EventsDatabaseHelper;
+import org.omnia.pushsdk.database.EventsDatabaseWrapper;
+import org.omnia.pushsdk.database.EventsStorage;
 import org.omnia.pushsdk.model.MessageReceiptEvent;
 import org.omnia.pushsdk.prefs.PreferencesProviderImpl;
-import org.omnia.pushsdk.model.MessageReceiptData;
-import org.omnia.pushsdk.prefs.MessageReceiptsProvider;
 import org.omnia.pushsdk.prefs.PreferencesProvider;
-import org.omnia.pushsdk.prefs.MessageReceiptsProviderImpl;
 import org.omnia.pushsdk.util.Const;
 import org.omnia.pushsdk.util.PushLibLogger;
 
-import java.util.Date;
-import java.util.UUID;
 import java.util.concurrent.Semaphore;
 
 public class GcmService extends IntentService {
@@ -51,8 +49,8 @@ public class GcmService extends IntentService {
 
     // Used by unit tests
     /* package */ static Semaphore semaphore = null;
+    /* package */ static EventsStorage eventsStorage = null;
     /* package */ static PreferencesProvider preferencesProvider = null;
-    /* package */ static MessageReceiptsProvider messageReceiptsProvider = null;
     /* package */ static MessageReceiptAlarmProvider messageReceiptAlarmProvider = null;
 
     private ResultReceiver resultReceiver = null;
@@ -94,11 +92,15 @@ public class GcmService extends IntentService {
     }
 
     private void setupStatics() {
+
+        EventsDatabaseHelper.init();
+        EventsDatabaseWrapper.createDatabaseInstance(this);
+
+        if (GcmService.eventsStorage == null) {
+            GcmService.eventsStorage = new DatabaseEventsStorage();
+        }
         if (GcmService.preferencesProvider == null) {
             GcmService.preferencesProvider = new PreferencesProviderImpl(this);
-        }
-        if (GcmService.messageReceiptsProvider == null) {
-            GcmService.messageReceiptsProvider = new MessageReceiptsProviderImpl(this);
         }
         if (GcmService.messageReceiptAlarmProvider == null) {
             GcmService.messageReceiptAlarmProvider = new MessageReceiptAlarmProviderImpl(this);
@@ -106,8 +108,8 @@ public class GcmService extends IntentService {
     }
 
     private void cleanupStatics() {
+        GcmService.eventsStorage = null;
         GcmService.preferencesProvider = null;
-        GcmService.messageReceiptsProvider = null;
         GcmService.messageReceiptAlarmProvider = null;
     }
 
@@ -137,9 +139,9 @@ public class GcmService extends IntentService {
 
     private void enqueueReturnReceipt(Intent intent) {
         final MessageReceiptEvent messageReceipt = getMessageReceiptEvent(intent);
-        GcmService.messageReceiptsProvider.addMessageReceipt(messageReceipt);
+        GcmService.eventsStorage.saveEvent(this, messageReceipt, EventsStorage.EventType.MESSAGE_RECEIPTS);
         GcmService.messageReceiptAlarmProvider.enableAlarmIfDisabled();
-        PushLibLogger.d("There are now " + GcmService.messageReceiptsProvider.numberOfMessageReceipts() + " message receipts queued to send to the server.");
+        PushLibLogger.d("There are now " + GcmService.eventsStorage.getNumberOfEvents(this, EventsStorage.EventType.MESSAGE_RECEIPTS) + " message receipts queued to send to the server.");
     }
 
     private MessageReceiptEvent getMessageReceiptEvent(Intent intent) {

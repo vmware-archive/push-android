@@ -4,17 +4,20 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.test.ServiceTestCase;
 
 import org.omnia.pushsdk.broadcastreceiver.FakeMessageReceiptAlarmProvider;
+import org.omnia.pushsdk.database.EventsStorage;
+import org.omnia.pushsdk.database.FakeEventsStorage;
 import org.omnia.pushsdk.model.EventBase;
 import org.omnia.pushsdk.model.MessageReceiptEvent;
-import org.omnia.pushsdk.prefs.FakeMessageReceiptsProvider;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
 
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
 public class GcmServiceTest extends ServiceTestCase<GcmService> {
@@ -32,7 +35,7 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
     private TestBroadcastReceiver testBroadcastReceiver;
     private Intent receivedIntent;
     private FakeMessageReceiptAlarmProvider alarmProvider;
-    private FakeMessageReceiptsProvider messageReceiptsProvider;
+    private FakeEventsStorage eventsStorage;
     private FakePreferencesProvider preferencesProvider;
 
     // Captures result codes from the service itself
@@ -66,12 +69,12 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        eventsStorage = new FakeEventsStorage();
         alarmProvider = new FakeMessageReceiptAlarmProvider();
-        messageReceiptsProvider = new FakeMessageReceiptsProvider(null);
         preferencesProvider = new FakePreferencesProvider(null, null, 0, null, TEST_VARIANT_UUID, null, null, null);
         GcmService.semaphore = new Semaphore(0);
+        GcmService.eventsStorage = eventsStorage;
         GcmService.preferencesProvider = preferencesProvider;
-        GcmService.messageReceiptsProvider = messageReceiptsProvider;
         GcmService.messageReceiptAlarmProvider = alarmProvider;
         testResultReceiver = new TestResultReceiver(null);
         testBroadcastReceiver = new TestBroadcastReceiver();
@@ -83,9 +86,9 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
     @Override
     protected void tearDown() throws Exception {
         GcmService.semaphore = null;
+        GcmService.eventsStorage = null;
         GcmService.preferencesProvider = null;
         GcmService.messageReceiptAlarmProvider = null;
-        GcmService.messageReceiptsProvider = null;
         getContext().unregisterReceiver(testBroadcastReceiver);
         super.tearDown();
     }
@@ -94,7 +97,7 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         startService(null);
         GcmService.semaphore.acquire();
         assertEquals(GcmService.NO_RESULT, testResultCode);
-        assertEquals(0, messageReceiptsProvider.numberOfMessageReceipts());
+        assertNumberOfMessageReceiptsInStorage(0);
         assertFalse(alarmProvider.isAlarmEnabled());
     }
 
@@ -102,7 +105,7 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         startService(intent);
         GcmService.semaphore.acquire();
         assertEquals(GcmService.RESULT_EMPTY_INTENT, testResultCode);
-        assertEquals(0, messageReceiptsProvider.numberOfMessageReceipts());
+        assertNumberOfMessageReceiptsInStorage(0);
         assertFalse(alarmProvider.isAlarmEnabled());
     }
 
@@ -111,7 +114,7 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         startService(intent);
         GcmService.semaphore.acquire();
         assertEquals(GcmService.RESULT_EMPTY_PACKAGE_NAME, testResultCode);
-        assertEquals(0, messageReceiptsProvider.numberOfMessageReceipts());
+        assertNumberOfMessageReceiptsInStorage(0);
         assertFalse(alarmProvider.isAlarmEnabled());
     }
 
@@ -133,7 +136,7 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         assertNotNull(extras);
         assertTrue(extras.containsKey(KEY_MESSAGE));
         assertEquals(TEST_MESSAGE, extras.getString(KEY_MESSAGE));
-        assertEquals(1, messageReceiptsProvider.numberOfMessageReceipts());
+        assertNumberOfMessageReceiptsInStorage(1);
         assertTrue(alarmProvider.isAlarmEnabled());
     }
 
@@ -147,8 +150,11 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         assertTrue(didReceiveBroadcast);
         assertNotNull(receivedIntent);
         assertTrue(receivedIntent.hasExtra(GcmService.KEY_GCM_INTENT));
-        assertEquals(1, messageReceiptsProvider.numberOfMessageReceipts());
-        final MessageReceiptEvent savedEvent = messageReceiptsProvider.loadMessageReceipts().get(0);
+        assertNumberOfMessageReceiptsInStorage(1);
+
+        final List<Uri> eventUris = eventsStorage.getEventUris(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS);
+        assertEquals(1, eventUris.size());
+        final MessageReceiptEvent savedEvent = (MessageReceiptEvent) eventsStorage.readEvent(getContext(), eventUris.get(0));
         assertEquals(TEST_MESSAGE_UUID, savedEvent.getData().getMessageUuid());
         assertEquals(TEST_VARIANT_UUID, savedEvent.getVariantUuid());
         assertEquals(EventBase.Status.NOT_POSTED, savedEvent.getStatus());
@@ -159,5 +165,9 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         final Intent intent = new Intent(getContext(), GcmService.class);
         intent.putExtra(GcmService.KEY_RESULT_RECEIVER, testResultReceiver);
         return intent;
+    }
+
+    private void assertNumberOfMessageReceiptsInStorage(int expected) {
+        assertEquals(expected, eventsStorage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS));
     }
 }

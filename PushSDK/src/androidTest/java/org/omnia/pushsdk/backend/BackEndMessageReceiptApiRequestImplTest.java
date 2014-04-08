@@ -1,13 +1,15 @@
 package org.omnia.pushsdk.backend;
 
+import android.net.Uri;
 import android.test.AndroidTestCase;
 
+import org.omnia.pushsdk.database.EventsStorage;
+import org.omnia.pushsdk.database.FakeEventsStorage;
 import org.omnia.pushsdk.model.MessageReceiptEvent;
 import org.omnia.pushsdk.model.MessageReceiptEventTest;
 import org.omnia.pushsdk.network.MockHttpURLConnection;
 import org.omnia.pushsdk.network.MockNetworkWrapper;
 import org.omnia.pushsdk.network.NetworkWrapper;
-import org.omnia.pushsdk.model.MessageReceiptData;
 import org.omnia.pushsdk.util.DelayedLoop;
 
 import java.io.IOException;
@@ -20,25 +22,46 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
     private NetworkWrapper networkWrapper;
     private BackEndMessageReceiptListener backEndMessageReceiptListener;
     private DelayedLoop delayedLoop;
+    private FakeEventsStorage eventsStorage;
     private static final long TEN_SECOND_TIMEOUT = 10000L;
 
-    private List<MessageReceiptEvent> emptyList;
-    private List<MessageReceiptEvent> listWithOneItem;
+    private List<Uri> emptyList;
+    private List<Uri> listWithOneItem;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        eventsStorage = new FakeEventsStorage();
         networkWrapper = new MockNetworkWrapper();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
         MockHttpURLConnection.reset();
-        emptyList = new LinkedList<MessageReceiptEvent>();
-        listWithOneItem = new LinkedList<MessageReceiptEvent>();
-        listWithOneItem.add(MessageReceiptEventTest.getMessageReceiptEvent1());
+        emptyList = new LinkedList<Uri>();
+        listWithOneItem = new LinkedList<Uri>();
+        final Uri uri = eventsStorage.saveEvent(getContext(), MessageReceiptEventTest.getMessageReceiptEvent1(), EventsStorage.EventType.MESSAGE_RECEIPTS);
+        listWithOneItem.add(uri);
+    }
+
+    public void testRequiresContext() {
+        try {
+            new BackEndMessageReceiptApiRequestImpl(null, eventsStorage, networkWrapper);
+            fail("Should not have succeeded");
+        } catch (IllegalArgumentException ex) {
+            // Success
+        }
+    }
+
+    public void testRequiresEventsStorage() {
+        try {
+            new BackEndMessageReceiptApiRequestImpl(getContext(), null, networkWrapper);
+            fail("Should not have succeeded");
+        } catch (IllegalArgumentException ex) {
+            // Success
+        }
     }
 
     public void testRequiresNetworkWrapper() {
         try {
-            new BackEndMessageReceiptApiRequestImpl(null);
+            new BackEndMessageReceiptApiRequestImpl(getContext(), eventsStorage, null);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
             // Success
@@ -47,7 +70,7 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresMessageReceipts() {
         try {
-            final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
+            final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(getContext(), eventsStorage, networkWrapper);
             makeBackEndMessageReceiptListener(true);
             request.startSendMessageReceipts(null, backEndMessageReceiptListener);
             fail("Should not have succeeded");
@@ -58,7 +81,7 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
 
     public void testMessageReceiptsMayNotBeEmpty() {
         try {
-            final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
+            final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(getContext(), eventsStorage, networkWrapper);
             makeBackEndMessageReceiptListener(true);
             request.startSendMessageReceipts(emptyList, backEndMessageReceiptListener);
             fail("Should not have succeeded");
@@ -69,7 +92,7 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresListener() {
         try {
-            final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
+            final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(getContext(), eventsStorage, networkWrapper);
             request.startSendMessageReceipts(listWithOneItem, null);
             fail("Should not have succeeded");
         } catch (Exception e) {
@@ -79,7 +102,7 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
 
     public void testSuccessfulRequest() {
         makeListenersForSuccessfulRequestFromNetwork(true, 200);
-        final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
+        final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(getContext(), eventsStorage, networkWrapper);
         request.startSendMessageReceipts(listWithOneItem, backEndMessageReceiptListener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
@@ -103,16 +126,16 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
 //        assertTrue(delayedLoop.isSuccess());
 //    }
 
-    private void makeListenersFromFailedRequestFromNetwork(String exceptionText, int expectedHttpStatusCode) {
-        IOException exception = null;
-        if (exceptionText != null) {
-            exception = new IOException(exceptionText);
-        }
-        MockHttpURLConnection.setConnectionException(exception);
-        MockHttpURLConnection.willThrowConnectionException(true);
-        MockHttpURLConnection.setResponseCode(expectedHttpStatusCode);
-        makeBackEndMessageReceiptListener(false);
-    }
+//    private void makeListenersFromFailedRequestFromNetwork(String exceptionText, int expectedHttpStatusCode) {
+//        IOException exception = null;
+//        if (exceptionText != null) {
+//            exception = new IOException(exceptionText);
+//        }
+//        MockHttpURLConnection.setConnectionException(exception);
+//        MockHttpURLConnection.willThrowConnectionException(true);
+//        MockHttpURLConnection.setResponseCode(expectedHttpStatusCode);
+//        makeBackEndMessageReceiptListener(false);
+//    }
 
     private void makeListenersForSuccessfulRequestFromNetwork(boolean isSuccessful, int expectedHttpStatusCode) {
         MockHttpURLConnection.setResponseCode(expectedHttpStatusCode);

@@ -11,18 +11,12 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Mock class used to isolate the crash handler from the filesystem in unit tests.
- * 
- * @author rob
- * 
- */
-public class MockEventsStorage implements EventsStorage {
+public class FakeEventsStorage implements EventsStorage {
 
 	private final Map<EventType, Map<Uri, EventBase>> events;
 	private static int fileId = 0;
 
-	public MockEventsStorage() {
+	public FakeEventsStorage() {
 		events = new HashMap<EventType, Map<Uri, EventBase>>();
 		events.put(EventType.MESSAGE_RECEIPTS, new HashMap<Uri, EventBase>());
 	}

@@ -2,8 +2,8 @@ package org.omnia.pushsdk.service;
 
 import android.app.IntentService;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.ResultReceiver;
-import android.util.Log;
 
 import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequest;
 import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestImpl;
@@ -12,14 +12,14 @@ import org.omnia.pushsdk.backend.BackEndMessageReceiptListener;
 import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProvider;
 import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProviderImpl;
 import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmReceiver;
-import org.omnia.pushsdk.model.MessageReceiptEvent;
+import org.omnia.pushsdk.database.DatabaseEventsStorage;
+import org.omnia.pushsdk.database.EventsDatabaseHelper;
+import org.omnia.pushsdk.database.EventsDatabaseWrapper;
+import org.omnia.pushsdk.database.EventsStorage;
+import org.omnia.pushsdk.model.EventBase;
 import org.omnia.pushsdk.network.NetworkWrapper;
 import org.omnia.pushsdk.network.NetworkWrapperImpl;
-import org.omnia.pushsdk.prefs.MessageReceiptsProvider;
-import org.omnia.pushsdk.prefs.MessageReceiptsProviderImpl;
-import org.omnia.pushsdk.model.MessageReceiptData;
 import org.omnia.pushsdk.util.Const;
-import org.omnia.pushsdk.util.DebugUtil;
 import org.omnia.pushsdk.util.PushLibLogger;
 
 import java.util.List;
@@ -38,7 +38,7 @@ public class MessageReceiptService extends IntentService {
 
     // Used by unit tests
     /* package */ static Semaphore semaphore = null;
-    /* package */ static MessageReceiptsProvider messageReceiptsProvider = null;
+    /* package */ static EventsStorage eventsStorage = null;
     /* package */ static BackEndMessageReceiptApiRequestProvider backEndMessageReceiptApiRequestProvider = null;
     /* package */ static MessageReceiptAlarmProvider messageReceiptAlarmProvider = null;
 
@@ -47,21 +47,25 @@ public class MessageReceiptService extends IntentService {
     }
 
     private void setupStatics() {
-        if (MessageReceiptService.messageReceiptsProvider == null) {
-            MessageReceiptService.messageReceiptsProvider = new MessageReceiptsProviderImpl(this);
+
+        EventsDatabaseHelper.init();
+        EventsDatabaseWrapper.createDatabaseInstance(this);
+
+        if (MessageReceiptService.eventsStorage == null) {
+            MessageReceiptService.eventsStorage = new DatabaseEventsStorage();
         }
         if (MessageReceiptService.messageReceiptAlarmProvider == null) {
             MessageReceiptService.messageReceiptAlarmProvider = new MessageReceiptAlarmProviderImpl(this);
         }
         if (MessageReceiptService.backEndMessageReceiptApiRequestProvider == null) {
             final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
-            final BackEndMessageReceiptApiRequestImpl backEndMessageReceiptApiRequest = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
+            final BackEndMessageReceiptApiRequestImpl backEndMessageReceiptApiRequest = new BackEndMessageReceiptApiRequestImpl(this, eventsStorage, networkWrapper);
             MessageReceiptService.backEndMessageReceiptApiRequestProvider = new BackEndMessageReceiptApiRequestProvider(backEndMessageReceiptApiRequest);
         }
     }
 
     private void cleanupStatics() {
-        MessageReceiptService.messageReceiptsProvider = null;
+        MessageReceiptService.eventsStorage = null;
         MessageReceiptService.messageReceiptAlarmProvider = null;
         MessageReceiptService.backEndMessageReceiptApiRequestProvider = null;
     }
@@ -81,14 +85,15 @@ public class MessageReceiptService extends IntentService {
 
         getResultReceiver(intent);
 
-        PushLibLogger.fd("MessageReceiptService: package %s: receipts available to send: %d", getPackageName(), MessageReceiptService.messageReceiptsProvider.numberOfMessageReceipts());
+        final List<Uri> uris = getUnpostedMessageReceipts();
+        PushLibLogger.fd("MessageReceiptService: package %s: receipts available to send: %d", getPackageName(), uris.size());
 
-        if (MessageReceiptService.messageReceiptsProvider.numberOfMessageReceipts() > 0) {
+        if (uris.size() > 0) {
 
-            final List<MessageReceiptEvent> messageReceipts = MessageReceiptService.messageReceiptsProvider.loadMessageReceipts();
-            sendMessageReceipts(messageReceipts, intent);
+            sendMessageReceipts(uris, intent);
 
         } else {
+
             PushLibLogger.d("MessageReceiptService: found no receipts. Disabling alarm.");
             MessageReceiptService.messageReceiptAlarmProvider.disableAlarm();
             sendResult(RESULT_NO_WORK_TO_DO);
@@ -112,15 +117,15 @@ public class MessageReceiptService extends IntentService {
         }
     }
 
-    private void sendMessageReceipts(final List<MessageReceiptEvent> messageReceipts, final Intent intent) {
+    private void sendMessageReceipts(final List<Uri> messageReceiptUris, final Intent intent) {
         final BackEndMessageReceiptApiRequest apiRequest = MessageReceiptService.backEndMessageReceiptApiRequestProvider.getRequest();
-        apiRequest.startSendMessageReceipts(messageReceipts, new BackEndMessageReceiptListener() {
+        apiRequest.startSendMessageReceipts(messageReceiptUris, new BackEndMessageReceiptListener() {
 
             @Override
             public void onBackEndMessageReceiptSuccess() {
                 try {
                     sendResult(RESULT_SENT_RECEIPTS_SUCCESSFULLY);
-                    postProcessAfterRequest(messageReceipts);
+                    postProcessAfterRequest(messageReceiptUris);
                 } finally {
                     postProcessAfterService(intent);
                 }
@@ -144,16 +149,22 @@ public class MessageReceiptService extends IntentService {
         }
     }
 
-    private void postProcessAfterRequest(final List<MessageReceiptEvent> messageReceipts) {
-        if (messageReceipts != null) {
-            MessageReceiptService.messageReceiptsProvider.removeMessageReceipts(messageReceipts);
-            if (MessageReceiptService.messageReceiptsProvider.numberOfMessageReceipts() <= 0) {
+    private void postProcessAfterRequest(final List<Uri> messageReceiptUris) {
+        if (messageReceiptUris != null) {
+            MessageReceiptService.eventsStorage.deleteEvents(this, messageReceiptUris, EventsStorage.EventType.MESSAGE_RECEIPTS);
+            final List<Uri> remainingUnpostedUris = getUnpostedMessageReceipts();
+            if (remainingUnpostedUris.size() <= 0) {
                 PushLibLogger.d("MessageReceiptService: no more messages left in queue. Disabling alarm.");
                 MessageReceiptService.messageReceiptAlarmProvider.disableAlarm();
             } else {
-                PushLibLogger.fd("MessageReceiptService: there are still %d more message(s) left in queue. Leaving alarm enabled.", MessageReceiptService.messageReceiptsProvider.numberOfMessageReceipts());
+                PushLibLogger.fd("MessageReceiptService: there are still %d more message(s) left in queue. Leaving alarm enabled.", remainingUnpostedUris.size());
             }
         }
+    }
+
+    private List<Uri> getUnpostedMessageReceipts() {
+        final List<Uri> uris = MessageReceiptService.eventsStorage.getEventUrisWithStatus(this, EventsStorage.EventType.MESSAGE_RECEIPTS, EventBase.Status.NOT_POSTED);
+        return uris;
     }
 
     private void postProcessAfterService(Intent intent) {

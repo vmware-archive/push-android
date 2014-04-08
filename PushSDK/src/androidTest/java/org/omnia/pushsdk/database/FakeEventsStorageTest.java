@@ -9,7 +9,7 @@ import org.omnia.pushsdk.model.MessageReceiptEvent;
 import java.util.LinkedList;
 import java.util.List;
 
-public class MockEventsStorageTest extends AndroidTestCase {
+public class FakeEventsStorageTest extends AndroidTestCase {
 
 	private static final Uri NON_EXISTENT_FILE_1 = Uri.parse("file://message_receipts/this_name_does_not_exist_come_on!");
     private static final String TEST_VARIANT_ID_1 = "TEST_VARIANT_ID_1";
@@ -25,7 +25,7 @@ public class MockEventsStorageTest extends AndroidTestCase {
 //	private ApiValidationErrorEvent EVENT_4;
 //	private ApiValidationErrorEvent EVENT_5;
 //	private ApiValidationErrorEvent EVENT_6;
-	private MockEventsStorage storage;
+	private FakeEventsStorage storage;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -36,7 +36,7 @@ public class MockEventsStorageTest extends AndroidTestCase {
 //		EVENT_4 = ApiValidationErrorEvent.getApiValidationErrorEvent(getContext(), "URL", "POST", REQUEST_HEADERS, 456, "content/sneh", "SNEEEH", "ERROR_MESSAGE OF DOOM", metadata);
 //		EVENT_5 = ApiValidationErrorEvent.getApiValidationErrorEvent(getContext(), "URL of truth", "POST", REQUEST_HEADERS, 456, "content/sneh", "SNEEEH", "DUAL ERRORs", metadata);
 //		EVENT_6 = ApiValidationErrorEvent.getApiValidationErrorEvent(getContext(), "valid URL", "POST", REQUEST_HEADERS, 456, "content/sneh", "SNEEEH", "TRIPLE THREAT ERRORS", metadata);
-		storage = new MockEventsStorage();
+		storage = new FakeEventsStorage();
 	}
 
 	public void testStartState() {
@@ -47,7 +47,7 @@ public class MockEventsStorageTest extends AndroidTestCase {
 		assertEquals(0, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.ALL));
 	}
 
-	public void testSaveUnhandledExceptionEventOnce() {
+	public void testSaveMessageReceiptEventOnce() {
 
 		// Tests saving one file into the fake filesystem
 		final Uri saveResult = storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
@@ -67,7 +67,7 @@ public class MockEventsStorageTest extends AndroidTestCase {
 //		assertEquals(1, storage.getNumberOfEvents(getContext(), EventType.ALL));
 //	}
 
-	public void testSaveUnhandledExceptionEventTwice() {
+	public void testSaveMessageReceiptEventTwice() {
 
 		// Save one file into the fake filesystem
 		final Uri saveResult1 = storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
@@ -101,7 +101,7 @@ public class MockEventsStorageTest extends AndroidTestCase {
 //		assertEquals(2, storage.getNumberOfEvents(getContext(), EventType.ALL));
 //	}
 
-	public void testSaveUnhandledExceptionAndRead() {
+	public void testSaveMessageReceiptAndRead() {
 
 		// Save a file into the fake filesystem
 		storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
@@ -155,7 +155,7 @@ public class MockEventsStorageTest extends AndroidTestCase {
 //		assertTrue(exceptionThrown);
 //	}
 
-	public void testSaveUnhandledExceptionAndDelete() {
+	public void testSaveMessageReceiptAndDelete() {
 
 		// Save a file into the fake filesystem
 		storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
@@ -206,7 +206,7 @@ public class MockEventsStorageTest extends AndroidTestCase {
 //		assertEquals(2, storage.getNumberOfEvents(getContext(), EventType.ALL));
 	}
 
-	public void testDeleteOneOfTwoUnhandledExceptionFiles() {
+	public void testDeleteOneOfTwoMessageReceiptFiles() {
 
 		// Save a couple of files into the fake filesystem
 		storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);

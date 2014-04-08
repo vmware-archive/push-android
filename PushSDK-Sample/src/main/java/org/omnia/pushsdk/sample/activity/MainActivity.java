@@ -35,8 +35,8 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 
-import org.omnia.pushsdk.prefs.MessageReceiptsProvider;
-import org.omnia.pushsdk.prefs.MessageReceiptsProviderImpl;
+import org.omnia.pushsdk.database.DatabaseEventsStorage;
+import org.omnia.pushsdk.database.EventsStorage;
 import org.omnia.pushsdk.sample.broadcastreceiver.MyOmniaRemotePushLibBroadcastReceiver;
 import org.omnia.pushsdk.sample.dialogfragment.SendMessageDialogFragment;
 import org.omnia.pushsdk.registration.UnregistrationListener;
@@ -443,9 +443,9 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void clearMessageReceipts() {
-        addLogMessage("Clearing unsent message receipts.");
-        final MessageReceiptsProvider messageReceipts = new MessageReceiptsProviderImpl(getApplicationContext());
-        messageReceipts.clear();
+        addLogMessage("Clearing all message receipts.");
+        final DatabaseEventsStorage eventsStorage = new DatabaseEventsStorage();
+        eventsStorage.reset(this, EventsStorage.EventType.MESSAGE_RECEIPTS);
     }
 
     private void clearRegistration() {

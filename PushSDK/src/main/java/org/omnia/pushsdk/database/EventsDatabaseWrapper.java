@@ -222,7 +222,7 @@ public class EventsDatabaseWrapper {
 				} else {
 					database.setMaximumSize(MAX_DATABASE_SIZE_RELEASE);
 				}
-                PushLibLogger.fd("Maximum database size is %d bytes", database.getMaximumSize());
+                PushLibLogger.fd("Database has been initialized.");
 			}
 		}
 	}

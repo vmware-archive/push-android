@@ -1,36 +1,60 @@
 package org.omnia.pushsdk.backend;
 
+import android.content.Context;
+import android.net.Uri;
+
 import com.google.gson.Gson;
 
+import org.omnia.pushsdk.database.EventsStorage;
 import org.omnia.pushsdk.model.MessageReceiptEvent;
 import org.omnia.pushsdk.network.NetworkWrapper;
 import org.omnia.pushsdk.util.PushLibLogger;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.util.LinkedList;
 import java.util.List;
 
 public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implements BackEndMessageReceiptApiRequest {
 
-    public BackEndMessageReceiptApiRequestImpl(NetworkWrapper networkWrapper) {
+    private Context context;
+    private EventsStorage eventsStorage;
+
+    public BackEndMessageReceiptApiRequestImpl(Context context, EventsStorage eventsStorage, NetworkWrapper networkWrapper) {
         super(networkWrapper);
+        verifyArguments(context, eventsStorage);
+        saveArguments(context, eventsStorage);
     }
 
-    public void startSendMessageReceipts(List<MessageReceiptEvent> messageReceipts, BackEndMessageReceiptListener listener) {
-        verifyRequestArguments(messageReceipts, listener);
-        processRequest(messageReceipts, listener);
+    private void verifyArguments(Context context, EventsStorage eventsStorage) {
+        if (context == null) {
+            throw new IllegalArgumentException("context may not be null");
+        }
+        if (eventsStorage == null) {
+            throw new IllegalArgumentException("eventsStorage may not be null");
+        }
     }
 
-    private void verifyRequestArguments(List<MessageReceiptEvent> messageReceipts, BackEndMessageReceiptListener listener) {
-        if (messageReceipts == null || messageReceipts.isEmpty()) {
-            throw new IllegalArgumentException("messageReceipts may not be null or empty");
+    private void saveArguments(Context context, EventsStorage eventsStorage) {
+        this.context = context;
+        this.eventsStorage = eventsStorage;
+    }
+
+    public void startSendMessageReceipts(List<Uri> uris, BackEndMessageReceiptListener listener) {
+        verifyRequestArguments(uris, listener);
+        processRequest(uris, listener);
+    }
+
+    private void verifyRequestArguments(List<Uri> uris, BackEndMessageReceiptListener listener) {
+        if (uris == null || uris.isEmpty()) {
+            throw new IllegalArgumentException("uris may not be null or empty");
         }
         if (listener == null) {
             throw new IllegalArgumentException("listener may not be null");
         }
     }
 
-    private void processRequest(List<MessageReceiptEvent> messageReceipts, BackEndMessageReceiptListener listener) {
+    private void processRequest(List<Uri> uris, BackEndMessageReceiptListener listener) {
 
         OutputStream outputStream = null;
 
@@ -43,7 +67,10 @@ public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implemen
 //            urlConnection.connect();
 //
 //            outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
-            final String requestBodyData = getRequestBodyData(messageReceipts);
+
+            // TODO - serialize events directly as JSON into the url connection?
+
+            final String requestBodyData = getRequestBodyData(uris);
             PushLibLogger.v("Making network request to post message receipts to the back-end server: " + requestBodyData);
 //            writeOutput(requestBodyData, outputStream);
 //
@@ -70,10 +97,20 @@ public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implemen
         }
     }
 
-    private String getRequestBodyData(List<MessageReceiptEvent> messageReceipts) {
+    private String getRequestBodyData(List<Uri> uris) {
+        final List<MessageReceiptEvent> events = getEvents(uris);
         final Gson gson = new Gson();
-        final String requestBodyData = gson.toJson(messageReceipts);
+        final String requestBodyData = gson.toJson(events);
         return requestBodyData;
+    }
+
+    private List<MessageReceiptEvent> getEvents(List<Uri> uris) {
+        final List<MessageReceiptEvent> events = new LinkedList<MessageReceiptEvent>();
+        for (final Uri uri : uris) {
+            final MessageReceiptEvent event = (MessageReceiptEvent) eventsStorage.readEvent(context, uri);
+            events.add(event);
+        }
+        return events;
     }
 
     private void onSuccessfulNetworkRequest(int statusCode, BackEndMessageReceiptListener listener) {
@@ -90,6 +127,6 @@ public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implemen
 
     @Override
     public BackEndMessageReceiptApiRequest copy() {
-        return new BackEndMessageReceiptApiRequestImpl(networkWrapper);
+        return new BackEndMessageReceiptApiRequestImpl(context, eventsStorage, networkWrapper);
     }
 }

@@ -4,27 +4,28 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import org.omnia.pushsdk.prefs.MessageReceiptsProvider;
-import org.omnia.pushsdk.prefs.MessageReceiptsProviderImpl;
+import org.omnia.pushsdk.database.DatabaseEventsStorage;
+import org.omnia.pushsdk.database.EventsDatabaseHelper;
+import org.omnia.pushsdk.database.EventsDatabaseWrapper;
+import org.omnia.pushsdk.database.EventsStorage;
 import org.omnia.pushsdk.util.Const;
-import org.omnia.pushsdk.util.DebugUtil;
 import org.omnia.pushsdk.util.PushLibLogger;
-
-import java.util.concurrent.Semaphore;
 
 // Received whenever the phone boots up
 public class BootCompletedBroadcastReceiver extends BroadcastReceiver {
 
-    public MessageReceiptAlarmProvider messageReceiptAlarmProvider;
-    public MessageReceiptsProvider messageReceiptsProvider;
+    private Context context;
+    private EventsStorage eventsStorage;
+    private MessageReceiptAlarmProvider messageReceiptAlarmProvider;
 
     public BootCompletedBroadcastReceiver() {
         // Does nothing
     }
 
-    public BootCompletedBroadcastReceiver(MessageReceiptAlarmProvider messageReceiptAlarmProvider, MessageReceiptsProvider messageReceiptsProvider) {
+    public BootCompletedBroadcastReceiver(Context context, EventsStorage eventsStorage, MessageReceiptAlarmProvider messageReceiptAlarmProvider) {
+        this.context = context;
+        this.eventsStorage = eventsStorage;
         this.messageReceiptAlarmProvider = messageReceiptAlarmProvider;
-        this.messageReceiptsProvider = messageReceiptsProvider;
     }
 
     @Override
@@ -39,18 +40,21 @@ public class BootCompletedBroadcastReceiver extends BroadcastReceiver {
         startAlarm();
     }
 
-
     private void setupDependencies(Context context) {
+
+        EventsDatabaseHelper.init();
+        EventsDatabaseWrapper.createDatabaseInstance(context);
+
         if (messageReceiptAlarmProvider == null) {
             messageReceiptAlarmProvider = new MessageReceiptAlarmProviderImpl(context);
         }
-        if (messageReceiptsProvider == null) {
-            messageReceiptsProvider = new MessageReceiptsProviderImpl(context);
+        if (eventsStorage == null) {
+            eventsStorage = new DatabaseEventsStorage();
         }
     }
 
     private void startAlarm() {
-        final int numberOfMessageReceipts = messageReceiptsProvider.numberOfMessageReceipts();
+        final int numberOfMessageReceipts = eventsStorage.getNumberOfEvents(context, EventsStorage.EventType.MESSAGE_RECEIPTS);
         if (numberOfMessageReceipts > 0) {
             PushLibLogger.fd("There are %d message receipt(s) queued for sending. Enabling alarm.", numberOfMessageReceipts);
             messageReceiptAlarmProvider.enableAlarmIfDisabled();

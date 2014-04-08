@@ -1,6 +1,6 @@
 package org.omnia.pushsdk.backend;
 
-import org.omnia.pushsdk.model.MessageReceiptEvent;
+import android.net.Uri;
 
 import java.util.List;
 
@@ -8,8 +8,8 @@ public class FakeBackEndMessageReceiptApiRequest implements BackEndMessageReceip
 
     private final FakeBackEndMessageReceiptApiRequest originatingRequest;
     private boolean willBeSuccessfulRequest = false;
-    private List<MessageReceiptEvent> receivedMessageReceipts = null;
     private boolean wasRequestAttempted = false;
+    private List<Uri> receivedUris = null;
 
     public FakeBackEndMessageReceiptApiRequest(FakeBackEndMessageReceiptApiRequest originatingRequest) {
         this.originatingRequest = originatingRequest;
@@ -21,7 +21,7 @@ public class FakeBackEndMessageReceiptApiRequest implements BackEndMessageReceip
     }
 
     @Override
-    public void startSendMessageReceipts(List<MessageReceiptEvent> messageReceipts, BackEndMessageReceiptListener listener) {
+    public void startSendMessageReceipts(List<Uri> uris, BackEndMessageReceiptListener listener) {
 
         wasRequestAttempted = true;
         if (originatingRequest != null) {
@@ -29,9 +29,9 @@ public class FakeBackEndMessageReceiptApiRequest implements BackEndMessageReceip
         }
 
         if (willBeSuccessfulRequest) {
-            receivedMessageReceipts = messageReceipts;
+            receivedUris = uris;
             if (originatingRequest != null) {
-                originatingRequest.receivedMessageReceipts = messageReceipts;
+                originatingRequest.receivedUris = uris;
             }
             listener.onBackEndMessageReceiptSuccess();
         } else {
@@ -55,10 +55,10 @@ public class FakeBackEndMessageReceiptApiRequest implements BackEndMessageReceip
     }
 
     public int numberOfMessageReceiptsSent() {
-        if (receivedMessageReceipts == null) {
+        if (receivedUris == null) {
             return 0;
         } else {
-            return receivedMessageReceipts.size();
+            return receivedUris.size();
         }
     };
 }
