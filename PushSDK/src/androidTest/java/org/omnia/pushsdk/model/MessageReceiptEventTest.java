@@ -1,5 +1,6 @@
 package org.omnia.pushsdk.model;
 
+import android.content.ContentValues;
 import android.database.sqlite.SQLiteStatement;
 import android.provider.BaseColumns;
 import android.test.AndroidTestCase;
@@ -8,6 +9,7 @@ import android.test.MoreAsserts;
 import com.google.gson.Gson;
 
 import org.omnia.pushsdk.database.DatabaseConstants;
+import org.omnia.pushsdk.database.FakeCursor;
 import org.omnia.pushsdk.util.PushLibLogger;
 
 import java.util.Calendar;
@@ -22,12 +24,14 @@ public class MessageReceiptEventTest extends AndroidTestCase {
     private static final String TEST_EVENT_ID_1 = "EVENT-ID-1";
     private static final String TEST_MESSAGE_UUID_1 = "SOME-MESSAGE-UUID-1";
     private static final String TEST_EVENT_VARIANT_UUID_1 = "VARIANT-UUID-1";
+    private static final String TEST_TIME_1 = "SOME BOGUS TIME";
     private static final int TEST_YEAR_1 = 1969;
     private static final int TEST_MONTH_1 = 6;
     private static final int TEST_DAY_1 = 20;
     private static final int TEST_HOUR_1 = 20;
     private static final int TEST_MINUTE_1 = 17;
     private static final int TEST_SECOND_1 = 40;
+    private static final int TEST_ROW_ID_1 = 67;
 
     private static final String TEST_EVENT_ID_2 = "EVENT-ID-2";
     private static final String TEST_MESSAGE_UUID_2 = "ANOTHER-MESSAGE-UUID";
@@ -245,26 +249,65 @@ public class MessageReceiptEventTest extends AndroidTestCase {
         assertTrue(sql.contains(DatabaseConstants.MESSAGE_RECEIPTS_TABLE_NAME));
     }
 
-    public static MessageReceiptEvent getMessageReceiptEvent1() {
-        final MessageReceiptEvent event = new MessageReceiptEvent();
-        final MessageReceiptData data = new MessageReceiptData();
-        event.setEventId(TEST_EVENT_ID_1);
-        event.setVariantUuid(TEST_EVENT_VARIANT_UUID_1);
-        event.setTime(getTestDate1());
-        event.setData(data);
-        data.setMessageUuid(TEST_MESSAGE_UUID_1);
-        return event;
+    public void testGetContentValues1() {
+        final MessageReceiptEvent event = getMessageReceiptEvent1();
+        final ContentValues cv = event.getContentValues();
+        assertFalse(cv.containsKey(BaseColumns._ID));
+        assertTrue(cv.containsKey(EventBase.Columns.TIME));
+        assertTrue(cv.containsKey(EventBase.Columns.STATUS));
+        assertTrue(cv.containsKey(EventBase.Columns.EVENT_UUID));
+        assertTrue(cv.containsKey(EventBase.Columns.VARIANT_UUID));
+        assertTrue(cv.containsKey(MessageReceiptData.Columns.MESSAGE_UUID));
+        assertEquals(event.getTime(), cv.getAsString(EventBase.Columns.TIME));
+        assertEquals(event.getStatus(), cv.getAsInteger(EventBase.Columns.STATUS).intValue());
+        assertEquals(event.getEventId(), cv.getAsString(EventBase.Columns.EVENT_UUID));
+        assertEquals(event.getVariantUuid(), cv.getAsString(EventBase.Columns.VARIANT_UUID));
+        assertEquals(event.getData().getMessageUuid(), cv.getAsString(MessageReceiptData.Columns.MESSAGE_UUID));
     }
 
-    public static MessageReceiptEvent getMessageReceiptEvent2() {
+    public void testGetContentValues2() {
         final MessageReceiptEvent event = new MessageReceiptEvent();
-        final MessageReceiptData data = new MessageReceiptData();
-        event.setEventId(TEST_EVENT_ID_2);
-        event.setVariantUuid(TEST_EVENT_VARIANT_UUID_2);
-        event.setTime(getTestDate1());
-        event.setData(data);
-        data.setMessageUuid(TEST_MESSAGE_UUID_2);
-        return event;
+        final ContentValues cv = event.getContentValues();
+        assertFalse(cv.containsKey(BaseColumns._ID));
+        assertTrue(cv.containsKey(EventBase.Columns.TIME));
+        assertTrue(cv.containsKey(EventBase.Columns.STATUS));
+        assertTrue(cv.containsKey(EventBase.Columns.EVENT_UUID));
+        assertTrue(cv.containsKey(EventBase.Columns.VARIANT_UUID));
+        assertTrue(cv.containsKey(MessageReceiptData.Columns.MESSAGE_UUID));
+        MoreAsserts.assertNotEqual(0, cv.getAsString(EventBase.Columns.TIME));
+        assertEquals(EventBase.Status.NOT_POSTED, cv.getAsInteger(EventBase.Columns.STATUS).intValue());
+        assertNull(cv.getAsString(EventBase.Columns.EVENT_UUID));
+        assertNull(cv.getAsString(EventBase.Columns.VARIANT_UUID));
+        assertNull(cv.getAsString(MessageReceiptData.Columns.MESSAGE_UUID));
+    }
+
+    public void testConstructFromCursor1() {
+        final FakeCursor cursor = new FakeCursor();
+        cursor.addField(BaseColumns._ID, TEST_ROW_ID_1);
+        cursor.addField(EventBase.Columns.TIME, TEST_TIME_1);
+        cursor.addField(EventBase.Columns.STATUS, EventBase.Status.POSTED);
+        cursor.addField(EventBase.Columns.EVENT_UUID, TEST_EVENT_ID_1);
+        cursor.addField(EventBase.Columns.VARIANT_UUID, TEST_EVENT_VARIANT_UUID_1);
+        cursor.addField(MessageReceiptData.Columns.MESSAGE_UUID, TEST_MESSAGE_UUID_1);
+        final MessageReceiptEvent event = new MessageReceiptEvent(cursor);
+        assertEquals(TEST_ROW_ID_1, event.getId());
+        assertEquals(TEST_TIME_1, event.getTime());
+        assertEquals(EventBase.Status.POSTED, event.getStatus());
+        assertEquals(TEST_EVENT_ID_1, event.getEventId());
+        assertEquals(TEST_EVENT_VARIANT_UUID_1, event.getVariantUuid());
+        assertNotNull(event.getData());
+        assertEquals(TEST_MESSAGE_UUID_1, event.getData().getMessageUuid());
+    }
+
+    public void testConstructFromCursor2() {
+        final FakeCursor cursor = new FakeCursor();
+        final MessageReceiptEvent event = new MessageReceiptEvent(cursor);
+        assertEquals(0, event.getId());
+        assertNull(event.getTime());
+        assertEquals(EventBase.Status.NOT_POSTED, event.getStatus());
+        assertNull(event.getEventId());
+        assertNull(event.getVariantUuid());
+        assertNull(event.getData());
     }
 
     private static Date getTestDate1() {
@@ -291,5 +334,27 @@ public class MessageReceiptEventTest extends AndroidTestCase {
         sb.append(getTestDate2().getTime() / 1000L);
         sb.append("\"}]");
         return sb.toString();
+    }
+
+    public static MessageReceiptEvent getMessageReceiptEvent1() {
+        final MessageReceiptEvent event = new MessageReceiptEvent();
+        final MessageReceiptData data = new MessageReceiptData();
+        event.setEventId(TEST_EVENT_ID_1);
+        event.setVariantUuid(TEST_EVENT_VARIANT_UUID_1);
+        event.setTime(getTestDate1());
+        event.setData(data);
+        data.setMessageUuid(TEST_MESSAGE_UUID_1);
+        return event;
+    }
+
+    public static MessageReceiptEvent getMessageReceiptEvent2() {
+        final MessageReceiptEvent event = new MessageReceiptEvent();
+        final MessageReceiptData data = new MessageReceiptData();
+        event.setEventId(TEST_EVENT_ID_2);
+        event.setVariantUuid(TEST_EVENT_VARIANT_UUID_2);
+        event.setTime(getTestDate1());
+        event.setData(data);
+        data.setMessageUuid(TEST_MESSAGE_UUID_2);
+        return event;
     }
 }

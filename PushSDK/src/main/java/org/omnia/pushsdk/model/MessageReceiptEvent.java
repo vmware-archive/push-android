@@ -35,11 +35,15 @@ public class MessageReceiptEvent extends EventBase {
         columnIndex = cursor.getColumnIndex(BaseColumns._ID);
         if (columnIndex >= 0) {
             setId(cursor.getInt(columnIndex));
+        } else {
+            setId(0);
         }
 
         columnIndex = cursor.getColumnIndex(EventBase.Columns.STATUS);
         if (columnIndex >= 0) {
             setStatus(cursor.getInt(columnIndex));
+        } else {
+            setStatus(Status.NOT_POSTED);
         }
 
         columnIndex = cursor.getColumnIndex(EventBase.Columns.EVENT_UUID);
@@ -71,7 +75,8 @@ public class MessageReceiptEvent extends EventBase {
 
     @Override
     public ContentValues getContentValues() {
-        // TODO - needs tests
+        // NOTE - do not save the 'id' field to the ContentValues. Let the database
+        // figure out the 'id' itself.
         final ContentValues cv = new ContentValues();
         cv.put(EventBase.Columns.EVENT_UUID, getEventId());
         cv.put(EventBase.Columns.VARIANT_UUID, getVariantUuid());
