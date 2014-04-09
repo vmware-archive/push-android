@@ -139,9 +139,9 @@ public class GcmService extends IntentService {
 
     private void enqueueReturnReceipt(Intent intent) {
         final MessageReceiptEvent messageReceipt = getMessageReceiptEvent(intent);
-        GcmService.eventsStorage.saveEvent(this, messageReceipt, EventsStorage.EventType.MESSAGE_RECEIPT);
+        GcmService.eventsStorage.saveEvent(messageReceipt, EventsStorage.EventType.MESSAGE_RECEIPT);
         GcmService.messageReceiptAlarmProvider.enableAlarmIfDisabled();
-        PushLibLogger.d("There are now " + GcmService.eventsStorage.getNumberOfEvents(this, EventsStorage.EventType.MESSAGE_RECEIPT) + " message receipts queued to send to the server.");
+        PushLibLogger.d("There are now " + GcmService.eventsStorage.getNumberOfEvents(EventsStorage.EventType.MESSAGE_RECEIPT) + " message receipts queued to send to the server.");
     }
 
     private MessageReceiptEvent getMessageReceiptEvent(Intent intent) {

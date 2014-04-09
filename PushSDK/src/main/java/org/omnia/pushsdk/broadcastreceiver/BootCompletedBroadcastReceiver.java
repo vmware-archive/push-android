@@ -54,7 +54,7 @@ public class BootCompletedBroadcastReceiver extends BroadcastReceiver {
     }
 
     private void startAlarm() {
-        final int numberOfMessageReceipts = eventsStorage.getNumberOfEvents(context, EventsStorage.EventType.MESSAGE_RECEIPT);
+        final int numberOfMessageReceipts = eventsStorage.getNumberOfEvents(EventsStorage.EventType.MESSAGE_RECEIPT);
         if (numberOfMessageReceipts > 0) {
             PushLibLogger.fd("There are %d message receipt(s) queued for sending. Enabling alarm.", numberOfMessageReceipts);
             messageReceiptAlarmProvider.enableAlarmIfDisabled();

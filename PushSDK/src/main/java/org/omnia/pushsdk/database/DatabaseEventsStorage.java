@@ -1,7 +1,6 @@
 package org.omnia.pushsdk.database;
 
 import android.content.ContentValues;
-import android.content.Context;
 import android.database.Cursor;
 import android.net.Uri;
 
@@ -17,7 +16,7 @@ public class DatabaseEventsStorage implements EventsStorage {
 	}
 
 	@Override
-	public Uri saveEvent(Context context, EventBase event, EventType eventType) {
+	public Uri saveEvent(EventBase event, EventType eventType) {
 		if (eventType == EventType.ALL) {
 			throw new IllegalArgumentException("Can not saveEvent for EventType.ALL");
 		}
@@ -27,32 +26,32 @@ public class DatabaseEventsStorage implements EventsStorage {
 	}
 
 	@Override
-	public List<Uri> getEventUris(Context context, EventType eventType) {
+	public List<Uri> getEventUris(EventType eventType) {
 		if (eventType == EventType.ALL) {
 			final List<Uri> results = new LinkedList<Uri>();
 			for (EventType type : EventType.values()) {
 				if (type != EventType.ALL) {
-					results.addAll(getGeneralQuery(context, type, null, null, null, null));
+					results.addAll(getGeneralQuery(type, null, null, null, null));
 				}
 			}
 			return results;
 		} else {
-			return getGeneralQuery(context, eventType, null, null, null, null);
+			return getGeneralQuery(eventType, null, null, null, null);
 		}
 	}
 
-	public List<Uri> getEventUrisWithStatus(Context context, EventType eventType, int status) {
+	public List<Uri> getEventUrisWithStatus(EventType eventType, int status) {
 		if (eventType == EventType.ALL) {
 			final List<Uri> results = new LinkedList<Uri>();
-			results.addAll(getGeneralQuery(context, EventType.MESSAGE_RECEIPT, null, "status = ?", new String[] { String.valueOf(status) }, null));
-//			results.addAll(getGeneralQuery(context, EventType.UNHANDLED_EXCEPTION, null, "status = ?", new String[] { String.valueOf(status) }, null));
+			results.addAll(getGeneralQuery(EventType.MESSAGE_RECEIPT, null, "status = ?", new String[] { String.valueOf(status) }, null));
+//			results.addAll(getGeneralQuery(EventType.UNHANDLED_EXCEPTION, null, "status = ?", new String[] { String.valueOf(status) }, null));
 			return results;
 		} else {
-			return getGeneralQuery(context, eventType, null, "status = ?", new String[] { String.valueOf(status) }, null);
+			return getGeneralQuery(eventType, null, "status = ?", new String[] { String.valueOf(status) }, null);
 		}
 	}
 
-	private List<Uri> getGeneralQuery(Context context, EventType eventType, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+	private List<Uri> getGeneralQuery(EventType eventType, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 		final Uri uri = EventHelper.getUriForEventType(eventType);
 		Cursor cursor = null;
 		try {
@@ -79,7 +78,7 @@ public class DatabaseEventsStorage implements EventsStorage {
 	}
 
 	@Override
-	public int getNumberOfEvents(Context context, EventType eventType) {
+	public int getNumberOfEvents(EventType eventType) {
 		if (eventType == EventType.ALL) {
 			return getNumberOfEventsByEventType(EventType.MESSAGE_RECEIPT)/* + getNumberOfEventsByEventType(EventType.UNHANDLED_EXCEPTION)*/;
 		} else {
@@ -105,7 +104,7 @@ public class DatabaseEventsStorage implements EventsStorage {
 	}
 
 	@Override
-	public EventBase readEvent(Context context, Uri uri) {
+	public EventBase readEvent(Uri uri) {
 		Cursor cursor = null;
 		try {
 			cursor = EventsDatabaseWrapper.query(uri, null, null, null, null);
@@ -126,7 +125,7 @@ public class DatabaseEventsStorage implements EventsStorage {
 	}
 
 	@Override
-	public void deleteEvents(Context context, List<Uri> eventUris, EventType eventType) {
+	public void deleteEvents(List<Uri> eventUris, EventType eventType) {
 		if (eventType == EventType.ALL) {
 			throw new IllegalArgumentException("Can not deleteEvents for EventType.ALL");
 		}
@@ -134,7 +133,7 @@ public class DatabaseEventsStorage implements EventsStorage {
 	}
 
 	@Override
-	public void reset(Context context, EventType eventType) {
+	public void reset(EventType eventType) {
 		if (eventType == EventType.ALL) {
 			for (EventType et : EventType.values()) {
 				if (et != EventType.ALL) {
@@ -147,7 +146,7 @@ public class DatabaseEventsStorage implements EventsStorage {
 	}
 
 	@Override
-	public void setEventStatus(Context context, Uri eventUri, int status) {
+	public void setEventStatus(Uri eventUri, int status) {
 		final ContentValues values = new ContentValues();
 		values.put(EventBase.Columns.STATUS, status);
 		final int numberOfRowsUpdated = EventsDatabaseWrapper.update(eventUri, values, null, null);

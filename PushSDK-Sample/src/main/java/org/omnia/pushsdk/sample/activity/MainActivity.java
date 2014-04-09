@@ -445,7 +445,7 @@ public class MainActivity extends ActionBarActivity {
     private void clearMessageReceipts() {
         addLogMessage("Clearing all message receipts.");
         final DatabaseEventsStorage eventsStorage = new DatabaseEventsStorage();
-        eventsStorage.reset(this, EventsStorage.EventType.MESSAGE_RECEIPT);
+        eventsStorage.reset(EventsStorage.EventType.MESSAGE_RECEIPT);
     }
 
     private void clearRegistration() {

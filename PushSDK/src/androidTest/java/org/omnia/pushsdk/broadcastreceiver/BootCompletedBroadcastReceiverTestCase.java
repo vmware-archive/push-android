@@ -38,13 +38,13 @@ public class BootCompletedBroadcastReceiverTestCase extends AndroidTestCase {
     }
 
     public void testMessageReceiptQueueWithOneItem() {
-        eventsStorage.saveEvent(getContext(), MessageReceiptEventTest.getMessageReceiptEvent1(), EventsStorage.EventType.MESSAGE_RECEIPT);
+        eventsStorage.saveEvent(MessageReceiptEventTest.getMessageReceiptEvent1(), EventsStorage.EventType.MESSAGE_RECEIPT);
         broadcastReceiver.onReceive(getContext(), testIntent);
         assertTrue(messageReceiptAlarmProvider.isAlarmEnabled());
         assertNumberOfMessageReceiptsInStorage(1);
     }
 
     private void assertNumberOfMessageReceiptsInStorage(int expected) {
-        assertEquals(expected, eventsStorage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT));
+        assertEquals(expected, eventsStorage.getNumberOfEvents(EventsStorage.EventType.MESSAGE_RECEIPT));
     }
 }

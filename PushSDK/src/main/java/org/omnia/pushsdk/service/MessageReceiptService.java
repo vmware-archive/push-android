@@ -151,7 +151,7 @@ public class MessageReceiptService extends IntentService {
 
     private void postProcessAfterRequest(final List<Uri> messageReceiptUris) {
         if (messageReceiptUris != null) {
-            MessageReceiptService.eventsStorage.deleteEvents(this, messageReceiptUris, EventsStorage.EventType.MESSAGE_RECEIPT);
+            MessageReceiptService.eventsStorage.deleteEvents(messageReceiptUris, EventsStorage.EventType.MESSAGE_RECEIPT);
             final List<Uri> remainingUnpostedUris = getUnpostedMessageReceipts();
             if (remainingUnpostedUris.size() <= 0) {
                 PushLibLogger.d("MessageReceiptService: no more messages left in queue. Disabling alarm.");
@@ -163,7 +163,7 @@ public class MessageReceiptService extends IntentService {
     }
 
     private List<Uri> getUnpostedMessageReceipts() {
-        final List<Uri> uris = MessageReceiptService.eventsStorage.getEventUrisWithStatus(this, EventsStorage.EventType.MESSAGE_RECEIPT, EventBase.Status.NOT_POSTED);
+        final List<Uri> uris = MessageReceiptService.eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, EventBase.Status.NOT_POSTED);
         return uris;
     }
 

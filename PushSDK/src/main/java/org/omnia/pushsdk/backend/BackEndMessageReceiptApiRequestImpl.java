@@ -107,7 +107,7 @@ public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implemen
     private List<MessageReceiptEvent> getEvents(List<Uri> uris) {
         final List<MessageReceiptEvent> events = new LinkedList<MessageReceiptEvent>();
         for (final Uri uri : uris) {
-            final MessageReceiptEvent event = (MessageReceiptEvent) eventsStorage.readEvent(context, uri);
+            final MessageReceiptEvent event = (MessageReceiptEvent) eventsStorage.readEvent(uri);
             events.add(event);
         }
         return events;
