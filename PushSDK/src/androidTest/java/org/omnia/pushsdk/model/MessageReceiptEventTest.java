@@ -2,6 +2,8 @@ package org.omnia.pushsdk.model;
 
 import android.content.ContentValues;
 import android.database.sqlite.SQLiteStatement;
+import android.os.Bundle;
+import android.os.Parcel;
 import android.provider.BaseColumns;
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
@@ -309,6 +311,35 @@ public class MessageReceiptEventTest extends AndroidTestCase {
         assertNull(event.getVariantUuid());
         assertNull(event.getData());
     }
+
+    public void testIsParcelable1() {
+        final MessageReceiptEvent inputEvent = getMessageReceiptEvent1();
+        final MessageReceiptEvent outputEvent = getObjectViaParcel(inputEvent);
+        assertNotNull(outputEvent);
+        assertEquals(inputEvent, outputEvent);
+    }
+
+    public void testIsParcelable2() {
+        final MessageReceiptEvent inputEvent = new MessageReceiptEvent();
+        final MessageReceiptEvent outputEvent = getObjectViaParcel(inputEvent);
+        assertNotNull(outputEvent);
+        assertEquals(inputEvent, outputEvent);
+    }
+
+    private MessageReceiptEvent getObjectViaParcel(MessageReceiptEvent inputEvent) {
+        final Parcel inputParcel = Parcel.obtain();
+        inputEvent.writeToParcel(inputParcel, 0);
+        final byte[] bytes = inputParcel.marshall();
+        assertNotNull(bytes);
+        final Parcel outputParcel = Parcel.obtain();
+        outputParcel.unmarshall(bytes, 0, bytes.length);
+        outputParcel.setDataPosition(0);
+        final MessageReceiptEvent outputEvent = MessageReceiptEvent.CREATOR.createFromParcel(outputParcel);
+        inputParcel.recycle();
+        outputParcel.recycle();
+        return outputEvent;
+    }
+
 
     private static Date getTestDate1() {
         final Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));

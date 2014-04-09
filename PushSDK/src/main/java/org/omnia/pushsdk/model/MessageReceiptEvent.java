@@ -2,6 +2,8 @@ package org.omnia.pushsdk.model;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.provider.BaseColumns;
 
 import com.google.gson.Gson;
@@ -15,11 +17,12 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-public class MessageReceiptEvent extends EventBase {
+public class MessageReceiptEvent extends EventBase implements Parcelable {
 
     public static class Columns {
         public static final String DATA = "data";
     }
+
     public static final String TYPE = "event_push_received";
 
     @SerializedName(Columns.DATA)
@@ -200,5 +203,53 @@ public class MessageReceiptEvent extends EventBase {
 
     private static Type getTypeToken() {
         return new TypeToken<List<MessageReceiptEvent>>(){}.getType();
+    }
+
+    // Parcelable stuff
+
+    public static final Parcelable.Creator<MessageReceiptEvent> CREATOR = new Parcelable.Creator<MessageReceiptEvent>() {
+
+        public MessageReceiptEvent createFromParcel(Parcel in) {
+            return new MessageReceiptEvent(in);
+        }
+
+        public MessageReceiptEvent[] newArray(int size) {
+            return new MessageReceiptEvent[size];
+        }
+    };
+
+    private MessageReceiptEvent(Parcel in) {
+
+        setId(in.readInt());
+        setStatus(in.readInt());
+        setEventId(in.readString());
+        setVariantUuid(in.readString());
+        setTime(in.readString());
+
+        final String messageUuid = in.readString();
+        if (messageUuid != null) {
+            setData(new MessageReceiptData());
+            getData().setMessageUuid(messageUuid);
+        }
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeInt(getId());
+        dest.writeInt(getStatus());
+        dest.writeString(getEventId());
+        dest.writeString(getVariantUuid());
+        dest.writeString(getTime());
+
+        if (getData() != null) {
+            dest.writeString(getData().getMessageUuid());
+        } else {
+            dest.writeString(null);
+        }
     }
 }
