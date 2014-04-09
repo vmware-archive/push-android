@@ -8,7 +8,7 @@ import com.google.gson.JsonElement;
 
 import org.omnia.pushsdk.database.DatabaseConstants;
 import org.omnia.pushsdk.database.EventsStorage;
-import org.omnia.pushsdk.database.EventsUriHelper;
+import org.omnia.pushsdk.database.urihelpers.EventsUriHelper;
 import org.omnia.pushsdk.database.urihelpers.UriHelper;
 import org.omnia.pushsdk.model.EventBase;
 import org.omnia.pushsdk.model.MessageReceiptEvent;
@@ -18,7 +18,7 @@ public class EventHelper {
 	public static Uri getUriForEventType(EventsStorage.EventType eventType) {
 		switch (eventType) {
 		case ALL:
-			return null; // no valid URI for all ones
+			return null; // no valid URI for type 'ALL'.
 		case MESSAGE_RECEIPT:
 			return DatabaseConstants.MESSAGE_RECEIPTS_CONTENT_URI;
 		default:
