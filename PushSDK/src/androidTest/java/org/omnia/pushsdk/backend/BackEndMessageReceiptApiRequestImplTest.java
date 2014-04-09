@@ -5,14 +5,12 @@ import android.test.AndroidTestCase;
 
 import org.omnia.pushsdk.database.EventsStorage;
 import org.omnia.pushsdk.database.FakeEventsStorage;
-import org.omnia.pushsdk.model.MessageReceiptEvent;
 import org.omnia.pushsdk.model.MessageReceiptEventTest;
-import org.omnia.pushsdk.network.MockHttpURLConnection;
-import org.omnia.pushsdk.network.MockNetworkWrapper;
+import org.omnia.pushsdk.network.FakeHttpURLConnection;
+import org.omnia.pushsdk.network.FakeNetworkWrapper;
 import org.omnia.pushsdk.network.NetworkWrapper;
 import org.omnia.pushsdk.util.DelayedLoop;
 
-import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -32,9 +30,9 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         eventsStorage = new FakeEventsStorage();
-        networkWrapper = new MockNetworkWrapper();
+        networkWrapper = new FakeNetworkWrapper();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
-        MockHttpURLConnection.reset();
+        FakeHttpURLConnection.reset();
         emptyList = new LinkedList<Uri>();
         listWithOneItem = new LinkedList<Uri>();
         final Uri uri = eventsStorage.saveEvent(getContext(), MessageReceiptEventTest.getMessageReceiptEvent1(), EventsStorage.EventType.MESSAGE_RECEIPTS);
@@ -131,14 +129,14 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
 //        if (exceptionText != null) {
 //            exception = new IOException(exceptionText);
 //        }
-//        MockHttpURLConnection.setConnectionException(exception);
-//        MockHttpURLConnection.willThrowConnectionException(true);
-//        MockHttpURLConnection.setResponseCode(expectedHttpStatusCode);
+//        FakeHttpURLConnection.setConnectionException(exception);
+//        FakeHttpURLConnection.willThrowConnectionException(true);
+//        FakeHttpURLConnection.setResponseCode(expectedHttpStatusCode);
 //        makeBackEndMessageReceiptListener(false);
 //    }
 
     private void makeListenersForSuccessfulRequestFromNetwork(boolean isSuccessful, int expectedHttpStatusCode) {
-        MockHttpURLConnection.setResponseCode(expectedHttpStatusCode);
+        FakeHttpURLConnection.setResponseCode(expectedHttpStatusCode);
         makeBackEndMessageReceiptListener(isSuccessful);
     }
 

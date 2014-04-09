@@ -21,15 +21,15 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class MockNetworkWrapper implements NetworkWrapper {
+public class FakeNetworkWrapper implements NetworkWrapper {
 
     private final boolean isNetworkAvailable;
 
-    public MockNetworkWrapper() {
+    public FakeNetworkWrapper() {
         isNetworkAvailable = true;
     }
 
-    public MockNetworkWrapper(boolean isNetworkAvailable) {
+    public FakeNetworkWrapper(boolean isNetworkAvailable) {
         this.isNetworkAvailable = isNetworkAvailable;
     }
 
@@ -40,6 +40,6 @@ public class MockNetworkWrapper implements NetworkWrapper {
 
     @Override
     public HttpURLConnection getHttpURLConnection(URL url) throws IOException {
-        return new MockHttpURLConnection(url);
+        return new FakeHttpURLConnection(url);
     }
 }

@@ -8,38 +8,38 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class MockHttpURLConnection extends HttpURLConnection {
+public class FakeHttpURLConnection extends HttpURLConnection {
 
     private static int responseCode;
     private static String responseData;
     private static IOException connectionException;
     private static boolean willThrowConnectionException;
 
-    protected MockHttpURLConnection(URL url) {
+    protected FakeHttpURLConnection(URL url) {
         super(url);
     }
 
     public static void setResponseCode(int responseCode) {
-        MockHttpURLConnection.responseCode = responseCode;
+        FakeHttpURLConnection.responseCode = responseCode;
     }
 
     public static void setResponseData(String responseData) {
-        MockHttpURLConnection.responseData = responseData;
+        FakeHttpURLConnection.responseData = responseData;
     }
 
     public static void setConnectionException(IOException connectionException) {
-        MockHttpURLConnection.connectionException = connectionException;
+        FakeHttpURLConnection.connectionException = connectionException;
     }
 
     public static void willThrowConnectionException(boolean willThrowConnectionException) {
-        MockHttpURLConnection.willThrowConnectionException = willThrowConnectionException;
+        FakeHttpURLConnection.willThrowConnectionException = willThrowConnectionException;
     }
 
     public static void reset() {
-        MockHttpURLConnection.responseCode = 0;
-        MockHttpURLConnection.responseData = null;
-        MockHttpURLConnection.connectionException = null;
-        MockHttpURLConnection.willThrowConnectionException = false;
+        FakeHttpURLConnection.responseCode = 0;
+        FakeHttpURLConnection.responseData = null;
+        FakeHttpURLConnection.connectionException = null;
+        FakeHttpURLConnection.willThrowConnectionException = false;
     }
 
     @Override
@@ -54,8 +54,8 @@ public class MockHttpURLConnection extends HttpURLConnection {
 
     @Override
     public void connect() throws IOException {
-        if (MockHttpURLConnection.willThrowConnectionException) {
-            throw MockHttpURLConnection.connectionException;
+        if (FakeHttpURLConnection.willThrowConnectionException) {
+            throw FakeHttpURLConnection.connectionException;
         }
     }
 

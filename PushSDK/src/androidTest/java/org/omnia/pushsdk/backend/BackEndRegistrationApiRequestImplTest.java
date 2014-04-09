@@ -18,8 +18,8 @@ package org.omnia.pushsdk.backend;
 import android.test.AndroidTestCase;
 
 import org.omnia.pushsdk.RegistrationParameters;
-import org.omnia.pushsdk.network.MockHttpURLConnection;
-import org.omnia.pushsdk.network.MockNetworkWrapper;
+import org.omnia.pushsdk.network.FakeHttpURLConnection;
+import org.omnia.pushsdk.network.FakeNetworkWrapper;
 import org.omnia.pushsdk.util.DelayedLoop;
 
 import java.io.IOException;
@@ -34,16 +34,16 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     private static final String TEST_DEVICE_ALIAS = "TEST_DEVICE_ALIAS";
     private static final long TEN_SECOND_TIMEOUT = 10000L;
 
-    private MockNetworkWrapper networkWrapper;
+    private FakeNetworkWrapper networkWrapper;
     private DelayedLoop delayedLoop;
     private BackEndRegistrationListener backEndRegistrationListener;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        networkWrapper = new MockNetworkWrapper();
+        networkWrapper = new FakeNetworkWrapper();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
-        MockHttpURLConnection.reset();
+        FakeHttpURLConnection.reset();
     }
 
     public void testRequiresContext() {
@@ -66,7 +66,7 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresGcmDeviceRegistrationId() {
         try {
-            final BackEndRegistrationApiRequestImpl request = new BackEndRegistrationApiRequestImpl(getContext(), new MockNetworkWrapper());
+            final BackEndRegistrationApiRequestImpl request = new BackEndRegistrationApiRequestImpl(getContext(), new FakeNetworkWrapper());
             makeBackEndRegistrationApiRequestListener(true);
             request.startDeviceRegistration(null, getParameters(), backEndRegistrationListener);
             fail("Should not have succeeded");
@@ -77,7 +77,7 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresParameters() {
         try {
-            final BackEndRegistrationApiRequestImpl request = new BackEndRegistrationApiRequestImpl(getContext(), new MockNetworkWrapper());
+            final BackEndRegistrationApiRequestImpl request = new BackEndRegistrationApiRequestImpl(getContext(), new FakeNetworkWrapper());
             request.startDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, null, backEndRegistrationListener);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
@@ -87,7 +87,7 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresListener() {
         try {
-            final BackEndRegistrationApiRequestImpl request = new BackEndRegistrationApiRequestImpl(getContext(), new MockNetworkWrapper());
+            final BackEndRegistrationApiRequestImpl request = new BackEndRegistrationApiRequestImpl(getContext(), new FakeNetworkWrapper());
             request.startDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, getParameters(), null);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
@@ -145,26 +145,26 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
 
     private void makeListenersForSuccessfulRequestFromNetwork(boolean isSuccessfulResult, int expectedHttpStatusCode) {
         final String resultantJson = "{\"device_uuid\" : \"" + TEST_BACK_END_DEVICE_REGISTRATION_ID + "\"}";
-        MockHttpURLConnection.setResponseData(resultantJson);
-        MockHttpURLConnection.setResponseCode(expectedHttpStatusCode);
+        FakeHttpURLConnection.setResponseData(resultantJson);
+        FakeHttpURLConnection.setResponseCode(expectedHttpStatusCode);
         makeBackEndRegistrationApiRequestListener(isSuccessfulResult);
     }
 
     private void makeListenersForSuccessfulNullResultFromNetwork() {
-        MockHttpURLConnection.setResponseData(null);
-        MockHttpURLConnection.setResponseCode(200);
+        FakeHttpURLConnection.setResponseData(null);
+        FakeHttpURLConnection.setResponseCode(200);
         makeBackEndRegistrationApiRequestListener(false);
     }
 
     private void makeListenersWithBadNetworkResponse() {
-        MockHttpURLConnection.setResponseData("{{{{{{{");
-        MockHttpURLConnection.setResponseCode(200);
+        FakeHttpURLConnection.setResponseData("{{{{{{{");
+        FakeHttpURLConnection.setResponseCode(200);
         makeBackEndRegistrationApiRequestListener(false);
     }
 
     private void makeListenersWithNoDeviceUuidInResponse() {
-        MockHttpURLConnection.setResponseData("{}");
-        MockHttpURLConnection.setResponseCode(200);
+        FakeHttpURLConnection.setResponseData("{}");
+        FakeHttpURLConnection.setResponseCode(200);
         makeBackEndRegistrationApiRequestListener(false);
     }
 
@@ -173,9 +173,9 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
         if (exceptionText != null) {
             exception = new IOException(exceptionText);
         }
-        MockHttpURLConnection.setConnectionException(exception);
-        MockHttpURLConnection.willThrowConnectionException(true);
-        MockHttpURLConnection.setResponseCode(expectedHttpStatusCode);
+        FakeHttpURLConnection.setConnectionException(exception);
+        FakeHttpURLConnection.willThrowConnectionException(true);
+        FakeHttpURLConnection.setResponseCode(expectedHttpStatusCode);
         makeBackEndRegistrationApiRequestListener(false);
     }
 

@@ -17,8 +17,8 @@ package org.omnia.pushsdk.backend;
 
 import android.test.AndroidTestCase;
 
-import org.omnia.pushsdk.network.MockHttpURLConnection;
-import org.omnia.pushsdk.network.MockNetworkWrapper;
+import org.omnia.pushsdk.network.FakeHttpURLConnection;
+import org.omnia.pushsdk.network.FakeNetworkWrapper;
 import org.omnia.pushsdk.util.DelayedLoop;
 
 import java.io.IOException;
@@ -28,16 +28,16 @@ public class BackEndUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
     private static final String TEST_BACK_END_DEVICE_REGISTRATION_ID = "TEST_BACK_END_DEVICE_REGISTRATION_ID";
     private static final long TEN_SECOND_TIMEOUT = 10000L;
 
-    private MockNetworkWrapper networkWrapper;
+    private FakeNetworkWrapper networkWrapper;
     private DelayedLoop delayedLoop;
     private BackEndUnregisterDeviceListener backEndUnregisterDeviceListener;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        networkWrapper = new MockNetworkWrapper();
+        networkWrapper = new FakeNetworkWrapper();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
-        MockHttpURLConnection.reset();
+        FakeHttpURLConnection.reset();
     }
 
     public void testRequiresNetworkWrapper() {
@@ -51,7 +51,7 @@ public class BackEndUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresBackEndDeviceRegistrationId() {
         try {
-            final BackEndUnregisterDeviceApiRequestImpl backEndRegistrationApiRequestImpl = new BackEndUnregisterDeviceApiRequestImpl(new MockNetworkWrapper());
+            final BackEndUnregisterDeviceApiRequestImpl backEndRegistrationApiRequestImpl = new BackEndUnregisterDeviceApiRequestImpl(new FakeNetworkWrapper());
             makeBackEndUnegisterDeviceApiRequestListener(true);
             backEndRegistrationApiRequestImpl.startUnregisterDevice(null, backEndUnregisterDeviceListener);
             fail("Should not have succeeded");
@@ -62,7 +62,7 @@ public class BackEndUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresListener() {
         try {
-            final BackEndUnregisterDeviceApiRequestImpl backEndRegistrationApiRequestImpl = new BackEndUnregisterDeviceApiRequestImpl(new MockNetworkWrapper());
+            final BackEndUnregisterDeviceApiRequestImpl backEndRegistrationApiRequestImpl = new BackEndUnregisterDeviceApiRequestImpl(new FakeNetworkWrapper());
             backEndRegistrationApiRequestImpl.startUnregisterDevice(TEST_BACK_END_DEVICE_REGISTRATION_ID, null);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
@@ -104,7 +104,7 @@ public class BackEndUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
     }
 
     private void makeListenersForSuccessfulRequestFromNetwork(boolean isSuccessfulResult, int expectedHttpStatusCode) {
-        MockHttpURLConnection.setResponseCode(expectedHttpStatusCode);
+        FakeHttpURLConnection.setResponseCode(expectedHttpStatusCode);
         makeBackEndUnegisterDeviceApiRequestListener(isSuccessfulResult);
     }
 
@@ -113,8 +113,8 @@ public class BackEndUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
         if (exceptionText != null) {
             exception = new IOException(exceptionText);
         }
-        MockHttpURLConnection.willThrowConnectionException(true);
-        MockHttpURLConnection.setConnectionException(exception);
+        FakeHttpURLConnection.willThrowConnectionException(true);
+        FakeHttpURLConnection.setConnectionException(exception);
         makeBackEndUnegisterDeviceApiRequestListener(false);
     }
 
