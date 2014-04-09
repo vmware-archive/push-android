@@ -42,7 +42,7 @@ public class FakeEventsStorageTest extends AndroidTestCase {
 	public void testStartState() {
 
 		// Tests the initial state of the fake filesystem
-		assertEquals(0, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS));
+		assertEquals(0, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT));
 //		assertEquals(0, storage.getNumberOfEvents(getContext(), EventType.API_VALIDATION_ERROR));
 		assertEquals(0, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.ALL));
 	}
@@ -50,9 +50,9 @@ public class FakeEventsStorageTest extends AndroidTestCase {
 	public void testSaveMessageReceiptEventOnce() {
 
 		// Tests saving one file into the fake filesystem
-		final Uri saveResult = storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
+		final Uri saveResult = storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
 		assertNotNull(saveResult);
-		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS));
+		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT));
 //		assertEquals(0, storage.getNumberOfEvents(getContext(), EventType.API_VALIDATION_ERROR));
 		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.ALL));
 	}
@@ -70,16 +70,16 @@ public class FakeEventsStorageTest extends AndroidTestCase {
 	public void testSaveMessageReceiptEventTwice() {
 
 		// Save one file into the fake filesystem
-		final Uri saveResult1 = storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
+		final Uri saveResult1 = storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
 		assertNotNull(saveResult1);
-		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS));
+		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT));
 //		assertEquals(0, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.API_VALIDATION_ERROR));
 		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.ALL));
 
 		// Save another file into the fake filesystem
-		final Uri saveResult2 = storage.saveEvent(getContext(), EVENT_2, EventsStorage.EventType.MESSAGE_RECEIPTS);
+		final Uri saveResult2 = storage.saveEvent(getContext(), EVENT_2, EventsStorage.EventType.MESSAGE_RECEIPT);
 		assertNotNull(saveResult2);
-		assertEquals(2, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS));
+		assertEquals(2, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT));
 //		assertEquals(0, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.API_VALIDATION_ERROR));
 		assertEquals(2, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.ALL));
 	}
@@ -104,8 +104,8 @@ public class FakeEventsStorageTest extends AndroidTestCase {
 	public void testSaveMessageReceiptAndRead() {
 
 		// Save a file into the fake filesystem
-		storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		final List<Uri> files1 = storage.getEventUris(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS);
+		storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
+		final List<Uri> files1 = storage.getEventUris(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT);
 		assertEquals(1, files1.size());
 		final List<Uri> files2 = storage.getEventUris(getContext(), EventsStorage.EventType.ALL);
 		assertEquals(1, files2.size());
@@ -158,14 +158,14 @@ public class FakeEventsStorageTest extends AndroidTestCase {
 	public void testSaveMessageReceiptAndDelete() {
 
 		// Save a file into the fake filesystem
-		storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		final List<Uri> files = storage.getEventUris(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS);
-		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS));
+		storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
+		final List<Uri> files = storage.getEventUris(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT);
+		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT));
 		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.ALL));
 
 		// Try to delete the file from the fake filesystem
-		storage.deleteEvents(getContext(), files, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		assertEquals(0, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS));
+		storage.deleteEvents(getContext(), files, EventsStorage.EventType.MESSAGE_RECEIPT);
+		assertEquals(0, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT));
 		assertEquals(0, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.ALL));
 	}
 
@@ -186,14 +186,14 @@ public class FakeEventsStorageTest extends AndroidTestCase {
 	public void testDeleteNonExistentFile() {
 
 		// Save a file into the fake filesystem
-		storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS));
+		storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
+		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT));
 		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.ALL));
 		// Try to delete a file that doesn't exist
 		final List<Uri> bogusList = new LinkedList<Uri>();
 		bogusList.add(NON_EXISTENT_FILE_1);
-		storage.deleteEvents(getContext(), bogusList, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS));
+		storage.deleteEvents(getContext(), bogusList, EventsStorage.EventType.MESSAGE_RECEIPT);
+		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT));
 		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.ALL));
 
 //		storage.saveEvent(getContext(), EVENT_4, EventType.API_VALIDATION_ERROR);
@@ -209,23 +209,23 @@ public class FakeEventsStorageTest extends AndroidTestCase {
 	public void testDeleteOneOfTwoMessageReceiptFiles() {
 
 		// Save a couple of files into the fake filesystem
-		storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS));
-		storage.saveEvent(getContext(), EVENT_2, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		assertEquals(2, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS));
+		storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
+		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT));
+		storage.saveEvent(getContext(), EVENT_2, EventsStorage.EventType.MESSAGE_RECEIPT);
+		assertEquals(2, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT));
 		assertEquals(2, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.ALL));
 
 		// Delete one of the two files
-		final List<Uri> files1 = storage.getEventUris(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS);
+		final List<Uri> files1 = storage.getEventUris(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT);
 		final List<Uri> filesRemaining = new LinkedList<Uri>();
 		filesRemaining.add(files1.get(1));
 		files1.remove(1);
-		storage.deleteEvents(getContext(), files1, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS));
+		storage.deleteEvents(getContext(), files1, EventsStorage.EventType.MESSAGE_RECEIPT);
+		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT));
 		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.ALL));
 
 		// Ensure the other file is still in the fake filesystem
-		final List<Uri> files2 = storage.getEventUris(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS);
+		final List<Uri> files2 = storage.getEventUris(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT);
 		assertEquals(files1.size(), files2.size());
 		assertEquals(1, files2.size());
 		assertEquals(filesRemaining.get(0), files2.get(0));
@@ -259,36 +259,36 @@ public class FakeEventsStorageTest extends AndroidTestCase {
 	public void testReset1() {
 
 		// Tests the reset mechanism
-		storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS));
+		storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
+		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT));
 //		storage.saveEvent(getContext(), EVENT_4, EventType.API_VALIDATION_ERROR);
 //		assertEquals(1, storage.getNumberOfEvents(getContext(), EventType.API_VALIDATION_ERROR));
 //		assertEquals(2, storage.getNumberOfEvents(getContext(), EventType.ALL));
-		storage.reset(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS);
+		storage.reset(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT);
 //		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.ALL));
 //		storage.reset(getContext(), EventType.API_VALIDATION_ERROR);
 		assertEquals(0, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.ALL));
-		assertEquals(0, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS));
+		assertEquals(0, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT));
 //		assertEquals(0, storage.getNumberOfEvents(getContext(), EventType.API_VALIDATION_ERROR));
 	}
 
 	public void testReset2() {
 
 		// Tests the reset mechanism
-		storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS));
+		storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
+		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT));
 //		storage.saveEvent(getContext(), EVENT_4, EventType.API_VALIDATION_ERROR);
 //		assertEquals(1, storage.getNumberOfEvents(getContext(), EventType.API_VALIDATION_ERROR));
 		assertEquals(1, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.ALL));
 		storage.reset(getContext(), EventsStorage.EventType.ALL);
 		assertEquals(0, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.ALL));
-		assertEquals(0, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS));
+		assertEquals(0, storage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT));
 //		assertEquals(0, storage.getNumberOfEvents(getContext(), EventType.API_VALIDATION_ERROR));
 	}
 
 	public void testSetStatus() {
 
-		final Uri uri1 = storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
+		final Uri uri1 = storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
 		assertEquals(EventBase.Status.NOT_POSTED, EVENT_1.getStatus());
 		storage.setEventStatus(getContext(), uri1, EventBase.Status.POSTING);
 		assertEquals(EventBase.Status.POSTING, EVENT_1.getStatus());
@@ -307,21 +307,21 @@ public class FakeEventsStorageTest extends AndroidTestCase {
 		EVENT_1.setStatus(EventBase.Status.POSTED);
 		EVENT_2.setStatus(EventBase.Status.POSTING_ERROR);
 		EVENT_3.setStatus(EventBase.Status.POSTING_ERROR);
-		final Uri uri1 = storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		final Uri uri2 = storage.saveEvent(getContext(), EVENT_2, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		final Uri uri3 = storage.saveEvent(getContext(), EVENT_3, EventsStorage.EventType.MESSAGE_RECEIPTS);
+		final Uri uri1 = storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
+		final Uri uri2 = storage.saveEvent(getContext(), EVENT_2, EventsStorage.EventType.MESSAGE_RECEIPT);
+		final Uri uri3 = storage.saveEvent(getContext(), EVENT_3, EventsStorage.EventType.MESSAGE_RECEIPT);
 
-		final List<Uri> uris1 = storage.getEventUrisWithStatus(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS, EventBase.Status.NOT_POSTED);
+		final List<Uri> uris1 = storage.getEventUrisWithStatus(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT, EventBase.Status.NOT_POSTED);
 		assertEquals(0, uris1.size());
 
-		final List<Uri> uris2 = storage.getEventUrisWithStatus(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS, EventBase.Status.POSTING);
+		final List<Uri> uris2 = storage.getEventUrisWithStatus(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT, EventBase.Status.POSTING);
 		assertEquals(0, uris2.size());
 
-		final List<Uri> uris3 = storage.getEventUrisWithStatus(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS, EventBase.Status.POSTED);
+		final List<Uri> uris3 = storage.getEventUrisWithStatus(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT, EventBase.Status.POSTED);
 		assertEquals(1, uris3.size());
 		assertEquals(uri1, uris3.get(0));
 
-		final List<Uri> uris4 = storage.getEventUrisWithStatus(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS, EventBase.Status.POSTING_ERROR);
+		final List<Uri> uris4 = storage.getEventUrisWithStatus(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT, EventBase.Status.POSTING_ERROR);
 		assertEquals(2, uris4.size());
 		assertTrue(uri2.equals(uris4.get(0)) || uri2.equals(uris4.get(1)));
 		assertTrue(uri3.equals(uris4.get(0)) || uri3.equals(uris4.get(1)));
@@ -360,9 +360,9 @@ public class FakeEventsStorageTest extends AndroidTestCase {
 //		EVENT_4.setStatus(Event.Status.POSTED);
 //		EVENT_5.setStatus(Event.Status.POSTING_ERROR);
 //		EVENT_6.setStatus(Event.Status.POSTING_ERROR);
-		storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		storage.saveEvent(getContext(), EVENT_2, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		storage.saveEvent(getContext(), EVENT_3, EventsStorage.EventType.MESSAGE_RECEIPTS);
+		storage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
+		storage.saveEvent(getContext(), EVENT_2, EventsStorage.EventType.MESSAGE_RECEIPT);
+		storage.saveEvent(getContext(), EVENT_3, EventsStorage.EventType.MESSAGE_RECEIPT);
 //		storage.saveEvent(getContext(), EVENT_4, EventType.API_VALIDATION_ERROR);
 //		storage.saveEvent(getContext(), EVENT_5, EventType.API_VALIDATION_ERROR);
 //		storage.saveEvent(getContext(), EVENT_6, EventType.API_VALIDATION_ERROR);

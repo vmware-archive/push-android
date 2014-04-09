@@ -152,7 +152,7 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         assertTrue(receivedIntent.hasExtra(GcmService.KEY_GCM_INTENT));
         assertNumberOfMessageReceiptsInStorage(1);
 
-        final List<Uri> eventUris = eventsStorage.getEventUris(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS);
+        final List<Uri> eventUris = eventsStorage.getEventUris(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT);
         assertEquals(1, eventUris.size());
         final MessageReceiptEvent savedEvent = (MessageReceiptEvent) eventsStorage.readEvent(getContext(), eventUris.get(0));
         assertEquals(TEST_MESSAGE_UUID, savedEvent.getData().getMessageUuid());
@@ -168,6 +168,6 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
     }
 
     private void assertNumberOfMessageReceiptsInStorage(int expected) {
-        assertEquals(expected, eventsStorage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS));
+        assertEquals(expected, eventsStorage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT));
     }
 }

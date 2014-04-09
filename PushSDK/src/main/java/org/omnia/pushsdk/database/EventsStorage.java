@@ -11,7 +11,7 @@ public interface EventsStorage {
 
     public enum EventType {
         ALL,
-        MESSAGE_RECEIPTS
+        MESSAGE_RECEIPT
     }
 
     /**

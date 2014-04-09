@@ -168,11 +168,11 @@ public class MessageReceiptServiceTest extends ServiceTestCase<MessageReceiptSer
 
     private void saveMessageReceipts(List<MessageReceiptEvent> events) {
         for (final MessageReceiptEvent event : events) {
-            eventsStorage.saveEvent(getContext(), event, EventsStorage.EventType.MESSAGE_RECEIPTS);
+            eventsStorage.saveEvent(getContext(), event, EventsStorage.EventType.MESSAGE_RECEIPT);
         }
     }
 
     private void assertNumberOfMessageReceiptsInStorage(int expected) {
-        assertEquals(expected, eventsStorage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS));
+        assertEquals(expected, eventsStorage.getNumberOfEvents(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT));
     }
 }

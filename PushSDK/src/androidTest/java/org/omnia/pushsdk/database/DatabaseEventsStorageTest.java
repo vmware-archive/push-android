@@ -48,20 +48,20 @@ public class DatabaseEventsStorageTest extends AndroidTestCase {
 //		EVENT_4 = ApiValidationErrorEvent.getApiValidationErrorEvent(getContext(), "valid URL", "POST", REQUEST_HEADERS, 44, "content/silly", "Ministry of Silly Walks", "DOUBLE ERROR", metadata);
 		databaseEventsStorage = new DatabaseEventsStorage();
 		databaseEventsStorage.reset(CONTEXT, EventsStorage.EventType.ALL);
-		// databaseEventsStorage.reset(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS);
+		// databaseEventsStorage.reset(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT);
 		// databaseEventsStorage.reset(CONTEXT, EventsStorage.EventType.API_VALIDATION_ERROR);
 	}
 
 	public void testStartState() {
 		assertNotNull(databaseEventsStorage);
 		assertNotNull(CONTEXT);
-		final List<Uri> files1 = databaseEventsStorage.getEventUris(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS);
+		final List<Uri> files1 = databaseEventsStorage.getEventUris(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT);
 		assertTrue(files1 == null || files1.size() == 0);
 //		final List<Uri> files2 = databaseEventsStorage.getEventUris(CONTEXT, EventsStorage.EventType.API_VALIDATION_ERROR);
 //		assertTrue(files2 == null || files2.size() == 0);
 		final List<Uri> files3 = databaseEventsStorage.getEventUris(CONTEXT, EventsStorage.EventType.ALL);
 		assertTrue(files3 == null || files3.size() == 0);
-		assertEquals(0, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS));
+		assertEquals(0, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT));
 //		assertEquals(0, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.API_VALIDATION_ERROR));
 		assertEquals(0, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.ALL));
 		assertFalse(EVENT_1.equals(EVENT_2));
@@ -69,9 +69,9 @@ public class DatabaseEventsStorageTest extends AndroidTestCase {
 	}
 
 	public void testSaveMessageReceiptOnce() {
-		final Uri saveResult = databaseEventsStorage.saveEvent(CONTEXT, EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
+		final Uri saveResult = databaseEventsStorage.saveEvent(CONTEXT, EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
 		assertNotNull(saveResult);
-		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS));
+		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT));
 //		assertEquals(0, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.API_VALIDATION_ERROR));
 		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.ALL));
 	}
@@ -80,17 +80,17 @@ public class DatabaseEventsStorageTest extends AndroidTestCase {
 //		final Uri saveResult = databaseEventsStorage.saveEvent(CONTEXT, EVENT_3, EventsStorage.EventType.API_VALIDATION_ERROR);
 //		assertNotNull(saveResult);
 //		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.API_VALIDATION_ERROR));
-//		assertEquals(0, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS));
+//		assertEquals(0, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT));
 //		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.ALL));
 //	}
 
 	public void testSaveMessageReceiptTwice() {
-		databaseEventsStorage.saveEvent(CONTEXT, EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS));
+		databaseEventsStorage.saveEvent(CONTEXT, EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
+		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT));
 		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.ALL));
-		final Uri saveResult = databaseEventsStorage.saveEvent(CONTEXT, EVENT_2, EventsStorage.EventType.MESSAGE_RECEIPTS);
+		final Uri saveResult = databaseEventsStorage.saveEvent(CONTEXT, EVENT_2, EventsStorage.EventType.MESSAGE_RECEIPT);
 		assertNotNull(saveResult);
-		assertEquals(2, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS));
+		assertEquals(2, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT));
 		assertEquals(2, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.ALL));
 	}
 
@@ -105,8 +105,8 @@ public class DatabaseEventsStorageTest extends AndroidTestCase {
 //	}
 
 	public void testSaveMessageReceiptAndRead() {
-		databaseEventsStorage.saveEvent(CONTEXT, EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		final List<Uri> files1 = databaseEventsStorage.getEventUris(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS);
+		databaseEventsStorage.saveEvent(CONTEXT, EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
+		final List<Uri> files1 = databaseEventsStorage.getEventUris(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT);
 		assertEquals(1, files1.size());
 		final List<Uri> files2 = databaseEventsStorage.getEventUris(CONTEXT, EventsStorage.EventType.ALL);
 		assertEquals(1, files2.size());
@@ -163,12 +163,12 @@ public class DatabaseEventsStorageTest extends AndroidTestCase {
 	}
 
 	public void testSaveMessageReceiptAndDelete() {
-		databaseEventsStorage.saveEvent(CONTEXT, EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		final List<Uri> files = databaseEventsStorage.getEventUris(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS));
+		databaseEventsStorage.saveEvent(CONTEXT, EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
+		final List<Uri> files = databaseEventsStorage.getEventUris(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT);
+		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT));
 		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.ALL));
-		databaseEventsStorage.deleteEvents(CONTEXT, files, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		assertEquals(0, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS));
+		databaseEventsStorage.deleteEvents(CONTEXT, files, EventsStorage.EventType.MESSAGE_RECEIPT);
+		assertEquals(0, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT));
 		assertEquals(0, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.ALL));
 	}
 
@@ -183,13 +183,13 @@ public class DatabaseEventsStorageTest extends AndroidTestCase {
 //	}
 
 	public void testDeleteNonExistingFile() {
-		databaseEventsStorage.saveEvent(CONTEXT, EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS));
+		databaseEventsStorage.saveEvent(CONTEXT, EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
+		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT));
 		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.ALL));
 		final List<Uri> bogusList = new LinkedList<Uri>();
 		bogusList.add(NON_EXISTENT_FILE_1);
-		databaseEventsStorage.deleteEvents(CONTEXT, bogusList, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS));
+		databaseEventsStorage.deleteEvents(CONTEXT, bogusList, EventsStorage.EventType.MESSAGE_RECEIPT);
+		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT));
 		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.ALL));
 
 //		databaseEventsStorage.saveEvent(CONTEXT, EVENT_3, EventsStorage.EventType.API_VALIDATION_ERROR);
@@ -204,23 +204,23 @@ public class DatabaseEventsStorageTest extends AndroidTestCase {
 
 	public void testDeleteOneOfTwoMessageReceiptFiles() {
 
-		databaseEventsStorage.saveEvent(CONTEXT, EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS));
+		databaseEventsStorage.saveEvent(CONTEXT, EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
+		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT));
 
-		databaseEventsStorage.saveEvent(CONTEXT, EVENT_2, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		assertEquals(2, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS));
+		databaseEventsStorage.saveEvent(CONTEXT, EVENT_2, EventsStorage.EventType.MESSAGE_RECEIPT);
+		assertEquals(2, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT));
 		assertEquals(2, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.ALL));
 
-		final List<Uri> files1 = databaseEventsStorage.getEventUris(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS);
+		final List<Uri> files1 = databaseEventsStorage.getEventUris(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT);
 		final List<Uri> filesRemaining = new LinkedList<Uri>();
 		filesRemaining.add(files1.get(1));
 		files1.remove(1);
 
-		databaseEventsStorage.deleteEvents(CONTEXT, files1, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS));
+		databaseEventsStorage.deleteEvents(CONTEXT, files1, EventsStorage.EventType.MESSAGE_RECEIPT);
+		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT));
 		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.ALL));
 
-		final List<Uri> files2 = databaseEventsStorage.getEventUris(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS);
+		final List<Uri> files2 = databaseEventsStorage.getEventUris(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT);
 		assertEquals(files1.size(), files2.size());
 		assertEquals(1, files2.size());
 		assertEquals(filesRemaining.get(0), files2.get(0));
@@ -253,36 +253,36 @@ public class DatabaseEventsStorageTest extends AndroidTestCase {
 
 	public void testReset1() {
 
-		databaseEventsStorage.saveEvent(CONTEXT, EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
+		databaseEventsStorage.saveEvent(CONTEXT, EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
 //		databaseEventsStorage.saveEvent(CONTEXT, EVENT_3, EventsStorage.EventType.API_VALIDATION_ERROR);
-		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS));
+		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT));
 //		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.API_VALIDATION_ERROR));
 		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.ALL));
 
-		databaseEventsStorage.reset(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS);
+		databaseEventsStorage.reset(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT);
 //		databaseEventsStorage.reset(CONTEXT, EventsStorage.EventType.API_VALIDATION_ERROR);
-		assertEquals(0, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS));
+		assertEquals(0, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT));
 //		assertEquals(0, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.API_VALIDATION_ERROR));
 		assertEquals(0, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.ALL));
 	}
 
 	public void testReset2() {
 
-		databaseEventsStorage.saveEvent(CONTEXT, EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
+		databaseEventsStorage.saveEvent(CONTEXT, EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
 //		databaseEventsStorage.saveEvent(CONTEXT, EVENT_3, EventsStorage.EventType.API_VALIDATION_ERROR);
-		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS));
+		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT));
 //		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.API_VALIDATION_ERROR));
 		assertEquals(1, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.ALL));
 
 		databaseEventsStorage.reset(CONTEXT, EventsStorage.EventType.ALL);
-		assertEquals(0, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPTS));
+		assertEquals(0, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.MESSAGE_RECEIPT));
 //		assertEquals(0, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.API_VALIDATION_ERROR));
 		assertEquals(0, databaseEventsStorage.getNumberOfEvents(CONTEXT, EventsStorage.EventType.ALL));
 	}
 
 	public void testSetStatus() {
 
-		final Uri uri1 = databaseEventsStorage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
+		final Uri uri1 = databaseEventsStorage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
 		assertEquals(EventBase.Status.NOT_POSTED, EVENT_1.getStatus());
 
 		databaseEventsStorage.setEventStatus(getContext(), uri1, EventBase.Status.POSTING);
@@ -304,16 +304,16 @@ public class DatabaseEventsStorageTest extends AndroidTestCase {
 	public void testGetMessageReceiptEventUrisWithStatus() {
 		EVENT_1.setStatus(EventBase.Status.POSTED);
 		EVENT_2.setStatus(EventBase.Status.POSTING_ERROR);
-		databaseEventsStorage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		databaseEventsStorage.saveEvent(getContext(), EVENT_2, EventsStorage.EventType.MESSAGE_RECEIPTS);
+		databaseEventsStorage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
+		databaseEventsStorage.saveEvent(getContext(), EVENT_2, EventsStorage.EventType.MESSAGE_RECEIPT);
 
-		final List<Uri> uris1 = databaseEventsStorage.getEventUrisWithStatus(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS, EventBase.Status.NOT_POSTED);
+		final List<Uri> uris1 = databaseEventsStorage.getEventUrisWithStatus(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT, EventBase.Status.NOT_POSTED);
 		assertEquals(0, uris1.size());
 
-		final List<Uri> uris2 = databaseEventsStorage.getEventUrisWithStatus(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS, EventBase.Status.POSTING);
+		final List<Uri> uris2 = databaseEventsStorage.getEventUrisWithStatus(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT, EventBase.Status.POSTING);
 		assertEquals(0, uris2.size());
 
-		final List<Uri> uris3 = databaseEventsStorage.getEventUrisWithStatus(getContext(), EventsStorage.EventType.MESSAGE_RECEIPTS, EventBase.Status.POSTING_ERROR);
+		final List<Uri> uris3 = databaseEventsStorage.getEventUrisWithStatus(getContext(), EventsStorage.EventType.MESSAGE_RECEIPT, EventBase.Status.POSTING_ERROR);
 		assertEquals(1, uris3.size());
 	}
 
@@ -338,8 +338,8 @@ public class DatabaseEventsStorageTest extends AndroidTestCase {
 		EVENT_2.setStatus(EventBase.Status.POSTING);
 //		EVENT_3.setStatus(EventBase.Status.NOT_POSTED);
 //		EVENT_4.setStatus(EventBase.Status.POSTED);
-		databaseEventsStorage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPTS);
-		databaseEventsStorage.saveEvent(getContext(), EVENT_2, EventsStorage.EventType.MESSAGE_RECEIPTS);
+		databaseEventsStorage.saveEvent(getContext(), EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
+		databaseEventsStorage.saveEvent(getContext(), EVENT_2, EventsStorage.EventType.MESSAGE_RECEIPT);
 //		databaseEventsStorage.saveEvent(getContext(), EVENT_3, EventsStorage.EventType.API_VALIDATION_ERROR);
 //		databaseEventsStorage.saveEvent(getContext(), EVENT_4, EventsStorage.EventType.API_VALIDATION_ERROR);
 

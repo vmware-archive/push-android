@@ -18,7 +18,7 @@ public class FakeEventsStorage implements EventsStorage {
 
 	public FakeEventsStorage() {
 		events = new HashMap<EventType, Map<Uri, EventBase>>();
-		events.put(EventType.MESSAGE_RECEIPTS, new HashMap<Uri, EventBase>());
+		events.put(EventType.MESSAGE_RECEIPT, new HashMap<Uri, EventBase>());
 	}
 
 	/**
@@ -48,7 +48,7 @@ public class FakeEventsStorage implements EventsStorage {
 	public List<Uri> getEventUris(Context context, final EventType eventType) {
 		final List<Uri> result = new LinkedList<Uri>();
 		if (eventType == EventType.ALL) {
-			result.addAll(events.get(EventType.MESSAGE_RECEIPTS).keySet());
+			result.addAll(events.get(EventType.MESSAGE_RECEIPT).keySet());
 		} else {
 			result.addAll(events.get(eventType).keySet());
 		}
@@ -66,7 +66,7 @@ public class FakeEventsStorage implements EventsStorage {
 	public List<Uri> getEventUrisWithStatus(Context context, EventType eventType, int status) {
 		final List<Uri> result = new LinkedList<Uri>();
 		if (eventType == EventType.ALL) {
-			getEventUrisWithStatusForEventType(EventType.MESSAGE_RECEIPTS, status, result);
+			getEventUrisWithStatusForEventType(EventType.MESSAGE_RECEIPT, status, result);
 		} else {
 			getEventUrisWithStatusForEventType(eventType, status, result);
 		}
@@ -115,7 +115,7 @@ public class FakeEventsStorage implements EventsStorage {
 	 */
 	public int getNumberOfEvents(Context context, EventType eventType) {
 		if (eventType == EventType.ALL) {
-			return events.get(EventType.MESSAGE_RECEIPTS).size();
+			return events.get(EventType.MESSAGE_RECEIPT).size();
 		}
 		return events.get(eventType).size();
 	}
@@ -129,7 +129,7 @@ public class FakeEventsStorage implements EventsStorage {
 	@Override
 	public void reset(Context context, EventType eventType) {
 		if (eventType == EventType.ALL) {
-			events.get(EventType.MESSAGE_RECEIPTS).clear();
+			events.get(EventType.MESSAGE_RECEIPT).clear();
 		} else {
 			events.get(eventType).clear();
 		}
@@ -137,7 +137,7 @@ public class FakeEventsStorage implements EventsStorage {
 
 	private static Uri getNextFileId(EventType eventType) {
 		Uri baseUri = null;
-		if (eventType == EventType.MESSAGE_RECEIPTS) {
+		if (eventType == EventType.MESSAGE_RECEIPT) {
 			baseUri = DatabaseConstants.MESSAGE_RECEIPTS_CONTENT_URI;
 		}
 		return Uri.withAppendedPath(baseUri, String.valueOf(fileId++));

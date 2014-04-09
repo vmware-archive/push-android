@@ -30,12 +30,11 @@ public class DatabaseEventsStorage implements EventsStorage {
 	public List<Uri> getEventUris(Context context, EventType eventType) {
 		if (eventType == EventType.ALL) {
 			final List<Uri> results = new LinkedList<Uri>();
-			for (EventType et : EventType.values()) {
-				if (et != EventType.ALL) {
-					results.addAll(getGeneralQuery(context, et, null, null, null, null));
+			for (EventType type : EventType.values()) {
+				if (type != EventType.ALL) {
+					results.addAll(getGeneralQuery(context, type, null, null, null, null));
 				}
 			}
-
 			return results;
 		} else {
 			return getGeneralQuery(context, eventType, null, null, null, null);
@@ -45,7 +44,7 @@ public class DatabaseEventsStorage implements EventsStorage {
 	public List<Uri> getEventUrisWithStatus(Context context, EventType eventType, int status) {
 		if (eventType == EventType.ALL) {
 			final List<Uri> results = new LinkedList<Uri>();
-			results.addAll(getGeneralQuery(context, EventType.MESSAGE_RECEIPTS, null, "status = ?", new String[] { String.valueOf(status) }, null));
+			results.addAll(getGeneralQuery(context, EventType.MESSAGE_RECEIPT, null, "status = ?", new String[] { String.valueOf(status) }, null));
 //			results.addAll(getGeneralQuery(context, EventType.UNHANDLED_EXCEPTION, null, "status = ?", new String[] { String.valueOf(status) }, null));
 			return results;
 		} else {
@@ -82,7 +81,7 @@ public class DatabaseEventsStorage implements EventsStorage {
 	@Override
 	public int getNumberOfEvents(Context context, EventType eventType) {
 		if (eventType == EventType.ALL) {
-			return getNumberOfEventsByEventType(EventType.MESSAGE_RECEIPTS)/* + getNumberOfEventsByEventType(EventType.UNHANDLED_EXCEPTION)*/;
+			return getNumberOfEventsByEventType(EventType.MESSAGE_RECEIPT)/* + getNumberOfEventsByEventType(EventType.UNHANDLED_EXCEPTION)*/;
 		} else {
 			return getNumberOfEventsByEventType(eventType);
 		}

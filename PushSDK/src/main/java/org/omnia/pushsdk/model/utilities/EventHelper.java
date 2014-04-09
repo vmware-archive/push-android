@@ -19,7 +19,7 @@ public class EventHelper {
 		switch (eventType) {
 		case ALL:
 			return null; // no valid URI for all ones
-		case MESSAGE_RECEIPTS:
+		case MESSAGE_RECEIPT:
 			return DatabaseConstants.MESSAGE_RECEIPTS_CONTENT_URI;
 		default:
 			return null;
@@ -30,7 +30,7 @@ public class EventHelper {
 
 		final UriHelper uriHelper = EventsUriHelper.getUriHelper(uri);
 		if (uriHelper.getDefaultTableName().equals(DatabaseConstants.MESSAGE_RECEIPTS_TABLE_NAME)) {
-			return EventsStorage.EventType.MESSAGE_RECEIPTS;
+			return EventsStorage.EventType.MESSAGE_RECEIPT;
 		}
 		return null;
 	}
@@ -39,7 +39,7 @@ public class EventHelper {
 		switch (eventType) {
 		case ALL:
 			return null; // can't make "all"
-		case MESSAGE_RECEIPTS:
+		case MESSAGE_RECEIPT:
 			return new MessageReceiptEvent(cursor);
 		}
 		return null;
