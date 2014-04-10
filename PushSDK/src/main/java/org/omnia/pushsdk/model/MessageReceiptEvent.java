@@ -219,18 +219,8 @@ public class MessageReceiptEvent extends EventBase implements Parcelable {
     };
 
     private MessageReceiptEvent(Parcel in) {
-
-        setId(in.readInt());
-        setStatus(in.readInt());
-        setEventId(in.readString());
-        setVariantUuid(in.readString());
-        setTime(in.readString());
-
-        final String messageUuid = in.readString();
-        if (messageUuid != null) {
-            setData(new MessageReceiptData());
-            getData().setMessageUuid(messageUuid);
-        }
+        super(in);
+        data = in.readParcelable(MessageReceiptData.class.getClassLoader());
     }
 
     @Override
@@ -239,17 +229,8 @@ public class MessageReceiptEvent extends EventBase implements Parcelable {
     }
 
     @Override
-    public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(getId());
-        dest.writeInt(getStatus());
-        dest.writeString(getEventId());
-        dest.writeString(getVariantUuid());
-        dest.writeString(getTime());
-
-        if (getData() != null) {
-            dest.writeString(getData().getMessageUuid());
-        } else {
-            dest.writeString(null);
-        }
+    public void writeToParcel(Parcel out, int flags) {
+        super.writeToParcel(out, flags);
+        out.writeParcelable(data, flags);
     }
 }

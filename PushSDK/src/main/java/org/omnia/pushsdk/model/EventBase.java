@@ -2,13 +2,15 @@ package org.omnia.pushsdk.model;
 
 import android.content.ContentValues;
 import android.database.Cursor;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.provider.BaseColumns;
 
 import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
 
-public abstract class EventBase {
+public abstract class EventBase implements Parcelable {
 
     public static class Columns {
         public static final String EVENT_UUID = "id";
@@ -194,5 +196,30 @@ public abstract class EventBase {
         }
         final int id = cursor.getInt(idColumn);
         return id;
+    }
+
+    // Parcelable stuff
+
+    protected EventBase(Parcel in) {
+        id = in.readInt();
+        status = in.readInt();
+        eventId = in.readString();
+        variantUuid = in.readString();
+        time = in.readString();
+        type = getEventType();
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeInt(id);
+        out.writeInt(status);
+        out.writeString(eventId);
+        out.writeString(variantUuid);
+        out.writeString(time);
     }
 }
