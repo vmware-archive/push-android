@@ -1,9 +1,9 @@
 package org.omnia.pushsdk.simpledemoapp;
 
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.widget.TextView;
 
 import org.omnia.pushsdk.PushLib;
@@ -37,6 +37,8 @@ public class MainActivity extends ActionBarActivity {
     protected void onResume() {
         super.onResume();
         label = (TextView) findViewById(R.id.label);
+        label.setText("Any received push notifications will appear on your device status bar.");
+        queueLogMessage(getResources().getString(R.string.label_text));
         registerForPushNotifications();
     }
 
