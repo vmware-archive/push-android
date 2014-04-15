@@ -59,6 +59,34 @@ public class EnqueueEventJobTest extends JobTest {
         assertTrue(alarmProvider.isAlarmEnabled());
     }
 
+    public void testSaveFails() throws InterruptedException {
+
+        // Setup environment
+        eventsStorage.setWillSaveFail(true);
+        assertEquals(0, eventsStorage.getNumberOfEvents(EventsStorage.EventType.ALL));
+        assertFalse(alarmProvider.isAlarmEnabled());
+
+        // Run job
+        final EnqueueEventJob job = new EnqueueEventJob(event1, EventsStorage.EventType.MESSAGE_RECEIPT);
+        job.run(getJobParams(new JobResultListener() {
+
+            @Override
+            public void onJobComplete(int resultCode) {
+                assertEquals(EnqueueEventJob.RESULT_COULD_NOT_SAVE_EVENT_TO_STORAGE, resultCode);
+                semaphore.release();
+            }
+        }));
+
+        semaphore.acquire();
+
+        // Ensure event did not made it into the database
+        assertEquals(0, eventsStorage.getNumberOfEvents(EventsStorage.EventType.MESSAGE_RECEIPT));
+        assertEquals(0, eventsStorage.getNumberOfEvents(EventsStorage.EventType.ALL));
+
+        // Ensure alarm was not enabled
+        assertFalse(alarmProvider.isAlarmEnabled());
+    }
+
     public void testEquals() {
         final EnqueueEventJob job1 = new EnqueueEventJob(event1, EventsStorage.EventType.MESSAGE_RECEIPT);
         final EnqueueEventJob job2 = new EnqueueEventJob(event1, EventsStorage.EventType.MESSAGE_RECEIPT);

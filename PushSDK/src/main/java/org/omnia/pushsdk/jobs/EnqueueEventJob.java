@@ -10,6 +10,8 @@ import org.omnia.pushsdk.util.PushLibLogger;
 
 public class EnqueueEventJob extends BaseJob {
 
+    public static final int RESULT_COULD_NOT_SAVE_EVENT_TO_STORAGE = 200;
+
     private EventBase event;
     private EventsStorage.EventType eventType;
 
@@ -35,14 +37,21 @@ public class EnqueueEventJob extends BaseJob {
 
     @Override
     public void run(JobParams jobParams) {
-        saveEvent(jobParams);
-        enableAlarm(jobParams);
-        sendJobResult(JobResultListener.RESULT_SUCCESS, jobParams);
+        if (saveEvent(jobParams)) {
+            enableAlarm(jobParams);
+            sendJobResult(JobResultListener.RESULT_SUCCESS, jobParams);
+        } else {
+            sendJobResult(EnqueueEventJob.RESULT_COULD_NOT_SAVE_EVENT_TO_STORAGE, jobParams);
+        }
     }
 
-    private void saveEvent(JobParams jobParams) {
-        jobParams.eventsStorage.saveEvent(event, eventType);
-        PushLibLogger.d("EnqueueEventJob: There are now " + jobParams.eventsStorage.getNumberOfEvents(EventsStorage.EventType.MESSAGE_RECEIPT) + " message receipts queued to send to the server.");
+    private boolean saveEvent(JobParams jobParams) {
+        if (jobParams.eventsStorage.saveEvent(event, eventType) != null) {
+            PushLibLogger.d("EnqueueEventJob: There are now " + jobParams.eventsStorage.getNumberOfEvents(EventsStorage.EventType.MESSAGE_RECEIPT) + " message receipts queued to send to the server.");
+            return true;
+        } else {
+            return false;
+        }
     }
 
     private void enableAlarm(JobParams jobParams) {

@@ -14,11 +14,16 @@ public class FakeEventsStorage implements EventsStorage {
 
 	private final Map<EventType, Map<Uri, EventBase>> events;
 	private static int fileId = 0;
+    private boolean willSaveFail;
 
 	public FakeEventsStorage() {
 		events = new HashMap<EventType, Map<Uri, EventBase>>();
 		events.put(EventType.MESSAGE_RECEIPT, new HashMap<Uri, EventBase>());
 	}
+
+    public void setWillSaveFail(boolean willSaveFail) {
+        this.willSaveFail = willSaveFail;
+    }
 
 	/**
 	 * Saves a {@link EventBase} object into the fake filesystem.
@@ -27,6 +32,9 @@ public class FakeEventsStorage implements EventsStorage {
      */
 	@Override
 	public Uri saveEvent(EventBase event, final EventType eventType) {
+        if (willSaveFail) {
+            return null;
+        }
 		if (eventType == EventType.ALL) {
 			throw new IllegalArgumentException("Can not saveEvent for EventType.ALL");
 		}

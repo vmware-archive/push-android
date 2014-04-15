@@ -67,6 +67,11 @@ public class FakeEventsStorageTest extends AndroidTestCase {
 //		assertEquals(1, storage.getNumberOfEvents(getContext(), EventType.ALL));
 //	}
 
+    public void testSaveFails() {
+        storage.setWillSaveFail(true);
+        assertNull(storage.saveEvent(EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT));
+    }
+
 	public void testSaveMessageReceiptEventTwice() {
 
 		// Save one file into the fake filesystem
