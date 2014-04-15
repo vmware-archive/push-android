@@ -5,21 +5,16 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.test.ServiceTestCase;
 
 import org.omnia.pushsdk.broadcastreceiver.FakeMessageReceiptAlarmProvider;
-import org.omnia.pushsdk.database.EventsStorage;
 import org.omnia.pushsdk.database.FakeEventsStorage;
-import org.omnia.pushsdk.model.EventBase;
-import org.omnia.pushsdk.model.MessageReceiptEvent;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
 import org.omnia.pushsdk.util.FakeServiceStarter;
 
-import java.util.List;
 import java.util.concurrent.Semaphore;
 
 public class GcmServiceTest extends ServiceTestCase<GcmService> {

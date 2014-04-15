@@ -6,7 +6,7 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.test.AndroidTestCase;
 
-import org.omnia.pushsdk.model.EventBase;
+import org.omnia.pushsdk.model.BaseEvent;
 import org.omnia.pushsdk.model.MessageReceiptEvent;
 
 import java.util.HashMap;
@@ -171,7 +171,7 @@ public class MonitoringDatabaseWrapperTest extends AndroidTestCase {
 		// Read it back and change its status
 		final MessageReceiptEvent event = getMessageReceiptEvent(uri);
 		assertEquals(MESSAGE_RECEIPT_EVENT_1, event);
-		event.setStatus(EventBase.Status.POSTED);
+		event.setStatus(BaseEvent.Status.POSTED);
 		assertFalse(MESSAGE_RECEIPT_EVENT_1.getStatus() == event.getStatus());
 
 		// Update the Event in the table
@@ -231,7 +231,7 @@ public class MonitoringDatabaseWrapperTest extends AndroidTestCase {
 		// Read the first one back and change its status
 		final MessageReceiptEvent event1 = getMessageReceiptEvent(uri1);
 		assertEquals(MESSAGE_RECEIPT_EVENT_1, event1);
-		event1.setStatus(EventBase.Status.POSTED);
+		event1.setStatus(BaseEvent.Status.POSTED);
 		assertFalse(MESSAGE_RECEIPT_EVENT_1.getStatus() == event1.getStatus());
 		final int rowsAffected1 = EventsDatabaseWrapper.update(uri1, event1.getContentValues(), null, null);
 		assertEquals(1, rowsAffected1);

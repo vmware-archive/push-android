@@ -4,7 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
-import org.omnia.pushsdk.model.EventBase;
+import org.omnia.pushsdk.model.BaseEvent;
 import org.omnia.pushsdk.model.utilities.EventHelper;
 
 import java.util.LinkedList;
@@ -16,7 +16,7 @@ public class DatabaseEventsStorage implements EventsStorage {
 	}
 
 	@Override
-	public Uri saveEvent(EventBase event, EventType eventType) {
+	public Uri saveEvent(BaseEvent event, EventType eventType) {
 		if (eventType == EventType.ALL) {
 			throw new IllegalArgumentException("Can not saveEvent for EventType.ALL");
 		}
@@ -69,7 +69,7 @@ public class DatabaseEventsStorage implements EventsStorage {
 		final List<Uri> uris = new LinkedList<Uri>();
 		if (cursor != null) {
 			for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-				final int id = EventBase.getRowIdFromCursor(cursor);
+				final int id = BaseEvent.getRowIdFromCursor(cursor);
 				final Uri uri = Uri.withAppendedPath(EventHelper.getUriForEventType(eventType), String.valueOf(id));
 				uris.add(uri);
 			}
@@ -104,14 +104,14 @@ public class DatabaseEventsStorage implements EventsStorage {
 	}
 
 	@Override
-	public EventBase readEvent(Uri uri) {
+	public BaseEvent readEvent(Uri uri) {
 		Cursor cursor = null;
 		try {
 			cursor = EventsDatabaseWrapper.query(uri, null, null, null, null);
 			if (cursor != null) {
 				cursor.moveToFirst();
 				if (cursor.getCount() > 0) {
-					final EventBase event = EventHelper.makeEventFromCursor(cursor, uri);
+					final BaseEvent event = EventHelper.makeEventFromCursor(cursor, uri);
 					return event;
 				}
 			}
@@ -148,7 +148,7 @@ public class DatabaseEventsStorage implements EventsStorage {
 	@Override
 	public void setEventStatus(Uri eventUri, int status) {
 		final ContentValues values = new ContentValues();
-		values.put(EventBase.Columns.STATUS, status);
+		values.put(BaseEvent.Columns.STATUS, status);
 		final int numberOfRowsUpdated = EventsDatabaseWrapper.update(eventUri, values, null, null);
 		if (numberOfRowsUpdated == 0) {
 			throw new IllegalArgumentException("Could not find event with Uri " + eventUri.getPath());

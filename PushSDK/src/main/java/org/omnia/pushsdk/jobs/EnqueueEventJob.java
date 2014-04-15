@@ -4,7 +4,7 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import org.omnia.pushsdk.database.EventsStorage;
-import org.omnia.pushsdk.model.EventBase;
+import org.omnia.pushsdk.model.BaseEvent;
 import org.omnia.pushsdk.model.utilities.EventHelper;
 import org.omnia.pushsdk.util.PushLibLogger;
 
@@ -12,16 +12,16 @@ public class EnqueueEventJob extends BaseJob {
 
     public static final int RESULT_COULD_NOT_SAVE_EVENT_TO_STORAGE = 200;
 
-    private EventBase event;
+    private BaseEvent event;
     private EventsStorage.EventType eventType;
 
-    public EnqueueEventJob(EventBase event, EventsStorage.EventType eventType) {
+    public EnqueueEventJob(BaseEvent event, EventsStorage.EventType eventType) {
         super();
         verifyArguments(event, eventType);
         saveArguments(event, eventType);
     }
 
-    private void verifyArguments(EventBase event, EventsStorage.EventType eventType) {
+    private void verifyArguments(BaseEvent event, EventsStorage.EventType eventType) {
         if (event == null) {
             throw new IllegalArgumentException("event may not be null");
         }
@@ -30,7 +30,7 @@ public class EnqueueEventJob extends BaseJob {
         }
     }
 
-    private void saveArguments(EventBase event, EventsStorage.EventType eventType) {
+    private void saveArguments(BaseEvent event, EventsStorage.EventType eventType) {
         this.event = event;
         this.eventType = eventType;
     }
@@ -45,6 +45,7 @@ public class EnqueueEventJob extends BaseJob {
         }
     }
 
+    // TODO generalize to other kinds of events
     private boolean saveEvent(JobParams jobParams) {
         if (jobParams.eventsStorage.saveEvent(event, eventType) != null) {
             PushLibLogger.d("EnqueueEventJob: There are now " + jobParams.eventsStorage.getNumberOfEvents(EventsStorage.EventType.MESSAGE_RECEIPT) + " message receipts queued to send to the server.");

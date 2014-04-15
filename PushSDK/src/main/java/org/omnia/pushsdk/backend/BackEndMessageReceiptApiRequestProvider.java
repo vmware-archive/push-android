@@ -15,6 +15,7 @@
 
 package org.omnia.pushsdk.backend;
 
+// TODO: generalize to other event types
 public class BackEndMessageReceiptApiRequestProvider {
 
     private final BackEndMessageReceiptApiRequest dummyRequest;

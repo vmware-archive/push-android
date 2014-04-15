@@ -15,6 +15,7 @@ import java.io.OutputStream;
 import java.util.LinkedList;
 import java.util.List;
 
+// TODO: generalize to other event types
 public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implements BackEndMessageReceiptApiRequest {
 
     private Context context;

@@ -3,7 +3,7 @@ package org.omnia.pushsdk.database;
 import android.net.Uri;
 import android.test.AndroidTestCase;
 
-import org.omnia.pushsdk.model.EventBase;
+import org.omnia.pushsdk.model.BaseEvent;
 import org.omnia.pushsdk.model.MessageReceiptEvent;
 
 import java.util.HashMap;
@@ -141,7 +141,7 @@ public class DatabaseEventsStorageTest extends AndroidTestCase {
 	public void testSetStatusNonExistentFile() {
 		boolean exceptionThrown = false;
 		try {
-			eventsStorage.setEventStatus(NON_EXISTENT_FILE_1, EventBase.Status.POSTED);
+			eventsStorage.setEventStatus(NON_EXISTENT_FILE_1, BaseEvent.Status.POSTED);
 		} catch (IllegalArgumentException e) {
 			exceptionThrown = true;
 		}
@@ -149,7 +149,7 @@ public class DatabaseEventsStorageTest extends AndroidTestCase {
 
 //		exceptionThrown = false;
 //		try {
-//			eventsStorage.setEventStatus(NON_EXISTENT_FILE_2, EventBase.Status.POSTED);
+//			eventsStorage.setEventStatus(NON_EXISTENT_FILE_2, BaseEvent.Status.POSTED);
 //		} catch (IllegalArgumentException e) {
 //			exceptionThrown = true;
 //		}
@@ -277,76 +277,76 @@ public class DatabaseEventsStorageTest extends AndroidTestCase {
 	public void testSetStatus() {
 
 		final Uri uri1 = eventsStorage.saveEvent(EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
-		assertEquals(EventBase.Status.NOT_POSTED, EVENT_1.getStatus());
+		assertEquals(BaseEvent.Status.NOT_POSTED, EVENT_1.getStatus());
 
-		eventsStorage.setEventStatus(uri1, EventBase.Status.POSTING);
-		assertEquals(EventBase.Status.POSTING, eventsStorage.readEvent(uri1).getStatus());
+		eventsStorage.setEventStatus(uri1, BaseEvent.Status.POSTING);
+		assertEquals(BaseEvent.Status.POSTING, eventsStorage.readEvent(uri1).getStatus());
 
-		eventsStorage.setEventStatus(uri1, EventBase.Status.POSTED);
-		assertEquals(EventBase.Status.POSTED, eventsStorage.readEvent(uri1).getStatus());
+		eventsStorage.setEventStatus(uri1, BaseEvent.Status.POSTED);
+		assertEquals(BaseEvent.Status.POSTED, eventsStorage.readEvent(uri1).getStatus());
 
 //		final Uri uri2 = eventsStorage.saveEvent(EVENT_3, EventsStorage.EventType.API_VALIDATION_ERROR);
-//		assertEquals(EventBase.Status.NOT_POSTED, EVENT_3.getStatus());
+//		assertEquals(BaseEvent.Status.NOT_POSTED, EVENT_3.getStatus());
 //
-//		eventsStorage.setEventStatus(uri2, EventBase.Status.POSTING);
-//		assertEquals(EventBase.Status.POSTING, eventsStorage.readEvent(uri2).getStatus());
+//		eventsStorage.setEventStatus(uri2, BaseEvent.Status.POSTING);
+//		assertEquals(BaseEvent.Status.POSTING, eventsStorage.readEvent(uri2).getStatus());
 //
-//		eventsStorage.setEventStatus(uri2, EventBase.Status.POSTED);
-//		assertEquals(EventBase.Status.POSTED, eventsStorage.readEvent(uri2).getStatus());
+//		eventsStorage.setEventStatus(uri2, BaseEvent.Status.POSTED);
+//		assertEquals(BaseEvent.Status.POSTED, eventsStorage.readEvent(uri2).getStatus());
 	}
 
 	public void testGetMessageReceiptEventUrisWithStatus() {
-		EVENT_1.setStatus(EventBase.Status.POSTED);
-		EVENT_2.setStatus(EventBase.Status.POSTING_ERROR);
+		EVENT_1.setStatus(BaseEvent.Status.POSTED);
+		EVENT_2.setStatus(BaseEvent.Status.POSTING_ERROR);
 		eventsStorage.saveEvent(EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
 		eventsStorage.saveEvent(EVENT_2, EventsStorage.EventType.MESSAGE_RECEIPT);
 
-		final List<Uri> uris1 = eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, EventBase.Status.NOT_POSTED);
+		final List<Uri> uris1 = eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, BaseEvent.Status.NOT_POSTED);
 		assertEquals(0, uris1.size());
 
-		final List<Uri> uris2 = eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, EventBase.Status.POSTING);
+		final List<Uri> uris2 = eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, BaseEvent.Status.POSTING);
 		assertEquals(0, uris2.size());
 
-		final List<Uri> uris3 = eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, EventBase.Status.POSTING_ERROR);
+		final List<Uri> uris3 = eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, BaseEvent.Status.POSTING_ERROR);
 		assertEquals(1, uris3.size());
 	}
 
 //	public void testGetApiValidationErrorEventUrisWithStatus() {
-//		EVENT_3.setStatus(EventBase.Status.POSTING);
-//		EVENT_4.setStatus(EventBase.Status.NOT_POSTED);
+//		EVENT_3.setStatus(BaseEvent.Status.POSTING);
+//		EVENT_4.setStatus(BaseEvent.Status.NOT_POSTED);
 //		eventsStorage.saveEvent(EVENT_3, EventsStorage.EventType.API_VALIDATION_ERROR);
 //		eventsStorage.saveEvent(EVENT_4, EventsStorage.EventType.API_VALIDATION_ERROR);
 //
-//		final List<Uri> uris1 = eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.API_VALIDATION_ERROR, EventBase.Status.NOT_POSTED);
+//		final List<Uri> uris1 = eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.API_VALIDATION_ERROR, BaseEvent.Status.NOT_POSTED);
 //		assertEquals(1, uris1.size());
 //
-//		final List<Uri> uris2 = eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.API_VALIDATION_ERROR, EventBase.Status.POSTING);
+//		final List<Uri> uris2 = eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.API_VALIDATION_ERROR, BaseEvent.Status.POSTING);
 //		assertEquals(1, uris2.size());
 //
-//		final List<Uri> uris3 = eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.API_VALIDATION_ERROR, EventBase.Status.POSTING_ERROR);
+//		final List<Uri> uris3 = eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.API_VALIDATION_ERROR, BaseEvent.Status.POSTING_ERROR);
 //		assertEquals(0, uris3.size());
 //	}
 
 	public void testGetMixedEventUrisWithStatus() {
-		EVENT_1.setStatus(EventBase.Status.NOT_POSTED);
-		EVENT_2.setStatus(EventBase.Status.POSTING);
-//		EVENT_3.setStatus(EventBase.Status.NOT_POSTED);
-//		EVENT_4.setStatus(EventBase.Status.POSTED);
+		EVENT_1.setStatus(BaseEvent.Status.NOT_POSTED);
+		EVENT_2.setStatus(BaseEvent.Status.POSTING);
+//		EVENT_3.setStatus(BaseEvent.Status.NOT_POSTED);
+//		EVENT_4.setStatus(BaseEvent.Status.POSTED);
 		eventsStorage.saveEvent(EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
 		eventsStorage.saveEvent(EVENT_2, EventsStorage.EventType.MESSAGE_RECEIPT);
 //		eventsStorage.saveEvent(EVENT_3, EventsStorage.EventType.API_VALIDATION_ERROR);
 //		eventsStorage.saveEvent(EVENT_4, EventsStorage.EventType.API_VALIDATION_ERROR);
 
-		final List<Uri> uris1 = eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.ALL, EventBase.Status.NOT_POSTED);
+		final List<Uri> uris1 = eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.ALL, BaseEvent.Status.NOT_POSTED);
 		assertEquals(1, uris1.size());
 
-		final List<Uri> uris2 = eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.ALL, EventBase.Status.POSTING);
+		final List<Uri> uris2 = eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.ALL, BaseEvent.Status.POSTING);
 		assertEquals(1, uris2.size());
 
-		final List<Uri> uris3 = eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.ALL, EventBase.Status.POSTED);
+		final List<Uri> uris3 = eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.ALL, BaseEvent.Status.POSTED);
 		assertEquals(0, uris3.size());
 
-		final List<Uri> uris4 = eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.ALL, EventBase.Status.POSTING_ERROR);
+		final List<Uri> uris4 = eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.ALL, BaseEvent.Status.POSTING_ERROR);
 		assertEquals(0, uris4.size());
 	}
 

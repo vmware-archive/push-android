@@ -10,7 +10,7 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.Date;
 
-public abstract class EventBase implements Parcelable {
+public abstract class BaseEvent implements Parcelable {
 
     public static class Columns {
         public static final String EVENT_UUID = "id";
@@ -111,7 +111,7 @@ public abstract class EventBase implements Parcelable {
         this.variantUuid = variantUuid;
     }
 
-    public EventBase() {
+    public BaseEvent() {
         this.type = getEventType();
     }
 
@@ -126,11 +126,11 @@ public abstract class EventBase implements Parcelable {
             return false;
         }
 
-        if (!(o instanceof EventBase)) {
+        if (!(o instanceof BaseEvent)) {
             return false;
         }
 
-        final EventBase other = (EventBase) o;
+        final BaseEvent other = (BaseEvent) o;
 
         if (other.status != status) {
             return false;
@@ -200,7 +200,7 @@ public abstract class EventBase implements Parcelable {
 
     // Parcelable stuff
 
-    protected EventBase(Parcel in) {
+    protected BaseEvent(Parcel in) {
         id = in.readInt();
         status = in.readInt();
         eventId = in.readString();

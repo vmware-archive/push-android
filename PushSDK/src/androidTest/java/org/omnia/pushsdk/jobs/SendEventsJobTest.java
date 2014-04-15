@@ -3,7 +3,7 @@ package org.omnia.pushsdk.jobs;
 import android.net.Uri;
 
 import org.omnia.pushsdk.database.EventsStorage;
-import org.omnia.pushsdk.model.EventBase;
+import org.omnia.pushsdk.model.BaseEvent;
 
 public class SendEventsJobTest extends JobTest {
 
@@ -26,7 +26,7 @@ public class SendEventsJobTest extends JobTest {
 
     public void testWithOneNotPostedEventInStorage() throws InterruptedException {
 
-        event1.setStatus(EventBase.Status.NOT_POSTED);
+        event1.setStatus(BaseEvent.Status.NOT_POSTED);
         final Uri uri = eventsStorage.saveEvent(event1, EventsStorage.EventType.MESSAGE_RECEIPT);
         backEndMessageReceiptApiRequest.setWillBeSuccessfulRequest(true);
 
@@ -49,7 +49,7 @@ public class SendEventsJobTest extends JobTest {
 
     public void testWithOnePostedEventInStorage() throws InterruptedException {
 
-        event1.setStatus(EventBase.Status.POSTED);
+        event1.setStatus(BaseEvent.Status.POSTED);
         eventsStorage.saveEvent(event1, EventsStorage.EventType.MESSAGE_RECEIPT);
 
         final SendEventsJob job = new SendEventsJob();
@@ -70,7 +70,7 @@ public class SendEventsJobTest extends JobTest {
 
     public void testFailedSendWithOneNotPostedEventInStorage() throws InterruptedException {
 
-        event1.setStatus(EventBase.Status.NOT_POSTED);
+        event1.setStatus(BaseEvent.Status.NOT_POSTED);
         final Uri uri = eventsStorage.saveEvent(event1, EventsStorage.EventType.MESSAGE_RECEIPT);
         backEndMessageReceiptApiRequest.setWillBeSuccessfulRequest(false);
 

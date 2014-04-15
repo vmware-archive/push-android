@@ -1,8 +1,6 @@
 package org.omnia.pushsdk.model;
 
 import android.content.ContentValues;
-import android.database.sqlite.SQLiteStatement;
-import android.os.Bundle;
 import android.os.Parcel;
 import android.provider.BaseColumns;
 import android.test.AndroidTestCase;
@@ -144,10 +142,10 @@ public class MessageReceiptEventTest extends AndroidTestCase {
     public void testNotEqualsWithStatuses() {
 
         final MessageReceiptEvent model1 = new MessageReceiptEvent();
-        model1.setStatus(EventBase.Status.POSTING_ERROR);
+        model1.setStatus(BaseEvent.Status.POSTING_ERROR);
 
         final MessageReceiptEvent model2 = new MessageReceiptEvent();
-        model1.setStatus(EventBase.Status.POSTING);
+        model1.setStatus(BaseEvent.Status.POSTING);
 
         MoreAsserts.assertNotEqual(model1, model2);
         MoreAsserts.assertNotEqual(model2, model1);
@@ -237,9 +235,9 @@ public class MessageReceiptEventTest extends AndroidTestCase {
         assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS"));
         assertTrue(sql.contains(DatabaseConstants.MESSAGE_RECEIPTS_TABLE_NAME));
         assertTrue(sql.contains("'" + BaseColumns._ID + "'"));
-        assertTrue(sql.contains("'" + EventBase.Columns.EVENT_UUID + "'"));
-        assertTrue(sql.contains("'" + EventBase.Columns.VARIANT_UUID + "'"));
-        assertTrue(sql.contains("'" + EventBase.Columns.TIME + "'"));
+        assertTrue(sql.contains("'" + BaseEvent.Columns.EVENT_UUID + "'"));
+        assertTrue(sql.contains("'" + BaseEvent.Columns.VARIANT_UUID + "'"));
+        assertTrue(sql.contains("'" + BaseEvent.Columns.TIME + "'"));
         assertTrue(sql.contains("'" + MessageReceiptData.Columns.MESSAGE_UUID + "'"));
     }
 
@@ -255,15 +253,15 @@ public class MessageReceiptEventTest extends AndroidTestCase {
         final MessageReceiptEvent event = getMessageReceiptEvent1();
         final ContentValues cv = event.getContentValues();
         assertFalse(cv.containsKey(BaseColumns._ID));
-        assertTrue(cv.containsKey(EventBase.Columns.TIME));
-        assertTrue(cv.containsKey(EventBase.Columns.STATUS));
-        assertTrue(cv.containsKey(EventBase.Columns.EVENT_UUID));
-        assertTrue(cv.containsKey(EventBase.Columns.VARIANT_UUID));
+        assertTrue(cv.containsKey(BaseEvent.Columns.TIME));
+        assertTrue(cv.containsKey(BaseEvent.Columns.STATUS));
+        assertTrue(cv.containsKey(BaseEvent.Columns.EVENT_UUID));
+        assertTrue(cv.containsKey(BaseEvent.Columns.VARIANT_UUID));
         assertTrue(cv.containsKey(MessageReceiptData.Columns.MESSAGE_UUID));
-        assertEquals(event.getTime(), cv.getAsString(EventBase.Columns.TIME));
-        assertEquals(event.getStatus(), cv.getAsInteger(EventBase.Columns.STATUS).intValue());
-        assertEquals(event.getEventId(), cv.getAsString(EventBase.Columns.EVENT_UUID));
-        assertEquals(event.getVariantUuid(), cv.getAsString(EventBase.Columns.VARIANT_UUID));
+        assertEquals(event.getTime(), cv.getAsString(BaseEvent.Columns.TIME));
+        assertEquals(event.getStatus(), cv.getAsInteger(BaseEvent.Columns.STATUS).intValue());
+        assertEquals(event.getEventId(), cv.getAsString(BaseEvent.Columns.EVENT_UUID));
+        assertEquals(event.getVariantUuid(), cv.getAsString(BaseEvent.Columns.VARIANT_UUID));
         assertEquals(event.getData().getMessageUuid(), cv.getAsString(MessageReceiptData.Columns.MESSAGE_UUID));
     }
 
@@ -271,30 +269,30 @@ public class MessageReceiptEventTest extends AndroidTestCase {
         final MessageReceiptEvent event = new MessageReceiptEvent();
         final ContentValues cv = event.getContentValues();
         assertFalse(cv.containsKey(BaseColumns._ID));
-        assertTrue(cv.containsKey(EventBase.Columns.TIME));
-        assertTrue(cv.containsKey(EventBase.Columns.STATUS));
-        assertTrue(cv.containsKey(EventBase.Columns.EVENT_UUID));
-        assertTrue(cv.containsKey(EventBase.Columns.VARIANT_UUID));
+        assertTrue(cv.containsKey(BaseEvent.Columns.TIME));
+        assertTrue(cv.containsKey(BaseEvent.Columns.STATUS));
+        assertTrue(cv.containsKey(BaseEvent.Columns.EVENT_UUID));
+        assertTrue(cv.containsKey(BaseEvent.Columns.VARIANT_UUID));
         assertTrue(cv.containsKey(MessageReceiptData.Columns.MESSAGE_UUID));
-        MoreAsserts.assertNotEqual(0, cv.getAsString(EventBase.Columns.TIME));
-        assertEquals(EventBase.Status.NOT_POSTED, cv.getAsInteger(EventBase.Columns.STATUS).intValue());
-        assertNull(cv.getAsString(EventBase.Columns.EVENT_UUID));
-        assertNull(cv.getAsString(EventBase.Columns.VARIANT_UUID));
+        MoreAsserts.assertNotEqual(0, cv.getAsString(BaseEvent.Columns.TIME));
+        assertEquals(BaseEvent.Status.NOT_POSTED, cv.getAsInteger(BaseEvent.Columns.STATUS).intValue());
+        assertNull(cv.getAsString(BaseEvent.Columns.EVENT_UUID));
+        assertNull(cv.getAsString(BaseEvent.Columns.VARIANT_UUID));
         assertNull(cv.getAsString(MessageReceiptData.Columns.MESSAGE_UUID));
     }
 
     public void testConstructFromCursor1() {
         final FakeCursor cursor = new FakeCursor();
         cursor.addField(BaseColumns._ID, TEST_ROW_ID_1);
-        cursor.addField(EventBase.Columns.TIME, TEST_TIME_1);
-        cursor.addField(EventBase.Columns.STATUS, EventBase.Status.POSTED);
-        cursor.addField(EventBase.Columns.EVENT_UUID, TEST_EVENT_ID_1);
-        cursor.addField(EventBase.Columns.VARIANT_UUID, TEST_EVENT_VARIANT_UUID_1);
+        cursor.addField(BaseEvent.Columns.TIME, TEST_TIME_1);
+        cursor.addField(BaseEvent.Columns.STATUS, BaseEvent.Status.POSTED);
+        cursor.addField(BaseEvent.Columns.EVENT_UUID, TEST_EVENT_ID_1);
+        cursor.addField(BaseEvent.Columns.VARIANT_UUID, TEST_EVENT_VARIANT_UUID_1);
         cursor.addField(MessageReceiptData.Columns.MESSAGE_UUID, TEST_MESSAGE_UUID_1);
         final MessageReceiptEvent event = new MessageReceiptEvent(cursor);
         assertEquals(TEST_ROW_ID_1, event.getId());
         assertEquals(TEST_TIME_1, event.getTime());
-        assertEquals(EventBase.Status.POSTED, event.getStatus());
+        assertEquals(BaseEvent.Status.POSTED, event.getStatus());
         assertEquals(TEST_EVENT_ID_1, event.getEventId());
         assertEquals(TEST_EVENT_VARIANT_UUID_1, event.getVariantUuid());
         assertNotNull(event.getData());
@@ -306,7 +304,7 @@ public class MessageReceiptEventTest extends AndroidTestCase {
         final MessageReceiptEvent event = new MessageReceiptEvent(cursor);
         assertEquals(0, event.getId());
         assertNull(event.getTime());
-        assertEquals(EventBase.Status.NOT_POSTED, event.getStatus());
+        assertEquals(BaseEvent.Status.NOT_POSTED, event.getStatus());
         assertNull(event.getEventId());
         assertNull(event.getVariantUuid());
         assertNull(event.getData());

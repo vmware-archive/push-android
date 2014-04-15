@@ -3,7 +3,6 @@ package org.omnia.pushsdk.service;
 import android.app.IntentService;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Parcelable;
 import android.os.ResultReceiver;
 
 import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestImpl;
@@ -18,7 +17,6 @@ import org.omnia.pushsdk.database.EventsStorage;
 import org.omnia.pushsdk.jobs.BaseJob;
 import org.omnia.pushsdk.jobs.JobParams;
 import org.omnia.pushsdk.jobs.JobResultListener;
-import org.omnia.pushsdk.model.EventBase;
 import org.omnia.pushsdk.network.NetworkWrapper;
 import org.omnia.pushsdk.network.NetworkWrapperImpl;
 import org.omnia.pushsdk.prefs.PreferencesProvider;

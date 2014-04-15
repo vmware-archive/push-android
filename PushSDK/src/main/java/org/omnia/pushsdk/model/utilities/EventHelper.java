@@ -11,7 +11,7 @@ import org.omnia.pushsdk.database.DatabaseConstants;
 import org.omnia.pushsdk.database.EventsStorage;
 import org.omnia.pushsdk.database.urihelpers.EventsUriHelper;
 import org.omnia.pushsdk.database.urihelpers.UriHelper;
-import org.omnia.pushsdk.model.EventBase;
+import org.omnia.pushsdk.model.BaseEvent;
 import org.omnia.pushsdk.model.MessageReceiptEvent;
 
 public class EventHelper {
@@ -36,7 +36,7 @@ public class EventHelper {
 		return null;
 	}
 	
-	public static EventBase makeEventFromCursor(final Cursor cursor, final EventsStorage.EventType eventType) {
+	public static BaseEvent makeEventFromCursor(final Cursor cursor, final EventsStorage.EventType eventType) {
 		switch (eventType) {
 		case ALL:
 			return null; // can't make "all"
@@ -46,7 +46,7 @@ public class EventHelper {
 		return null;
 	}
 
-	public static EventBase makeEventFromCursor(final Cursor cursor, final Uri uri) {
+	public static BaseEvent makeEventFromCursor(final Cursor cursor, final Uri uri) {
 
 		final UriHelper uriHelper = EventsUriHelper.getUriHelper(uri);
 		if (uriHelper.getDefaultTableName().equals(DatabaseConstants.MESSAGE_RECEIPTS_TABLE_NAME)) {
@@ -55,14 +55,14 @@ public class EventHelper {
 		return null;
 	}
 	
-	public static EventBase deserializeEvent(String eventType, JsonElement jsonElement, JsonDeserializationContext jsonDeserializationContext) {
+	public static BaseEvent deserializeEvent(String eventType, JsonElement jsonElement, JsonDeserializationContext jsonDeserializationContext) {
 		if (eventType.equals(MessageReceiptEvent.TYPE)) {
 			return (MessageReceiptEvent) jsonDeserializationContext.deserialize(jsonElement, MessageReceiptEvent.class);
 		}
 		return null;
 	}
 
-    public static EventBase readEventFromParcel(Parcel parcel, EventsStorage.EventType eventType) {
+    public static BaseEvent readEventFromParcel(Parcel parcel, EventsStorage.EventType eventType) {
         if (eventType == EventsStorage.EventType.MESSAGE_RECEIPT) {
             return parcel.readParcelable(MessageReceiptEvent.class.getClassLoader());
         }

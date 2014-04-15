@@ -6,7 +6,6 @@ import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
 import org.omnia.pushsdk.backend.FakeBackEndMessageReceiptApiRequest;
 import org.omnia.pushsdk.broadcastreceiver.FakeMessageReceiptAlarmProvider;
 import org.omnia.pushsdk.database.FakeEventsStorage;
-import org.omnia.pushsdk.model.MessageReceiptEventTest;
 import org.omnia.pushsdk.network.FakeNetworkWrapper;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
 

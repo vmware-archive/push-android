@@ -3,25 +3,19 @@ package org.omnia.pushsdk.service;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Parcelable;
 import android.os.ResultReceiver;
 import android.test.ServiceTestCase;
 
 import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
 import org.omnia.pushsdk.backend.FakeBackEndMessageReceiptApiRequest;
 import org.omnia.pushsdk.broadcastreceiver.FakeMessageReceiptAlarmProvider;
-import org.omnia.pushsdk.database.EventsStorage;
 import org.omnia.pushsdk.database.FakeEventsStorage;
-import org.omnia.pushsdk.jobs.BaseJob;
 import org.omnia.pushsdk.jobs.DummyJob;
-import org.omnia.pushsdk.jobs.Job;
-import org.omnia.pushsdk.model.EventBase;
 import org.omnia.pushsdk.model.MessageReceiptEvent;
 import org.omnia.pushsdk.model.MessageReceiptEventTest;
 import org.omnia.pushsdk.network.FakeNetworkWrapper;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
 
-import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 

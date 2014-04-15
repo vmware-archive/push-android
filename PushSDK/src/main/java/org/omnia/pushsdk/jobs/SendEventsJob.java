@@ -7,8 +7,7 @@ import android.os.Parcelable;
 import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequest;
 import org.omnia.pushsdk.backend.BackEndMessageReceiptListener;
 import org.omnia.pushsdk.database.EventsStorage;
-import org.omnia.pushsdk.model.EventBase;
-import org.omnia.pushsdk.service.EventService;
+import org.omnia.pushsdk.model.BaseEvent;
 import org.omnia.pushsdk.util.PushLibLogger;
 
 import java.util.List;
@@ -61,7 +60,7 @@ public class SendEventsJob extends BaseJob {
 
     // TODO - generalize to all event types
     private List<Uri> getUnpostedMessageReceipts(JobParams jobParams) {
-        final List<Uri> uris = jobParams.eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, EventBase.Status.NOT_POSTED);
+        final List<Uri> uris = jobParams.eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, BaseEvent.Status.NOT_POSTED);
         return uris;
     }
 

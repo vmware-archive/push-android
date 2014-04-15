@@ -16,12 +16,10 @@
 package org.omnia.pushsdk.service;
 
 import android.app.IntentService;
-import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 
-import org.omnia.pushsdk.PushLib;
 import org.omnia.pushsdk.broadcastreceiver.GcmBroadcastReceiver;
 import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProvider;
 import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProviderImpl;
@@ -31,8 +29,8 @@ import org.omnia.pushsdk.database.EventsDatabaseWrapper;
 import org.omnia.pushsdk.database.EventsStorage;
 import org.omnia.pushsdk.jobs.EnqueueEventJob;
 import org.omnia.pushsdk.model.MessageReceiptEvent;
-import org.omnia.pushsdk.prefs.PreferencesProviderImpl;
 import org.omnia.pushsdk.prefs.PreferencesProvider;
+import org.omnia.pushsdk.prefs.PreferencesProviderImpl;
 import org.omnia.pushsdk.util.Const;
 import org.omnia.pushsdk.util.PushLibLogger;
 import org.omnia.pushsdk.util.ServiceStarter;

@@ -17,7 +17,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
-public class MessageReceiptEvent extends EventBase implements Parcelable {
+public class MessageReceiptEvent extends BaseEvent implements Parcelable {
 
     public static class Columns {
         public static final String DATA = "data";
@@ -42,24 +42,24 @@ public class MessageReceiptEvent extends EventBase implements Parcelable {
             setId(0);
         }
 
-        columnIndex = cursor.getColumnIndex(EventBase.Columns.STATUS);
+        columnIndex = cursor.getColumnIndex(BaseEvent.Columns.STATUS);
         if (columnIndex >= 0) {
             setStatus(cursor.getInt(columnIndex));
         } else {
             setStatus(Status.NOT_POSTED);
         }
 
-        columnIndex = cursor.getColumnIndex(EventBase.Columns.EVENT_UUID);
+        columnIndex = cursor.getColumnIndex(BaseEvent.Columns.EVENT_UUID);
         if (columnIndex >= 0) {
             setEventId(cursor.getString(columnIndex));
         }
 
-        columnIndex = cursor.getColumnIndex(EventBase.Columns.VARIANT_UUID);
+        columnIndex = cursor.getColumnIndex(BaseEvent.Columns.VARIANT_UUID);
         if (columnIndex >= 0) {
             setVariantUuid(cursor.getString(columnIndex));
         }
 
-        columnIndex = cursor.getColumnIndex(EventBase.Columns.TIME);
+        columnIndex = cursor.getColumnIndex(BaseEvent.Columns.TIME);
         if (columnIndex >= 0) {
             setTime(cursor.getString(columnIndex));
         }
@@ -81,10 +81,10 @@ public class MessageReceiptEvent extends EventBase implements Parcelable {
         // NOTE - do not save the 'id' field to the ContentValues. Let the database
         // figure out the 'id' itself.
         final ContentValues cv = new ContentValues();
-        cv.put(EventBase.Columns.EVENT_UUID, getEventId());
-        cv.put(EventBase.Columns.VARIANT_UUID, getVariantUuid());
-        cv.put(EventBase.Columns.TIME, getTime());
-        cv.put(EventBase.Columns.STATUS, getStatus());
+        cv.put(BaseEvent.Columns.EVENT_UUID, getEventId());
+        cv.put(BaseEvent.Columns.VARIANT_UUID, getVariantUuid());
+        cv.put(BaseEvent.Columns.TIME, getTime());
+        cv.put(BaseEvent.Columns.STATUS, getStatus());
         if (data != null) {
             cv.put(MessageReceiptData.Columns.MESSAGE_UUID, data.getMessageUuid());
         } else {
@@ -132,13 +132,13 @@ public class MessageReceiptEvent extends EventBase implements Parcelable {
         sb.append("\' ('");
         sb.append(BaseColumns._ID);
         sb.append("' INTEGER PRIMARY KEY AUTOINCREMENT, '");
-        sb.append(EventBase.Columns.EVENT_UUID);
+        sb.append(BaseEvent.Columns.EVENT_UUID);
         sb.append("' TEXT, '");
-        sb.append(EventBase.Columns.VARIANT_UUID);
+        sb.append(BaseEvent.Columns.VARIANT_UUID);
         sb.append("' TEXT, '");
-        sb.append(EventBase.Columns.TIME);
+        sb.append(BaseEvent.Columns.TIME);
         sb.append("' INT, '");
-        sb.append(EventBase.Columns.STATUS);
+        sb.append(BaseEvent.Columns.STATUS);
         sb.append("' INT, '");
         sb.append(MessageReceiptData.Columns.MESSAGE_UUID);
         sb.append("' TEXT);");

@@ -2,7 +2,7 @@ package org.omnia.pushsdk.database;
 
 import android.net.Uri;
 
-import org.omnia.pushsdk.model.EventBase;
+import org.omnia.pushsdk.model.BaseEvent;
 import org.omnia.pushsdk.model.utilities.EventHelper;
 
 import java.util.HashMap;
@@ -12,13 +12,13 @@ import java.util.Map;
 
 public class FakeEventsStorage implements EventsStorage {
 
-	private final Map<EventType, Map<Uri, EventBase>> events;
+	private final Map<EventType, Map<Uri, BaseEvent>> events;
 	private static int fileId = 0;
     private boolean willSaveFail;
 
 	public FakeEventsStorage() {
-		events = new HashMap<EventType, Map<Uri, EventBase>>();
-		events.put(EventType.MESSAGE_RECEIPT, new HashMap<Uri, EventBase>());
+		events = new HashMap<EventType, Map<Uri, BaseEvent>>();
+		events.put(EventType.MESSAGE_RECEIPT, new HashMap<Uri, BaseEvent>());
 	}
 
     public void setWillSaveFail(boolean willSaveFail) {
@@ -26,12 +26,12 @@ public class FakeEventsStorage implements EventsStorage {
     }
 
 	/**
-	 * Saves a {@link EventBase} object into the fake filesystem.
+	 * Saves a {@link org.omnia.pushsdk.model.BaseEvent} object into the fake filesystem.
 	 *  @param event
      * @param eventType
      */
 	@Override
-	public Uri saveEvent(EventBase event, final EventType eventType) {
+	public Uri saveEvent(BaseEvent event, final EventType eventType) {
         if (willSaveFail) {
             return null;
         }
@@ -44,7 +44,7 @@ public class FakeEventsStorage implements EventsStorage {
 	}
 
 	/**
-	 * Gets the filenames for all the {@link EventBase} objects currently in the fake filesystem.
+	 * Gets the filenames for all the {@link org.omnia.pushsdk.model.BaseEvent} objects currently in the fake filesystem.
      *
      * @param eventType
      */
@@ -60,7 +60,7 @@ public class FakeEventsStorage implements EventsStorage {
 	}
 
 	/**
-	 * Gets the {@link EventBase} objects currently in the fake filesystem that match the given status
+	 * Gets the {@link org.omnia.pushsdk.model.BaseEvent} objects currently in the fake filesystem that match the given status
      *  @param eventType
      * @param status
      */
@@ -77,7 +77,7 @@ public class FakeEventsStorage implements EventsStorage {
 
 	private void getEventUrisWithStatusForEventType(EventType eventType, int status, final List<Uri> result) {
 		for (final Uri uri : events.get(eventType).keySet()) {
-			final EventBase event = events.get(eventType).get(uri);
+			final BaseEvent event = events.get(eventType).get(uri);
 			if (event.getStatus() == status) {
 				result.add(uri);
 			}
@@ -85,10 +85,10 @@ public class FakeEventsStorage implements EventsStorage {
 	}
 
 	/**
-	 * Retrieves the {@link EventBase} object with the given filename from the fake filesystem.
+	 * Retrieves the {@link org.omnia.pushsdk.model.BaseEvent} object with the given filename from the fake filesystem.
 	 */
 	@Override
-	public EventBase readEvent(Uri uri) {
+	public BaseEvent readEvent(Uri uri) {
 		final EventType eventType = EventHelper.getEventTypeForUri(uri);
 		if (events.get(eventType).containsKey(uri)) {
 			return events.get(eventType).get(uri);
@@ -98,7 +98,7 @@ public class FakeEventsStorage implements EventsStorage {
 	}
 
 	/**
-	 * Deletes the {@link EventBase} objects from the fake filesystem with the given list of filenames.
+	 * Deletes the {@link org.omnia.pushsdk.model.BaseEvent} objects from the fake filesystem with the given list of filenames.
 	 */
 	@Override
 	public void deleteEvents(List<Uri> eventUris, EventType eventType) {
@@ -113,7 +113,7 @@ public class FakeEventsStorage implements EventsStorage {
 	}
 
 	/**
-	 * Returns the number of {@link EventBase} objects currently in the fake filesystem.
+	 * Returns the number of {@link org.omnia.pushsdk.model.BaseEvent} objects currently in the fake filesystem.
 	 */
 	public int getNumberOfEvents(EventType eventType) {
 		if (eventType == EventType.ALL) {
@@ -123,7 +123,7 @@ public class FakeEventsStorage implements EventsStorage {
 	}
 
 	/**
-	 * Clears all {@link EventBase} objects from the fake filesystem.
+	 * Clears all {@link org.omnia.pushsdk.model.BaseEvent} objects from the fake filesystem.
 	 *
      * @param eventType
      */
@@ -146,7 +146,7 @@ public class FakeEventsStorage implements EventsStorage {
 
 	@Override
 	public void setEventStatus(Uri eventUri, int status) {
-		final EventBase event = readEvent(eventUri);
+		final BaseEvent event = readEvent(eventUri);
 		event.setStatus(status);
 	}
 }

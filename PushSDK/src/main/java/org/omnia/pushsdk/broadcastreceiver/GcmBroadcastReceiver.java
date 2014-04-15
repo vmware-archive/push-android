@@ -22,7 +22,6 @@ import android.content.Intent;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
 import org.omnia.pushsdk.service.GcmService;
-import org.omnia.pushsdk.util.PushLibLogger;
 
 public class GcmBroadcastReceiver extends WakefulBroadcastReceiver {
 

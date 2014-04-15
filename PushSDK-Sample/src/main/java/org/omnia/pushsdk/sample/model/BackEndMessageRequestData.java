@@ -17,8 +17,6 @@ package org.omnia.pushsdk.sample.model;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.UUID;
-
 public class BackEndMessageRequestData {
 
     @SerializedName("title")
