@@ -24,6 +24,27 @@ android {
     }
 }
 
+// Try to see if we can upload the AAR to artifactory
+//
+//task jar(type: Jar) {
+//    from android.sourceSets.main.java
+//}
+//
+//artifacts {
+//    archives jar
+//}
+//
+//uploadArchives {
+//    repositories.mavenDeployer {
+//        repository(url: "https://maven.xtremelabs.com/artifactory/libs-release-local") {
+//            authentication(userName: "user", password: "pass")
+//        }
+//    }
+//}
+//
+// apply plugin: "maven"
+// and run: gradlew clean upload
+
 dependencies {
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'com.google.android.gms:play-services:4.2.42'

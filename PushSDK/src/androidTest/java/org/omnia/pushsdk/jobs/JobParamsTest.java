@@ -4,7 +4,7 @@ import android.test.AndroidTestCase;
 
 import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
 import org.omnia.pushsdk.backend.FakeBackEndMessageReceiptApiRequest;
-import org.omnia.pushsdk.broadcastreceiver.FakeMessageReceiptAlarmProvider;
+import org.omnia.pushsdk.broadcastreceiver.FakeEventsSenderAlarmProvider;
 import org.omnia.pushsdk.database.FakeEventsStorage;
 import org.omnia.pushsdk.network.FakeNetworkWrapper;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
@@ -14,7 +14,7 @@ public class JobParamsTest extends AndroidTestCase {
     private FakeEventsStorage eventsStorage;
     private FakeNetworkWrapper networkWrapper;
     private FakePreferencesProvider preferencesProvider;
-    private FakeMessageReceiptAlarmProvider alarmProvider;
+    private FakeEventsSenderAlarmProvider alarmProvider;
     private FakeBackEndMessageReceiptApiRequest backEndMessageReceiptApiRequest;
     private BackEndMessageReceiptApiRequestProvider backEndMessageReceiptApiRequestProvider;
     private JobResultListener listener;
@@ -24,7 +24,7 @@ public class JobParamsTest extends AndroidTestCase {
         super.setUp();
         eventsStorage = new FakeEventsStorage();
         networkWrapper = new FakeNetworkWrapper();
-        alarmProvider = new FakeMessageReceiptAlarmProvider();
+        alarmProvider = new FakeEventsSenderAlarmProvider();
         preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null);
         backEndMessageReceiptApiRequest = new FakeBackEndMessageReceiptApiRequest();
         backEndMessageReceiptApiRequestProvider = new BackEndMessageReceiptApiRequestProvider(backEndMessageReceiptApiRequest);

@@ -1,6 +1,6 @@
 package org.omnia.pushsdk.broadcastreceiver;
 
-public interface MessageReceiptAlarmProvider {
+public interface EventsSenderAlarmProvider {
 
     void enableAlarm();
     void disableAlarm();

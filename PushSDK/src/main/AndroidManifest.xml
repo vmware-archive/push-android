@@ -26,7 +26,7 @@
             </intent-filter>
         </receiver>
 
-        <receiver android:name=".broadcastreceiver.MessageReceiptAlarmReceiver" />
+        <receiver android:name=".broadcastreceiver.EventsSenderAlarmReceiver" />
 
         <service android:name=".service.GcmService"/>
 

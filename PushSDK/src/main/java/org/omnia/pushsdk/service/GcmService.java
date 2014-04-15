@@ -21,9 +21,6 @@ import android.os.Bundle;
 import android.os.ResultReceiver;
 
 import org.omnia.pushsdk.broadcastreceiver.GcmBroadcastReceiver;
-import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProvider;
-import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProviderImpl;
-import org.omnia.pushsdk.database.DatabaseEventsStorage;
 import org.omnia.pushsdk.database.EventsDatabaseHelper;
 import org.omnia.pushsdk.database.EventsDatabaseWrapper;
 import org.omnia.pushsdk.database.EventsStorage;
@@ -52,9 +49,7 @@ public class GcmService extends IntentService {
 
     // Used by unit tests
     /* package */ static Semaphore semaphore = null;
-    /* package */ static EventsStorage eventsStorage = null;
     /* package */ static PreferencesProvider preferencesProvider = null;
-    /* package */ static MessageReceiptAlarmProvider messageReceiptAlarmProvider = null;
     /* package */ static ServiceStarter serviceStarter = null;
 
     private ResultReceiver resultReceiver = null;
@@ -100,14 +95,8 @@ public class GcmService extends IntentService {
         EventsDatabaseHelper.init();
         EventsDatabaseWrapper.createDatabaseInstance(this);
 
-        if (GcmService.eventsStorage == null) {
-            GcmService.eventsStorage = new DatabaseEventsStorage();
-        }
         if (GcmService.preferencesProvider == null) {
             GcmService.preferencesProvider = new PreferencesProviderImpl(this);
-        }
-        if (GcmService.messageReceiptAlarmProvider == null) {
-            GcmService.messageReceiptAlarmProvider = new MessageReceiptAlarmProviderImpl(this);
         }
         if (GcmService.serviceStarter == null) {
             GcmService.serviceStarter = new ServiceStarterImpl();
@@ -115,9 +104,7 @@ public class GcmService extends IntentService {
     }
 
     private void cleanupStatics() {
-        GcmService.eventsStorage = null;
         GcmService.preferencesProvider = null;
-        GcmService.messageReceiptAlarmProvider = null;
         GcmService.serviceStarter = null;
     }
 
@@ -140,12 +127,12 @@ public class GcmService extends IntentService {
                 return;
             }
 
-            enqueueReturnReceipt(intent);
+            enqueueMessageReceipt(intent);
             notifyApplication(intent);
         }
     }
 
-    private void enqueueReturnReceipt(Intent intent) {
+    private void enqueueMessageReceipt(Intent intent) {
         final MessageReceiptEvent messageReceipt = getMessageReceiptEvent(intent);
         final EnqueueEventJob enqueueEventJob = new EnqueueEventJob(messageReceipt, EventsStorage.EventType.MESSAGE_RECEIPT);
         final Intent enqueueEventJobIntent = EventService.getIntentToRunJob(this, enqueueEventJob);

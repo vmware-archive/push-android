@@ -8,7 +8,7 @@ import android.test.ServiceTestCase;
 
 import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
 import org.omnia.pushsdk.backend.FakeBackEndMessageReceiptApiRequest;
-import org.omnia.pushsdk.broadcastreceiver.FakeMessageReceiptAlarmProvider;
+import org.omnia.pushsdk.broadcastreceiver.FakeEventsSenderAlarmProvider;
 import org.omnia.pushsdk.database.FakeEventsStorage;
 import org.omnia.pushsdk.jobs.DummyJob;
 import org.omnia.pushsdk.model.MessageReceiptEvent;
@@ -26,7 +26,7 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
     private FakeNetworkWrapper networkWrapper;
     private FakeEventsStorage eventsStorage;
     private FakePreferencesProvider preferencesProvider;
-    private FakeMessageReceiptAlarmProvider messageReceiptAlarmProvider;
+    private FakeEventsSenderAlarmProvider messageReceiptAlarmProvider;
     private FakeBackEndMessageReceiptApiRequest backEndMessageReceiptApiRequest;
     private int testResultCode = EventService.NO_RESULT;
     private TestResultReceiver testResultReceiver;
@@ -60,7 +60,7 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
         backEndMessageReceiptApiRequest = new FakeBackEndMessageReceiptApiRequest();
         testResultReceiver = new TestResultReceiver(null);
 
-        messageReceiptAlarmProvider = new FakeMessageReceiptAlarmProvider();
+        messageReceiptAlarmProvider = new FakeEventsSenderAlarmProvider();
         messageReceiptAlarmProvider.enableAlarm();
 
         EventService.semaphore = new Semaphore(0);

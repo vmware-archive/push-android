@@ -10,7 +10,7 @@ import org.omnia.pushsdk.model.MessageReceiptEventTest;
 public class BootCompletedBroadcastReceiverTestCase extends AndroidTestCase {
 
     private BootCompletedBroadcastReceiver broadcastReceiver;
-    private FakeMessageReceiptAlarmProvider messageReceiptAlarmProvider;
+    private FakeEventsSenderAlarmProvider messageReceiptAlarmProvider;
     private FakeEventsStorage eventsStorage;
     private Intent testIntent;
 
@@ -18,7 +18,7 @@ public class BootCompletedBroadcastReceiverTestCase extends AndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         testIntent = new Intent();
-        messageReceiptAlarmProvider = new FakeMessageReceiptAlarmProvider();
+        messageReceiptAlarmProvider = new FakeEventsSenderAlarmProvider();
         messageReceiptAlarmProvider.disableAlarm();
         eventsStorage = new FakeEventsStorage();
         broadcastReceiver = new BootCompletedBroadcastReceiver(getContext(), eventsStorage, messageReceiptAlarmProvider);

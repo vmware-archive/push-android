@@ -8,11 +8,11 @@ import android.os.SystemClock;
 import org.omnia.pushsdk.util.DebugUtil;
 import org.omnia.pushsdk.util.PushLibLogger;
 
-public class MessageReceiptAlarmProviderImpl implements MessageReceiptAlarmProvider {
+public class EventsSenderAlarmProviderImpl implements EventsSenderAlarmProvider {
 
     private final Context context;
 
-    public MessageReceiptAlarmProviderImpl(Context context) {
+    public EventsSenderAlarmProviderImpl(Context context) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
@@ -21,8 +21,8 @@ public class MessageReceiptAlarmProviderImpl implements MessageReceiptAlarmProvi
 
     @Override
     public synchronized void enableAlarm() {
-        PushLibLogger.d("Message receipt sender alarm enabled.");
-        final PendingIntent intent = MessageReceiptAlarmReceiver.getPendingIntent(context, PendingIntent.FLAG_UPDATE_CURRENT);
+        PushLibLogger.d("Events sender alarm enabled.");
+        final PendingIntent intent = EventsSenderAlarmReceiver.getPendingIntent(context, PendingIntent.FLAG_UPDATE_CURRENT);
         final AlarmManager alarmManager = getAlarmManager();
         alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, getTriggerMillis(), getIntervalMillis(), intent);
     }
@@ -50,8 +50,8 @@ public class MessageReceiptAlarmProviderImpl implements MessageReceiptAlarmProvi
 
     @Override
     public synchronized void disableAlarm() {
-        PushLibLogger.d("Message receipt sender alarm disabled.");
-        final PendingIntent intent = MessageReceiptAlarmReceiver.getPendingIntent(context, PendingIntent.FLAG_UPDATE_CURRENT);
+        PushLibLogger.d("Events sender alarm disabled.");
+        final PendingIntent intent = EventsSenderAlarmReceiver.getPendingIntent(context, PendingIntent.FLAG_UPDATE_CURRENT);
         final AlarmManager alarmManager = getAlarmManager();
         alarmManager.cancel(intent);
         intent.cancel();
@@ -59,9 +59,9 @@ public class MessageReceiptAlarmProviderImpl implements MessageReceiptAlarmProvi
 
     @Override
     public synchronized boolean isAlarmEnabled() {
-        final PendingIntent intent = MessageReceiptAlarmReceiver.getPendingIntent(context, PendingIntent.FLAG_NO_CREATE);
+        final PendingIntent intent = EventsSenderAlarmReceiver.getPendingIntent(context, PendingIntent.FLAG_NO_CREATE);
         final boolean isAlarmEnabled = (intent != null);
-        PushLibLogger.d("Message receipt sender alarm enabled: " + (isAlarmEnabled ? "yes." : "no."));
+        PushLibLogger.d("Events sender alarm enabled: " + (isAlarmEnabled ? "yes." : "no."));
         return isAlarmEnabled;
     }
 

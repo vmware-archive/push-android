@@ -7,9 +7,9 @@ import android.os.ResultReceiver;
 
 import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestImpl;
 import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
-import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProvider;
-import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProviderImpl;
-import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmReceiver;
+import org.omnia.pushsdk.broadcastreceiver.EventsSenderAlarmProvider;
+import org.omnia.pushsdk.broadcastreceiver.EventsSenderAlarmProviderImpl;
+import org.omnia.pushsdk.broadcastreceiver.EventsSenderAlarmReceiver;
 import org.omnia.pushsdk.database.DatabaseEventsStorage;
 import org.omnia.pushsdk.database.EventsDatabaseHelper;
 import org.omnia.pushsdk.database.EventsDatabaseWrapper;
@@ -41,7 +41,7 @@ public class EventService extends IntentService {
     /* package */ static NetworkWrapper networkWrapper = null;
     /* package */ static EventsStorage eventsStorage = null;
     /* package */ static PreferencesProvider preferencesProvider = null;
-    /* package */ static MessageReceiptAlarmProvider alarmProvider = null;
+    /* package */ static EventsSenderAlarmProvider alarmProvider = null;
     /* package */ static BackEndMessageReceiptApiRequestProvider backEndMessageReceiptApiRequestProvider = null;
 
     public EventService() {
@@ -62,7 +62,7 @@ public class EventService extends IntentService {
             EventService.preferencesProvider = new PreferencesProviderImpl(this);
         }
         if (EventService.alarmProvider == null) {
-            EventService.alarmProvider = new MessageReceiptAlarmProviderImpl(this);
+            EventService.alarmProvider = new EventsSenderAlarmProviderImpl(this);
         }
         if (EventService.backEndMessageReceiptApiRequestProvider == null) {
             final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
@@ -191,7 +191,7 @@ public class EventService extends IntentService {
             // SUPER IMPORTANT! Make sure that this gets called EVERY time this service is invoked, but not until AFTER
             // any requests are completed -- otherwise the device might return to sleep before the request is complete.
             if (intent != null) {
-                MessageReceiptAlarmReceiver.completeWakefulIntent(intent);
+                EventsSenderAlarmReceiver.completeWakefulIntent(intent);
             }
         }
     }

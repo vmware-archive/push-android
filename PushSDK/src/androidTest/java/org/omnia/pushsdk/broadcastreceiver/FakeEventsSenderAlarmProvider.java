@@ -1,6 +1,6 @@
 package org.omnia.pushsdk.broadcastreceiver;
 
-public class FakeMessageReceiptAlarmProvider implements MessageReceiptAlarmProvider {
+public class FakeEventsSenderAlarmProvider implements EventsSenderAlarmProvider {
 
     private boolean isAlarmEnabled = false;
 

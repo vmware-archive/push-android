@@ -3,7 +3,7 @@ package org.omnia.pushsdk.jobs;
 import android.content.Context;
 
 import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
-import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProvider;
+import org.omnia.pushsdk.broadcastreceiver.EventsSenderAlarmProvider;
 import org.omnia.pushsdk.database.EventsStorage;
 import org.omnia.pushsdk.network.NetworkWrapper;
 import org.omnia.pushsdk.prefs.PreferencesProvider;
@@ -15,7 +15,7 @@ public class JobParams {
     public final NetworkWrapper networkWrapper;
     public final PreferencesProvider preferencesProvider;
     public final EventsStorage eventsStorage;
-    public final MessageReceiptAlarmProvider alarmProvider;
+    public final EventsSenderAlarmProvider alarmProvider;
     public final BackEndMessageReceiptApiRequestProvider backEndMessageReceiptApiRequestProvider;
 
     public JobParams(Context context,
@@ -23,7 +23,7 @@ public class JobParams {
                      NetworkWrapper networkWrapper,
                      EventsStorage eventsStorage,
                      PreferencesProvider preferencesProvider,
-                     MessageReceiptAlarmProvider alarmProvider,
+                     EventsSenderAlarmProvider alarmProvider,
                      BackEndMessageReceiptApiRequestProvider backEndMessageReceiptApiRequestProvider) {
 
         verifyArguments(context, listener, networkWrapper, eventsStorage, preferencesProvider, alarmProvider, backEndMessageReceiptApiRequestProvider);
@@ -42,7 +42,7 @@ public class JobParams {
                                  NetworkWrapper networkWrapper,
                                  EventsStorage eventsStorage,
                                  PreferencesProvider preferencesProvider,
-                                 MessageReceiptAlarmProvider alarmProvider,
+                                 EventsSenderAlarmProvider alarmProvider,
                                  BackEndMessageReceiptApiRequestProvider backEndMessageReceiptApiRequestProvider) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");

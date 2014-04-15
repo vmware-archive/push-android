@@ -16,16 +16,16 @@ public class BootCompletedBroadcastReceiver extends BroadcastReceiver {
 
     private Context context;
     private EventsStorage eventsStorage;
-    private MessageReceiptAlarmProvider messageReceiptAlarmProvider;
+    private EventsSenderAlarmProvider eventsSenderAlarmProvider;
 
     public BootCompletedBroadcastReceiver() {
         // Does nothing
     }
 
-    public BootCompletedBroadcastReceiver(Context context, EventsStorage eventsStorage, MessageReceiptAlarmProvider messageReceiptAlarmProvider) {
+    public BootCompletedBroadcastReceiver(Context context, EventsStorage eventsStorage, EventsSenderAlarmProvider eventsSenderAlarmProvider) {
         this.context = context;
         this.eventsStorage = eventsStorage;
-        this.messageReceiptAlarmProvider = messageReceiptAlarmProvider;
+        this.eventsSenderAlarmProvider = eventsSenderAlarmProvider;
     }
 
     @Override
@@ -45,8 +45,8 @@ public class BootCompletedBroadcastReceiver extends BroadcastReceiver {
         EventsDatabaseHelper.init();
         EventsDatabaseWrapper.createDatabaseInstance(context);
 
-        if (messageReceiptAlarmProvider == null) {
-            messageReceiptAlarmProvider = new MessageReceiptAlarmProviderImpl(context);
+        if (eventsSenderAlarmProvider == null) {
+            eventsSenderAlarmProvider = new EventsSenderAlarmProviderImpl(context);
         }
         if (eventsStorage == null) {
             eventsStorage = new DatabaseEventsStorage();
@@ -56,10 +56,10 @@ public class BootCompletedBroadcastReceiver extends BroadcastReceiver {
     private void startAlarm() {
         final int numberOfMessageReceipts = eventsStorage.getNumberOfEvents(EventsStorage.EventType.MESSAGE_RECEIPT);
         if (numberOfMessageReceipts > 0) {
-            PushLibLogger.fd("There are %d message receipt(s) queued for sending. Enabling alarm.", numberOfMessageReceipts);
-            messageReceiptAlarmProvider.enableAlarmIfDisabled();
+            PushLibLogger.fd("There are %d events(s) queued for sending. Enabling alarm.", numberOfMessageReceipts);
+            eventsSenderAlarmProvider.enableAlarmIfDisabled();
         } else {
-            PushLibLogger.d("There are no message receipts queued for sending.");
+            PushLibLogger.d("There are no events queued for sending.");
         }
     }
 }

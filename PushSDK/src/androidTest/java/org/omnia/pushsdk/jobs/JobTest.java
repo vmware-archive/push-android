@@ -6,7 +6,7 @@ import android.test.AndroidTestCase;
 
 import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
 import org.omnia.pushsdk.backend.FakeBackEndMessageReceiptApiRequest;
-import org.omnia.pushsdk.broadcastreceiver.FakeMessageReceiptAlarmProvider;
+import org.omnia.pushsdk.broadcastreceiver.FakeEventsSenderAlarmProvider;
 import org.omnia.pushsdk.database.FakeEventsStorage;
 import org.omnia.pushsdk.model.MessageReceiptEvent;
 import org.omnia.pushsdk.model.MessageReceiptEventTest;
@@ -23,7 +23,7 @@ public abstract class JobTest extends AndroidTestCase {
     protected FakeEventsStorage eventsStorage;
     protected FakeNetworkWrapper networkWrapper;
     protected FakePreferencesProvider preferencesProvider;
-    protected FakeMessageReceiptAlarmProvider alarmProvider;
+    protected FakeEventsSenderAlarmProvider alarmProvider;
     protected FakeBackEndMessageReceiptApiRequest backEndMessageReceiptApiRequest;
     protected BackEndMessageReceiptApiRequestProvider backEndMessageReceiptApiRequestProvider;
     protected Semaphore semaphore = new Semaphore(0);
@@ -35,7 +35,7 @@ public abstract class JobTest extends AndroidTestCase {
         event2 = MessageReceiptEventTest.getMessageReceiptEvent2();
         eventsStorage = new FakeEventsStorage();
         networkWrapper = new FakeNetworkWrapper();
-        alarmProvider = new FakeMessageReceiptAlarmProvider();
+        alarmProvider = new FakeEventsSenderAlarmProvider();
         preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null);
         backEndMessageReceiptApiRequest = new FakeBackEndMessageReceiptApiRequest();
         backEndMessageReceiptApiRequestProvider = new BackEndMessageReceiptApiRequestProvider(backEndMessageReceiptApiRequest);

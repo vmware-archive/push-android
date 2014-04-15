@@ -10,8 +10,6 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.test.ServiceTestCase;
 
-import org.omnia.pushsdk.broadcastreceiver.FakeMessageReceiptAlarmProvider;
-import org.omnia.pushsdk.database.FakeEventsStorage;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
 import org.omnia.pushsdk.util.FakeServiceStarter;
 
@@ -31,8 +29,6 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
     private TestResultReceiver testResultReceiver;
     private TestBroadcastReceiver testBroadcastReceiver;
     private Intent receivedIntent;
-    private FakeMessageReceiptAlarmProvider alarmProvider;
-    private FakeEventsStorage eventsStorage;
     private FakePreferencesProvider preferencesProvider;
     private FakeServiceStarter serviceStarter;
 
@@ -67,14 +63,10 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        eventsStorage = new FakeEventsStorage();
-        alarmProvider = new FakeMessageReceiptAlarmProvider();
         preferencesProvider = new FakePreferencesProvider(null, null, 0, null, TEST_VARIANT_UUID, null, null, null);
         serviceStarter = new FakeServiceStarter();
         GcmService.semaphore = new Semaphore(0);
-        GcmService.eventsStorage = eventsStorage;
         GcmService.preferencesProvider = preferencesProvider;
-        GcmService.messageReceiptAlarmProvider = alarmProvider;
         GcmService.serviceStarter = serviceStarter;
         testResultReceiver = new TestResultReceiver(null);
         testBroadcastReceiver = new TestBroadcastReceiver();
@@ -86,9 +78,7 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
     @Override
     protected void tearDown() throws Exception {
         GcmService.semaphore = null;
-        GcmService.eventsStorage = null;
         GcmService.preferencesProvider = null;
-        GcmService.messageReceiptAlarmProvider = null;
         GcmService.serviceStarter = null;
         getContext().unregisterReceiver(testBroadcastReceiver);
         super.tearDown();
@@ -98,7 +88,6 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         startService(null);
         GcmService.semaphore.acquire();
         assertEquals(GcmService.NO_RESULT, testResultCode);
-        assertFalse(alarmProvider.isAlarmEnabled());
         assertFalse(serviceStarter.wasStarted());
     }
 
@@ -106,7 +95,6 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         startService(intent);
         GcmService.semaphore.acquire();
         assertEquals(GcmService.RESULT_EMPTY_INTENT, testResultCode);
-        assertFalse(alarmProvider.isAlarmEnabled());
         assertFalse(serviceStarter.wasStarted());
     }
 
@@ -115,7 +103,6 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         startService(intent);
         GcmService.semaphore.acquire();
         assertEquals(GcmService.RESULT_EMPTY_PACKAGE_NAME, testResultCode);
-        assertFalse(alarmProvider.isAlarmEnabled());
         assertFalse(serviceStarter.wasStarted());
     }
 
