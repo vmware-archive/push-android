@@ -34,12 +34,12 @@
         <!-- =============================================================================================== -->
 
         <!-- =============================================================================================== -->
-        <!-- This BroadcastReceiver is called whenever the Omnia Push SDK receives a push notification from  -->
-        <!-- GCM targetted at your application.  You can call it whatever you'd like in your application.    -->
-        <!-- Make sure you add the action "YOUR.PACKAGE.NAME.omniapushsdk.RECEIVE_PUSH" to the broadcast     -->
-        <!-- receiver here.                                                                                  -->
+        <!-- This BroadcastReceiver is called whenever the Pivotal CF Mobile Services Push SDK receives a    -->
+        <!-- push notification from GCM targette at your application.  You can call it whatever you'd like   -->
+        <!-- in your application. Make sure you add the action "YOUR.PACKAGE.NAME.omniapushsdk.RECEIVE_PUSH" -->
+        <!-- to the broadcast receiver here.                                                                 -->
         <receiver
-            android:name=".broadcastreceiver.MyOmniaRemotePushLibBroadcastReceiver">
+            android:name=".broadcastreceiver.MyPivotalCFMSRemotePushLibBroadcastReceiver">
             <intent-filter>
                 <action android:name="org.omnia.pushsdk.simpledemoapp.omniapushsdk.RECEIVE_PUSH"/>
             </intent-filter>
@@ -47,7 +47,7 @@
         <!-- =============================================================================================== -->
 
         <activity
-            android:name="org.omnia.pushsdk.simpledemoapp.MainActivity"
+            android:name=".MainActivity"
             android:label="@string/long_app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

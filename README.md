@@ -1,11 +1,11 @@
-Omnia Mobile Services Push Client SDK for Android
-=================================================
+Pivotal CF Mobile Services Push Client SDK for Android
+======================================================
 
 Features
 --------
 
-The Omnia Mobile Services Push Client SDK is a small tool that will register your application and device with the Omnia
-Push Messaging server for receiving push messages.
+The Pivotal CF Mobile Services Push Client SDK is a small tool that will register your application and device with the
+Pivotal CF Push Messaging server for receiving push messages.
 
 At this time, this SDK does not provide any code for receiving push messages.
 
@@ -18,24 +18,24 @@ The Google Play Services application must be installed on the device before you 
 push messages.  Most devices should already have this application installed, but some odd ones may not.  By default,
 Android Virtual Devices (i.e.: emulators) do not have Google Play Services installed.
 
-Instructions for Integrating the Omnia Mobile Push Services Push Client SDK for Android
+Instructions for Integrating the Pivotal CF Mobile Push Services Push Client SDK for Android
 ---------------------------------------------------------------------------------------
 
-In order to receive push messages from Omnia in your Android application you will need to follow these tasks:
+In order to receive push messages from Pivotal CF in your Android application you will need to follow these tasks:
 
  1. Set up a project on Google Cloud Console.  Follow the instructions here:
 
       http://developer.android.com/google/gcm/gs.html
 
     You will need obtain the Project Number (AKA the "Sender ID") and register a "Web Application".  The Project
-    Number is a parameter you most provide to the Push SDK when registering your device at run-time and to the Omnia
-    console.  The Web Application on Google Cloud Console includes an "API Key" that you must supply to the Omnia
+    Number is a parameter you most provide to the Push SDK when registering your device at run-time and to the Pivotal CF
+    console.  The Web Application on Google Cloud Console includes an "API Key" that you must supply to the Pivotal CF
     administration console when creating your variant.
 
- 2. Set up your project, application, and a variant on the Omnia administration console.  This task is beyond the scope
+ 2. Set up your project, application, and a variant on the Pivotal CF administration console.  This task is beyond the scope
     of this document, but please note that you will need the two parameters from Google Cloud Console above.
 
-    After setting up your variant in Omnia, make sure to note the Variant UUID and Variant Secret parameters.  You will
+    After setting up your variant in Pivotal CF, make sure to note the Variant UUID and Variant Secret parameters.  You will
     need them below.
 
  3. Link the library to your project.  If you are using Gradle to build your project and you have access to the Xtreme
@@ -48,7 +48,7 @@ In order to receive push messages from Omnia in your Android application you wil
 
  4. Linking the library as an AAR file (as above) should add the appropriate permissions to your `AndroidManifest.xml`
     file.  If you are not able to link the library as an AAR file then you will need to add the following permissions
-    manually in order to register your device with Omnia:
+    manually in order to register your device with Pivotal CF:
 
         <uses-permission android:name="android.permission.INTERNET"/>
         <uses-permission android:name="android.permission.GET_ACCOUNTS"/>
@@ -90,11 +90,11 @@ In order to receive push messages from Omnia in your Android application you wil
     The `startRegistration` method is asynchronous and will return before registration is complete.  If you need to know
     when registration is complete (or if it fails), then provide a `RegistrationListener` as the second argument.
 
-    The Omnia Push SDK takes care of the following tasks for you:
+    The Pivotal CF Push SDK takes care of the following tasks for you:
         * Checking for Google Play Services
         * Registering with Google Play Services
         * Saving your registration ID
-        * Sending your registration ID to the back-end (i.e.: Omnia)
+        * Sending your registration ID to the back-end (i.e.: Pivotal CF)
         * Re-registering after the application version, or any other registration parameters are updated.
 
  8. To receive push notifications in your application, you will need to add a `broadcast receiver` to your application.
@@ -189,7 +189,7 @@ to point to a production server when it is available.
 Simple Demo Application
 -----------------------
 
-The Simple Demo Application is an example of the simplest application possible that uses the Omnia Push Client SDK.  At
+The Simple Demo Application is an example of the simplest application possible that uses the Pivotal CF Push Client SDK.  At
 this time, it only demonstrates how to register for push notifications.
 
 This demo application registers for push notifications in the Activity object in order to make it easier to display the
@@ -197,7 +197,7 @@ output on the screen.  It is probably more appropriate for you to register for p
 object instead.
 
 This application may be expanded in the future to demonstrate how to receive push notifications but we may need to decide
-whether we want to expose the Omnia device ID (which is the "address" that push messages are delivered to).  This information
+whether we want to expose the Pivotal CF device ID (which is the "address" that push messages are delivered to).  This information
 is not really pertinent to client applications so we might not want to expose it.
 
 Sample Application
@@ -206,7 +206,7 @@ Sample Application
 There is a small sample application included in this repository to demonstrate and exercise the features in the Push
 Client SDK.
 
-You can use this sample application to test registration against Google Cloud Messaging (GCM) and the Omnia Mobile
+You can use this sample application to test registration against Google Cloud Messaging (GCM) and the Pivotal CF Mobile
 Services back-end server for push messages.  Although not currently supported by the library itself, you can also send
 and receive push messages with the sample application.
 
@@ -224,7 +224,7 @@ Rotate the display to landscape mode to see the captions for the action bar butt
 
 Press the "Register" button in the sample application action bar to ask the Push Library to register the device.  If
 the device is not already registered, then you should see a lot of output scroll by as the library registers with
-both GCM and Omnia.  If the device is already registered then the output should be shorter.
+both GCM and Pivotal CF.  If the device is already registered then the output should be shorter.
 
 You can clear all or parts of the saved registration data with the "Clear Registration" action bar option.  Clearing
 part or all of the registration data will cause a partial or complete re-registration the next time you press the
@@ -238,7 +238,7 @@ You can reset the registration preferences to the default values by selecting th
 the Settings screen.
 
 The sample application (not the library) is also set up to receive push messages once the device has been registered
-with GCM and Omnia.  You can choose to push messages directly through GCM or via Omnia.  Although the library does not
+with GCM and Pivotal CF.  You can choose to push messages directly through GCM or via Pivotal CF.  Although the library does not
 support receiving push messages at this time (since the Google framework already provides very straightforward example
 code that you can copy into your application), the sample application does as a demonstration to show that the "system
 works".  It can be useful for testing your registration set up, or for testing the server itself.

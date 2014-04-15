@@ -31,7 +31,7 @@ package org.omnia.pushsdk.model;
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Model returned by the Omnia Mobile Services device registration API.
+ * Model returned by the Pivotal CF Mobile Services device registration API.
  */
 public class BackEndApiRegistrationResponseData {
 

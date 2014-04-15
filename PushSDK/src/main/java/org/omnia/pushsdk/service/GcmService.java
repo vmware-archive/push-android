@@ -16,10 +16,12 @@
 package org.omnia.pushsdk.service;
 
 import android.app.IntentService;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 
+import org.omnia.pushsdk.PushLib;
 import org.omnia.pushsdk.broadcastreceiver.GcmBroadcastReceiver;
 import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProvider;
 import org.omnia.pushsdk.broadcastreceiver.MessageReceiptAlarmProviderImpl;
@@ -27,11 +29,14 @@ import org.omnia.pushsdk.database.DatabaseEventsStorage;
 import org.omnia.pushsdk.database.EventsDatabaseHelper;
 import org.omnia.pushsdk.database.EventsDatabaseWrapper;
 import org.omnia.pushsdk.database.EventsStorage;
+import org.omnia.pushsdk.jobs.EnqueueEventJob;
 import org.omnia.pushsdk.model.MessageReceiptEvent;
 import org.omnia.pushsdk.prefs.PreferencesProviderImpl;
 import org.omnia.pushsdk.prefs.PreferencesProvider;
 import org.omnia.pushsdk.util.Const;
 import org.omnia.pushsdk.util.PushLibLogger;
+import org.omnia.pushsdk.util.ServiceStarter;
+import org.omnia.pushsdk.util.ServiceStarterImpl;
 
 import java.util.concurrent.Semaphore;
 
@@ -52,6 +57,7 @@ public class GcmService extends IntentService {
     /* package */ static EventsStorage eventsStorage = null;
     /* package */ static PreferencesProvider preferencesProvider = null;
     /* package */ static MessageReceiptAlarmProvider messageReceiptAlarmProvider = null;
+    /* package */ static ServiceStarter serviceStarter = null;
 
     private ResultReceiver resultReceiver = null;
 
@@ -105,17 +111,21 @@ public class GcmService extends IntentService {
         if (GcmService.messageReceiptAlarmProvider == null) {
             GcmService.messageReceiptAlarmProvider = new MessageReceiptAlarmProviderImpl(this);
         }
+        if (GcmService.serviceStarter == null) {
+            GcmService.serviceStarter = new ServiceStarterImpl();
+        }
     }
 
     private void cleanupStatics() {
         GcmService.eventsStorage = null;
         GcmService.preferencesProvider = null;
         GcmService.messageReceiptAlarmProvider = null;
+        GcmService.serviceStarter = null;
     }
 
     private void doHandleIntent(Intent intent) {
 
-        PushLibLogger.fd("Package %s has received a push message from GCM.", getPackageName());
+        PushLibLogger.fd("GcmService: Package %s has received a push message from GCM.", getPackageName());
 
         if (intent == null) {
             return;
@@ -139,9 +149,11 @@ public class GcmService extends IntentService {
 
     private void enqueueReturnReceipt(Intent intent) {
         final MessageReceiptEvent messageReceipt = getMessageReceiptEvent(intent);
-        GcmService.eventsStorage.saveEvent(messageReceipt, EventsStorage.EventType.MESSAGE_RECEIPT);
-        GcmService.messageReceiptAlarmProvider.enableAlarmIfDisabled();
-        PushLibLogger.d("There are now " + GcmService.eventsStorage.getNumberOfEvents(EventsStorage.EventType.MESSAGE_RECEIPT) + " message receipts queued to send to the server.");
+        final EnqueueEventJob enqueueEventJob = new EnqueueEventJob(messageReceipt, EventsStorage.EventType.MESSAGE_RECEIPT);
+        final Intent enqueueEventJobIntent = EventService.getIntentToRunJob(this, enqueueEventJob);
+        if (GcmService.serviceStarter.startService(this, enqueueEventJobIntent) == null) {
+            PushLibLogger.e("ERROR: could not start service '" + enqueueEventJobIntent + ". A message receipt for this message will not be sent.");
+        }
     }
 
     private MessageReceiptEvent getMessageReceiptEvent(Intent intent) {

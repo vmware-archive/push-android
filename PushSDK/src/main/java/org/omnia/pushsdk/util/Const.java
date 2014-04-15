@@ -17,7 +17,7 @@ package org.omnia.pushsdk.util;
 
 public class Const {
 
-    public static final String TAG_NAME = "OmniaPushSDK";
+    public static final String TAG_NAME = "PivotalCFMSPushSDK";
 
     // TODO - update this to the production server when it is set up.
 //    public static final String BASE_SERVER_URL = "http://ec2-54-234-124-123.compute-1.amazonaws.com:8090/";

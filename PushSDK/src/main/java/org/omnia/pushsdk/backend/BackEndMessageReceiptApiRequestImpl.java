@@ -71,7 +71,7 @@ public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implemen
             // TODO - serialize events directly as JSON into the url connection?
 
             final String requestBodyData = getRequestBodyData(uris);
-            PushLibLogger.v("Making network request to post message receipts to the back-end server: " + requestBodyData);
+            PushLibLogger.v("Making network request to post event data to the back-end server: " + requestBodyData);
 //            writeOutput(requestBodyData, outputStream);
 //
 //            final int statusCode = urlConnection.getResponseCode();
@@ -85,7 +85,7 @@ public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implemen
             onSuccessfulNetworkRequest(statusCode, listener);
 
         } catch (Exception e) {
-            PushLibLogger.ex("Back-end message receipt attempt failed", e);
+            PushLibLogger.ex("Sending event data to back-end server failed", e);
             listener.onBackEndMessageReceiptFailed(e.getLocalizedMessage());
 
         } finally {
@@ -116,12 +116,12 @@ public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implemen
     private void onSuccessfulNetworkRequest(int statusCode, BackEndMessageReceiptListener listener) {
 
         if (isFailureStatusCode(statusCode)) {
-            PushLibLogger.e("Back-end server message receipt failed: server returned HTTP status " + statusCode);
-            listener.onBackEndMessageReceiptFailed("Back-end server message receipt returned HTTP status " + statusCode);
+            PushLibLogger.e("Sending event data to back-end server failed: server returned HTTP status " + statusCode);
+            listener.onBackEndMessageReceiptFailed("Sending event data to back-end server returned HTTP status " + statusCode);
             return;
         }
 
-        PushLibLogger.i("Back-end Server message receipt succeeded.");
+        PushLibLogger.i("Sending event data to back-end server succeeded.");
         listener.onBackEndMessageReceiptSuccess();
     }
 

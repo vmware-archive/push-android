@@ -48,7 +48,7 @@ import org.omnia.pushsdk.version.VersionProvider;
  *  previous registration then the Registration Engine won't do anything.
  *
  *  On a fresh install, the Registration Engine will register with Google Cloud Messaging (GCM) and then with the
- *  Omnia Mobile Services back-end server.
+ *  Pivotal CF Mobile Services back-end server.
  *
  *  If the GCM Sender ID is different then the previous registration, then the Registration Engine will
  *  attempt to unregister the device with GCM (Google Cloud Messaging) first.
@@ -56,9 +56,9 @@ import org.omnia.pushsdk.version.VersionProvider;
  *  If the application version code or the GCM Sender ID is updated since the previous registration, then the
  *  Registration Engine will attempt to re-register with GCM.
  *
- *  If any of the Omnia registration parameters (variant_uuid, variant_secret, device_alias), or if a GCM registration
+ *  If any of the Pivotal CF registration parameters (variant_uuid, variant_secret, device_alias), or if a GCM registration
  *  provides a different device registration ID than a previous install, then the Registration Engine will attempt
- *  to unregister with the Omnia back-end server prior to re-registering.
+ *  to unregister with the Pivotal CF back-end server prior to re-registering.
  *
  *  The Registration Engine is also designed to successfully complete previous registrations that have failed. For
  *  instance, if the previous registration attempt successfully registered with GCM but failed to complete the

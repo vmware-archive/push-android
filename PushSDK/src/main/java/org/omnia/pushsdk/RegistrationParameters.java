@@ -16,7 +16,7 @@
 package org.omnia.pushsdk;
 
 /**
- * Parameters used to register with the Omnia Mobile Services Push server.
+ * Parameters used to register with the Pivotal CF Mobile Services Push server.
  */
 public class RegistrationParameters {
 
@@ -26,12 +26,12 @@ public class RegistrationParameters {
     private final String deviceAlias;
 
     /**
-     * Sets up parameters used by the Omnia Push SDK
+     * Sets up parameters used by the Pivotal CF Push SDK
      *
      * @param gcmSenderId   The "sender ID" or "project ID", as defined by the Google Cloud Messaging.  May not be null or empty.
      *                      You can find it on the Google Cloud Console (https://cloud.google.com) for your project.
-     * @param variantUuid   The "variant_uuid", as defined by Omnia Push Services for your variant.  May not be null or empty.
-     * @param variantSecret The "variant secret", as defined by Omnia Push Services for your variant.  May not be null or empty.
+     * @param variantUuid   The "variant_uuid", as defined by Pivotal CF Push Services for your variant.  May not be null or empty.
+     * @param variantSecret The "variant secret", as defined by Pivotal CF Push Services for your variant.  May not be null or empty.
      * @param deviceAlias   A developer-defined "device alias" which can be used to designate this device, or class.
      *                      of devices, in push or notification campaigns. May not be set to `null`. May be set to empty.
      *

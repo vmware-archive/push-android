@@ -30,7 +30,7 @@
 
         <service android:name=".service.GcmService"/>
 
-        <service android:name=".service.MessageReceiptService"/>
+        <service android:name=".service.EventService"/>
 
     </application>
 

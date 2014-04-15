@@ -2,6 +2,7 @@ package org.omnia.pushsdk.backend;
 
 import android.net.Uri;
 
+import java.util.Collections;
 import java.util.List;
 
 public class FakeBackEndMessageReceiptApiRequest implements BackEndMessageReceiptApiRequest {
@@ -61,4 +62,8 @@ public class FakeBackEndMessageReceiptApiRequest implements BackEndMessageReceip
             return receivedUris.size();
         }
     };
+
+    public List<Uri> getListOfReceivedUris() {
+        return Collections.unmodifiableList(receivedUris);
+    }
 }

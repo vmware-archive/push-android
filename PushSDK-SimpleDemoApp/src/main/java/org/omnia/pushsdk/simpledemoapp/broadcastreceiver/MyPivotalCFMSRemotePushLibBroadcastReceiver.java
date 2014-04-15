@@ -15,12 +15,12 @@ import org.omnia.pushsdk.simpledemoapp.MainActivity;
 import org.omnia.pushsdk.util.PushLibLogger;
 
 /*
- * This BroadcastReceiver is called by the Omnia Push SDK whenever it receives a push message
- * from GCM targeted at your application.  The original intent received by the PushLib is in the
- * "gcm_intent" parcelable extra in the intent passed to the `onReceive` method.  The fields passed
- * in the push message itself are in the extras of the Intent in the `gcm_intent` extra.
+ * This BroadcastReceiver is called by the Pivotal CF Mobile Services Push SDK whenever it receives
+ * a push message from GCM targeted at your application.  The original intent received by the PushLib
+ * is in the "gcm_intent" parcelable extra in the intent passed to the `onReceive` method.  The fields
+ * passed in the push message itself are in the extras of the Intent in the `gcm_intent` extra.
  */
-public class MyOmniaRemotePushLibBroadcastReceiver extends WakefulBroadcastReceiver {
+public class MyPivotalCFMSRemotePushLibBroadcastReceiver extends WakefulBroadcastReceiver {
 
     public static final int NOTIFICATION_ID = 1;
 
@@ -66,7 +66,7 @@ public class MyOmniaRemotePushLibBroadcastReceiver extends WakefulBroadcastRecei
             PushLibLogger.i("Received message with no content.");
         }
 
-        MyOmniaRemotePushLibBroadcastReceiver.completeWakefulIntent(intent);
+        MyPivotalCFMSRemotePushLibBroadcastReceiver.completeWakefulIntent(intent);
     }
 
     // Put the message into a notification and post it.
@@ -79,7 +79,7 @@ public class MyOmniaRemotePushLibBroadcastReceiver extends WakefulBroadcastRecei
         final NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(context)
                         .setSmallIcon(R.drawable.ic_launcher)
-                        .setContentTitle("Omnia Push Simple Demo App")
+                        .setContentTitle("Pivotal CF MS Push Simple Demo App")
                         .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
                         .setContentText(msg);
 

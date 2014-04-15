@@ -36,7 +36,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
- * API request for registering a device with the Omnia Mobile Services back-end server.
+ * API request for registering a device with the Pivotal CF Mobile Services back-end server.
  */
 public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements BackEndRegistrationApiRequest {
 

@@ -6,14 +6,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
-import org.omnia.pushsdk.service.MessageReceiptService;
+import org.omnia.pushsdk.jobs.SendEventsJob;
+import org.omnia.pushsdk.service.EventService;
 
 public class MessageReceiptAlarmReceiver extends WakefulBroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        ComponentName comp = new ComponentName(context.getPackageName(), MessageReceiptService.class.getName());
-        WakefulBroadcastReceiver.startWakefulService(context, (intent.setComponent(comp)));
+        final SendEventsJob job = new SendEventsJob();
+        final Intent sendEventsJobIntent = EventService.getIntentToRunJob(context, job);
+        WakefulBroadcastReceiver.startWakefulService(context, sendEventsJobIntent);
     }
 
     public static PendingIntent getPendingIntent(Context context, int pendingIntentFlags) {

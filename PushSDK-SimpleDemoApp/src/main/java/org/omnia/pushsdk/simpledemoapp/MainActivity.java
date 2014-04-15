@@ -15,10 +15,10 @@ public class MainActivity extends ActionBarActivity {
     // Set to your "Project Number" on your Google Cloud project
     private static final String GCM_SENDER_ID = "961895792376";
 
-    // Set to your "Variant UUID", as provided by the Omnia console
+    // Set to your "Variant UUID", as provided by the Pivotal CF Mobile Services console
     private static final String VARIANT_UUID = "9a0bbe07-eb1e-483d-9517-ff9647de0fcc";
 
-    // Set to your "Variant Secret" as provided by the Omnia console
+    // Set to your "Variant Secret" as provided by the Pivotal CF Mobile Services console
     private static final String VARIANT_SECRET = "fbd90567-078d-4f3f-98bd-33e018cbb1a8";
 
     // Set to your own defined alias for this device.  May not be null.  May be empty.

@@ -2,6 +2,7 @@ package org.omnia.pushsdk.model.utilities;
 
 import android.database.Cursor;
 import android.net.Uri;
+import android.os.Parcel;
 
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonElement;
@@ -60,4 +61,11 @@ public class EventHelper {
 		}
 		return null;
 	}
+
+    public static EventBase readEventFromParcel(Parcel parcel, EventsStorage.EventType eventType) {
+        if (eventType == EventsStorage.EventType.MESSAGE_RECEIPT) {
+            return parcel.readParcelable(MessageReceiptEvent.class.getClassLoader());
+        }
+        return null;
+    }
 }

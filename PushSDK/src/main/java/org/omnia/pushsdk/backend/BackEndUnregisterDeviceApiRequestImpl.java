@@ -22,7 +22,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 /**
- * API request for unregistering a device from the Omnia Mobile Services back-end server.
+ * API request for unregistering a device from the Pivotal CF Mobile Services back-end server.
  */
 public class BackEndUnregisterDeviceApiRequestImpl extends ApiRequestImpl implements BackEndUnregisterDeviceApiRequest {
 

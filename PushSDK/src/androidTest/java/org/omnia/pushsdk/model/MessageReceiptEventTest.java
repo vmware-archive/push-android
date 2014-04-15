@@ -340,7 +340,6 @@ public class MessageReceiptEventTest extends AndroidTestCase {
         return outputEvent;
     }
 
-
     private static Date getTestDate1() {
         final Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         cal.set(TEST_YEAR_1, TEST_MONTH_1, TEST_DAY_1, TEST_HOUR_1, TEST_MINUTE_1, TEST_SECOND_1);

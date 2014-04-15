@@ -1,6 +1,7 @@
 package org.omnia.pushsdk.service;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -16,6 +17,7 @@ import org.omnia.pushsdk.database.FakeEventsStorage;
 import org.omnia.pushsdk.model.EventBase;
 import org.omnia.pushsdk.model.MessageReceiptEvent;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
+import org.omnia.pushsdk.util.FakeServiceStarter;
 
 import java.util.List;
 import java.util.concurrent.Semaphore;
@@ -37,6 +39,7 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
     private FakeMessageReceiptAlarmProvider alarmProvider;
     private FakeEventsStorage eventsStorage;
     private FakePreferencesProvider preferencesProvider;
+    private FakeServiceStarter serviceStarter;
 
     // Captures result codes from the service itself
     public class TestResultReceiver extends ResultReceiver {
@@ -72,10 +75,12 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         eventsStorage = new FakeEventsStorage();
         alarmProvider = new FakeMessageReceiptAlarmProvider();
         preferencesProvider = new FakePreferencesProvider(null, null, 0, null, TEST_VARIANT_UUID, null, null, null);
+        serviceStarter = new FakeServiceStarter();
         GcmService.semaphore = new Semaphore(0);
         GcmService.eventsStorage = eventsStorage;
         GcmService.preferencesProvider = preferencesProvider;
         GcmService.messageReceiptAlarmProvider = alarmProvider;
+        GcmService.serviceStarter = serviceStarter;
         testResultReceiver = new TestResultReceiver(null);
         testBroadcastReceiver = new TestBroadcastReceiver();
         final IntentFilter intentFilter = new IntentFilter(TEST_PACKAGE_NAME + GcmService.BROADCAST_NAME_SUFFIX);
@@ -89,6 +94,7 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         GcmService.eventsStorage = null;
         GcmService.preferencesProvider = null;
         GcmService.messageReceiptAlarmProvider = null;
+        GcmService.serviceStarter = null;
         getContext().unregisterReceiver(testBroadcastReceiver);
         super.tearDown();
     }
@@ -97,16 +103,16 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         startService(null);
         GcmService.semaphore.acquire();
         assertEquals(GcmService.NO_RESULT, testResultCode);
-        assertNumberOfMessageReceiptsInStorage(0);
         assertFalse(alarmProvider.isAlarmEnabled());
+        assertFalse(serviceStarter.wasStarted());
     }
 
     public void testReceiveEmptyIntent() throws InterruptedException {
         startService(intent);
         GcmService.semaphore.acquire();
         assertEquals(GcmService.RESULT_EMPTY_INTENT, testResultCode);
-        assertNumberOfMessageReceiptsInStorage(0);
         assertFalse(alarmProvider.isAlarmEnabled());
+        assertFalse(serviceStarter.wasStarted());
     }
 
     public void testEmptyPackageName() throws InterruptedException {
@@ -114,11 +120,12 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         startService(intent);
         GcmService.semaphore.acquire();
         assertEquals(GcmService.RESULT_EMPTY_PACKAGE_NAME, testResultCode);
-        assertNumberOfMessageReceiptsInStorage(0);
         assertFalse(alarmProvider.isAlarmEnabled());
+        assertFalse(serviceStarter.wasStarted());
     }
 
     public void testSendNotification() throws InterruptedException {
+        serviceStarter.setReturnedComponentName(new ComponentName(getContext(), EventService.class));
         intent.putExtra(KEY_MESSAGE, TEST_MESSAGE);
         GcmService.preferencesProvider.setPackageName(TEST_PACKAGE_NAME);
         startService(intent);
@@ -136,11 +143,13 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         assertNotNull(extras);
         assertTrue(extras.containsKey(KEY_MESSAGE));
         assertEquals(TEST_MESSAGE, extras.getString(KEY_MESSAGE));
-        assertNumberOfMessageReceiptsInStorage(1);
-        assertTrue(alarmProvider.isAlarmEnabled());
+
+        assertTrue(serviceStarter.wasStarted());
+        assertEquals(EventService.class.getCanonicalName(), serviceStarter.getStartedIntent().getComponent().getClassName());
     }
 
     public void testQueuesReceiptNotificationWithMessageUuid() throws InterruptedException {
+        serviceStarter.setReturnedComponentName(new ComponentName(getContext(), EventService.class));
         intent.putExtra(GcmService.KEY_MESSAGE_UUID, TEST_MESSAGE_UUID);
         GcmService.preferencesProvider.setPackageName(TEST_PACKAGE_NAME);
         startService(intent);
@@ -150,24 +159,14 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         assertTrue(didReceiveBroadcast);
         assertNotNull(receivedIntent);
         assertTrue(receivedIntent.hasExtra(GcmService.KEY_GCM_INTENT));
-        assertNumberOfMessageReceiptsInStorage(1);
 
-        final List<Uri> eventUris = eventsStorage.getEventUris(EventsStorage.EventType.MESSAGE_RECEIPT);
-        assertEquals(1, eventUris.size());
-        final MessageReceiptEvent savedEvent = (MessageReceiptEvent) eventsStorage.readEvent(eventUris.get(0));
-        assertEquals(TEST_MESSAGE_UUID, savedEvent.getData().getMessageUuid());
-        assertEquals(TEST_VARIANT_UUID, savedEvent.getVariantUuid());
-        assertEquals(EventBase.Status.NOT_POSTED, savedEvent.getStatus());
-        assertTrue(alarmProvider.isAlarmEnabled());
+        assertTrue(serviceStarter.wasStarted());
+        assertEquals(EventService.class.getCanonicalName(), serviceStarter.getStartedIntent().getComponent().getClassName());
     }
 
     private Intent getServiceIntent() {
         final Intent intent = new Intent(getContext(), GcmService.class);
         intent.putExtra(GcmService.KEY_RESULT_RECEIVER, testResultReceiver);
         return intent;
-    }
-
-    private void assertNumberOfMessageReceiptsInStorage(int expected) {
-        assertEquals(expected, eventsStorage.getNumberOfEvents(EventsStorage.EventType.MESSAGE_RECEIPT));
     }
 }

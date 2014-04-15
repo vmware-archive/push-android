@@ -37,7 +37,7 @@ import com.google.gson.Gson;
 
 import org.omnia.pushsdk.database.DatabaseEventsStorage;
 import org.omnia.pushsdk.database.EventsStorage;
-import org.omnia.pushsdk.sample.broadcastreceiver.MyOmniaRemotePushLibBroadcastReceiver;
+import org.omnia.pushsdk.sample.broadcastreceiver.MyPivotalCFMSRemotePushLibBroadcastReceiver;
 import org.omnia.pushsdk.sample.dialogfragment.SendMessageDialogFragment;
 import org.omnia.pushsdk.registration.UnregistrationListener;
 import org.omnia.pushsdk.sample.adapter.LogAdapter;
@@ -115,7 +115,7 @@ public class MainActivity extends ActionBarActivity {
 
     private void clearNotifications() {
         final NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(MyOmniaRemotePushLibBroadcastReceiver.NOTIFICATION_ID);
+        notificationManager.cancel(MyPivotalCFMSRemotePushLibBroadcastReceiver.NOTIFICATION_ID);
     }
 
     private void startRegistration() {
