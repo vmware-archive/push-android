@@ -32,6 +32,14 @@ public class MessageReceiptEvent extends BaseEvent implements Parcelable {
         super();
     }
 
+    // Copy constructor
+    public MessageReceiptEvent(MessageReceiptEvent source) {
+        super(source);
+        if (source.data != null) {
+            this.data = new MessageReceiptData(source.data);
+        }
+    }
+
     public MessageReceiptEvent(Cursor cursor) {
         int columnIndex;
 

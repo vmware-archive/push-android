@@ -27,7 +27,7 @@ android {
 // Try to see if we can upload the AAR to artifactory
 //
 //task jar(type: Jar) {
-//    from android.sourceSets.main.java
+//    from fileTree(dir: 'build/classes/release')
 //}
 //
 //artifacts {

@@ -56,6 +56,24 @@ public abstract class BaseEvent implements Parcelable {
     @SerializedName(Columns.VARIANT_UUID)
     private String variantUuid;
 
+    public BaseEvent() {
+        this.type = getEventType();
+    }
+
+    // Copy constructor
+    public BaseEvent(BaseEvent source) {
+        this.status = source.status;
+        this.id = source.id;
+        this.eventId = source.eventId;
+        this.type = source.type;
+        this.time = source.time;
+        this.variantUuid = source.variantUuid;
+    }
+
+    protected abstract String getEventType();
+
+    public abstract ContentValues getContentValues();
+
     public int getId() {
         return id;
     }
@@ -110,14 +128,6 @@ public abstract class BaseEvent implements Parcelable {
     public void setVariantUuid(String variantUuid) {
         this.variantUuid = variantUuid;
     }
-
-    public BaseEvent() {
-        this.type = getEventType();
-    }
-
-    protected abstract String getEventType();
-
-    public abstract ContentValues getContentValues();
 
     @Override
     public boolean equals(Object o) {

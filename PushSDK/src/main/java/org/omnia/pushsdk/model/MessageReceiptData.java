@@ -18,6 +18,11 @@ public class MessageReceiptData implements Parcelable {
     public MessageReceiptData() {
     }
 
+    // Copy constructor
+    public MessageReceiptData(MessageReceiptData source) {
+        this.messageUuid = source.messageUuid;
+    }
+
     public String getMessageUuid() {
         return messageUuid;
     }

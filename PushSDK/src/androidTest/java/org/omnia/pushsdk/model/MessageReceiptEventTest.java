@@ -57,6 +57,20 @@ public class MessageReceiptEventTest extends AndroidTestCase {
         MoreAsserts.assertNotEqual(model2, model1);
     }
 
+    public void testCopyConstructor1() {
+        final MessageReceiptEvent model1 = new MessageReceiptEvent();
+        final MessageReceiptEvent model2 = new MessageReceiptEvent(model1);
+        assertEquals(model1, model2);
+        assertFalse(model1 == model2);
+    }
+
+    public void testCopyConstructor2() {
+        final MessageReceiptEvent model1 = getMessageReceiptEvent1();
+        final MessageReceiptEvent model2 = new MessageReceiptEvent(model1);
+        assertEquals(model1, model2);
+        assertFalse(model1 == model2);
+    }
+
     public void testNotEqualsWithDates() {
 
         final MessageReceiptEvent model1 = new MessageReceiptEvent();

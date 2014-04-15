@@ -54,7 +54,15 @@ public class EventHelper {
 		}
 		return null;
 	}
-	
+
+    public static BaseEvent copyEvent(BaseEvent source, EventsStorage.EventType eventType) {
+        if (eventType == EventsStorage.EventType.MESSAGE_RECEIPT) {
+            return new MessageReceiptEvent((MessageReceiptEvent) source);
+        } else {
+            throw new IllegalArgumentException("unsupported eventType: " + eventType);
+        }
+    }
+
 	public static BaseEvent deserializeEvent(String eventType, JsonElement jsonElement, JsonDeserializationContext jsonDeserializationContext) {
 		if (eventType.equals(MessageReceiptEvent.TYPE)) {
 			return (MessageReceiptEvent) jsonDeserializationContext.deserialize(jsonElement, MessageReceiptEvent.class);

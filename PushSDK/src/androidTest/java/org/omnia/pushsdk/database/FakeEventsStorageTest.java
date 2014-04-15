@@ -110,14 +110,14 @@ public class FakeEventsStorageTest extends AndroidTestCase {
 
 		// Save a file into the fake filesystem
 		storage.saveEvent(EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
-		final List<Uri> files1 = storage.getEventUris(EventsStorage.EventType.MESSAGE_RECEIPT);
-		assertEquals(1, files1.size());
-		final List<Uri> files2 = storage.getEventUris(EventsStorage.EventType.ALL);
-		assertEquals(1, files2.size());
-		assertEquals(files1.get(0), files2.get(0));
+		final List<Uri> uris1 = storage.getEventUris(EventsStorage.EventType.MESSAGE_RECEIPT);
+		assertEquals(1, uris1.size());
+		final List<Uri> uris2 = storage.getEventUris(EventsStorage.EventType.ALL);
+		assertEquals(1, uris2.size());
+		assertEquals(uris1.get(0), uris2.get(0));
 
 		// Read the file back and confirm that it matches
-		final MessageReceiptEvent fileContents = (MessageReceiptEvent) storage.readEvent(files2.get(0));
+		final MessageReceiptEvent fileContents = (MessageReceiptEvent) storage.readEvent(uris2.get(0));
 		assertEquals(EVENT_1, fileContents);
 	}
 
@@ -294,11 +294,13 @@ public class FakeEventsStorageTest extends AndroidTestCase {
 	public void testSetStatus() {
 
 		final Uri uri1 = storage.saveEvent(EVENT_1, EventsStorage.EventType.MESSAGE_RECEIPT);
-		assertEquals(BaseEvent.Status.NOT_POSTED, EVENT_1.getStatus());
+        assertEventStatus(uri1, BaseEvent.Status.NOT_POSTED);
+
 		storage.setEventStatus(uri1, BaseEvent.Status.POSTING);
-		assertEquals(BaseEvent.Status.POSTING, EVENT_1.getStatus());
+        assertEventStatus(uri1, BaseEvent.Status.POSTING);
+
 		storage.setEventStatus(uri1, BaseEvent.Status.POSTED);
-		assertEquals(BaseEvent.Status.POSTED, EVENT_1.getStatus());
+        assertEventStatus(uri1, BaseEvent.Status.POSTED);
 
 //		final Uri uri2 = storage.saveEvent(getContext(), EVENT_4, EventType.API_VALIDATION_ERROR);
 //		assertEquals(Event.Status.NOT_POSTED, EVENT_4.getStatus());
@@ -307,6 +309,11 @@ public class FakeEventsStorageTest extends AndroidTestCase {
 //		storage.setEventStatus(getContext(), uri2, Event.Status.POSTED);
 //		assertEquals(Event.Status.POSTED, EVENT_4.getStatus());
 	}
+
+    private void assertEventStatus(Uri uri, int expectedStatus) {
+        final BaseEvent event = storage.readEvent(uri);
+        assertEquals(expectedStatus, event.getStatus());
+    }
 
 	public void testGetMessageReceiptEventUrisWithStatus() {
 		EVENT_1.setStatus(BaseEvent.Status.POSTED);
