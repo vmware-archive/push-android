@@ -14,7 +14,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class MonitoringDatabaseWrapperTest extends AndroidTestCase {
+public class EventDatabaseWrapperTest extends AndroidTestCase {
 
     private static final String TEST_VARIANT_UUID_1 = "TEST-VARIANT-UUID-1";
     private static final String TEST_MESSAGE_UUID_1 = "TEST-MESSAGE-UUID-1";
@@ -32,7 +32,7 @@ public class MonitoringDatabaseWrapperTest extends AndroidTestCase {
         REQUEST_HEADERS.put("TEST_KEY2", "TEST_VALUE2");
     }
 
-	public MonitoringDatabaseWrapperTest() {
+	public EventDatabaseWrapperTest() {
 	}
 
 	@Override

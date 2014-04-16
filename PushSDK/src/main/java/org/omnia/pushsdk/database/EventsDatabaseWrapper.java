@@ -37,7 +37,9 @@ public class EventsDatabaseWrapper {
         }
     }
 
-    public static void createDatabaseInstance(Context context) {
+    // Returns 'true' if the database instance was initialized.
+    // Returns 'false' if the database instance was already initialized.
+    public static boolean createDatabaseInstance(Context context) {
 
         if (EventsDatabaseHelper.needsInitializing()) {
             throw new IllegalStateException("EventsDatabaseHelper needs initializing.");
@@ -54,7 +56,10 @@ public class EventsDatabaseWrapper {
                 } else {
                     database.setMaximumSize(MAX_DATABASE_SIZE_RELEASE);
                 }
-                PushLibLogger.d("Database has been initialized.");
+                PushLibLogger.fd("Database has been initialized for package '%s'.", context.getPackageName());
+                return true;
+            } else {
+                return false;
             }
         }
     }

@@ -15,6 +15,7 @@ import org.omnia.pushsdk.database.EventsDatabaseHelper;
 import org.omnia.pushsdk.database.EventsDatabaseWrapper;
 import org.omnia.pushsdk.database.EventsStorage;
 import org.omnia.pushsdk.jobs.BaseJob;
+import org.omnia.pushsdk.jobs.CleanupEventsJob;
 import org.omnia.pushsdk.jobs.JobParams;
 import org.omnia.pushsdk.jobs.JobResultListener;
 import org.omnia.pushsdk.network.NetworkWrapper;
@@ -44,19 +45,42 @@ public class EventService extends IntentService {
     /* package */ static EventsSenderAlarmProvider alarmProvider = null;
     /* package */ static BackEndMessageReceiptApiRequestProvider backEndMessageReceiptApiRequestProvider = null;
 
+    public static Intent getIntentToRunJob(Context context, BaseJob job) {
+        final Intent intent = new Intent(context, EventService.class);
+        if (job != null) {
+            intent.putExtra(KEY_JOB, job);
+        }
+        return intent;
+    }
+
     public EventService() {
         super("EventService");
     }
 
-    private void setupStatics() {
+    @Override
+    protected void onHandleIntent(Intent intent) {
+
+        setupStatics(intent);
+
+        if (intent != null) {
+            getResultReceiver(intent);
+
+            if (hasJob(intent)) {
+                runJob(intent);
+            }
+        }
+
+        postProcessAfterService(intent);
+    }
+
+    private void setupStatics(Intent intent) {
 
         setupLogger();
 
+        boolean needToCleanDatabase = false;
+
         if (EventService.networkWrapper == null) {
             EventService.networkWrapper = new NetworkWrapperImpl();
-        }
-        if (EventService.eventsStorage == null) {
-            setupDatabase();
         }
         if (EventService.preferencesProvider == null) {
             EventService.preferencesProvider = new PreferencesProviderImpl(this);
@@ -64,10 +88,16 @@ public class EventService extends IntentService {
         if (EventService.alarmProvider == null) {
             EventService.alarmProvider = new EventsSenderAlarmProviderImpl(this);
         }
+        if (EventService.eventsStorage == null) {
+            needToCleanDatabase = setupDatabase();
+        }
         if (EventService.backEndMessageReceiptApiRequestProvider == null) {
-            final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
-            final BackEndMessageReceiptApiRequestImpl backEndMessageReceiptApiRequest = new BackEndMessageReceiptApiRequestImpl(this, eventsStorage, networkWrapper);
+            final BackEndMessageReceiptApiRequestImpl backEndMessageReceiptApiRequest = new BackEndMessageReceiptApiRequestImpl(this, EventService.eventsStorage, EventService.networkWrapper);
             EventService.backEndMessageReceiptApiRequestProvider = new BackEndMessageReceiptApiRequestProvider(backEndMessageReceiptApiRequest);
+        }
+
+        if (!isIntentForCleanup(intent) && needToCleanDatabase) {
+            cleanDatabase();
         }
     }
 
@@ -79,37 +109,33 @@ public class EventService extends IntentService {
         }
     }
 
-    private void setupDatabase() {
+    private boolean setupDatabase() {
         EventsDatabaseHelper.init();
-        EventsDatabaseWrapper.createDatabaseInstance(this);
+        final boolean wasDatabaseInstanceCreated = EventsDatabaseWrapper.createDatabaseInstance(this);
         EventService.eventsStorage = new DatabaseEventsStorage();
+        return wasDatabaseInstanceCreated;
     }
 
-    private void cleanupStatics() {
-        EventService.networkWrapper = null;
-        EventService.eventsStorage = null;
-        EventService.preferencesProvider = null;
-        EventService.alarmProvider = null;
-        EventService.backEndMessageReceiptApiRequestProvider = null;
-    }
+    // TODO - see if you can write any unit tests to verify that cleanDatabase gets run on fresh instances
+    // of the EventService class
 
-    @Override
-    protected void onHandleIntent(Intent intent) {
+    private void cleanDatabase() {
+        final CleanupEventsJob job = new CleanupEventsJob();
 
-        setupStatics();
+        final Semaphore runJobSemaphore = new Semaphore(0);
+        job.run(getJobParams(new JobResultListener() {
 
-        if (intent == null) {
-            postProcessAfterService(intent);
-            return;
+            @Override
+            public void onJobComplete(int resultCode) {
+                runJobSemaphore.release();
+            }
+        }));
+
+        try {
+            runJobSemaphore.acquire();
+        } catch (InterruptedException e) {
+            PushLibLogger.ex("Got interrupted while trying to clean database", e);
         }
-
-        getResultReceiver(intent);
-
-        if (hasJob(intent)) {
-            runJob(intent);
-        }
-
-        postProcessAfterService(intent);
     }
 
     private void getResultReceiver(Intent intent) {
@@ -118,6 +144,19 @@ public class EventService extends IntentService {
             resultReceiver = intent.getParcelableExtra(KEY_RESULT_RECEIVER);
             intent.removeExtra(KEY_RESULT_RECEIVER);
         }
+    }
+
+    private boolean isIntentForCleanup(Intent intent) {
+        if (intent == null || !hasJob(intent)) {
+            return false;
+        }
+
+        BaseJob job = getJobFromIntent(intent);
+        if (job == null) {
+            return false;
+        }
+
+        return job instanceof CleanupEventsJob;
     }
 
     private boolean hasJob(Intent intent) {
@@ -196,11 +235,11 @@ public class EventService extends IntentService {
         }
     }
 
-    public static Intent getIntentToRunJob(Context context, BaseJob job) {
-        final Intent intent = new Intent(context, EventService.class);
-        if (job != null) {
-            intent.putExtra(KEY_JOB, job);
-        }
-        return intent;
+    private void cleanupStatics() {
+        EventService.networkWrapper = null;
+        EventService.eventsStorage = null;
+        EventService.preferencesProvider = null;
+        EventService.alarmProvider = null;
+        EventService.backEndMessageReceiptApiRequestProvider = null;
     }
 }

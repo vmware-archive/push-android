@@ -18,22 +18,28 @@ public class CleanupEventsJob extends BaseJob {
 
     @Override
     public void run(JobParams jobParams) {
+        cleanupDatabase(jobParams);
+        enableAlarmIfRequired(jobParams);
+        jobParams.listener.onJobComplete(JobResultListener.RESULT_SUCCESS);
+    }
+
+    private void cleanupDatabase(JobParams jobParams) {
         int numberOfFixedEvents = 0;
         numberOfFixedEvents += fixEventsWithStatus(BaseEvent.Status.POSTING, jobParams);
         numberOfFixedEvents += deleteEventsWithStatus(BaseEvent.Status.POSTED, jobParams);
-        if (numberOfFixedEvents > 0) {
-            PushLibLogger.fd("CleanupEventsJob: fixed %d events in the database.", numberOfFixedEvents);
-        } else {
-            PushLibLogger.fd("CleanupEventsJob: no jobs in the database that need to be cleaned.", numberOfFixedEvents);
+        if (numberOfFixedEvents <= 0) {
+            PushLibLogger.fd("CleanupEventsJob: no events in the database that need to be cleaned.", numberOfFixedEvents);
         }
-        jobParams.listener.onJobComplete(JobResultListener.RESULT_SUCCESS);
     }
 
     // TODO - generalize to all event types
     private int fixEventsWithStatus(int status, JobParams jobParams) {
         final List<Uri> uris = jobParams.eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, status);
-        for (final Uri uri : uris) {
-            jobParams.eventsStorage.setEventStatus(uri, BaseEvent.Status.NOT_POSTED);
+        if (uris.size() > 0) {
+            for (final Uri uri : uris) {
+                jobParams.eventsStorage.setEventStatus(uri, BaseEvent.Status.NOT_POSTED);
+            }
+            PushLibLogger.fd("CleanupEventsJob: set %d '%s' events to status '%s'", uris.size(), BaseEvent.statusString(status), BaseEvent.statusString(BaseEvent.Status.NOT_POSTED));
         }
         return uris.size();
     }
@@ -42,7 +48,24 @@ public class CleanupEventsJob extends BaseJob {
     private int deleteEventsWithStatus(int status, JobParams jobParams) {
         final List<Uri> uris = jobParams.eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, status);
         jobParams.eventsStorage.deleteEvents(uris, EventsStorage.EventType.MESSAGE_RECEIPT);
+        if (uris.size() > 0) {
+            PushLibLogger.fd("CleanupEventsJob: deleted %d events with status '%s'", uris.size(), BaseEvent.statusString(status));
+        }
         return uris.size();
+    }
+
+    // TODO - generalize to all event types
+    private void enableAlarmIfRequired(JobParams jobParams) {
+        int numberOfPendingMessageReceipts = 0;
+        numberOfPendingMessageReceipts += jobParams.eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, BaseEvent.Status.NOT_POSTED).size();
+        numberOfPendingMessageReceipts += jobParams.eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, BaseEvent.Status.POSTING_ERROR).size();
+        if (numberOfPendingMessageReceipts > 0) {
+            PushLibLogger.fd("CleanupEventsJob: There are %d events(s) queued for sending. Enabling alarm.", numberOfPendingMessageReceipts);
+            jobParams.alarmProvider.enableAlarmIfDisabled();
+        } else {
+            PushLibLogger.d("CleanupEventsJob: There are no events queued for sending. Disabling alarm.");
+            jobParams.alarmProvider.disableAlarm();
+        }
     }
 
     @Override

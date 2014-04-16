@@ -21,8 +21,6 @@ import android.os.Bundle;
 import android.os.ResultReceiver;
 
 import org.omnia.pushsdk.broadcastreceiver.GcmBroadcastReceiver;
-import org.omnia.pushsdk.database.EventsDatabaseHelper;
-import org.omnia.pushsdk.database.EventsDatabaseWrapper;
 import org.omnia.pushsdk.database.EventsStorage;
 import org.omnia.pushsdk.jobs.EnqueueEventJob;
 import org.omnia.pushsdk.model.MessageReceiptEvent;
@@ -91,10 +89,6 @@ public class GcmService extends IntentService {
     }
 
     private void setupStatics() {
-
-        EventsDatabaseHelper.init();
-        EventsDatabaseWrapper.createDatabaseInstance(this);
-
         if (GcmService.preferencesProvider == null) {
             GcmService.preferencesProvider = new PreferencesProviderImpl(this);
         }

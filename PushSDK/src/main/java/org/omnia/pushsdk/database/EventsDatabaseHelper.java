@@ -12,7 +12,6 @@ public class EventsDatabaseHelper extends DatabaseHelper {
 
 	public static void init() {
 		if (needsInitializing()) {
-			PushLibLogger.d("Initializing EventsDatabaseHelper");
 			init(DATABASE_NAME, DATABASE_VERSION);
 			addInitializer(new EventsDatabaseInitializer());
 		}

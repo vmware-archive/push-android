@@ -17,6 +17,7 @@ package org.omnia.pushsdk;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 
 import org.omnia.pushsdk.backend.BackEndRegistrationApiRequest;
 import org.omnia.pushsdk.backend.BackEndRegistrationApiRequestImpl;
@@ -24,8 +25,6 @@ import org.omnia.pushsdk.backend.BackEndRegistrationApiRequestProvider;
 import org.omnia.pushsdk.backend.BackEndUnregisterDeviceApiRequest;
 import org.omnia.pushsdk.backend.BackEndUnregisterDeviceApiRequestImpl;
 import org.omnia.pushsdk.backend.BackEndUnregisterDeviceApiRequestProvider;
-import org.omnia.pushsdk.database.EventsDatabaseHelper;
-import org.omnia.pushsdk.database.EventsDatabaseWrapper;
 import org.omnia.pushsdk.gcm.GcmProvider;
 import org.omnia.pushsdk.gcm.GcmRegistrationApiRequest;
 import org.omnia.pushsdk.gcm.GcmRegistrationApiRequestImpl;
@@ -34,6 +33,7 @@ import org.omnia.pushsdk.gcm.GcmUnregistrationApiRequest;
 import org.omnia.pushsdk.gcm.GcmUnregistrationApiRequestImpl;
 import org.omnia.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
 import org.omnia.pushsdk.gcm.RealGcmProvider;
+import org.omnia.pushsdk.jobs.CleanupEventsJob;
 import org.omnia.pushsdk.network.NetworkWrapper;
 import org.omnia.pushsdk.network.NetworkWrapperImpl;
 import org.omnia.pushsdk.prefs.PreferencesProvider;
@@ -42,6 +42,7 @@ import org.omnia.pushsdk.registration.RegistrationEngine;
 import org.omnia.pushsdk.registration.RegistrationListener;
 import org.omnia.pushsdk.registration.UnregistrationEngine;
 import org.omnia.pushsdk.registration.UnregistrationListener;
+import org.omnia.pushsdk.service.EventService;
 import org.omnia.pushsdk.util.Const;
 import org.omnia.pushsdk.util.PushLibLogger;
 import org.omnia.pushsdk.version.RealVersionProvider;
@@ -88,8 +89,7 @@ public class PushLib {
             PushLibLogger.setup(context, Const.TAG_NAME);
         }
 
-        // TODO - may need to go on a background thread
-        initializeDatabase(context);
+        cleanupDatabase(context);
     }
 
     private void saveArguments(Context context) {
@@ -106,9 +106,10 @@ public class PushLib {
         }
     }
 
-    private void initializeDatabase(Context context) {
-        EventsDatabaseHelper.init();
-        EventsDatabaseWrapper.createDatabaseInstance(context);
+    private void cleanupDatabase(Context context) {
+        final CleanupEventsJob job = new CleanupEventsJob();
+        final Intent intent = EventService.getIntentToRunJob(context, job);
+        context.startService(intent);
     }
 
     /**
