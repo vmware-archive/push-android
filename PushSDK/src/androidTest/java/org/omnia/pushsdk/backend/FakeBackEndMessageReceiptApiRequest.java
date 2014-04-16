@@ -10,7 +10,12 @@ public class FakeBackEndMessageReceiptApiRequest implements BackEndMessageReceip
     private final FakeBackEndMessageReceiptApiRequest originatingRequest;
     private boolean willBeSuccessfulRequest = false;
     private boolean wasRequestAttempted = false;
+    private RequestHook requestHook = null;
     private List<Uri> receivedUris = null;
+
+    public interface RequestHook {
+        public void onRequestMade(FakeBackEndMessageReceiptApiRequest request, List<Uri> uris);
+    }
 
     public FakeBackEndMessageReceiptApiRequest(FakeBackEndMessageReceiptApiRequest originatingRequest) {
         this.originatingRequest = originatingRequest;
@@ -27,6 +32,10 @@ public class FakeBackEndMessageReceiptApiRequest implements BackEndMessageReceip
         wasRequestAttempted = true;
         if (originatingRequest != null) {
             originatingRequest.wasRequestAttempted = true;
+        }
+
+        if (requestHook != null) {
+            requestHook.onRequestMade(this, uris);
         }
 
         if (willBeSuccessfulRequest) {
@@ -53,6 +62,10 @@ public class FakeBackEndMessageReceiptApiRequest implements BackEndMessageReceip
 
     public void setWillBeSuccessfulRequest(boolean b) {
         this.willBeSuccessfulRequest = b;
+    }
+
+    public void setRequestHook(RequestHook requestHook) {
+        this.requestHook = requestHook;
     }
 
     public int numberOfMessageReceiptsSent() {

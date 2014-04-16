@@ -4,7 +4,6 @@ import android.net.Uri;
 
 import org.omnia.pushsdk.database.EventsStorage;
 import org.omnia.pushsdk.model.BaseEvent;
-import org.omnia.pushsdk.model.MessageReceiptEvent;
 
 public class CleanupEventsJobTest extends JobTest {
 
@@ -29,12 +28,12 @@ public class CleanupEventsJobTest extends JobTest {
 
         semaphore.acquire();
 
-        assertEquals(4, eventsStorage.getNumberOfEvents(EventsStorage.EventType.MESSAGE_RECEIPT));
+        assertEquals(3, eventsStorage.getNumberOfEvents(EventsStorage.EventType.MESSAGE_RECEIPT));
 
-        assertStatusForEvent(uri1, BaseEvent.Status.NOT_POSTED);
-        assertStatusForEvent(uri2, BaseEvent.Status.NOT_POSTED);
-        assertStatusForEvent(uri3, BaseEvent.Status.NOT_POSTED);
-        assertStatusForEvent(uri4, BaseEvent.Status.POSTED);
+        assertEventHasStatus(uri1, BaseEvent.Status.NOT_POSTED);
+        assertEventHasStatus(uri2, BaseEvent.Status.NOT_POSTED);
+        assertEventHasStatus(uri3, BaseEvent.Status.POSTING_ERROR);
+        assertEventNotInStorage(uri4);
     }
 
     public void testEquals() {
@@ -49,15 +48,5 @@ public class CleanupEventsJobTest extends JobTest {
         final CleanupEventsJob outputJob = getJobViaParcel(inputJob);
         assertNotNull(outputJob);
         assertEquals(inputJob, outputJob);
-    }
-
-    private Uri saveEventWithStatus(int status) {
-        event1.setStatus(status);
-        return eventsStorage.saveEvent(event1, EventsStorage.EventType.MESSAGE_RECEIPT);
-    }
-
-    private void assertStatusForEvent(Uri uri, int expectedStatus) {
-        final MessageReceiptEvent event = (MessageReceiptEvent) eventsStorage.readEvent(uri);
-        assertEquals(expectedStatus, event.getStatus());
     }
 }

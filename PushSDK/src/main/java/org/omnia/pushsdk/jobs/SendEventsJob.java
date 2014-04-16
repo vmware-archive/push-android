@@ -10,6 +10,7 @@ import org.omnia.pushsdk.database.EventsStorage;
 import org.omnia.pushsdk.model.BaseEvent;
 import org.omnia.pushsdk.util.PushLibLogger;
 
+import java.util.LinkedList;
 import java.util.List;
 
 public class SendEventsJob extends BaseJob {
@@ -28,9 +29,16 @@ public class SendEventsJob extends BaseJob {
         PushLibLogger.fd("SendEventsJob: package %s: events available to send: %d", getPackageName(jobParams), uris.size());
 
         if (uris.size() > 0) {
+            setStatusForEvents(jobParams, uris, BaseEvent.Status.POSTING);
             sendMessageReceipts(jobParams, uris);
         } else {
             sendJobResult(RESULT_NO_WORK_TO_DO, jobParams);
+        }
+    }
+
+    private void setStatusForEvents(JobParams jobParams, List<Uri> uris, int status) {
+        for (final Uri uri : uris) {
+            jobParams.eventsStorage.setEventStatus(uri, status);
         }
     }
 
@@ -42,12 +50,15 @@ public class SendEventsJob extends BaseJob {
 
             @Override
             public void onBackEndMessageReceiptSuccess() {
-                postProcessAfterRequest(uris, jobParams);
+                if (uris != null) {
+                    jobParams.eventsStorage.deleteEvents(uris, EventsStorage.EventType.MESSAGE_RECEIPT);
+                }
+                sendJobResult(JobResultListener.RESULT_SUCCESS, jobParams);
             }
 
             @Override
             public void onBackEndMessageReceiptFailed(String reason) {
-                // TODO - log reason? send somewhere?
+                setStatusForEvents(jobParams, uris, BaseEvent.Status.POSTING_ERROR);
                 sendJobResult(RESULT_FAILED_TO_SEND_RECEIPTS, jobParams);
             }
         });
@@ -60,15 +71,11 @@ public class SendEventsJob extends BaseJob {
 
     // TODO - generalize to all event types
     private List<Uri> getUnpostedMessageReceipts(JobParams jobParams) {
-        final List<Uri> uris = jobParams.eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, BaseEvent.Status.NOT_POSTED);
+        final List<Uri> uris1 = jobParams.eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, BaseEvent.Status.NOT_POSTED);
+        final List<Uri> uris2 = jobParams.eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, BaseEvent.Status.POSTING_ERROR);
+        final List<Uri> uris = new LinkedList<Uri>(uris1);
+        uris.addAll(uris2);
         return uris;
-    }
-
-    private void postProcessAfterRequest(List<Uri> messageReceiptUris, JobParams jobParams) {
-        if (messageReceiptUris != null) {
-            jobParams.eventsStorage.deleteEvents(messageReceiptUris, EventsStorage.EventType.MESSAGE_RECEIPT);
-        }
-        sendJobResult(JobResultListener.RESULT_SUCCESS, jobParams);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package org.omnia.pushsdk.jobs;
 
+import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.test.AndroidTestCase;
@@ -7,7 +8,9 @@ import android.test.AndroidTestCase;
 import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
 import org.omnia.pushsdk.backend.FakeBackEndMessageReceiptApiRequest;
 import org.omnia.pushsdk.broadcastreceiver.FakeEventsSenderAlarmProvider;
+import org.omnia.pushsdk.database.EventsStorage;
 import org.omnia.pushsdk.database.FakeEventsStorage;
+import org.omnia.pushsdk.model.BaseEvent;
 import org.omnia.pushsdk.model.MessageReceiptEvent;
 import org.omnia.pushsdk.model.MessageReceiptEventTest;
 import org.omnia.pushsdk.network.FakeNetworkWrapper;
@@ -44,6 +47,29 @@ public abstract class JobTest extends AndroidTestCase {
     protected JobParams getJobParams(JobResultListener listener) {
         return new JobParams(getContext(), listener, networkWrapper, eventsStorage, preferencesProvider, alarmProvider, backEndMessageReceiptApiRequestProvider);
     }
+
+    protected Uri saveEventWithStatus(int status) {
+        event1.setStatus(status);
+        return eventsStorage.saveEvent(event1, EventsStorage.EventType.MESSAGE_RECEIPT);
+    }
+
+    protected void assertEventHasStatus(Uri uri, int expectedStatus) {
+        final BaseEvent event = eventsStorage.readEvent(uri);
+        assertNotNull(event);
+        assertEquals(expectedStatus, event.getStatus());
+    }
+
+    protected void assertEventNotInStorage(Uri uri) {
+        try {
+            eventsStorage.readEvent(uri);
+            fail("expected event to be removed from storage");
+        } catch(IllegalArgumentException e) {
+            // It is expected that the readEvent call throws an exception since
+            // the event is not supposed to be in the database
+        }
+    }
+
+    // Parcelable stuff
 
     protected <T extends Parcelable> T getJobViaParcel(T inputJob) {
         final Parcel inputParcel = Parcel.obtain();

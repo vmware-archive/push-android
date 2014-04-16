@@ -20,23 +20,29 @@ public class CleanupEventsJob extends BaseJob {
     public void run(JobParams jobParams) {
         int numberOfFixedEvents = 0;
         numberOfFixedEvents += fixEventsWithStatus(BaseEvent.Status.POSTING, jobParams);
-        numberOfFixedEvents += fixEventsWithStatus(BaseEvent.Status.POSTING_ERROR, jobParams);
+        numberOfFixedEvents += deleteEventsWithStatus(BaseEvent.Status.POSTED, jobParams);
         if (numberOfFixedEvents > 0) {
-            PushLibLogger.fd("CleanupEventsJob: reset the status for %d POSTING or POSTING_ERROR events in the database.", numberOfFixedEvents);
+            PushLibLogger.fd("CleanupEventsJob: fixed %d events in the database.", numberOfFixedEvents);
+        } else {
+            PushLibLogger.fd("CleanupEventsJob: no jobs in the database that need to be cleaned.", numberOfFixedEvents);
         }
         jobParams.listener.onJobComplete(JobResultListener.RESULT_SUCCESS);
     }
 
+    // TODO - generalize to all event types
     private int fixEventsWithStatus(int status, JobParams jobParams) {
         final List<Uri> uris = jobParams.eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, status);
-        fixEvents(jobParams, uris);
-        return uris.size();
-    }
-
-    private void fixEvents(JobParams jobParams, List<Uri> uris) {
         for (final Uri uri : uris) {
             jobParams.eventsStorage.setEventStatus(uri, BaseEvent.Status.NOT_POSTED);
         }
+        return uris.size();
+    }
+
+    // TODO - generalize to all event types
+    private int deleteEventsWithStatus(int status, JobParams jobParams) {
+        final List<Uri> uris = jobParams.eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, status);
+        jobParams.eventsStorage.deleteEvents(uris, EventsStorage.EventType.MESSAGE_RECEIPT);
+        return uris.size();
     }
 
     @Override
