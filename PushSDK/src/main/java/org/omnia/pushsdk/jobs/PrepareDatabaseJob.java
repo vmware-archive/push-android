@@ -10,9 +10,9 @@ import org.omnia.pushsdk.util.PushLibLogger;
 
 import java.util.List;
 
-public class CleanupEventsJob extends BaseJob {
+public class PrepareDatabaseJob extends BaseJob {
 
-    public CleanupEventsJob() {
+    public PrepareDatabaseJob() {
         super();
     }
 
@@ -28,7 +28,7 @@ public class CleanupEventsJob extends BaseJob {
         numberOfFixedEvents += fixEventsWithStatus(BaseEvent.Status.POSTING, jobParams);
         numberOfFixedEvents += deleteEventsWithStatus(BaseEvent.Status.POSTED, jobParams);
         if (numberOfFixedEvents <= 0) {
-            PushLibLogger.fd("CleanupEventsJob: no events in the database that need to be cleaned.", numberOfFixedEvents);
+            PushLibLogger.fd("PrepareDatabaseJob: no events in the database that need to be cleaned.", numberOfFixedEvents);
         }
     }
 
@@ -39,7 +39,7 @@ public class CleanupEventsJob extends BaseJob {
             for (final Uri uri : uris) {
                 jobParams.eventsStorage.setEventStatus(uri, BaseEvent.Status.NOT_POSTED);
             }
-            PushLibLogger.fd("CleanupEventsJob: set %d '%s' events to status '%s'", uris.size(), BaseEvent.statusString(status), BaseEvent.statusString(BaseEvent.Status.NOT_POSTED));
+            PushLibLogger.fd("PrepareDatabaseJob: set %d '%s' events to status '%s'", uris.size(), BaseEvent.statusString(status), BaseEvent.statusString(BaseEvent.Status.NOT_POSTED));
         }
         return uris.size();
     }
@@ -49,7 +49,7 @@ public class CleanupEventsJob extends BaseJob {
         final List<Uri> uris = jobParams.eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, status);
         jobParams.eventsStorage.deleteEvents(uris, EventsStorage.EventType.MESSAGE_RECEIPT);
         if (uris.size() > 0) {
-            PushLibLogger.fd("CleanupEventsJob: deleted %d events with status '%s'", uris.size(), BaseEvent.statusString(status));
+            PushLibLogger.fd("PrepareDatabaseJob: deleted %d events with status '%s'", uris.size(), BaseEvent.statusString(status));
         }
         return uris.size();
     }
@@ -60,10 +60,10 @@ public class CleanupEventsJob extends BaseJob {
         numberOfPendingMessageReceipts += jobParams.eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, BaseEvent.Status.NOT_POSTED).size();
         numberOfPendingMessageReceipts += jobParams.eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, BaseEvent.Status.POSTING_ERROR).size();
         if (numberOfPendingMessageReceipts > 0) {
-            PushLibLogger.fd("CleanupEventsJob: There are %d events(s) queued for sending. Enabling alarm.", numberOfPendingMessageReceipts);
+            PushLibLogger.fd("PrepareDatabaseJob: There are %d events(s) queued for sending. Enabling alarm.", numberOfPendingMessageReceipts);
             jobParams.alarmProvider.enableAlarmIfDisabled();
         } else {
-            PushLibLogger.d("CleanupEventsJob: There are no events queued for sending. Disabling alarm.");
+            PushLibLogger.d("PrepareDatabaseJob: There are no events queued for sending. Disabling alarm.");
             jobParams.alarmProvider.disableAlarm();
         }
     }
@@ -73,7 +73,7 @@ public class CleanupEventsJob extends BaseJob {
         if (o == null) {
             return false;
         }
-        if (!(o instanceof CleanupEventsJob)) {
+        if (!(o instanceof PrepareDatabaseJob)) {
             return false;
         }
         return true;
@@ -81,18 +81,18 @@ public class CleanupEventsJob extends BaseJob {
 
     // Parcelable stuff
 
-    public static final Parcelable.Creator<CleanupEventsJob> CREATOR = new Parcelable.Creator<CleanupEventsJob>() {
+    public static final Parcelable.Creator<PrepareDatabaseJob> CREATOR = new Parcelable.Creator<PrepareDatabaseJob>() {
 
-        public CleanupEventsJob createFromParcel(Parcel in) {
-            return new CleanupEventsJob(in);
+        public PrepareDatabaseJob createFromParcel(Parcel in) {
+            return new PrepareDatabaseJob(in);
         }
 
-        public CleanupEventsJob[] newArray(int size) {
-            return new CleanupEventsJob[size];
+        public PrepareDatabaseJob[] newArray(int size) {
+            return new PrepareDatabaseJob[size];
         }
     };
 
-    private CleanupEventsJob(Parcel in) {
+    private PrepareDatabaseJob(Parcel in) {
         super(in);
     }
 

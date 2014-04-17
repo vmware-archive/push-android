@@ -5,7 +5,7 @@ import android.net.Uri;
 import org.omnia.pushsdk.database.EventsStorage;
 import org.omnia.pushsdk.model.BaseEvent;
 
-public class CleanupEventsJobTest extends JobTest {
+public class PrepareDatabaseJobTest extends JobTest {
 
     public void testHandlesDatabaseWithManyEvents() throws InterruptedException {
 
@@ -16,7 +16,7 @@ public class CleanupEventsJobTest extends JobTest {
 
         assertEquals(4, eventsStorage.getNumberOfEvents(EventsStorage.EventType.MESSAGE_RECEIPT));
 
-        final CleanupEventsJob job = new CleanupEventsJob();
+        final PrepareDatabaseJob job = new PrepareDatabaseJob();
         job.run(getJobParams(new JobResultListener() {
 
             @Override
@@ -37,15 +37,15 @@ public class CleanupEventsJobTest extends JobTest {
     }
 
     public void testEquals() {
-        final CleanupEventsJob job1 = new CleanupEventsJob();
-        final CleanupEventsJob job2 = new CleanupEventsJob();
+        final PrepareDatabaseJob job1 = new PrepareDatabaseJob();
+        final PrepareDatabaseJob job2 = new PrepareDatabaseJob();
         assertEquals(event1, event1);
         assertEquals(job1, job2);
     }
 
     public void testParcelsData() {
-        final CleanupEventsJob inputJob = new CleanupEventsJob();
-        final CleanupEventsJob outputJob = getJobViaParcel(inputJob);
+        final PrepareDatabaseJob inputJob = new PrepareDatabaseJob();
+        final PrepareDatabaseJob outputJob = getJobViaParcel(inputJob);
         assertNotNull(outputJob);
         assertEquals(inputJob, outputJob);
     }

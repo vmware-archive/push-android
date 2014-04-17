@@ -4,7 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 
-import org.omnia.pushsdk.jobs.CleanupEventsJob;
+import org.omnia.pushsdk.jobs.PrepareDatabaseJob;
 import org.omnia.pushsdk.service.EventService;
 import org.omnia.pushsdk.util.Const;
 import org.omnia.pushsdk.util.PushLibLogger;
@@ -23,7 +23,7 @@ public class BootCompletedBroadcastReceiver extends BroadcastReceiver {
     }
 
     private void startEventService(Context context) {
-        final CleanupEventsJob job = new CleanupEventsJob();
+        final PrepareDatabaseJob job = new PrepareDatabaseJob();
         final Intent intent = EventService.getIntentToRunJob(context, job);
         context.startService(intent);
     }

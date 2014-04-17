@@ -15,7 +15,7 @@ import org.omnia.pushsdk.database.EventsDatabaseHelper;
 import org.omnia.pushsdk.database.EventsDatabaseWrapper;
 import org.omnia.pushsdk.database.EventsStorage;
 import org.omnia.pushsdk.jobs.BaseJob;
-import org.omnia.pushsdk.jobs.CleanupEventsJob;
+import org.omnia.pushsdk.jobs.PrepareDatabaseJob;
 import org.omnia.pushsdk.jobs.JobParams;
 import org.omnia.pushsdk.jobs.JobResultListener;
 import org.omnia.pushsdk.network.NetworkWrapper;
@@ -120,7 +120,7 @@ public class EventService extends IntentService {
     // of the EventService class
 
     private void cleanDatabase() {
-        final CleanupEventsJob job = new CleanupEventsJob();
+        final PrepareDatabaseJob job = new PrepareDatabaseJob();
 
         final Semaphore runJobSemaphore = new Semaphore(0);
         job.run(getJobParams(new JobResultListener() {
@@ -156,7 +156,7 @@ public class EventService extends IntentService {
             return false;
         }
 
-        return job instanceof CleanupEventsJob;
+        return job instanceof PrepareDatabaseJob;
     }
 
     private boolean hasJob(Intent intent) {

@@ -33,7 +33,7 @@ import org.omnia.pushsdk.gcm.GcmUnregistrationApiRequest;
 import org.omnia.pushsdk.gcm.GcmUnregistrationApiRequestImpl;
 import org.omnia.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
 import org.omnia.pushsdk.gcm.RealGcmProvider;
-import org.omnia.pushsdk.jobs.CleanupEventsJob;
+import org.omnia.pushsdk.jobs.PrepareDatabaseJob;
 import org.omnia.pushsdk.network.NetworkWrapper;
 import org.omnia.pushsdk.network.NetworkWrapperImpl;
 import org.omnia.pushsdk.prefs.PreferencesProvider;
@@ -107,7 +107,7 @@ public class PushLib {
     }
 
     private void cleanupDatabase(Context context) {
-        final CleanupEventsJob job = new CleanupEventsJob();
+        final PrepareDatabaseJob job = new PrepareDatabaseJob();
         final Intent intent = EventService.getIntentToRunJob(context, job);
         context.startService(intent);
     }
