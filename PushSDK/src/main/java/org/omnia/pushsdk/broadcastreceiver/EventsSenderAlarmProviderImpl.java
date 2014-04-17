@@ -8,6 +8,8 @@ import android.os.SystemClock;
 import org.omnia.pushsdk.util.DebugUtil;
 import org.omnia.pushsdk.util.PushLibLogger;
 
+import java.util.Random;
+
 public class EventsSenderAlarmProviderImpl implements EventsSenderAlarmProvider {
 
     private final Context context;
@@ -31,9 +33,8 @@ public class EventsSenderAlarmProviderImpl implements EventsSenderAlarmProvider 
         if (DebugUtil.getInstance(context).isDebuggable()) {
             return SystemClock.elapsedRealtime() + 2 * 60 * 1000; // 2 minutes
         } else {
-            return SystemClock.elapsedRealtime() + 2 * AlarmManager.INTERVAL_HOUR;
+            return SystemClock.elapsedRealtime() + EventsSenderAlarmProviderImpl.getTriggerOffsetInMillis();
         }
-        // TODO - add a jitter to the trigger time
     }
 
     private long getIntervalMillis() {
@@ -70,5 +71,13 @@ public class EventsSenderAlarmProviderImpl implements EventsSenderAlarmProvider 
         if (!isAlarmEnabled()) {
             enableAlarm();
         }
+    }
+
+    // Returns a random number in the range [1 hour, 3 hours)
+    public static long getTriggerOffsetInMillis() {
+        final Random r = new Random();
+        long jitter = (long)(r.nextDouble() * 2.0d * (double) AlarmManager.INTERVAL_HOUR) - AlarmManager.INTERVAL_HOUR;
+        long offset = 2 * AlarmManager.INTERVAL_HOUR + jitter;
+        return offset;
     }
 }
