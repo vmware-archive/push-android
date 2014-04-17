@@ -104,7 +104,7 @@ public class GcmService extends IntentService {
 
     private void doHandleIntent(Intent intent) {
 
-        PushLibLogger.fd("GcmService: Package %s has received a push message from GCM.", getPackageName());
+        PushLibLogger.fd("GcmService: Package '%s' has received a push message from GCM.", getPackageName());
 
         if (intent == null) {
             return;
@@ -135,19 +135,12 @@ public class GcmService extends IntentService {
         }
     }
 
+    // TODO - needs device_uuid field, too
     private MessageReceiptEvent getMessageReceiptEvent(Intent intent) {
         final String messageUuid = intent.getStringExtra(KEY_MESSAGE_UUID);
         final String variantUuid = GcmService.preferencesProvider.getVariantUuid();
         final MessageReceiptEvent event = MessageReceiptEvent.getMessageReceiptEvent(variantUuid, messageUuid);
         return event;
-    }
-
-    private void getResultReceiver(Intent intent) {
-        if (intent.hasExtra(KEY_RESULT_RECEIVER)) {
-            // Used by unit tests
-            resultReceiver = intent.getParcelableExtra(KEY_RESULT_RECEIVER);
-            intent.removeExtra(KEY_RESULT_RECEIVER);
-        }
     }
 
     private boolean isBundleEmpty(Intent intent) {
@@ -174,6 +167,14 @@ public class GcmService extends IntentService {
         } else {
             final String broadcastName = packageName + BROADCAST_NAME_SUFFIX;
             return broadcastName;
+        }
+    }
+
+    private void getResultReceiver(Intent intent) {
+        if (intent.hasExtra(KEY_RESULT_RECEIVER)) {
+            // Used by unit tests
+            resultReceiver = intent.getParcelableExtra(KEY_RESULT_RECEIVER);
+            intent.removeExtra(KEY_RESULT_RECEIVER);
         }
     }
 

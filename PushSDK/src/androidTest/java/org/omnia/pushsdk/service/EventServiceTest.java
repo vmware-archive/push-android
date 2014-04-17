@@ -9,13 +9,16 @@ import android.test.ServiceTestCase;
 import org.omnia.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
 import org.omnia.pushsdk.backend.FakeBackEndMessageReceiptApiRequest;
 import org.omnia.pushsdk.broadcastreceiver.FakeEventsSenderAlarmProvider;
+import org.omnia.pushsdk.database.EventsDatabaseWrapper;
 import org.omnia.pushsdk.database.FakeEventsStorage;
 import org.omnia.pushsdk.jobs.DummyJob;
+import org.omnia.pushsdk.jobs.PrepareDatabaseJob;
 import org.omnia.pushsdk.model.MessageReceiptEvent;
 import org.omnia.pushsdk.model.MessageReceiptEventTest;
 import org.omnia.pushsdk.network.FakeNetworkWrapper;
 import org.omnia.pushsdk.prefs.FakePreferencesProvider;
 
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
@@ -28,6 +31,7 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
     private FakePreferencesProvider preferencesProvider;
     private FakeEventsSenderAlarmProvider messageReceiptAlarmProvider;
     private FakeBackEndMessageReceiptApiRequest backEndMessageReceiptApiRequest;
+    private List<String> listOfCompletedJobs;
     private int testResultCode = EventService.NO_RESULT;
     private TestResultReceiver testResultReceiver;
 
@@ -59,6 +63,7 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
         preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null);
         backEndMessageReceiptApiRequest = new FakeBackEndMessageReceiptApiRequest();
         testResultReceiver = new TestResultReceiver(null);
+        listOfCompletedJobs = new LinkedList<String>();
 
         messageReceiptAlarmProvider = new FakeEventsSenderAlarmProvider();
         messageReceiptAlarmProvider.enableAlarm();
@@ -69,6 +74,7 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
         EventService.preferencesProvider = preferencesProvider;
         EventService.backEndMessageReceiptApiRequestProvider = new BackEndMessageReceiptApiRequestProvider(backEndMessageReceiptApiRequest);
         EventService.alarmProvider = messageReceiptAlarmProvider;
+        EventService.listOfCompletedJobs = listOfCompletedJobs;
     }
 
     @Override
@@ -86,6 +92,7 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
         startService(null);
         EventService.semaphore.acquire();
         assertEquals(EventService.NO_RESULT, testResultCode);
+        assertEquals(0, listOfCompletedJobs.size());
     }
 
     public void testGetIntentToRunJob() {
@@ -103,6 +110,7 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
         startService(intent);
         EventService.semaphore.acquire();
         assertEquals(EventService.NO_RESULT, testResultCode);
+        assertEquals(0, listOfCompletedJobs.size());
     }
 
     public void testRunNotParcelableJob() throws InterruptedException {
@@ -112,6 +120,7 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
         startService(intent);
         EventService.semaphore.acquire();
         assertEquals(EventService.NO_RESULT, testResultCode);
+        assertEquals(0, listOfCompletedJobs.size());
     }
 
     public void testRunNotAJob() throws InterruptedException {
@@ -121,6 +130,7 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
         startService(intent);
         EventService.semaphore.acquire();
         assertEquals(EventService.NO_RESULT, testResultCode);
+        assertEquals(0, listOfCompletedJobs.size());
     }
 
     public void testRunDummyJob() throws InterruptedException {
@@ -131,6 +141,8 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
         startService(intent);
         EventService.semaphore.acquire();
         assertEquals(DUMMY_RESULT_CODE, testResultCode);
+        assertEquals(1, listOfCompletedJobs.size());
+        assertEquals(inputJob.toString(), listOfCompletedJobs.get(0));
     }
 
     public void testJobInterrupts() throws InterruptedException {
@@ -141,6 +153,20 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
         startService(intent);
         EventService.semaphore.acquire();
         assertEquals(EventService.JOB_INTERRUPTED, testResultCode);
+        assertEquals(0, listOfCompletedJobs.size());
+    }
+
+    public void testRunsPrepareDatabaseJobIfReceivingAFreshDatabaseInstance() throws InterruptedException {
+        EventService.eventsStorage = null;
+        EventsDatabaseWrapper.removeDatabaseInstance();
+        final DummyJob inputJob = new DummyJob();
+        final Intent intent = EventService.getIntentToRunJob(getContext(), inputJob);
+        addResultReceiverToIntent(intent);
+        startService(intent);
+        EventService.semaphore.acquire();
+        assertEquals(2, listOfCompletedJobs.size());
+        assertEquals(new PrepareDatabaseJob().toString(), listOfCompletedJobs.get(0));
+        assertEquals(inputJob.toString(), listOfCompletedJobs.get(1));
     }
 
     private void addResultReceiverToIntent(Intent intent) {

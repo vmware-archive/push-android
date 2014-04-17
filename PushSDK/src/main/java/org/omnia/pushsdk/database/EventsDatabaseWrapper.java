@@ -64,6 +64,13 @@ public class EventsDatabaseWrapper {
         }
     }
 
+    // Only used by unit tests
+    public static void removeDatabaseInstance() {
+        synchronized (lock) {
+            database = null;
+        }
+    }
+
     public static Cursor query(final Uri uri, final String[] projection, final String whereClause, final String[] whereArgs, final String sortOrder) {
         final QueryParams queryParams = EventsUriHelper.getUriHelper(uri).getQueryParams(uri, projection, whereClause, whereArgs, sortOrder);
         return getDatabase().query(EventsUriHelper.getUriHelper(uri).getDefaultTableName(), queryParams.projection, queryParams.whereClause, queryParams.whereArgs, null, null, queryParams.sortOrder);

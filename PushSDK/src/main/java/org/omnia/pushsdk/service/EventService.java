@@ -15,9 +15,9 @@ import org.omnia.pushsdk.database.EventsDatabaseHelper;
 import org.omnia.pushsdk.database.EventsDatabaseWrapper;
 import org.omnia.pushsdk.database.EventsStorage;
 import org.omnia.pushsdk.jobs.BaseJob;
-import org.omnia.pushsdk.jobs.PrepareDatabaseJob;
 import org.omnia.pushsdk.jobs.JobParams;
 import org.omnia.pushsdk.jobs.JobResultListener;
+import org.omnia.pushsdk.jobs.PrepareDatabaseJob;
 import org.omnia.pushsdk.network.NetworkWrapper;
 import org.omnia.pushsdk.network.NetworkWrapperImpl;
 import org.omnia.pushsdk.prefs.PreferencesProvider;
@@ -25,6 +25,7 @@ import org.omnia.pushsdk.prefs.PreferencesProviderImpl;
 import org.omnia.pushsdk.util.Const;
 import org.omnia.pushsdk.util.PushLibLogger;
 
+import java.util.List;
 import java.util.concurrent.Semaphore;
 
 public class EventService extends IntentService {
@@ -35,8 +36,6 @@ public class EventService extends IntentService {
     public static final int NO_RESULT = -1;
     public static final int JOB_INTERRUPTED = 1;
 
-    private ResultReceiver resultReceiver = null;
-
     // Used by unit tests
     /* package */ static Semaphore semaphore = null;
     /* package */ static NetworkWrapper networkWrapper = null;
@@ -44,6 +43,7 @@ public class EventService extends IntentService {
     /* package */ static PreferencesProvider preferencesProvider = null;
     /* package */ static EventsSenderAlarmProvider alarmProvider = null;
     /* package */ static BackEndMessageReceiptApiRequestProvider backEndMessageReceiptApiRequestProvider = null;
+    /* package */ static List<String> listOfCompletedJobs = null;
 
     public static Intent getIntentToRunJob(Context context, BaseJob job) {
         final Intent intent = new Intent(context, EventService.class);
@@ -63,10 +63,10 @@ public class EventService extends IntentService {
         setupStatics(intent);
 
         if (intent != null) {
-            getResultReceiver(intent);
-
             if (hasJob(intent)) {
-                runJob(intent);
+                final BaseJob job = getJobFromIntent(intent);
+                final ResultReceiver resultReceiver = getResultReceiver(intent);
+                runJob(job, resultReceiver);
             }
         }
 
@@ -116,34 +116,19 @@ public class EventService extends IntentService {
         return wasDatabaseInstanceCreated;
     }
 
-    // TODO - see if you can write any unit tests to verify that cleanDatabase gets run on fresh instances
-    // of the EventService class
-
     private void cleanDatabase() {
         final PrepareDatabaseJob job = new PrepareDatabaseJob();
-
-        final Semaphore runJobSemaphore = new Semaphore(0);
-        job.run(getJobParams(new JobResultListener() {
-
-            @Override
-            public void onJobComplete(int resultCode) {
-                runJobSemaphore.release();
-            }
-        }));
-
-        try {
-            runJobSemaphore.acquire();
-        } catch (InterruptedException e) {
-            PushLibLogger.ex("Got interrupted while trying to clean database", e);
-        }
+        runJob(job, null); // no result receiver used in this hard-coded job
     }
 
-    private void getResultReceiver(Intent intent) {
+    private ResultReceiver getResultReceiver(Intent intent) {
+        ResultReceiver resultReceiver = null;
         if (intent.hasExtra(KEY_RESULT_RECEIVER)) {
             // Used by unit tests
             resultReceiver = intent.getParcelableExtra(KEY_RESULT_RECEIVER);
             intent.removeExtra(KEY_RESULT_RECEIVER);
         }
+        return resultReceiver;
     }
 
     private boolean isIntentForCleanup(Intent intent) {
@@ -156,7 +141,7 @@ public class EventService extends IntentService {
             return false;
         }
 
-        return job instanceof PrepareDatabaseJob;
+        return (job instanceof PrepareDatabaseJob);
     }
 
     private boolean hasJob(Intent intent) {
@@ -176,23 +161,24 @@ public class EventService extends IntentService {
         return (BaseJob) o;
     }
 
-    private void runJob(Intent intent) {
-        final BaseJob job = getJobFromIntent(intent);
+    private void runJob(BaseJob job, final ResultReceiver resultReceiver) {
         final Semaphore runJobSemaphore = new Semaphore(0);
 
         job.run(getJobParams(new JobResultListener() {
 
             @Override
             public void onJobComplete(int resultCode) {
-                sendResult(resultCode);
+                sendResult(resultCode, resultReceiver);
                 runJobSemaphore.release();
             }
         }));
 
         try {
             runJobSemaphore.acquire();
+            recordCompletedJob(job);
         } catch (InterruptedException e) {
-            sendResult(JOB_INTERRUPTED);
+            PushLibLogger.ex("Got interrupted while trying to run job '" + job.toString() + "'.", e);
+            sendResult(JOB_INTERRUPTED, resultReceiver);
         }
     }
 
@@ -206,10 +192,17 @@ public class EventService extends IntentService {
                 EventService.backEndMessageReceiptApiRequestProvider);
     }
 
-    private void sendResult(int resultCode) {
+    // Used by unit tests
+    private void sendResult(int resultCode, ResultReceiver resultReceiver) {
         if (resultReceiver != null) {
-            // Used by unit tests
             resultReceiver.send(resultCode, null);
+        }
+    }
+
+    // Used by unit tests
+    private void recordCompletedJob(BaseJob job) {
+        if (EventService.listOfCompletedJobs != null) {
+            EventService.listOfCompletedJobs.add(job.toString());
         }
     }
 
@@ -241,5 +234,6 @@ public class EventService extends IntentService {
         EventService.preferencesProvider = null;
         EventService.alarmProvider = null;
         EventService.backEndMessageReceiptApiRequestProvider = null;
+        EventService.listOfCompletedJobs = null;
     }
 }
