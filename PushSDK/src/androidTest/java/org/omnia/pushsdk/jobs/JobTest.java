@@ -53,6 +53,10 @@ public abstract class JobTest extends AndroidTestCase {
         return eventsStorage.saveEvent(event1, EventsStorage.EventType.MESSAGE_RECEIPT);
     }
 
+    protected void assertDatabaseEventCount(int expectedEventCount) {
+        assertEquals(expectedEventCount, eventsStorage.getNumberOfEvents(EventsStorage.EventType.MESSAGE_RECEIPT));
+    }
+
     protected void assertEventHasStatus(Uri uri, int expectedStatus) {
         final BaseEvent event = eventsStorage.readEvent(uri);
         assertNotNull(event);

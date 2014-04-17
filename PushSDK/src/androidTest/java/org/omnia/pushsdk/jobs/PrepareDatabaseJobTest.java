@@ -2,10 +2,72 @@ package org.omnia.pushsdk.jobs;
 
 import android.net.Uri;
 
-import org.omnia.pushsdk.database.EventsStorage;
 import org.omnia.pushsdk.model.BaseEvent;
 
 public class PrepareDatabaseJobTest extends JobTest {
+
+    public void testHandlesEmptyDatabase() throws InterruptedException {
+
+        assertDatabaseEventCount(0);
+        assertFalse(alarmProvider.isAlarmEnabled());
+
+        runPrepareDatabaseJob();
+
+        assertDatabaseEventCount(0);
+        assertFalse(alarmProvider.isAlarmEnabled());
+    }
+
+    public void testStartsAlarmForNotPostedEvent() throws InterruptedException {
+
+        final Uri uri = saveEventWithStatus(BaseEvent.Status.NOT_POSTED);
+        assertDatabaseEventCount(1);
+        assertFalse(alarmProvider.isAlarmEnabled());
+
+        runPrepareDatabaseJob();
+
+        assertDatabaseEventCount(1);
+        assertTrue(alarmProvider.isAlarmEnabled());
+        assertEventHasStatus(uri, BaseEvent.Status.NOT_POSTED);
+    }
+
+    public void testStartsAlarmForPostingErrorEvent() throws InterruptedException {
+
+        final Uri uri = saveEventWithStatus(BaseEvent.Status.POSTING_ERROR);
+        assertDatabaseEventCount(1);
+        assertFalse(alarmProvider.isAlarmEnabled());
+
+        runPrepareDatabaseJob();
+
+        assertDatabaseEventCount(1);
+        assertTrue(alarmProvider.isAlarmEnabled());
+        assertEventHasStatus(uri, BaseEvent.Status.POSTING_ERROR);
+    }
+
+    public void testResetsStatusAndStartsAlarmForPostingEvent() throws InterruptedException {
+
+        final Uri uri = saveEventWithStatus(BaseEvent.Status.POSTING);
+        assertDatabaseEventCount(1);
+        assertFalse(alarmProvider.isAlarmEnabled());
+
+        runPrepareDatabaseJob();
+
+        assertDatabaseEventCount(1);
+        assertTrue(alarmProvider.isAlarmEnabled());
+        assertEventHasStatus(uri, BaseEvent.Status.NOT_POSTED);
+    }
+
+    public void testDeletesPostedEvent() throws InterruptedException {
+
+        final Uri uri = saveEventWithStatus(BaseEvent.Status.POSTED);
+        assertDatabaseEventCount(1);
+        assertFalse(alarmProvider.isAlarmEnabled());
+
+        runPrepareDatabaseJob();
+
+        assertDatabaseEventCount(0);
+        assertFalse(alarmProvider.isAlarmEnabled());
+        assertEventNotInStorage(uri);
+    }
 
     public void testHandlesDatabaseWithManyEvents() throws InterruptedException {
 
@@ -14,26 +76,19 @@ public class PrepareDatabaseJobTest extends JobTest {
         final Uri uri3 = saveEventWithStatus(BaseEvent.Status.POSTING_ERROR);
         final Uri uri4 = saveEventWithStatus(BaseEvent.Status.POSTED);
 
-        assertEquals(4, eventsStorage.getNumberOfEvents(EventsStorage.EventType.MESSAGE_RECEIPT));
+        assertDatabaseEventCount(4);
+        assertFalse(alarmProvider.isAlarmEnabled());
 
-        final PrepareDatabaseJob job = new PrepareDatabaseJob();
-        job.run(getJobParams(new JobResultListener() {
+        runPrepareDatabaseJob();
 
-            @Override
-            public void onJobComplete(int resultCode) {
-                assertEquals(JobResultListener.RESULT_SUCCESS, resultCode);
-                semaphore.release();
-            }
-        }));
-
-        semaphore.acquire();
-
-        assertEquals(3, eventsStorage.getNumberOfEvents(EventsStorage.EventType.MESSAGE_RECEIPT));
+        assertDatabaseEventCount(3);
 
         assertEventHasStatus(uri1, BaseEvent.Status.NOT_POSTED);
         assertEventHasStatus(uri2, BaseEvent.Status.NOT_POSTED);
         assertEventHasStatus(uri3, BaseEvent.Status.POSTING_ERROR);
         assertEventNotInStorage(uri4);
+
+        assertTrue(alarmProvider.isAlarmEnabled());
     }
 
     public void testEquals() {
@@ -48,5 +103,19 @@ public class PrepareDatabaseJobTest extends JobTest {
         final PrepareDatabaseJob outputJob = getJobViaParcel(inputJob);
         assertNotNull(outputJob);
         assertEquals(inputJob, outputJob);
+    }
+
+    private void runPrepareDatabaseJob() throws InterruptedException {
+        final PrepareDatabaseJob job = new PrepareDatabaseJob();
+        job.run(getJobParams(new JobResultListener() {
+
+            @Override
+            public void onJobComplete(int resultCode) {
+                assertEquals(JobResultListener.RESULT_SUCCESS, resultCode);
+                semaphore.release();
+            }
+        }));
+
+        semaphore.acquire();
     }
 }
