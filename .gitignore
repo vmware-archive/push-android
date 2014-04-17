@@ -39,3 +39,7 @@ proguard/
 *.ipr
 *.iws
 .idea/
+
+# Other local files
+post_loop.sh
+post_one.sh
