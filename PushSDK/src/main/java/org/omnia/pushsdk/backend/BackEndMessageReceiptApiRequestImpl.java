@@ -8,16 +8,21 @@ import com.google.gson.Gson;
 import org.omnia.pushsdk.database.EventsStorage;
 import org.omnia.pushsdk.model.MessageReceiptEvent;
 import org.omnia.pushsdk.network.NetworkWrapper;
+import org.omnia.pushsdk.util.Const;
 import org.omnia.pushsdk.util.PushLibLogger;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 
 // TODO: generalize to other event types
 public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implements BackEndMessageReceiptApiRequest {
 
+    private static final boolean POST_TO_BACK_END = false;
     private Context context;
     private EventsStorage eventsStorage;
 
@@ -60,30 +65,45 @@ public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implemen
         OutputStream outputStream = null;
 
         try {
-//            final URL url = new URL(Const.BACKEND_MESSAGE_RECEIPT_URL);
-//            final HttpURLConnection urlConnection = getHttpURLConnection(url);
-//            urlConnection.addRequestProperty("Content-Type", "application/json");
-//            urlConnection.setRequestMethod("POST");
-//            urlConnection.setDoInput(true);
-//            urlConnection.connect();
-//
-//            outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
 
-            // TODO - serialize events directly as JSON into the url connection?
+            // TODO - once the server supports received message receipts then remove
+            // this silly 'if' block and let the library post the message receipts for real.
+            // At this time, if you attempt to post message receipt events to the server
+            // then you will get a 405 error.
 
-            final String requestBodyData = getRequestBodyData(uris);
-            PushLibLogger.v("Making network request to post event data to the back-end server: " + requestBodyData);
-//            writeOutput(requestBodyData, outputStream);
-//
-//            final int statusCode = urlConnection.getResponseCode();
-//            urlConnection.disconnect();
+            if (POST_TO_BACK_END) {
 
-            // TODO - restore the commented code above and stop hardcoding the statusCode once
-            // the server accepts message receipts
+                final URL url = new URL(Const.BACKEND_MESSAGE_RECEIPT_URL);
+                final HttpURLConnection urlConnection = getHttpURLConnection(url);
+                urlConnection.addRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoInput(true);
+                urlConnection.connect();
 
-            final int statusCode = 200; // <---- TODO! REMOVE!
+                outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
 
-            onSuccessfulNetworkRequest(statusCode, listener);
+                // TODO - serialize events directly as JSON into the url connection?
+
+                final String requestBodyData = getRequestBodyData(uris);
+                PushLibLogger.v("Making network request to post event data to the back-end server: " + requestBodyData);
+                writeOutput(requestBodyData, outputStream);
+
+                final int statusCode = urlConnection.getResponseCode();
+                urlConnection.disconnect();
+
+                onSuccessfulNetworkRequest(statusCode, listener);
+
+            } else { // FAKE IT!
+
+                // NOTE: the server does not support receiving message receipts at this time.  In the meanwhile,
+                // this block of code is hard-coded to pretend that the library posts to the server and succeeds.
+
+                final String requestBodyData = getRequestBodyData(uris);
+                PushLibLogger.v("Making network request to post event data to the back-end server: " + requestBodyData);
+
+                final int statusCode = 200;
+                onSuccessfulNetworkRequest(statusCode, listener);
+            }
 
         } catch (Exception e) {
             PushLibLogger.ex("Sending event data to back-end server failed", e);
