@@ -29,8 +29,8 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     private static final String TEST_BACK_END_DEVICE_REGISTRATION_ID = "TEST_BACK_END_DEVICE_REGISTRATION_ID";
     private static final String TEST_GCM_DEVICE_REGISTRATION_ID = "TEST_GCM_DEVICE_REGISTRATION_ID";
     private static final String TEST_SENDER_ID = "TEST_SENDER_ID";
-    private static final String TEST_RELEASE_UUID = "TEST_RELEASE_UUID";
-    private static final String TEST_RELEASE_SECRET = "TEST_RELEASE_SECRET";
+    private static final String TEST_VARIANT_UUID = "TEST_VARIANT_UUID";
+    private static final String TEST_VARIANT_SECRET = "TEST_VARIANT_SECRET";
     private static final String TEST_DEVICE_ALIAS = "TEST_DEVICE_ALIAS";
     private static final long TEN_SECOND_TIMEOUT = 10000L;
 
@@ -206,6 +206,6 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     }
 
     private RegistrationParameters getParameters() {
-        return new RegistrationParameters(TEST_SENDER_ID, TEST_RELEASE_UUID, TEST_RELEASE_SECRET, TEST_DEVICE_ALIAS);
+        return new RegistrationParameters(TEST_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_DEVICE_ALIAS);
     }
 }

@@ -16,8 +16,8 @@ public class UnregistrationEngineTestParameters {
 
     private static final long TEN_SECOND_TIMEOUT = 10000L;
     private static final String GCM_SENDER_ID_IN_PREFS = "GCM SENDER ID";
-    private static final String RELEASE_UUID_IN_PREFS = "RELEASE UUID";
-    private static final String RELEASE_SECRET_IN_PREFS = "RELEASE SECRET";
+    private static final String VARIANT_UUID_IN_PREFS = "VARIANT UUID";
+    private static final String VARIANT_SECRET_IN_PREFS = "VARIANT SECRET";
     private static final String DEVICE_ALIAS_IN_PREFS = "DEVICE ALIAS";
     private static final int APP_VERSION_IN_PREFS = 99;
     private static final String GCM_DEVICE_ID_IN_PREFS = "GCM DEVICE ID";
@@ -44,7 +44,7 @@ public class UnregistrationEngineTestParameters {
         if (backEndDeviceRegistrationIdInPrefs == null) {
             prefsProvider = new FakePreferencesProvider(null, backEndDeviceRegistrationIdInPrefs, -1, null, null, null, null, null);
         } else {
-            prefsProvider = new FakePreferencesProvider(GCM_DEVICE_ID_IN_PREFS, backEndDeviceRegistrationIdInPrefs, APP_VERSION_IN_PREFS, GCM_SENDER_ID_IN_PREFS, RELEASE_UUID_IN_PREFS, RELEASE_SECRET_IN_PREFS, DEVICE_ALIAS_IN_PREFS, PACKAGE_NAME_IN_PREFS);
+            prefsProvider = new FakePreferencesProvider(GCM_DEVICE_ID_IN_PREFS, backEndDeviceRegistrationIdInPrefs, APP_VERSION_IN_PREFS, GCM_SENDER_ID_IN_PREFS, VARIANT_UUID_IN_PREFS, VARIANT_SECRET_IN_PREFS, DEVICE_ALIAS_IN_PREFS, PACKAGE_NAME_IN_PREFS);
         }
         final FakeGcmUnregistrationApiRequest gcmUnregistrationApiRequest = new FakeGcmUnregistrationApiRequest(gcmProvider);
         final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(gcmUnregistrationApiRequest);
