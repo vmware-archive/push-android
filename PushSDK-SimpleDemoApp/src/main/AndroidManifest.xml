@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="org.omnia.pushsdk.simpledemoapp"
+    package="com.pivotal.cf.mobile.pushsdk.simpledemoapp"
     android:versionCode="4"
     android:versionName="0.4" >
 
@@ -8,9 +8,9 @@
     <!-- You must add this permission, with your package name, to your manifest in order to receive push -->
     <!-- notifications.  The permission name must be YOUR.PACKAGE.NAME.permission.C2D_MESSAGE            -->
     <permission
-        android:name="org.omnia.pushsdk.simpledemoapp.permission.C2D_MESSAGE"
+        android:name="com.pivotal.cf.mobile.pushsdk.simpledemoapp.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
-    <uses-permission android:name="org.omnia.pushsdk.simpledemoapp.permission.C2D_MESSAGE" />
+    <uses-permission android:name="com.pivotal.cf.mobile.pushsdk.simpledemoapp.permission.C2D_MESSAGE" />
     <!-- =============================================================================================== -->
 
     <application
@@ -24,11 +24,11 @@
         <!-- your manifest in order to receive push notifications.  Do not change the package name in the    -->
         <!-- receiver name itself.                                                                           -->
         <receiver
-            android:name="org.omnia.pushsdk.broadcastreceiver.GcmBroadcastReceiver"
+            android:name="com.pivotal.cf.mobile.pushsdk.broadcastreceiver.GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
-                <category android:name="org.omnia.pushsdk.simpledemoapp"/>
+                <category android:name="com.pivotal.cf.mobile.pushsdk.simpledemoapp"/>
             </intent-filter>
         </receiver>
         <!-- =============================================================================================== -->
@@ -36,18 +36,18 @@
         <!-- =============================================================================================== -->
         <!-- This BroadcastReceiver is called whenever the Pivotal CF Mobile Services Push SDK receives a    -->
         <!-- push notification from GCM targette at your application.  You can call it whatever you'd like   -->
-        <!-- in your application. Make sure you add the action "YOUR.PACKAGE.NAME.omniapushsdk.RECEIVE_PUSH" -->
+        <!-- in your application. Make sure you add the action "YOUR.PACKAGE.NAME.pcfmspushsdk.RECEIVE_PUSH" -->
         <!-- to the broadcast receiver here.                                                                 -->
         <receiver
-            android:name=".broadcastreceiver.MyPivotalCFMSRemotePushLibBroadcastReceiver">
+            android:name="com.pivotal.cf.mobile.pushsdk.simpledemoapp.broadcastreceiver.MyPivotalCFMSRemotePushLibBroadcastReceiver">
             <intent-filter>
-                <action android:name="org.omnia.pushsdk.simpledemoapp.omniapushsdk.RECEIVE_PUSH"/>
+                <action android:name="com.pivotal.cf.mobile.pushsdk.simpledemoapp.pcfmspushsdk.RECEIVE_PUSH"/>
             </intent-filter>
         </receiver>
         <!-- =============================================================================================== -->
 
         <activity
-            android:name=".MainActivity"
+            android:name="com.pivotal.cf.mobile.pushsdk.simpledemoapp.MainActivity"
             android:label="@string/long_app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
