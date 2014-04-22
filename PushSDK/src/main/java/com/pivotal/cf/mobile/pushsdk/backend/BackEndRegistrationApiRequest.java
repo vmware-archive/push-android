@@ -19,7 +19,8 @@ import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 
 public interface BackEndRegistrationApiRequest {
 
-    void startDeviceRegistration(String gcmDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener);
+    void startNewDeviceRegistration(String gcmDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener);
+    void startUpdateDeviceRegistration(String gcmDeviceRegistrationId, String backEndDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener);
     BackEndRegistrationApiRequest copy();
 
 }

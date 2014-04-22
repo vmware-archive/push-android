@@ -58,7 +58,7 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
         this.context = context;
     }
 
-    public void startDeviceRegistration(String gcmDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener) {
+    public void startNewDeviceRegistration(String gcmDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener) {
 
         verifyRegistrationArguments(gcmDeviceRegistrationId, listener);
 
@@ -97,6 +97,11 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
                 } catch (IOException e) {}
             }
         }
+    }
+
+    @Override
+    public void startUpdateDeviceRegistration(String gcmDeviceRegistrationId, String backEndDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener) {
+
     }
 
     private void verifyRegistrationArguments(String gcmDeviceRegistrationId, BackEndRegistrationListener listener) {

@@ -20,20 +20,17 @@ import android.content.Context;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndRegistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndRegistrationApiRequestProvider;
-import com.pivotal.cf.mobile.pushsdk.backend.BackEndUnregisterDeviceApiRequestProvider;
-import com.pivotal.cf.mobile.pushsdk.backend.BackEndUnregisterDeviceListener;
+import com.pivotal.cf.mobile.pushsdk.backend.BackEndRegistrationListener;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmProvider;
+import com.pivotal.cf.mobile.pushsdk.gcm.GcmRegistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmRegistrationApiRequestProvider;
+import com.pivotal.cf.mobile.pushsdk.gcm.GcmRegistrationListener;
+import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationListener;
 import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProvider;
 import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 import com.pivotal.cf.mobile.pushsdk.version.VersionProvider;
-import com.pivotal.cf.mobile.pushsdk.backend.BackEndRegistrationListener;
-import com.pivotal.cf.mobile.pushsdk.backend.BackEndUnregisterDeviceApiRequest;
-import com.pivotal.cf.mobile.pushsdk.gcm.GcmRegistrationApiRequest;
-import com.pivotal.cf.mobile.pushsdk.gcm.GcmRegistrationListener;
-import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequest;
 
 /**
  * This class is responsible for all the business logic behind device registration.  For a description
@@ -72,7 +69,6 @@ public class RegistrationEngine {
     private GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider;
     private GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider;
     private BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider;
-    private BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider;
     private VersionProvider versionProvider;
     private String packageName;
     private String previousGcmDeviceRegistrationId = null;
@@ -86,23 +82,21 @@ public class RegistrationEngine {
      * Instantiate an instance of the RegistrationEngine.
      *
      * All the parameters are required.  None may be null.
-     *
-     * @param context  A context
+     *  @param context  A context
      * @param packageName
      * @param gcmProvider  Some object that can provide the GCM services.
      * @param preferencesProvider  Some object that can provide persistent storage of preferences.
      * @param gcmRegistrationApiRequestProvider  Some object that can provide GCMRegistrationApiRequest objects.
      * @param gcmUnregistrationApiRequestProvider  Some object that can provide GCMUnregistrationApiRequest objects.
      * @param backEndRegistrationApiRequestProvider  Some object that can provide BackEndRegistrationApiRequest objects.
-     * @param backEndUnregisterDeviceApiRequestProvider  Some object that can provide BackEndUnregisterDeviceApiRequest objects.
      * @param versionProvider  Some object that can provide the application version.
      */
-    public RegistrationEngine(Context context, String packageName, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider, VersionProvider versionProvider) {
-        verifyArguments(context, packageName, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, backEndUnregisterDeviceApiRequestProvider);
-        saveArguments(context, packageName, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, backEndUnregisterDeviceApiRequestProvider);
+    public RegistrationEngine(Context context, String packageName, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, VersionProvider versionProvider) {
+        verifyArguments(context, packageName, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+        saveArguments(context, packageName, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
     }
 
-    private void verifyArguments(Context context, String packageName, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, VersionProvider versionProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
+    private void verifyArguments(Context context, String packageName, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, VersionProvider versionProvider) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
@@ -124,15 +118,12 @@ public class RegistrationEngine {
         if (backEndRegistrationApiRequestProvider == null) {
             throw new IllegalArgumentException("backEndRegistrationApiRequestProvider may not be null");
         }
-        if (backEndUnregisterDeviceApiRequestProvider == null) {
-            throw new IllegalArgumentException("backEndUnregisterDeviceApiRequestProvider may not be null");
-        }
         if (versionProvider == null) {
             throw new IllegalArgumentException("versionProvider may not be null");
         }
     }
 
-    private void saveArguments(Context context, String packageName, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, VersionProvider versionProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
+    private void saveArguments(Context context, String packageName, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, VersionProvider versionProvider) {
         this.context = context;
         this.packageName = packageName;
         this.gcmProvider = gcmProvider;
@@ -140,7 +131,6 @@ public class RegistrationEngine {
         this.gcmRegistrationApiRequestProvider = gcmRegistrationApiRequestProvider;
         this.gcmUnregistrationApiRequestProvider = gcmUnregistrationApiRequestProvider;
         this.backEndRegistrationApiRequestProvider = backEndRegistrationApiRequestProvider;
-        this.backEndUnregisterDeviceApiRequestProvider = backEndUnregisterDeviceApiRequestProvider;
         this.versionProvider = versionProvider;
         this.previousGcmDeviceRegistrationId = preferencesProvider.getGcmDeviceRegistrationId();
         this.previousBackEndDeviceRegistrationId = preferencesProvider.getBackEndDeviceRegistrationId();
@@ -182,11 +172,11 @@ public class RegistrationEngine {
                 }
             }
 
-        } else if (isUnregisterDeviceWithBackEndRequired(previousGcmDeviceRegistrationId, parameters)) {
-            unregisterDeviceWithBackEnd(previousBackEndDeviceRegistrationId, previousGcmDeviceRegistrationId, parameters, listener);
+        } else if (isBackEndUpdateRegistrationRequired(previousGcmDeviceRegistrationId, parameters)) {
+            registerUpdateDeviceWithBackEnd(previousGcmDeviceRegistrationId, previousBackEndDeviceRegistrationId, parameters, listener);
 
-        } else if (isBackEndRegistrationRequired(parameters)) {
-            registerDeviceWithBackEnd(previousGcmDeviceRegistrationId, parameters, listener);
+        } else if (isBackEndNewRegistrationRequired(parameters)) {
+            registerNewDeviceWithBackEnd(previousGcmDeviceRegistrationId, parameters, listener);
 
         } else {
             PushLibLogger.v("Already registered with GCM and back-end");
@@ -253,7 +243,7 @@ public class RegistrationEngine {
         return currentAppVersion != savedAppVersion;
     }
 
-    private boolean isBackEndRegistrationRequired(RegistrationParameters parameters) {
+    private boolean isBackEndNewRegistrationRequired(RegistrationParameters parameters) {
         final boolean isPreviousVariantUuidEmpty = previousVariantUuid == null || previousVariantUuid.isEmpty();
         if (isEmptyPreviousGcmDeviceRegistrationId()) {
             PushLibLogger.v("previousGcmDeviceRegistrationId is empty. Device registration with the back-end will be required.");
@@ -264,22 +254,23 @@ public class RegistrationEngine {
         return isEmptyPreviousGcmDeviceRegistrationId() || isPreviousVariantUuidEmpty || areRegistrationParametersUpdated(parameters);
     }
 
-    private boolean isUnregisterDeviceWithBackEndRequired(String newGcmDeviceRegistrationId, RegistrationParameters parameters) {
+
+    private boolean isBackEndUpdateRegistrationRequired(String newGcmDeviceRegistrationId, RegistrationParameters parameters) {
         final boolean isGcmDeviceRegistrationIdDifferent = isEmptyPreviousGcmDeviceRegistrationId() || !previousGcmDeviceRegistrationId.equals(newGcmDeviceRegistrationId);
         final boolean isPreviousBackEndDeviceRegistrationIdEmpty = previousBackEndDeviceRegistrationId == null || previousBackEndDeviceRegistrationId.isEmpty();
         if (isPreviousBackEndDeviceRegistrationIdEmpty) {
-            PushLibLogger.v("previousBackEndDeviceRegistrationId is empty. Device will NOT have to be unregistered with the back-end.");
+            PushLibLogger.v("previousBackEndDeviceRegistrationId is empty. Device will NOT require an update-registration with the back-end.");
             return false;
         }
         if (isGcmDeviceRegistrationIdDifferent) {
-            PushLibLogger.v("The gcmDeviceRegistrationId is different. Device will have to be unregistered with the back-end.");
+            PushLibLogger.v("The gcmDeviceRegistrationId is different. Device will need to update its registration with the back-end.");
             return true;
         }
         if (areRegistrationParametersUpdated(parameters)) {
-            PushLibLogger.v("The registration parameters have been updated. Device will have to be unregistered with the back-end.");
+            PushLibLogger.v("The registration parameters have been updated. Device will need to update its registration with the back-end.");
             return true;
         }
-        PushLibLogger.v("It does not seem that the device needs to be unregistered with the back-end.");
+        PushLibLogger.v("It does not seem that the device needs to update its registration with the back-end.");
         return false;
     }
 
@@ -342,10 +333,11 @@ public class RegistrationEngine {
                     isNewGcmDeviceRegistrationId = true;
                 }
 
-                if (isUnregisterDeviceWithBackEndRequired(gcmDeviceRegistrationId, parameters)) {
-                    unregisterDeviceWithBackEnd(previousBackEndDeviceRegistrationId, gcmDeviceRegistrationId, parameters, listener);
-                } else if (isNewGcmDeviceRegistrationId) {
-                    registerDeviceWithBackEnd(gcmDeviceRegistrationId, parameters, listener);
+
+                if (isBackEndUpdateRegistrationRequired(gcmDeviceRegistrationId, parameters)) {
+                    registerUpdateDeviceWithBackEnd(gcmDeviceRegistrationId, previousBackEndDeviceRegistrationId, parameters, listener);
+                }  else if (isNewGcmDeviceRegistrationId) {
+                    registerNewDeviceWithBackEnd(gcmDeviceRegistrationId, parameters, listener);
                 } else if (listener != null) {
                     listener.onRegistrationComplete();
                 }
@@ -360,40 +352,71 @@ public class RegistrationEngine {
         });
     }
 
-    private void unregisterDeviceWithBackEnd(final String backEndDeviceRegistrationId, String gcmDeviceRegistrationId, RegistrationParameters parameters, final RegistrationListener listener) {
-        PushLibLogger.i("Initiating device unregistration with the back-end.");
-        final BackEndUnregisterDeviceApiRequest backEndUnregisterDeviceApiRequest = backEndUnregisterDeviceApiRequestProvider.getRequest();
-        backEndUnregisterDeviceApiRequest.startUnregisterDevice(backEndDeviceRegistrationId, getBackEndUnregisterDeviceListener(gcmDeviceRegistrationId, parameters, listener));
+    private void registerUpdateDeviceWithBackEnd(String gcmDeviceRegistrationId, String backEndDeviceRegistrationId, RegistrationParameters parameters, final RegistrationListener listener) {
+        PushLibLogger.i("Initiating update device registration with the back-end.");
+        final BackEndRegistrationApiRequest backEndRegistrationApiRequest = backEndRegistrationApiRequestProvider.getRequest();
+        backEndRegistrationApiRequest.startUpdateDeviceRegistration(gcmDeviceRegistrationId, backEndDeviceRegistrationId,
+                parameters,
+                getBackEndUpdateRegistrationListener(parameters, listener));
     }
 
-    private BackEndUnregisterDeviceListener getBackEndUnregisterDeviceListener(final String gcmDeviceRegistrationId, final RegistrationParameters parameters, final RegistrationListener listener) {
-        return new BackEndUnregisterDeviceListener() {
+    private BackEndRegistrationListener getBackEndUpdateRegistrationListener(final RegistrationParameters parameters, final RegistrationListener listener) {
+        return new BackEndRegistrationListener() {
 
             @Override
-            public void onBackEndUnregisterDeviceSuccess() {
+            public void onBackEndRegistrationSuccess(String backEndDeviceRegistrationId) {
+
+                if (backEndDeviceRegistrationId == null) {
+                    PushLibLogger.e("Back-end server return null backEndDeviceRegistrationId upon registration update.");
+
+                    // The server didn't return a valid registration response.  We should clear our local
+                    // registration data so that we can attempt to reregister next time.
+                    preferencesProvider.setBackEndDeviceRegistrationId(null);
+                    preferencesProvider.setVariantUuid(null);
+                    preferencesProvider.setVariantSecret(null);
+                    preferencesProvider.setDeviceAlias(null);
+
+                    if (listener != null) {
+                        listener.onRegistrationFailed("Back-end server return null backEndDeviceRegistrationId upon registration update.");
+                    }
+                    return;
+                }
+
+                PushLibLogger.i("Saving back-end device registration ID: " + backEndDeviceRegistrationId);
+                preferencesProvider.setBackEndDeviceRegistrationId(backEndDeviceRegistrationId);
+
+                PushLibLogger.v("Saving updated variantUuid, variantSecret, and deviceAlias");
+                preferencesProvider.setVariantUuid(parameters.getVariantUuid());
+                preferencesProvider.setVariantSecret(parameters.getVariantSecret());
+                preferencesProvider.setDeviceAlias(parameters.getDeviceAlias());
+
+                if (listener != null) {
+                    listener.onRegistrationComplete();
+                }
+            }
+
+            @Override
+            public void onBackEndRegistrationFailed(String reason) {
+
                 preferencesProvider.setBackEndDeviceRegistrationId(null);
                 preferencesProvider.setVariantUuid(null);
                 preferencesProvider.setVariantSecret(null);
                 preferencesProvider.setDeviceAlias(null);
-                registerDeviceWithBackEnd(gcmDeviceRegistrationId, parameters, listener);
-            }
 
-            @Override
-            public void onBackEndUnregisterDeviceFailed(String reason) {
-                // Even if we couldn't unregister the old device ID we should still attempt
-                // to register the new one.
-                registerDeviceWithBackEnd(gcmDeviceRegistrationId, parameters, listener);
+                if (listener != null) {
+                    listener.onRegistrationFailed(reason);
+                }
             }
         };
     }
 
-    private void registerDeviceWithBackEnd(final String gcmDeviceRegistrationId, RegistrationParameters parameters, final RegistrationListener listener) {
-        PushLibLogger.i("Initiating device registration with the back-end.");
+    private void registerNewDeviceWithBackEnd(final String gcmDeviceRegistrationId, RegistrationParameters parameters, final RegistrationListener listener) {
+        PushLibLogger.i("Initiating new device registration with the back-end.");
         final BackEndRegistrationApiRequest backEndRegistrationApiRequest = backEndRegistrationApiRequestProvider.getRequest();
-        backEndRegistrationApiRequest.startDeviceRegistration(gcmDeviceRegistrationId, parameters, getBackEndRegistrationListener(parameters, listener));
+        backEndRegistrationApiRequest.startNewDeviceRegistration(gcmDeviceRegistrationId, parameters, getBackEndNewRegistrationListener(parameters, listener));
     }
 
-    private BackEndRegistrationListener getBackEndRegistrationListener(final RegistrationParameters parameters, final RegistrationListener listener) {
+    private BackEndRegistrationListener getBackEndNewRegistrationListener(final RegistrationParameters parameters, final RegistrationListener listener) {
         return new BackEndRegistrationListener() {
 
             @Override
