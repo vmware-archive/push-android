@@ -19,11 +19,11 @@ import android.content.Context;
 import android.os.Build;
 
 import com.google.gson.Gson;
-import com.pivotal.cf.mobile.pushsdk.model.BackEndApiRegistrationRequestData;
-import com.pivotal.cf.mobile.pushsdk.util.Const;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
+import com.pivotal.cf.mobile.pushsdk.model.BackEndApiRegistrationRequestData;
 import com.pivotal.cf.mobile.pushsdk.model.BackEndApiRegistrationResponseData;
 import com.pivotal.cf.mobile.pushsdk.network.NetworkWrapper;
+import com.pivotal.cf.mobile.pushsdk.util.Const;
 import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 import com.pivotal.cf.mobile.pushsdk.util.Util;
 
@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 
 /**
@@ -60,14 +61,46 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
 
     public void startNewDeviceRegistration(String gcmDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener) {
 
-        verifyRegistrationArguments(gcmDeviceRegistrationId, listener);
+        verifyNewRegistrationArguments(gcmDeviceRegistrationId, listener);
+        handleRequest(gcmDeviceRegistrationId, null, parameters, listener, false);
+    }
 
+    @Override
+    public void startUpdateDeviceRegistration(String gcmDeviceRegistrationId, String backEndDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener) {
+
+        verifyUpdateRegistrationArguments(gcmDeviceRegistrationId, backEndDeviceRegistrationId, listener);
+        handleRequest(gcmDeviceRegistrationId, backEndDeviceRegistrationId, parameters, listener, true);
+    }
+
+    private void verifyNewRegistrationArguments(String gcmDeviceRegistrationId, BackEndRegistrationListener listener) {
+        if (gcmDeviceRegistrationId == null) {
+            throw new IllegalArgumentException("gcmDeviceRegistrationId may not be null");
+        }
+        if (listener == null) {
+            throw new IllegalArgumentException("listener may not be null");
+        }
+    }
+
+    private void verifyUpdateRegistrationArguments(String gcmDeviceRegistrationId, String backEndDeviceRegistrationId, BackEndRegistrationListener listener) {
+        if (gcmDeviceRegistrationId == null) {
+            throw new IllegalArgumentException("gcmDeviceRegistrationId may not be null");
+        }
+        if (backEndDeviceRegistrationId == null) {
+            throw new IllegalArgumentException("backEndDeviceRegistrationId may not be null");
+        }
+        if (listener == null) {
+            throw new IllegalArgumentException("listener may not be null");
+        }
+    }
+
+    private void handleRequest(String gcmDeviceRegistrationId, String previousBackEndDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener, boolean isUpdate) {
         OutputStream outputStream = null;
         try {
-            final URL url = new URL(Const.BACKEND_REGISTRATION_REQUEST_URL);
+            final URL url = getURL(isUpdate, previousBackEndDeviceRegistrationId);
             final HttpURLConnection urlConnection = getHttpURLConnection(url);
             urlConnection.setDoOutput(true); // indicate "POST" request
             urlConnection.setDoInput(true);
+            urlConnection.setRequestMethod(getRequestMethod(isUpdate));
             urlConnection.addRequestProperty("Content-Type", "application/json");
             urlConnection.connect();
 
@@ -99,17 +132,19 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
         }
     }
 
-    @Override
-    public void startUpdateDeviceRegistration(String gcmDeviceRegistrationId, String backEndDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener) {
-
+    private URL getURL(boolean isUpdate, String previousBackEndDeviceRegistrationId) throws MalformedURLException {
+        if (isUpdate) {
+            return new URL(Const.BACKEND_REGISTRATION_REQUEST_URL + "/" +  previousBackEndDeviceRegistrationId);
+        } else {
+            return new URL(Const.BACKEND_REGISTRATION_REQUEST_URL);
+        }
     }
 
-    private void verifyRegistrationArguments(String gcmDeviceRegistrationId, BackEndRegistrationListener listener) {
-        if (gcmDeviceRegistrationId == null) {
-            throw new IllegalArgumentException("gcmDeviceRegistrationId may not be null");
-        }
-        if (listener == null) {
-            throw new IllegalArgumentException("listener may not be null");
+    private String getRequestMethod(boolean isUpdate) {
+        if (isUpdate) {
+            return "PUT";
+        } else {
+            return "POST";
         }
     }
 

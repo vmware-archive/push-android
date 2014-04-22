@@ -6,17 +6,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.ProtocolException;
 import java.net.URL;
 
 public class FakeHttpURLConnection extends HttpURLConnection {
 
     private static int responseCode;
     private static String responseData;
+    private static String receivedHttpMethod;
     private static IOException connectionException;
     private static boolean willThrowConnectionException;
+    private static URL url;
 
     protected FakeHttpURLConnection(URL url) {
         super(url);
+        FakeHttpURLConnection.url = url;
     }
 
     public static void setResponseCode(int responseCode) {
@@ -35,9 +39,19 @@ public class FakeHttpURLConnection extends HttpURLConnection {
         FakeHttpURLConnection.willThrowConnectionException = willThrowConnectionException;
     }
 
+    public static String getReceivedHttpMethod() {
+        return FakeHttpURLConnection.receivedHttpMethod;
+    }
+
+    public static URL getReceivedURL() {
+        return FakeHttpURLConnection.url;
+    }
+
     public static void reset() {
+        FakeHttpURLConnection.url = null;
         FakeHttpURLConnection.responseCode = 0;
         FakeHttpURLConnection.responseData = null;
+        FakeHttpURLConnection.receivedHttpMethod = null;
         FakeHttpURLConnection.connectionException = null;
         FakeHttpURLConnection.willThrowConnectionException = false;
     }
@@ -57,6 +71,11 @@ public class FakeHttpURLConnection extends HttpURLConnection {
         if (FakeHttpURLConnection.willThrowConnectionException) {
             throw FakeHttpURLConnection.connectionException;
         }
+    }
+
+    @Override
+    public void setRequestMethod(String method) throws ProtocolException {
+        FakeHttpURLConnection.receivedHttpMethod = method;
     }
 
     @Override
