@@ -77,7 +77,7 @@ public class MyPivotalCFMSRemotePushLibBroadcastReceiver extends WakefulBroadcas
 
         final NotificationCompat.Builder builder =
                 new NotificationCompat.Builder(context)
-                        .setSmallIcon(com.pivotal.cf.mobile.pushsdk.R.drawable.ic_launcher)
+                        .setSmallIcon(com.pivotal.cf.mobile.pushsdk.simpledemoapp.R.drawable.ic_launcher)
                         .setContentTitle("Pivotal CF MS Push Simple Demo App")
                         .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
                         .setContentText(msg);
