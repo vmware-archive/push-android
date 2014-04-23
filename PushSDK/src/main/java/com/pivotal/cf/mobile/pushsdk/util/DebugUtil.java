@@ -1,12 +1,9 @@
 package com.pivotal.cf.mobile.pushsdk.util;
 
-import java.util.Locale;
-
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
-import android.os.Debug;
 
 /**
  * Debug utilities class
@@ -43,17 +40,5 @@ public class DebugUtil {
 	 */
 	public boolean isDebuggable() {
 		return isDebuggable;
-	}
-
-	/**
-	 * Dumps the application's current memory usage to the device log.  "i"nformation-level
-	 * logging must be enabled for the log message to appear.
-	 */
-	public static void dumpMemoryInfo() {
-		final Debug.MemoryInfo m = new Debug.MemoryInfo();
-		Debug.getMemoryInfo(m);
-		final String formattedMessage = String.format(Locale.getDefault(), "Memory info: dalvikPrivateDirty:%d dalvikPss:%d dalvikSharedDirty:%d nativePrivateDirty:%d nativePss:%d nativeSharedDirty:%d otherPrivateDirty:%d otherPss:%d otherSharedDirty:%d",
-				m.dalvikPrivateDirty, m.dalvikPss, m.dalvikSharedDirty, m.nativePrivateDirty, m.nativePss, m.nativeSharedDirty, m.otherPrivateDirty, m.otherPss, m.otherSharedDirty);
-		PushLibLogger.i(formattedMessage);
 	}
 }

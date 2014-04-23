@@ -18,8 +18,6 @@ package com.pivotal.cf.mobile.pushsdk.network;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.wifi.WifiInfo;
-import android.net.wifi.WifiManager;
 
 /**
  * General purpose network helper methods.
@@ -48,16 +46,5 @@ public class NetworkUtil {
         ConnectivityManager connectivityManager = (ConnectivityManager) applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return (activeNetworkInfo != null) && activeNetworkInfo.isConnected();
-    }
-
-    /**
-     * Check to see if the device is connected to wifi. Requires ACCESS_WIFI_STATE permission in manifest.
-     */
-    public boolean isWifiAvailable() {
-        final WifiManager wifi = (WifiManager) applicationContext.getSystemService(Context.WIFI_SERVICE);
-        final WifiInfo w = wifi.getConnectionInfo();
-        if (w == null)
-            return false;
-        return (w.getIpAddress() != 0);
     }
 }
