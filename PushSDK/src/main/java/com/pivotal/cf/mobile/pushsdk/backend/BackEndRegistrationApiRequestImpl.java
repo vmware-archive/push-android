@@ -105,7 +105,7 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
             urlConnection.connect();
 
             outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
-            final String requestBodyData = getRequestBodyData(gcmDeviceRegistrationId, parameters);
+            final String requestBodyData = getRequestBodyData(gcmDeviceRegistrationId, parameters, isUpdate);
             PushLibLogger.v("Making network request to register this device with the back-end server: " + requestBodyData);
             writeOutput(requestBodyData, outputStream);
 
@@ -188,13 +188,13 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
         listener.onBackEndRegistrationSuccess(deviceUuid);
     }
 
-    private String getRequestBodyData(String deviceRegistrationId, RegistrationParameters parameters) {
-        final BackEndApiRegistrationRequestData data = getBackEndApiRegistrationRequestData(deviceRegistrationId, parameters);
+    private String getRequestBodyData(String deviceRegistrationId, RegistrationParameters parameters, boolean isUpdate) {
+        final BackEndApiRegistrationRequestData data = getBackEndApiRegistrationRequestData(deviceRegistrationId, parameters, isUpdate);
         final Gson gson = new Gson();
         return gson.toJson(data);
     }
 
-    private BackEndApiRegistrationRequestData getBackEndApiRegistrationRequestData(String deviceRegistrationId, RegistrationParameters parameters) {
+    private BackEndApiRegistrationRequestData getBackEndApiRegistrationRequestData(String deviceRegistrationId, RegistrationParameters parameters, boolean isUpdate) {
         final BackEndApiRegistrationRequestData data = new BackEndApiRegistrationRequestData();
         data.setVariantUuid(parameters.getVariantUuid());
         data.setSecret(parameters.getVariantSecret());
@@ -205,7 +205,9 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
         }
         data.setDeviceModel(Build.MODEL);
         data.setDeviceManufacturer(Build.MANUFACTURER);
-        data.setOs("android");
+        if (!isUpdate) {
+            data.setOs("android");
+        }
         data.setOsVersion(Build.VERSION.RELEASE);
         data.setRegistrationToken(deviceRegistrationId);
         return data;
