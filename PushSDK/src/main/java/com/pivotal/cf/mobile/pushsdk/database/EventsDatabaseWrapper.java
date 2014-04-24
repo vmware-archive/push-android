@@ -27,7 +27,7 @@ import java.util.Set;
 public class EventsDatabaseWrapper {
 
     private static final int MAX_DATABASE_SIZE_RELEASE = 1024 * 1024; // 1 MB
-    private static final int MAX_DATABASE_SIZE_DEBUG = 100 * 1024; // 100 kB
+    private static final int MAX_DATABASE_SIZE_DEBUG = 32 * 1024; // 32 kB
     private static final Object lock = new Object();
     private static SQLiteDatabase database;
 
@@ -51,12 +51,14 @@ public class EventsDatabaseWrapper {
                 final EventsDatabaseHelper databaseHelper = new EventsDatabaseHelper(context, factory);
                 database = databaseHelper.getWritableDatabase();
 
+                final long maxDatabaseSize;
                 if (DebugUtil.getInstance(context).isDebuggable()) {
-                    database.setMaximumSize(MAX_DATABASE_SIZE_DEBUG);
+                    maxDatabaseSize = MAX_DATABASE_SIZE_DEBUG;
                 } else {
-                    database.setMaximumSize(MAX_DATABASE_SIZE_RELEASE);
+                    maxDatabaseSize = MAX_DATABASE_SIZE_RELEASE;
                 }
-                PushLibLogger.fd("Database has been initialized for package '%s'.", context.getPackageName());
+                database.setMaximumSize(maxDatabaseSize);
+                PushLibLogger.fd("Database has been initialized for package '%s' with maximum size %d kB.", context.getPackageName(), maxDatabaseSize / 1024);
                 return true;
             } else {
                 return false;
