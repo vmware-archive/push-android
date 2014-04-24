@@ -17,17 +17,25 @@
 
         <meta-data android:name="com.google.android.gms.version" android:value="@integer/google_play_services_version" />
 
-        <receiver android:name="com.pivotal.cf.mobile.pushsdk.broadcastreceiver.BootCompletedBroadcastReceiver" >
+        <receiver
+            android:name="com.pivotal.cf.mobile.pushsdk.broadcastreceiver.BootCompletedBroadcastReceiver"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
 
-        <receiver android:name="com.pivotal.cf.mobile.pushsdk.broadcastreceiver.EventsSenderAlarmReceiver" />
+        <receiver
+            android:name="com.pivotal.cf.mobile.pushsdk.broadcastreceiver.EventsSenderAlarmReceiver"
+            android:exported="false"/>
 
-        <service android:name="com.pivotal.cf.mobile.pushsdk.service.GcmService"/>
+        <service
+            android:name="com.pivotal.cf.mobile.pushsdk.service.GcmService"
+            android:exported="false"/>
 
-        <service android:name="com.pivotal.cf.mobile.pushsdk.service.EventService"/>
+        <service
+            android:name="com.pivotal.cf.mobile.pushsdk.service.EventService"
+            android:exported="false"/>
 
     </application>
 

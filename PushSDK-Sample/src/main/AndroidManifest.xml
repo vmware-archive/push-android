@@ -29,7 +29,8 @@
         <!-- receiver name itself.                                                                           -->
         <receiver
             android:name="com.pivotal.cf.mobile.pushsdk.broadcastreceiver.GcmBroadcastReceiver"
-            android:permission="com.google.android.c2dm.permission.SEND">
+            android:permission="com.google.android.c2dm.permission.SEND"
+            android:exported="true">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
                 <category android:name="com.pivotal.cf.mobile.pushsdk.sample"/>
@@ -43,7 +44,8 @@
         <!-- in your application. Make sure you add the action "YOUR.PACKAGE.NAME.pcfmspushsdk.RECEIVE_PUSH" -->
         <!-- to the broadcast receiver here.                                                                 -->
         <receiver
-            android:name="com.pivotal.cf.mobile.pushsdk.sample.broadcastreceiver.MyPivotalCFMSRemotePushLibBroadcastReceiver">
+            android:name="com.pivotal.cf.mobile.pushsdk.sample.broadcastreceiver.MyPivotalCFMSRemotePushLibBroadcastReceiver"
+            android:exported="false">
             <intent-filter>
                 <action android:name="com.pivotal.cf.mobile.pushsdk.sample.pcfmspushsdk.RECEIVE_PUSH"/>
             </intent-filter>
