@@ -74,7 +74,7 @@ public class MainActivity extends ActionBarActivity {
 
     private static final String GCM_SEND_MESSAGE_URL = "https://android.googleapis.com/gcm/send";
 //    private static final String BACK_END_SEND_MESSAGE_URL = "http://ec2-54-234-124-123.compute-1.amazonaws.com:8090/v1/push";
-    private static final String BACK_END_SEND_MESSAGE_URL = "http://cfms-push-service-staging.one.pepsi.cf-app.com/v1/push";
+    private static final String BACK_END_SEND_MESSAGE_URL = "http://push.main.vchs.cfms-apps.com/v1/push";
 
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm:ss.SSS");
     private static final int[] baseRowColours = new int[]{0xddeeff, 0xddffee, 0xffeedd};
