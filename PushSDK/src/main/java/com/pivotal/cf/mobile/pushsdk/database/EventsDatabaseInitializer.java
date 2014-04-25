@@ -2,14 +2,14 @@ package com.pivotal.cf.mobile.pushsdk.database;
 
 import android.database.sqlite.SQLiteDatabase;
 
-import com.pivotal.cf.mobile.pushsdk.model.MessageReceiptEvent;
+import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
 
 public class EventsDatabaseInitializer implements DatabaseInitializer {
 
     @Override
     public void onCreate(final SQLiteDatabase db) {
         final String[] createTableStatements = new String[] {
-             MessageReceiptEvent.getCreateTableSqlStatement()
+             BaseEvent.getCreateTableSqlStatement()
         };
         for (final String sql : createTableStatements) {
             db.execSQL(sql);
@@ -22,7 +22,7 @@ public class EventsDatabaseInitializer implements DatabaseInitializer {
         // is important to keep data. Since this database is just a cache, it is unlikely
         // that keeping data is important.
         final String[] dropTableStatements = new String[] {
-            MessageReceiptEvent.getDropTableSqlStatement()
+                BaseEvent.getDropTableSqlStatement()
         };
         for (final String dropTableStatement : dropTableStatements) {
             db.execSQL(dropTableStatement);

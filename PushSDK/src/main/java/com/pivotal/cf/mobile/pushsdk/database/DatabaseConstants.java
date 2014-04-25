@@ -4,6 +4,6 @@ import android.net.Uri;
 
 public class DatabaseConstants {
 	public static final String AUTHORITY = "com.pivotal.cf.mobile.pushsdk.providers.EventsDatabase";
-	public static final String MESSAGE_RECEIPTS_TABLE_NAME = "message_receipts";
-	public static final Uri MESSAGE_RECEIPTS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/" + MESSAGE_RECEIPTS_TABLE_NAME);
+	public static final String EVENTS_TABLE_NAME = "events";
+	public static final Uri EVENTS_CONTENT_URI = Uri.parse("content://" + AUTHORITY + "/" + EVENTS_TABLE_NAME);
 }

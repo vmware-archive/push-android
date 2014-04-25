@@ -6,23 +6,21 @@ import android.os.Parcelable;
 import android.test.AndroidTestCase;
 
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
+import com.pivotal.cf.mobile.pushsdk.backend.FakeBackEndMessageReceiptApiRequest;
 import com.pivotal.cf.mobile.pushsdk.broadcastreceiver.FakeEventsSenderAlarmProvider;
-import com.pivotal.cf.mobile.pushsdk.database.EventsStorage;
 import com.pivotal.cf.mobile.pushsdk.database.FakeEventsStorage;
 import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
-import com.pivotal.cf.mobile.pushsdk.model.MessageReceiptEvent;
-import com.pivotal.cf.mobile.pushsdk.model.MessageReceiptEventTest;
+import com.pivotal.cf.mobile.pushsdk.model.BaseEventTest;
 import com.pivotal.cf.mobile.pushsdk.network.FakeNetworkWrapper;
 import com.pivotal.cf.mobile.pushsdk.prefs.FakePreferencesProvider;
-import com.pivotal.cf.mobile.pushsdk.backend.FakeBackEndMessageReceiptApiRequest;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.Semaphore;
 
 public abstract class JobTest extends AndroidTestCase {
 
-    protected MessageReceiptEvent event1;
-    protected MessageReceiptEvent event2;
+    protected BaseEvent event1;
+    protected BaseEvent event2;
     protected FakeEventsStorage eventsStorage;
     protected FakeNetworkWrapper networkWrapper;
     protected FakePreferencesProvider preferencesProvider;
@@ -34,8 +32,8 @@ public abstract class JobTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        event1 = MessageReceiptEventTest.getMessageReceiptEvent1();
-        event2 = MessageReceiptEventTest.getMessageReceiptEvent2();
+        event1 = BaseEventTest.getBaseEvent1();
+        event2 = BaseEventTest.getBaseEvent2();
         eventsStorage = new FakeEventsStorage();
         networkWrapper = new FakeNetworkWrapper();
         alarmProvider = new FakeEventsSenderAlarmProvider();
@@ -50,11 +48,11 @@ public abstract class JobTest extends AndroidTestCase {
 
     protected Uri saveEventWithStatus(int status) {
         event1.setStatus(status);
-        return eventsStorage.saveEvent(event1, EventsStorage.EventType.MESSAGE_RECEIPT);
+        return eventsStorage.saveEvent(event1);
     }
 
     protected void assertDatabaseEventCount(int expectedEventCount) {
-        assertEquals(expectedEventCount, eventsStorage.getNumberOfEvents(EventsStorage.EventType.MESSAGE_RECEIPT));
+        assertEquals(expectedEventCount, eventsStorage.getNumberOfEvents());
     }
 
     protected void assertEventHasStatus(Uri uri, int expectedStatus) {

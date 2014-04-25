@@ -12,13 +12,12 @@ import java.util.Map;
 
 public class FakeEventsStorage implements EventsStorage {
 
-    private final Map<EventType, Map<Uri, BaseEvent>> events;
+    private final Map<Uri, BaseEvent> events;
     private static int fileId = 0;
     private boolean willSaveFail;
 
     public FakeEventsStorage() {
-        events = new HashMap<EventType, Map<Uri, BaseEvent>>();
-        events.put(EventType.MESSAGE_RECEIPT, new HashMap<Uri, BaseEvent>());
+        events = new HashMap<Uri, BaseEvent>();
     }
 
     public void setWillSaveFail(boolean willSaveFail) {
@@ -29,58 +28,41 @@ public class FakeEventsStorage implements EventsStorage {
      * Saves a {@link com.pivotal.cf.mobile.pushsdk.model.BaseEvent} object into the fake filesystem.
      *
      * @param event
-     * @param eventType
      */
     @Override
-    public Uri saveEvent(BaseEvent event, final EventType eventType) {
+    public Uri saveEvent(BaseEvent event) {
         if (willSaveFail) {
             return null;
         }
-        if (eventType == EventType.ALL) {
-            throw new IllegalArgumentException("Can not saveEvent for EventType.ALL");
-        }
-        final Uri uri = getNextFileId(eventType);
-        final BaseEvent clonedEvent = EventHelper.copyEvent(event, eventType);
-        events.get(eventType).put(uri, clonedEvent);
+        final Uri uri = getNextFileId();
+        final BaseEvent clonedEvent = EventHelper.copyEvent(event);
+        events.put(uri, clonedEvent);
         return uri;
     }
 
     /**
      * Gets the filenames for all the {@link com.pivotal.cf.mobile.pushsdk.model.BaseEvent} objects currently in the fake filesystem.
-     *
-     * @param eventType
      */
     @Override
-    public List<Uri> getEventUris(final EventType eventType) {
-        final List<Uri> result = new LinkedList<Uri>();
-        if (eventType == EventType.ALL) {
-            result.addAll(events.get(EventType.MESSAGE_RECEIPT).keySet());
-        } else {
-            result.addAll(events.get(eventType).keySet());
-        }
-        return result;
+    public List<Uri> getEventUris() {
+        return new LinkedList<Uri>(events.keySet());
     }
 
     /**
      * Gets the {@link com.pivotal.cf.mobile.pushsdk.model.BaseEvent} objects currently in the fake filesystem that match the given status
      *
-     * @param eventType
      * @param status
      */
     @Override
-    public List<Uri> getEventUrisWithStatus(EventType eventType, int status) {
+    public List<Uri> getEventUrisWithStatus(int status) {
         final List<Uri> result = new LinkedList<Uri>();
-        if (eventType == EventType.ALL) {
-            getEventUrisWithStatusForEventType(EventType.MESSAGE_RECEIPT, status, result);
-        } else {
-            getEventUrisWithStatusForEventType(eventType, status, result);
-        }
+        getEventUrisWithStatusForEventType(status, result);
         return result;
     }
 
-    private void getEventUrisWithStatusForEventType(EventType eventType, int status, final List<Uri> result) {
-        for (final Uri uri : events.get(eventType).keySet()) {
-            final BaseEvent event = events.get(eventType).get(uri);
+    private void getEventUrisWithStatusForEventType(int status, final List<Uri> result) {
+        for (final Uri uri : events.keySet()) {
+            final BaseEvent event = events.get(uri);
             if (event.getStatus() == status) {
                 result.add(uri);
             }
@@ -92,9 +74,8 @@ public class FakeEventsStorage implements EventsStorage {
      */
     @Override
     public BaseEvent readEvent(Uri uri) {
-        final EventType eventType = EventHelper.getEventTypeForUri(uri);
-        if (events.get(eventType).containsKey(uri)) {
-            return events.get(eventType).get(uri);
+        if (events.containsKey(uri)) {
+            return events.get(uri);
         } else {
             throw new IllegalArgumentException("Could not find event with Uri " + uri.getPath());
         }
@@ -104,13 +85,10 @@ public class FakeEventsStorage implements EventsStorage {
      * Deletes the {@link com.pivotal.cf.mobile.pushsdk.model.BaseEvent} objects from the fake filesystem with the given list of filenames.
      */
     @Override
-    public void deleteEvents(List<Uri> eventUris, EventType eventType) {
-        if (eventType == EventType.ALL) {
-            throw new IllegalArgumentException("Can not deleteEvents for EventType.ALL");
-        }
+    public void deleteEvents(List<Uri> eventUris) {
         for (final Uri uri : eventUris) {
-            if (events.get(eventType).containsKey(uri)) {
-                events.get(eventType).remove(uri);
+            if (events.containsKey(uri)) {
+                events.remove(uri);
             }
         }
     }
@@ -118,32 +96,20 @@ public class FakeEventsStorage implements EventsStorage {
     /**
      * Returns the number of {@link com.pivotal.cf.mobile.pushsdk.model.BaseEvent} objects currently in the fake filesystem.
      */
-    public int getNumberOfEvents(EventType eventType) {
-        if (eventType == EventType.ALL) {
-            return events.get(EventType.MESSAGE_RECEIPT).size();
-        }
-        return events.get(eventType).size();
+    public int getNumberOfEvents() {
+        return events.size();
     }
 
     /**
      * Clears all {@link com.pivotal.cf.mobile.pushsdk.model.BaseEvent} objects from the fake filesystem.
-     *
-     * @param eventType
      */
     @Override
-    public void reset(EventType eventType) {
-        if (eventType == EventType.ALL) {
-            events.get(EventType.MESSAGE_RECEIPT).clear();
-        } else {
-            events.get(eventType).clear();
-        }
+    public void reset() {
+        events.clear();
     }
 
-    private static Uri getNextFileId(EventType eventType) {
-        Uri baseUri = null;
-        if (eventType == EventType.MESSAGE_RECEIPT) {
-            baseUri = DatabaseConstants.MESSAGE_RECEIPTS_CONTENT_URI;
-        }
+    private static Uri getNextFileId() {
+        Uri baseUri = DatabaseConstants.EVENTS_CONTENT_URI;
         return Uri.withAppendedPath(baseUri, String.valueOf(fileId++));
     }
 

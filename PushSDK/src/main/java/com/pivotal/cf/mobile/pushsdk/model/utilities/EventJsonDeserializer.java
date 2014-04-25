@@ -21,7 +21,7 @@ public class EventJsonDeserializer implements JsonDeserializer<BaseEvent> {
 	@Override
 	public BaseEvent deserialize(JsonElement jsonElement, Type t, JsonDeserializationContext jsonDeserializationContext) throws JsonParseException {
 		final String eventType = getEventType(jsonElement);
-		final BaseEvent event = EventHelper.deserializeEvent(eventType, jsonElement, jsonDeserializationContext);
+		final BaseEvent event = EventHelper.deserializeEvent(jsonElement, jsonDeserializationContext);
 		return event;
 	}
 

@@ -5,7 +5,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
-import com.pivotal.cf.mobile.pushsdk.database.EventsStorage;
 import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 
 import java.util.List;
@@ -32,9 +31,8 @@ public class PrepareDatabaseJob extends BaseJob {
         }
     }
 
-    // TODO - generalize to all event types
     private int fixEventsWithStatus(int status, JobParams jobParams) {
-        final List<Uri> uris = jobParams.eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, status);
+        final List<Uri> uris = jobParams.eventsStorage.getEventUrisWithStatus(status);
         if (uris.size() > 0) {
             for (final Uri uri : uris) {
                 jobParams.eventsStorage.setEventStatus(uri, BaseEvent.Status.NOT_POSTED);
@@ -44,21 +42,19 @@ public class PrepareDatabaseJob extends BaseJob {
         return uris.size();
     }
 
-    // TODO - generalize to all event types
     private int deleteEventsWithStatus(int status, JobParams jobParams) {
-        final List<Uri> uris = jobParams.eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, status);
-        jobParams.eventsStorage.deleteEvents(uris, EventsStorage.EventType.MESSAGE_RECEIPT);
+        final List<Uri> uris = jobParams.eventsStorage.getEventUrisWithStatus(status);
+        jobParams.eventsStorage.deleteEvents(uris);
         if (uris.size() > 0) {
             PushLibLogger.fd("PrepareDatabaseJob: deleted %d events with status '%s'", uris.size(), BaseEvent.statusString(status));
         }
         return uris.size();
     }
 
-    // TODO - generalize to all event types
     private void enableAlarmIfRequired(JobParams jobParams) {
         int numberOfPendingMessageReceipts = 0;
-        numberOfPendingMessageReceipts += jobParams.eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, BaseEvent.Status.NOT_POSTED).size();
-        numberOfPendingMessageReceipts += jobParams.eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, BaseEvent.Status.POSTING_ERROR).size();
+        numberOfPendingMessageReceipts += jobParams.eventsStorage.getEventUrisWithStatus(BaseEvent.Status.NOT_POSTED).size();
+        numberOfPendingMessageReceipts += jobParams.eventsStorage.getEventUrisWithStatus(BaseEvent.Status.POSTING_ERROR).size();
         if (numberOfPendingMessageReceipts > 0) {
             PushLibLogger.fd("PrepareDatabaseJob: There are %d events(s) queued for sending. Enabling alarm.", numberOfPendingMessageReceipts);
             jobParams.alarmProvider.enableAlarmIfDisabled();

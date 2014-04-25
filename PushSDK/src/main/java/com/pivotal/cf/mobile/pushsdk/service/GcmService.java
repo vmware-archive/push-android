@@ -21,15 +21,15 @@ import android.os.Bundle;
 import android.os.ResultReceiver;
 
 import com.pivotal.cf.mobile.pushsdk.broadcastreceiver.GcmBroadcastReceiver;
-import com.pivotal.cf.mobile.pushsdk.database.EventsStorage;
 import com.pivotal.cf.mobile.pushsdk.jobs.EnqueueEventJob;
+import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
 import com.pivotal.cf.mobile.pushsdk.model.MessageReceiptEvent;
+import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProvider;
+import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProviderImpl;
 import com.pivotal.cf.mobile.pushsdk.util.Const;
 import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 import com.pivotal.cf.mobile.pushsdk.util.ServiceStarter;
 import com.pivotal.cf.mobile.pushsdk.util.ServiceStarterImpl;
-import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProvider;
-import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProviderImpl;
 
 import java.util.concurrent.Semaphore;
 
@@ -121,26 +121,25 @@ public class GcmService extends IntentService {
                 return;
             }
 
-            enqueueMessageReceipt(intent);
+            enqueueMessageReceivedEvent(intent);
             notifyApplication(intent);
         }
     }
 
-    private void enqueueMessageReceipt(Intent intent) {
-        final MessageReceiptEvent messageReceipt = getMessageReceiptEvent(intent);
-        final EnqueueEventJob enqueueEventJob = new EnqueueEventJob(messageReceipt, EventsStorage.EventType.MESSAGE_RECEIPT);
+    private void enqueueMessageReceivedEvent(Intent intent) {
+        final BaseEvent messageReceipt = getMessageReceivedEvent(intent);
+        final EnqueueEventJob enqueueEventJob = new EnqueueEventJob(messageReceipt);
         final Intent enqueueEventJobIntent = EventService.getIntentToRunJob(this, enqueueEventJob);
         if (GcmService.serviceStarter.startService(this, enqueueEventJobIntent) == null) {
-            PushLibLogger.e("ERROR: could not start service '" + enqueueEventJobIntent + ". A message receipt for this message will not be sent.");
+            PushLibLogger.e("ERROR: could not start service '" + enqueueEventJobIntent + ". A message receipt event for this message will not be sent.");
         }
     }
 
-    // TODO - needs device_uuid field, too
-    private MessageReceiptEvent getMessageReceiptEvent(Intent intent) {
+    private BaseEvent getMessageReceivedEvent(Intent intent) {
         final String messageUuid = intent.getStringExtra(KEY_MESSAGE_UUID);
         final String variantUuid = GcmService.preferencesProvider.getVariantUuid();
         final String deviceId = GcmService.preferencesProvider.getBackEndDeviceRegistrationId();
-        final MessageReceiptEvent event = MessageReceiptEvent.getMessageReceiptEvent(variantUuid, messageUuid, deviceId);
+        final BaseEvent event = MessageReceiptEvent.getMessageReceiptEvent(variantUuid, messageUuid, deviceId);
         return event;
     }
 

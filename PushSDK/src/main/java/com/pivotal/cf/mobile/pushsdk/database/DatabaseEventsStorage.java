@@ -16,47 +16,27 @@ public class DatabaseEventsStorage implements EventsStorage {
 	}
 
 	@Override
-	public Uri saveEvent(BaseEvent event, EventType eventType) {
-		if (eventType == EventType.ALL) {
-			throw new IllegalArgumentException("Can not saveEvent for EventType.ALL");
-		}
+	public Uri saveEvent(BaseEvent event) {
 		final ContentValues contentValues = event.getContentValues();
-		final Uri uri = EventsDatabaseWrapper.insert(EventHelper.getUriForEventType(eventType), contentValues);
+		final Uri uri = EventsDatabaseWrapper.insert(EventHelper.getUriForEventType(), contentValues);
 		return uri;
 	}
 
 	@Override
-	public List<Uri> getEventUris(EventType eventType) {
-		if (eventType == EventType.ALL) {
-			final List<Uri> results = new LinkedList<Uri>();
-			for (EventType type : EventType.values()) {
-				if (type != EventType.ALL) {
-					results.addAll(getGeneralQuery(type, null, null, null, null));
-				}
-			}
-			return results;
-		} else {
-			return getGeneralQuery(eventType, null, null, null, null);
-		}
+	public List<Uri> getEventUris() {
+        return getGeneralQuery(null, null, null, null);
 	}
 
-	public List<Uri> getEventUrisWithStatus(EventType eventType, int status) {
-		if (eventType == EventType.ALL) {
-			final List<Uri> results = new LinkedList<Uri>();
-			results.addAll(getGeneralQuery(EventType.MESSAGE_RECEIPT, null, "status = ?", new String[] { String.valueOf(status) }, null));
-//			results.addAll(getGeneralQuery(EventType.UNHANDLED_EXCEPTION, null, "status = ?", new String[] { String.valueOf(status) }, null));
-			return results;
-		} else {
-			return getGeneralQuery(eventType, null, "status = ?", new String[] { String.valueOf(status) }, null);
-		}
+	public List<Uri> getEventUrisWithStatus(int status) {
+        return getGeneralQuery(null, "status = ?", new String[] { String.valueOf(status) }, null);
 	}
 
-	private List<Uri> getGeneralQuery(EventType eventType, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-		final Uri uri = EventHelper.getUriForEventType(eventType);
+	private List<Uri> getGeneralQuery(String[] projection, String selection, String[] selectionArgs, String sortOrder) {
+		final Uri uri = EventHelper.getUriForEventType();
 		Cursor cursor = null;
 		try {
 			cursor = EventsDatabaseWrapper.query(uri, projection, selection, selectionArgs, sortOrder);
-			return getEventUrisFromCursor(cursor, eventType);
+			return getEventUrisFromCursor(cursor);
 		} finally {
 			if (cursor != null) {
 				cursor.close();
@@ -65,12 +45,12 @@ public class DatabaseEventsStorage implements EventsStorage {
 		}
 	}
 
-	private List<Uri> getEventUrisFromCursor(final Cursor cursor, final EventType eventType) {
+	private List<Uri> getEventUrisFromCursor(final Cursor cursor) {
 		final List<Uri> uris = new LinkedList<Uri>();
 		if (cursor != null) {
 			for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
 				final int id = BaseEvent.getRowIdFromCursor(cursor);
-				final Uri uri = Uri.withAppendedPath(EventHelper.getUriForEventType(eventType), String.valueOf(id));
+				final Uri uri = Uri.withAppendedPath(EventHelper.getUriForEventType(), String.valueOf(id));
 				uris.add(uri);
 			}
 		}
@@ -78,18 +58,10 @@ public class DatabaseEventsStorage implements EventsStorage {
 	}
 
 	@Override
-	public int getNumberOfEvents(EventType eventType) {
-		if (eventType == EventType.ALL) {
-			return getNumberOfEventsByEventType(EventType.MESSAGE_RECEIPT)/* + getNumberOfEventsByEventType(EventType.UNHANDLED_EXCEPTION)*/;
-		} else {
-			return getNumberOfEventsByEventType(eventType);
-		}
-	}
-
-	private int getNumberOfEventsByEventType(EventType eventType) {
+	public int getNumberOfEvents() {
 		Cursor cursor = null;
 		try {
-			cursor = EventsDatabaseWrapper.query(EventHelper.getUriForEventType(eventType), null, null, null, null);
+			cursor = EventsDatabaseWrapper.query(EventHelper.getUriForEventType(), null, null, null, null);
 			if (cursor != null) {
 				cursor.moveToFirst();
 				return cursor.getCount();
@@ -125,24 +97,13 @@ public class DatabaseEventsStorage implements EventsStorage {
 	}
 
 	@Override
-	public void deleteEvents(List<Uri> eventUris, EventType eventType) {
-		if (eventType == EventType.ALL) {
-			throw new IllegalArgumentException("Can not deleteEvents for EventType.ALL");
-		}
+	public void deleteEvents(List<Uri> eventUris) {
 		EventsDatabaseWrapper.delete(eventUris, null, null);
 	}
 
 	@Override
-	public void reset(EventType eventType) {
-		if (eventType == EventType.ALL) {
-			for (EventType et : EventType.values()) {
-				if (et != EventType.ALL) {
-                    EventsDatabaseWrapper.delete(EventHelper.getUriForEventType(et), null, null);
-				}
-			}
-		} else {
-            EventsDatabaseWrapper.delete(EventHelper.getUriForEventType(eventType), null, null);
-		}
+	public void reset() {
+        EventsDatabaseWrapper.delete(EventHelper.getUriForEventType(), null, null);
 	}
 
 	@Override

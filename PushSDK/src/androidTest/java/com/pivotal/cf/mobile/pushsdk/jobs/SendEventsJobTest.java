@@ -3,9 +3,8 @@ package com.pivotal.cf.mobile.pushsdk.jobs;
 import android.net.Uri;
 import android.test.MoreAsserts;
 
-import com.pivotal.cf.mobile.pushsdk.database.EventsStorage;
-import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
 import com.pivotal.cf.mobile.pushsdk.backend.FakeBackEndMessageReceiptApiRequest;
+import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -25,7 +24,7 @@ public class SendEventsJobTest extends JobTest {
         }));
 
         semaphore.acquire();
-        assertEquals(0, eventsStorage.getNumberOfEvents(EventsStorage.EventType.ALL));
+        assertEquals(0, eventsStorage.getNumberOfEvents());
         assertFalse(backEndMessageReceiptApiRequest.wasRequestAttempted());
     }
 
@@ -55,7 +54,7 @@ public class SendEventsJobTest extends JobTest {
             }
         });
 
-        assertEquals(4, eventsStorage.getNumberOfEvents(EventsStorage.EventType.ALL));
+        assertEquals(4, eventsStorage.getNumberOfEvents());
 
         final SendEventsJob job = new SendEventsJob();
         job.run(getJobParams(new JobResultListener() {
@@ -68,7 +67,7 @@ public class SendEventsJobTest extends JobTest {
         }));
 
         semaphore.acquire();
-        assertEquals(2, eventsStorage.getNumberOfEvents(EventsStorage.EventType.ALL));
+        assertEquals(2, eventsStorage.getNumberOfEvents());
         assertTrue(backEndMessageReceiptApiRequest.wasRequestAttempted());
         assertEquals(2, backEndMessageReceiptApiRequest.numberOfMessageReceiptsSent());
 
@@ -104,7 +103,7 @@ public class SendEventsJobTest extends JobTest {
         }));
 
         semaphore.acquire();
-        assertEquals(1, eventsStorage.getNumberOfEvents(EventsStorage.EventType.ALL));
+        assertEquals(1, eventsStorage.getNumberOfEvents());
         assertTrue(backEndMessageReceiptApiRequest.wasRequestAttempted());
         assertEquals(0, backEndMessageReceiptApiRequest.numberOfMessageReceiptsSent());
         assertEventHasStatus(uri, BaseEvent.Status.POSTING_ERROR);

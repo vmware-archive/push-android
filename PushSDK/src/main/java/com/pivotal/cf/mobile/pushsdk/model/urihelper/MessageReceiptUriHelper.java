@@ -20,7 +20,7 @@ public class MessageReceiptUriHelper implements UriHelper {
 
 	@Override
 	public String getDefaultTableName() {
-		return DatabaseConstants.MESSAGE_RECEIPTS_TABLE_NAME;
+		return DatabaseConstants.EVENTS_TABLE_NAME;
 	}
 	
 	@Override

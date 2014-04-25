@@ -4,9 +4,8 @@ import android.content.Context;
 import android.net.Uri;
 
 import com.google.gson.Gson;
-
 import com.pivotal.cf.mobile.pushsdk.database.EventsStorage;
-import com.pivotal.cf.mobile.pushsdk.model.MessageReceiptEvent;
+import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
 import com.pivotal.cf.mobile.pushsdk.network.NetworkWrapper;
 import com.pivotal.cf.mobile.pushsdk.util.Const;
 import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
@@ -119,16 +118,16 @@ public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implemen
     }
 
     private String getRequestBodyData(List<Uri> uris) {
-        final List<MessageReceiptEvent> events = getEvents(uris);
+        final List<BaseEvent> events = getEvents(uris);
         final Gson gson = new Gson();
         final String requestBodyData = gson.toJson(events);
         return requestBodyData;
     }
 
-    private List<MessageReceiptEvent> getEvents(List<Uri> uris) {
-        final List<MessageReceiptEvent> events = new LinkedList<MessageReceiptEvent>();
+    private List<BaseEvent> getEvents(List<Uri> uris) {
+        final List<BaseEvent> events = new LinkedList<BaseEvent>();
         for (final Uri uri : uris) {
-            final MessageReceiptEvent event = (MessageReceiptEvent) eventsStorage.readEvent(uri);
+            final BaseEvent event = (BaseEvent) eventsStorage.readEvent(uri);
             events.add(event);
         }
         return events;

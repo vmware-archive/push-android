@@ -3,7 +3,6 @@ package com.pivotal.cf.mobile.pushsdk.jobs;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.pivotal.cf.mobile.pushsdk.database.EventsStorage;
 import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
 import com.pivotal.cf.mobile.pushsdk.model.utilities.EventHelper;
 import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
@@ -13,26 +12,21 @@ public class EnqueueEventJob extends BaseJob {
     public static final int RESULT_COULD_NOT_SAVE_EVENT_TO_STORAGE = 200;
 
     private BaseEvent event;
-    private EventsStorage.EventType eventType;
 
-    public EnqueueEventJob(BaseEvent event, EventsStorage.EventType eventType) {
+    public EnqueueEventJob(BaseEvent event) {
         super();
-        verifyArguments(event, eventType);
-        saveArguments(event, eventType);
+        verifyArguments(event);
+        saveArguments(event);
     }
 
-    private void verifyArguments(BaseEvent event, EventsStorage.EventType eventType) {
+    private void verifyArguments(BaseEvent event) {
         if (event == null) {
             throw new IllegalArgumentException("event may not be null");
         }
-        if (eventType == EventsStorage.EventType.ALL) {
-            throw new IllegalArgumentException("eventType may not be ALL");
-        }
     }
 
-    private void saveArguments(BaseEvent event, EventsStorage.EventType eventType) {
+    private void saveArguments(BaseEvent event) {
         this.event = event;
-        this.eventType = eventType;
     }
 
     @Override
@@ -47,8 +41,8 @@ public class EnqueueEventJob extends BaseJob {
 
     // TODO generalize to other kinds of events
     private boolean saveEvent(JobParams jobParams) {
-        if (jobParams.eventsStorage.saveEvent(event, eventType) != null) {
-            PushLibLogger.d("EnqueueEventJob: There are now " + jobParams.eventsStorage.getNumberOfEvents(EventsStorage.EventType.MESSAGE_RECEIPT) + " message receipts queued to send to the server.");
+        if (jobParams.eventsStorage.saveEvent(event) != null) {
+            PushLibLogger.d("EnqueueEventJob: There are now " + jobParams.eventsStorage.getNumberOfEvents() + " message receipts queued to send to the server.");
             return true;
         } else {
             return false;
@@ -81,10 +75,6 @@ public class EnqueueEventJob extends BaseJob {
             return false;
         }
 
-        if (eventType != otherJob.eventType) {
-            return false;
-        }
-
         return true;
     }
 
@@ -103,14 +93,12 @@ public class EnqueueEventJob extends BaseJob {
 
     private EnqueueEventJob(Parcel in) {
         super(in);
-        eventType = (EventsStorage.EventType) in.readSerializable();
-        event = EventHelper.readEventFromParcel(in, eventType);
+        event = EventHelper.readEventFromParcel(in);
     }
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
         super.writeToParcel(out, flags);
-        out.writeSerializable(eventType);
         out.writeParcelable(event, flags);
     }
 }

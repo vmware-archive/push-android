@@ -6,7 +6,6 @@ import android.os.Parcelable;
 
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndMessageReceiptApiRequest;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndMessageReceiptListener;
-import com.pivotal.cf.mobile.pushsdk.database.EventsStorage;
 import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
 import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 
@@ -25,12 +24,12 @@ public class SendEventsJob extends BaseJob {
     @Override
     public void run(JobParams jobParams) {
 
-        final List<Uri> uris = getUnpostedMessageReceipts(jobParams);
+        final List<Uri> uris = getUnpostedEvents(jobParams);
         PushLibLogger.fd("SendEventsJob: package %s: events available to send: %d", getPackageName(jobParams), uris.size());
 
         if (uris.size() > 0) {
             setStatusForEvents(jobParams, uris, BaseEvent.Status.POSTING);
-            sendMessageReceipts(jobParams, uris);
+            sendEvents(jobParams, uris);
         } else {
             sendJobResult(RESULT_NO_WORK_TO_DO, jobParams);
         }
@@ -42,8 +41,7 @@ public class SendEventsJob extends BaseJob {
         }
     }
 
-    // TODO - generalize to all event types
-    private void sendMessageReceipts(final JobParams jobParams, final List<Uri> uris) {
+    private void sendEvents(final JobParams jobParams, final List<Uri> uris) {
 
         final BackEndMessageReceiptApiRequest apiRequest = jobParams.backEndMessageReceiptApiRequestProvider.getRequest();
         apiRequest.startSendMessageReceipts(uris, new BackEndMessageReceiptListener() {
@@ -51,7 +49,7 @@ public class SendEventsJob extends BaseJob {
             @Override
             public void onBackEndMessageReceiptSuccess() {
                 if (uris != null) {
-                    jobParams.eventsStorage.deleteEvents(uris, EventsStorage.EventType.MESSAGE_RECEIPT);
+                    jobParams.eventsStorage.deleteEvents(uris);
                 }
                 sendJobResult(JobResultListener.RESULT_SUCCESS, jobParams);
             }
@@ -69,10 +67,9 @@ public class SendEventsJob extends BaseJob {
         return packageName;
     }
 
-    // TODO - generalize to all event types
-    private List<Uri> getUnpostedMessageReceipts(JobParams jobParams) {
-        final List<Uri> uris1 = jobParams.eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, BaseEvent.Status.NOT_POSTED);
-        final List<Uri> uris2 = jobParams.eventsStorage.getEventUrisWithStatus(EventsStorage.EventType.MESSAGE_RECEIPT, BaseEvent.Status.POSTING_ERROR);
+    private List<Uri> getUnpostedEvents(JobParams jobParams) {
+        final List<Uri> uris1 = jobParams.eventsStorage.getEventUrisWithStatus(BaseEvent.Status.NOT_POSTED);
+        final List<Uri> uris2 = jobParams.eventsStorage.getEventUrisWithStatus(BaseEvent.Status.POSTING_ERROR);
         final List<Uri> uris = new LinkedList<Uri>(uris1);
         uris.addAll(uris2);
         return uris;

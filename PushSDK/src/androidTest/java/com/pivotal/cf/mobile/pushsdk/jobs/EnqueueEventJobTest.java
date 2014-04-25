@@ -3,8 +3,7 @@ package com.pivotal.cf.mobile.pushsdk.jobs;
 import android.net.Uri;
 import android.test.MoreAsserts;
 
-import com.pivotal.cf.mobile.pushsdk.database.EventsStorage;
-import com.pivotal.cf.mobile.pushsdk.model.MessageReceiptEvent;
+import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
 
 import java.util.List;
 
@@ -12,30 +11,22 @@ public class EnqueueEventJobTest extends JobTest {
 
     public void testRequiresEvent() {
         try {
-            new EnqueueEventJob(null, EventsStorage.EventType.MESSAGE_RECEIPT);
+            new EnqueueEventJob(null);
             fail();
         } catch (IllegalArgumentException e) {
             // success
         }
     }
 
-    public void testRequestValidEventType() {
-        try {
-            new EnqueueEventJob(event1, EventsStorage.EventType.ALL);
-            fail();
-        } catch (IllegalArgumentException e) {
-            // success
-        }
-    }
 
     public void testEnqueuesObject() throws InterruptedException {
 
         // Setup environment
-        assertEquals(0, eventsStorage.getNumberOfEvents(EventsStorage.EventType.ALL));
+        assertEquals(0, eventsStorage.getNumberOfEvents());
         assertFalse(alarmProvider.isAlarmEnabled());
 
         // Run job
-        final EnqueueEventJob job = new EnqueueEventJob(event1, EventsStorage.EventType.MESSAGE_RECEIPT);
+        final EnqueueEventJob job = new EnqueueEventJob(event1);
         job.run(getJobParams(new JobResultListener() {
 
             @Override
@@ -48,11 +39,10 @@ public class EnqueueEventJobTest extends JobTest {
         semaphore.acquire();
 
         // Ensure event made it into the database
-        assertEquals(1, eventsStorage.getNumberOfEvents(EventsStorage.EventType.MESSAGE_RECEIPT));
-        assertEquals(1, eventsStorage.getNumberOfEvents(EventsStorage.EventType.ALL));
-        final List<Uri> uris = eventsStorage.getEventUris(EventsStorage.EventType.MESSAGE_RECEIPT);
+        assertEquals(1, eventsStorage.getNumberOfEvents());
+        final List<Uri> uris = eventsStorage.getEventUris();
         assertEquals(1, uris.size());
-        final MessageReceiptEvent savedEvent = (MessageReceiptEvent) eventsStorage.readEvent(uris.get(0));
+        final BaseEvent savedEvent = eventsStorage.readEvent(uris.get(0));
         assertEquals(event1, savedEvent);
 
         // Ensure alarm was enabled
@@ -63,11 +53,11 @@ public class EnqueueEventJobTest extends JobTest {
 
         // Setup environment
         eventsStorage.setWillSaveFail(true);
-        assertEquals(0, eventsStorage.getNumberOfEvents(EventsStorage.EventType.ALL));
+        assertEquals(0, eventsStorage.getNumberOfEvents());
         assertFalse(alarmProvider.isAlarmEnabled());
 
         // Run job
-        final EnqueueEventJob job = new EnqueueEventJob(event1, EventsStorage.EventType.MESSAGE_RECEIPT);
+        final EnqueueEventJob job = new EnqueueEventJob(event1);
         job.run(getJobParams(new JobResultListener() {
 
             @Override
@@ -80,23 +70,22 @@ public class EnqueueEventJobTest extends JobTest {
         semaphore.acquire();
 
         // Ensure event did not made it into the database
-        assertEquals(0, eventsStorage.getNumberOfEvents(EventsStorage.EventType.MESSAGE_RECEIPT));
-        assertEquals(0, eventsStorage.getNumberOfEvents(EventsStorage.EventType.ALL));
+        assertEquals(0, eventsStorage.getNumberOfEvents());
 
         // Ensure alarm was not enabled
         assertFalse(alarmProvider.isAlarmEnabled());
     }
 
     public void testEquals() {
-        final EnqueueEventJob job1 = new EnqueueEventJob(event1, EventsStorage.EventType.MESSAGE_RECEIPT);
-        final EnqueueEventJob job2 = new EnqueueEventJob(event1, EventsStorage.EventType.MESSAGE_RECEIPT);
+        final EnqueueEventJob job1 = new EnqueueEventJob(event1);
+        final EnqueueEventJob job2 = new EnqueueEventJob(event1);
         assertEquals(event1, event1);
         assertEquals(job1, job2);
     }
 
     public void testNotEquals() {
-        final EnqueueEventJob job1 = new EnqueueEventJob(event1, EventsStorage.EventType.MESSAGE_RECEIPT);
-        final EnqueueEventJob job2 = new EnqueueEventJob(event2, EventsStorage.EventType.MESSAGE_RECEIPT);
+        final EnqueueEventJob job1 = new EnqueueEventJob(event1);
+        final EnqueueEventJob job2 = new EnqueueEventJob(event2);
         MoreAsserts.assertNotEqual(event1, event2);
         MoreAsserts.assertNotEqual(job1, job2);
     }
@@ -104,10 +93,9 @@ public class EnqueueEventJobTest extends JobTest {
     // TODO - test more event types after we define some.
 
     public void testParcelsData() {
-        final EnqueueEventJob inputJob = new EnqueueEventJob(event1, EventsStorage.EventType.MESSAGE_RECEIPT);
+        final EnqueueEventJob inputJob = new EnqueueEventJob(event1);
         final EnqueueEventJob outputJob = getJobViaParcel(inputJob);
         assertNotNull(outputJob);
         assertEquals(inputJob, outputJob);
     }
-
 }
