@@ -72,6 +72,11 @@ public class MessageReceiptEvent extends BaseEvent implements Parcelable {
             setTime(cursor.getString(columnIndex));
         }
 
+        columnIndex = cursor.getColumnIndex(BaseEvent.Columns.DEVICE_ID);
+        if (columnIndex >= 0) {
+            setDeviceId(cursor.getString(columnIndex));
+        }
+
         columnIndex = cursor.getColumnIndex(MessageReceiptData.Columns.MESSAGE_UUID);
         if (columnIndex >= 0) {
             setData(new MessageReceiptData());
@@ -93,6 +98,7 @@ public class MessageReceiptEvent extends BaseEvent implements Parcelable {
         cv.put(BaseEvent.Columns.VARIANT_UUID, getVariantUuid());
         cv.put(BaseEvent.Columns.TIME, getTime());
         cv.put(BaseEvent.Columns.STATUS, getStatus());
+        cv.put(BaseEvent.Columns.DEVICE_ID, getDeviceId());
         if (data != null) {
             cv.put(MessageReceiptData.Columns.MESSAGE_UUID, data.getMessageUuid());
         } else {
@@ -109,22 +115,23 @@ public class MessageReceiptEvent extends BaseEvent implements Parcelable {
         this.data = data;
     }
 
-    public static MessageReceiptEvent getMessageReceiptEvent(String variantUuid, String messageUuid) {
+    public static MessageReceiptEvent getMessageReceiptEvent(String variantUuid, String messageUuid, String deviceId) {
         final String eventId = UUID.randomUUID().toString();
         final Date time = new Date();
-        return getMessageReceiptEvent(eventId, variantUuid, messageUuid, time);
+        return getMessageReceiptEvent(eventId, variantUuid, messageUuid, deviceId, time);
     }
 
-    public static MessageReceiptEvent getMessageReceiptEvent(String variantUuid, String messageUuid, Date time) {
+    public static MessageReceiptEvent getMessageReceiptEvent(String variantUuid, String messageUuid, String deviceId, Date time) {
         final String eventId = UUID.randomUUID().toString();
-        return getMessageReceiptEvent(eventId, variantUuid, messageUuid, time);
+        return getMessageReceiptEvent(eventId, variantUuid, messageUuid, deviceId, time);
     }
 
-    public static MessageReceiptEvent getMessageReceiptEvent(String eventId, String variantUuid, String messageUuid, Date time) {
+    public static MessageReceiptEvent getMessageReceiptEvent(String eventId, String variantUuid, String messageUuid, String deviceId, Date time) {
         final MessageReceiptEvent event = new MessageReceiptEvent();
         event.setEventId(eventId);
         event.setVariantUuid(variantUuid);
         event.setTime(time);
+        event.setDeviceId(deviceId);
         event.setData(new MessageReceiptData());
         event.getData().setMessageUuid(messageUuid);
         event.setStatus(Status.NOT_POSTED);
@@ -143,6 +150,8 @@ public class MessageReceiptEvent extends BaseEvent implements Parcelable {
         sb.append(BaseEvent.Columns.EVENT_UUID);
         sb.append("' TEXT, '");
         sb.append(BaseEvent.Columns.VARIANT_UUID);
+        sb.append("' TEXT, '");
+        sb.append(BaseEvent.Columns.DEVICE_ID);
         sb.append("' TEXT, '");
         sb.append(BaseEvent.Columns.TIME);
         sb.append("' INT, '");

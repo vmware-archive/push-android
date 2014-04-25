@@ -139,7 +139,8 @@ public class GcmService extends IntentService {
     private MessageReceiptEvent getMessageReceiptEvent(Intent intent) {
         final String messageUuid = intent.getStringExtra(KEY_MESSAGE_UUID);
         final String variantUuid = GcmService.preferencesProvider.getVariantUuid();
-        final MessageReceiptEvent event = MessageReceiptEvent.getMessageReceiptEvent(variantUuid, messageUuid);
+        final String deviceId = GcmService.preferencesProvider.getBackEndDeviceRegistrationId();
+        final MessageReceiptEvent event = MessageReceiptEvent.getMessageReceiptEvent(variantUuid, messageUuid, deviceId);
         return event;
     }
 

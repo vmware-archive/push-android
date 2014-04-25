@@ -14,8 +14,10 @@ public class EventDatabaseHelperTest extends AndroidTestCase {
     private static final String TEST_FILE_PREFIX = "test_";
     private static final String TEST_VARIANT_UUID_1 = "TEST-VARIANT-UUID-1";
     private static final String TEST_MESSAGE_UUID_1 = "TEST-MESSAGE-UUID-1";
+    private static final String TEST_DEVICE_ID_1 = "TEST-DEVICE-ID-1";
     private static final String TEST_VARIANT_UUID_2 = "TEST-VARIANT-UUID-2";
     private static final String TEST_MESSAGE_UUID_2 = "TEST-MESSAGE-UUID-2";
+    private static final String TEST_DEVICE_ID_2 = "TEST-DEVICE-ID-2";
     private Context CONTEXT;
     private SQLiteDatabase database;
 
@@ -27,7 +29,7 @@ public class EventDatabaseHelperTest extends AndroidTestCase {
     }
 
     public void testDatabaseSettings() {
-        assertEquals(1, database.getVersion());
+        assertEquals(EventsDatabaseHelper.DATABASE_VERSION, database.getVersion());
     }
 
     public void testDatabaseOpen() {
@@ -43,17 +45,17 @@ public class EventDatabaseHelperTest extends AndroidTestCase {
     }
 
     public void testInsertOneRow() {
-        final MessageReceiptEvent event = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_UUID_1, TEST_MESSAGE_UUID_1);
+        final MessageReceiptEvent event = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_UUID_1, TEST_MESSAGE_UUID_1, TEST_DEVICE_ID_1);
         long rowId = database.insert(TABLE_NAME, null, event.getContentValues());
         assertFalse(-1 == rowId);
         assertTableRowCount(1, TABLE_NAME);
     }
 
     public void testInsertTwoRows() {
-        final MessageReceiptEvent event1 = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_UUID_1, TEST_MESSAGE_UUID_1);
+        final MessageReceiptEvent event1 = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_UUID_1, TEST_MESSAGE_UUID_1, TEST_DEVICE_ID_1);
         long rowId1 = database.insert(TABLE_NAME, null, event1.getContentValues());
         assertFalse(-1 == rowId1);
-        final MessageReceiptEvent event2 = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_UUID_2, TEST_MESSAGE_UUID_2);
+        final MessageReceiptEvent event2 = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_UUID_2, TEST_MESSAGE_UUID_2, TEST_DEVICE_ID_2);
         long rowId2 = database.insert(TABLE_NAME, null, event2.getContentValues());
         assertFalse(-1 == rowId2);
         assertTableRowCount(2, TABLE_NAME);

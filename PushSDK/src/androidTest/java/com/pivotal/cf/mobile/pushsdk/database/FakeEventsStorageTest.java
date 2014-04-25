@@ -18,6 +18,9 @@ public class FakeEventsStorageTest extends AndroidTestCase {
     private static final String TEST_MESSAGE_UUID_1 = "TEST_MESSAGE_UUID_1";
     private static final String TEST_MESSAGE_UUID_2 = "TEST_MESSAGE_UUID_2";
     private static final String TEST_MESSAGE_UUID_3 = "TEST_MESSAGE_UUID_3";
+    private static final String TEST_DEVICE_ID_1 = "TEST-DEVICE-ID-1";
+    private static final String TEST_DEVICE_ID_2 = "TEST-DEVICE-ID-2";
+    private static final String TEST_DEVICE_ID_3 = "TEST-DEVICE-ID-3";
     //	private static final Uri NON_EXISTENT_FILE_2 = Uri.parse("file://api_validation_error/this_name_does_not_exist_come_on!");
 	private MessageReceiptEvent EVENT_1;
 	private MessageReceiptEvent EVENT_2;
@@ -30,9 +33,9 @@ public class FakeEventsStorageTest extends AndroidTestCase {
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		EVENT_1 = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_ID_1, TEST_MESSAGE_UUID_1);
-		EVENT_2 = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_ID_2, TEST_MESSAGE_UUID_2);
-		EVENT_3 = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_ID_3, TEST_MESSAGE_UUID_3);
+		EVENT_1 = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_ID_1, TEST_MESSAGE_UUID_1, TEST_DEVICE_ID_1);
+		EVENT_2 = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_ID_2, TEST_MESSAGE_UUID_2, TEST_DEVICE_ID_2);
+		EVENT_3 = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_ID_3, TEST_MESSAGE_UUID_3, TEST_DEVICE_ID_3);
 //		EVENT_4 = ApiValidationErrorEvent.getApiValidationErrorEvent(getContext(), "URL", "POST", REQUEST_HEADERS, 456, "content/sneh", "SNEEEH", "ERROR_MESSAGE OF DOOM", metadata);
 //		EVENT_5 = ApiValidationErrorEvent.getApiValidationErrorEvent(getContext(), "URL of truth", "POST", REQUEST_HEADERS, 456, "content/sneh", "SNEEEH", "DUAL ERRORs", metadata);
 //		EVENT_6 = ApiValidationErrorEvent.getApiValidationErrorEvent(getContext(), "valid URL", "POST", REQUEST_HEADERS, 456, "content/sneh", "SNEEEH", "TRIPLE THREAT ERRORS", metadata);

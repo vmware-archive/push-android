@@ -8,17 +8,17 @@ import com.pivotal.cf.mobile.pushsdk.model.MessageReceiptEvent;
 
 import junit.framework.Assert;
 
-import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 public class DatabaseEventsStorageTest extends AndroidTestCase {
 
     private static final String TEST_VARIANT_UUID_1 = "TEST-VARIANT-UUID-1";
     private static final String TEST_MESSAGE_UUID_1 = "TEST-MESSAGE-UUID-1";
+    private static final String TEST_DEVICE_ID_1 = "TEST-DEVICE-ID-1";
     private static final String TEST_VARIANT_UUID_2 = "TEST-VARIANT-UUID-2";
     private static final String TEST_MESSAGE_UUID_2 = "TEST-MESSAGE-UUID-2";
+    private static final String TEST_DEVICE_ID_2 = "TEST-DEVICE-ID-2";
     private static final Uri NON_EXISTENT_FILE_1 = Uri.withAppendedPath(DatabaseConstants.MESSAGE_RECEIPTS_CONTENT_URI, "/999999");
     //	private static final Uri NON_EXISTENT_FILE_2 = Uri.withAppendedPath(DatabaseConstants.API_VALIDATION_ERROR_CONTENT_URI, "/999999");
     private DatabaseEventsStorage eventsStorage;
@@ -27,21 +27,14 @@ public class DatabaseEventsStorageTest extends AndroidTestCase {
     //	private ApiValidationErrorEvent EVENT_3;
 //	private ApiValidationErrorEvent EVENT_4;
     private static final String TEST_DATABASE_PREFIX = "test_";
-    private static final Map<String, String> REQUEST_HEADERS;
-
-    static {
-        REQUEST_HEADERS = new HashMap<String, String>();
-        REQUEST_HEADERS.put("TEST_KEY1", "TEST_VALUE1");
-        REQUEST_HEADERS.put("TEST_KEY2", "TEST_VALUE2");
-    }
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         EventsDatabaseHelper.init();
         EventsDatabaseWrapper.createDatabaseInstance(getContext());
-        EVENT_1 = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_UUID_1, TEST_MESSAGE_UUID_1);
-        EVENT_2 = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_UUID_2, TEST_MESSAGE_UUID_2);
+        EVENT_1 = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_UUID_1, TEST_MESSAGE_UUID_1, TEST_DEVICE_ID_1);
+        EVENT_2 = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_UUID_2, TEST_MESSAGE_UUID_2, TEST_DEVICE_ID_2);
 //		EVENT_3 = ApiValidationErrorEvent.getApiValidationErrorEvent("URL", "POST", REQUEST_HEADERS, 44, "content/silly", "Ministry of Silly Walks", "ERROR_MESSAGE OF DOOM", metadata);
 //		EVENT_4 = ApiValidationErrorEvent.getApiValidationErrorEvent("valid URL", "POST", REQUEST_HEADERS, 44, "content/silly", "Ministry of Silly Walks", "DOUBLE ERROR", metadata);
         eventsStorage = new DatabaseEventsStorage();

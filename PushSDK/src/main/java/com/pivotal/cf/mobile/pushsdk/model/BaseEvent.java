@@ -18,6 +18,7 @@ public abstract class BaseEvent implements Parcelable {
         public static final String TIME = "time";
         public static final String VARIANT_UUID = "variant_uuid";
         public static final String STATUS = "status";
+        public static final String DEVICE_ID = "device_id";
     }
 
     public static class Status {
@@ -56,6 +57,9 @@ public abstract class BaseEvent implements Parcelable {
     @SerializedName(Columns.VARIANT_UUID)
     private String variantUuid;
 
+    @SerializedName(Columns.DEVICE_ID)
+    private String deviceId;
+
     public BaseEvent() {
         this.type = getEventType();
     }
@@ -68,6 +72,7 @@ public abstract class BaseEvent implements Parcelable {
         this.type = source.type;
         this.time = source.time;
         this.variantUuid = source.variantUuid;
+        this.deviceId = source.deviceId;
     }
 
     protected abstract String getEventType();
@@ -129,6 +134,14 @@ public abstract class BaseEvent implements Parcelable {
         this.variantUuid = variantUuid;
     }
 
+    public String getDeviceId() {
+        return deviceId;
+    }
+
+    public void setDeviceId(String deviceId) {
+        this.deviceId = deviceId;
+    }
+
     @Override
     public boolean equals(Object o) {
 
@@ -186,6 +199,15 @@ public abstract class BaseEvent implements Parcelable {
             return false;
         }
 
+        if (other.deviceId == null && deviceId != null) {
+            return false;
+        }
+        if (other.deviceId != null && deviceId == null) {
+            return false;
+        }
+        if (other.deviceId != null && deviceId != null && !(other.deviceId.equals(deviceId))) {
+            return false;
+        }
         return true;
     }
 
@@ -196,6 +218,7 @@ public abstract class BaseEvent implements Parcelable {
         result = (result * 31) + (type == null ? 0 : type.hashCode());
         result = (result * 31) + (time == null ? 0 : time.hashCode());
         result = (result * 31) + (variantUuid == null ? 0 : variantUuid.hashCode());
+        result = (result * 31) + (deviceId == null ? 0 : deviceId.hashCode());
         return result;
     }
 
@@ -216,6 +239,7 @@ public abstract class BaseEvent implements Parcelable {
         eventId = in.readString();
         variantUuid = in.readString();
         time = in.readString();
+        deviceId = in.readString();
         type = getEventType();
     }
 
@@ -231,5 +255,6 @@ public abstract class BaseEvent implements Parcelable {
         out.writeString(eventId);
         out.writeString(variantUuid);
         out.writeString(time);
+        out.writeString(deviceId);
     }
 }

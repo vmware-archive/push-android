@@ -24,6 +24,7 @@ public class MessageReceiptEventTest extends AndroidTestCase {
     private static final String TEST_EVENT_ID_1 = "EVENT-ID-1";
     private static final String TEST_MESSAGE_UUID_1 = "SOME-MESSAGE-UUID-1";
     private static final String TEST_EVENT_VARIANT_UUID_1 = "VARIANT-UUID-1";
+    private static final String TEST_DEVICE_ID_1 = "DEVICE-ID-1";
     private static final String TEST_TIME_1 = "SOME BOGUS TIME";
     private static final int TEST_YEAR_1 = 1969;
     private static final int TEST_MONTH_1 = 6;
@@ -36,6 +37,7 @@ public class MessageReceiptEventTest extends AndroidTestCase {
     private static final String TEST_EVENT_ID_2 = "EVENT-ID-2";
     private static final String TEST_MESSAGE_UUID_2 = "ANOTHER-MESSAGE-UUID";
     private static final String TEST_EVENT_VARIANT_UUID_2 = "VARIANT-UUID-2";
+    private static final String TEST_DEVICE_ID_2 = "DEVICE-ID-2";
     private static final int TEST_YEAR_2 = 1957;
     private static final int TEST_MONTH_2 = 9;
     private static final int TEST_DAY_2 = 4;
@@ -129,6 +131,25 @@ public class MessageReceiptEventTest extends AndroidTestCase {
         MoreAsserts.assertNotEqual(model2, model1);
 
         model2.setVariantUuid(null);
+        assertEquals(model1, model2);
+    }
+
+    public void testNotEqualsWithDeviceIds() {
+
+        final MessageReceiptEvent model1 = new MessageReceiptEvent();
+        model1.setDeviceId(TEST_DEVICE_ID_1);
+
+        final MessageReceiptEvent model2 = new MessageReceiptEvent();
+        model2.setDeviceId(TEST_DEVICE_ID_2);
+
+        MoreAsserts.assertNotEqual(model1, model2);
+        MoreAsserts.assertNotEqual(model2, model1);
+
+        model1.setDeviceId(null);
+        MoreAsserts.assertNotEqual(model1, model2);
+        MoreAsserts.assertNotEqual(model2, model1);
+
+        model2.setDeviceId(null);
         assertEquals(model1, model2);
     }
 
@@ -251,6 +272,7 @@ public class MessageReceiptEventTest extends AndroidTestCase {
         assertTrue(sql.contains("'" + BaseColumns._ID + "'"));
         assertTrue(sql.contains("'" + BaseEvent.Columns.EVENT_UUID + "'"));
         assertTrue(sql.contains("'" + BaseEvent.Columns.VARIANT_UUID + "'"));
+        assertTrue(sql.contains("'" + BaseEvent.Columns.DEVICE_ID + "'"));
         assertTrue(sql.contains("'" + BaseEvent.Columns.TIME + "'"));
         assertTrue(sql.contains("'" + MessageReceiptData.Columns.MESSAGE_UUID + "'"));
     }
@@ -271,10 +293,12 @@ public class MessageReceiptEventTest extends AndroidTestCase {
         assertTrue(cv.containsKey(BaseEvent.Columns.STATUS));
         assertTrue(cv.containsKey(BaseEvent.Columns.EVENT_UUID));
         assertTrue(cv.containsKey(BaseEvent.Columns.VARIANT_UUID));
+        assertTrue(cv.containsKey(BaseEvent.Columns.DEVICE_ID));
         assertTrue(cv.containsKey(MessageReceiptData.Columns.MESSAGE_UUID));
         assertEquals(event.getTime(), cv.getAsString(BaseEvent.Columns.TIME));
         assertEquals(event.getStatus(), cv.getAsInteger(BaseEvent.Columns.STATUS).intValue());
         assertEquals(event.getEventId(), cv.getAsString(BaseEvent.Columns.EVENT_UUID));
+        assertEquals(event.getDeviceId(), cv.getAsString(BaseEvent.Columns.DEVICE_ID));
         assertEquals(event.getVariantUuid(), cv.getAsString(BaseEvent.Columns.VARIANT_UUID));
         assertEquals(event.getData().getMessageUuid(), cv.getAsString(MessageReceiptData.Columns.MESSAGE_UUID));
     }
@@ -287,11 +311,13 @@ public class MessageReceiptEventTest extends AndroidTestCase {
         assertTrue(cv.containsKey(BaseEvent.Columns.STATUS));
         assertTrue(cv.containsKey(BaseEvent.Columns.EVENT_UUID));
         assertTrue(cv.containsKey(BaseEvent.Columns.VARIANT_UUID));
+        assertTrue(cv.containsKey(BaseEvent.Columns.DEVICE_ID));
         assertTrue(cv.containsKey(MessageReceiptData.Columns.MESSAGE_UUID));
         MoreAsserts.assertNotEqual(0, cv.getAsString(BaseEvent.Columns.TIME));
         assertEquals(BaseEvent.Status.NOT_POSTED, cv.getAsInteger(BaseEvent.Columns.STATUS).intValue());
         assertNull(cv.getAsString(BaseEvent.Columns.EVENT_UUID));
         assertNull(cv.getAsString(BaseEvent.Columns.VARIANT_UUID));
+        assertNull(cv.getAsString(BaseEvent.Columns.DEVICE_ID));
         assertNull(cv.getAsString(MessageReceiptData.Columns.MESSAGE_UUID));
     }
 
@@ -301,6 +327,7 @@ public class MessageReceiptEventTest extends AndroidTestCase {
         cursor.addField(BaseEvent.Columns.TIME, TEST_TIME_1);
         cursor.addField(BaseEvent.Columns.STATUS, BaseEvent.Status.POSTED);
         cursor.addField(BaseEvent.Columns.EVENT_UUID, TEST_EVENT_ID_1);
+        cursor.addField(BaseEvent.Columns.DEVICE_ID, TEST_DEVICE_ID_1);
         cursor.addField(BaseEvent.Columns.VARIANT_UUID, TEST_EVENT_VARIANT_UUID_1);
         cursor.addField(MessageReceiptData.Columns.MESSAGE_UUID, TEST_MESSAGE_UUID_1);
         final MessageReceiptEvent event = new MessageReceiptEvent(cursor);
@@ -309,6 +336,7 @@ public class MessageReceiptEventTest extends AndroidTestCase {
         assertEquals(BaseEvent.Status.POSTED, event.getStatus());
         assertEquals(TEST_EVENT_ID_1, event.getEventId());
         assertEquals(TEST_EVENT_VARIANT_UUID_1, event.getVariantUuid());
+        assertEquals(TEST_DEVICE_ID_1, event.getDeviceId());
         assertNotNull(event.getData());
         assertEquals(TEST_MESSAGE_UUID_1, event.getData().getMessageUuid());
     }
@@ -321,6 +349,7 @@ public class MessageReceiptEventTest extends AndroidTestCase {
         assertEquals(BaseEvent.Status.NOT_POSTED, event.getStatus());
         assertNull(event.getEventId());
         assertNull(event.getVariantUuid());
+        assertNull(event.getDeviceId());
         assertNull(event.getData());
     }
 
@@ -383,6 +412,7 @@ public class MessageReceiptEventTest extends AndroidTestCase {
         final MessageReceiptData data = new MessageReceiptData();
         event.setEventId(TEST_EVENT_ID_1);
         event.setVariantUuid(TEST_EVENT_VARIANT_UUID_1);
+        event.setDeviceId(TEST_DEVICE_ID_1);
         event.setTime(getTestDate1());
         event.setData(data);
         data.setMessageUuid(TEST_MESSAGE_UUID_1);
@@ -394,6 +424,7 @@ public class MessageReceiptEventTest extends AndroidTestCase {
         final MessageReceiptData data = new MessageReceiptData();
         event.setEventId(TEST_EVENT_ID_2);
         event.setVariantUuid(TEST_EVENT_VARIANT_UUID_2);
+        event.setDeviceId(TEST_DEVICE_ID_2);
         event.setTime(getTestDate1());
         event.setData(data);
         data.setMessageUuid(TEST_MESSAGE_UUID_2);
