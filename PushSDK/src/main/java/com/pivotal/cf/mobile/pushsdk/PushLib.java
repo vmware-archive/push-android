@@ -46,7 +46,7 @@ import com.pivotal.cf.mobile.pushsdk.registration.UnregistrationEngine;
 import com.pivotal.cf.mobile.pushsdk.service.EventService;
 import com.pivotal.cf.mobile.pushsdk.util.Const;
 import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
-import com.pivotal.cf.mobile.pushsdk.version.RealVersionProvider;
+import com.pivotal.cf.mobile.pushsdk.version.VersionProviderImpl;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -136,7 +136,7 @@ public class PushLib {
         final BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider = new BackEndRegistrationApiRequestProvider(dummyBackEndRegistrationApiRequest);
         final BackEndUnregisterDeviceApiRequest dummyBackEndUnregisterDeviceApiRequest = new BackEndUnregisterDeviceApiRequestImpl(networkWrapper);
         final BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider = new BackEndUnregisterDeviceApiRequestProvider(dummyBackEndUnregisterDeviceApiRequest);
-        final VersionProvider versionProvider = new RealVersionProvider(context);
+        final VersionProvider versionProvider = new VersionProviderImpl(context);
         final Runnable runnable = new Runnable() {
 
             @Override

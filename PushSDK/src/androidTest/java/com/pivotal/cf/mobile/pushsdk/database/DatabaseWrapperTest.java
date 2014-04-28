@@ -12,7 +12,7 @@ import com.pivotal.cf.mobile.pushsdk.model.events.EventPushReceived;
 import java.util.LinkedList;
 import java.util.List;
 
-public class EventDatabaseWrapperTest extends AndroidTestCase {
+public class DatabaseWrapperTest extends AndroidTestCase {
 
     private static final String TEST_VARIANT_UUID_1 = "TEST-VARIANT-UUID-1";
     private static final String TEST_MESSAGE_UUID_1 = "TEST-MESSAGE-UUID-1";

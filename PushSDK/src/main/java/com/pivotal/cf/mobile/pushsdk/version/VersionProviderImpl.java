@@ -19,11 +19,11 @@ import android.content.Context;
 
 import com.pivotal.cf.mobile.pushsdk.util.Util;
 
-public class RealVersionProvider implements VersionProvider {
+public class VersionProviderImpl implements VersionProvider {
 
     private final Context context;
 
-    public RealVersionProvider(Context context) {
+    public VersionProviderImpl(Context context) {
         this.context = context;
     }
 

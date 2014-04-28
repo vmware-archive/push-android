@@ -29,10 +29,6 @@ public class FakeNetworkWrapper implements NetworkWrapper {
         isNetworkAvailable = true;
     }
 
-    public FakeNetworkWrapper(boolean isNetworkAvailable) {
-        this.isNetworkAvailable = isNetworkAvailable;
-    }
-
     @Override
     public boolean isNetworkAvailable(Context context) {
         return isNetworkAvailable;

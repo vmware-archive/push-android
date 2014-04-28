@@ -52,8 +52,6 @@ public class GcmService extends IntentService {
 
     private ResultReceiver resultReceiver = null;
 
-    // TODO - write unit tests to cover this class
-
     public GcmService() {
         super("GcmService");
     }
