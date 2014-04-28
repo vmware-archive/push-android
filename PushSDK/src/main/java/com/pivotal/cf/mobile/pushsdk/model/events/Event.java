@@ -144,7 +144,11 @@ public class Event implements Parcelable {
         this.time = source.time;
         this.variantUuid = source.variantUuid;
         this.deviceId = source.deviceId;
-        this.data = new HashMap<String, Object>(source.data);
+        if (source.data != null) {
+            this.data = new HashMap<String, Object>(source.data);
+        } else {
+            this.data = null;
+        }
     }
 
     public int getId() {
