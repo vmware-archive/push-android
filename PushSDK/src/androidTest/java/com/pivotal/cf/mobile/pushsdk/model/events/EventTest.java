@@ -201,11 +201,11 @@ public class EventTest extends AndroidTestCase {
         assertEquals(model1.hashCode(), model2.hashCode());
     }
 
-    public void testToJson() {
-        final Event model = getBaseEvent1();
+    public void testToJson1() {
+        final Event event = getBaseEvent1();
 
         final Gson gson = new Gson();
-        final String json = gson.toJson(model);
+        final String json = gson.toJson(event);
         assertTrue(json.contains("\"id\":"));
         assertTrue(json.contains("\"" + TEST_EVENT_ID_1 + "\""));
         assertTrue(json.contains("\"variant_uuid\":"));
@@ -216,6 +216,18 @@ public class EventTest extends AndroidTestCase {
         assertTrue(json.contains("\"" + TEST_MESSAGE_UUID_1 + "\""));
         assertTrue(json.contains("\"time\":"));
         assertTrue(json.contains("\"" + (getTestDate1().getTime() / 1000L) + "\""));
+    }
+
+    public void testToJson2() {
+        final Event event = new Event();
+        event.setData(getBaseEventData3());
+        final Gson gson = new Gson();
+        final String json = gson.toJson(event);
+        assertTrue(json.startsWith("{\"data\":{\"A LIST\":["));
+        assertTrue(json.contains("\"ZEBRAS\""));
+        assertTrue(json.contains("\"LEMURS\""));
+        assertTrue(json.contains("\"SLOTHS\""));
+        assertTrue(json.endsWith("]}}"));
     }
 
     public void testConvertStringToList() {
@@ -375,6 +387,18 @@ public class EventTest extends AndroidTestCase {
         assertEquals(inputEvent, outputEvent);
     }
 
+    public void testIsParcelable3() {
+        final Event inputEvent = getBaseEvent1();
+        inputEvent.setData(getBaseEventData3());
+        final Event outputEvent = getObjectViaParcel(inputEvent);
+        assertNotNull(outputEvent);
+        assertEquals(inputEvent, outputEvent);
+        final HashMap<String, Object> outputMap = outputEvent.getData();
+        assertTrue(outputMap.containsKey("A LIST"));
+        final List<String> outputList = (List<String>) outputMap.get("A LIST");
+        assertEquals(3, outputList.size());
+    }
+
     private Event getObjectViaParcel(Event inputEvent) {
         final Parcel inputParcel = Parcel.obtain();
         inputEvent.writeToParcel(inputParcel, 0);
@@ -425,17 +449,27 @@ public class EventTest extends AndroidTestCase {
         return event;
     }
 
-    private static HashMap<String, String> getBaseEventData1() {
-        final HashMap<String, String> map = new HashMap<String, String>();
+    private static HashMap<String, Object> getBaseEventData1() {
+        final HashMap<String, Object> map = new HashMap<String, Object>();
         map.put(EventPushReceived.MESSAGE_UUID, TEST_MESSAGE_UUID_1);
         return map;
     }
 
-    private static HashMap<String, String> getBaseEventData2() {
-        final HashMap<String, String> map = new HashMap<String, String>();
+    private static HashMap<String, Object> getBaseEventData2() {
+        final HashMap<String, Object> map = new HashMap<String, Object>();
         map.put(EventPushReceived.MESSAGE_UUID, TEST_MESSAGE_UUID_2);
         map.put("AND NOW", "FOR SOMETHING");
         map.put("COMPLETELY", "DIFFERENT");
+        return map;
+    }
+
+    private static HashMap<String, Object> getBaseEventData3() {
+        final HashMap<String, Object> map = new HashMap<String, Object>();
+        final List<String> list = new LinkedList<String>();
+        list.add("ZEBRAS");
+        list.add("LEMURS");
+        list.add("SLOTHS");
+        map.put("A LIST", list);
         return map;
     }
 

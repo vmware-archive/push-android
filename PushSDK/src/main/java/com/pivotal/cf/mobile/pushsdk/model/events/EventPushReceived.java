@@ -24,7 +24,7 @@ public class EventPushReceived {
         event.setTime(time);
         event.setDeviceId(deviceId);
         event.setStatus(Event.Status.NOT_POSTED);
-        final HashMap<String, String> data = new HashMap<String, String>();
+        final HashMap<String, Object> data = new HashMap<String, Object>();
         data.put(MESSAGE_UUID, messageUuid);
         event.setData(data);
         return event;

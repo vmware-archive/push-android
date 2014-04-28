@@ -61,7 +61,7 @@ public class Event implements Parcelable {
 
     @SerializedName(Columns.EVENT_UUID)
     private String eventId;
-    
+
     @SerializedName(Columns.TYPE)
     private String eventType;
 
@@ -74,9 +74,8 @@ public class Event implements Parcelable {
     @SerializedName(Columns.DEVICE_ID)
     private String deviceId;
 
-    // TODO - can we generalize to "Map<String, Object>"?
     @SerializedName(Columns.DATA)
-    private HashMap<String, String> data;
+    private HashMap<String, Object> data;
 
     public Event() {
     }
@@ -216,22 +215,24 @@ public class Event implements Parcelable {
         this.deviceId = deviceId;
     }
 
-    public HashMap<String, String> getData() {
+    public HashMap<String, Object> getData() {
         return data;
     }
 
-    public void setData(HashMap<String, String> data) {
+    public void setData(HashMap<String, Object> data) {
         this.data = data;
     }
 
     private void setData(Serializable serializedData) {
         if (serializedData == null) {
-            setData(null);
-        } else if (HashMap.class.isAssignableFrom(serializedData.getClass())) {
-            this.data = (HashMap<String, String>) serializedData;
+            this.data = null;
         } else {
-            PushLibLogger.w("Warning: attempted to deserialize invalid event data field");
-            setData(null);
+            try {
+                this.data = (HashMap<String, Object>) serializedData;
+            } catch (ClassCastException e) {
+                PushLibLogger.w("Warning: attempted to deserialize invalid event data field");
+                this.data = null;
+            }
         }
     }
 
@@ -348,7 +349,8 @@ public class Event implements Parcelable {
     }
 
     private static Type getTypeToken() {
-        return new TypeToken<List<Event>>(){}.getType();
+        return new TypeToken<List<Event>>() {
+        }.getType();
     }
 
     // Database helpers
@@ -432,18 +434,18 @@ public class Event implements Parcelable {
             PushLibLogger.ex("Error deserializing data: ", i);
         } catch (ClassNotFoundException c) {
             PushLibLogger.ex("Error deserializing data: ", c);
-        }
-
-        finally {
+        } finally {
             if (in != null) {
                 try {
                     in.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
             }
             if (byteStream != null) {
                 try {
                     byteStream.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
             }
         }
 
@@ -463,18 +465,18 @@ public class Event implements Parcelable {
 
         } catch (IOException i) {
             PushLibLogger.w("Warning: Serializable object didn't serialize.");
-        }
-
-        finally {
+        } finally {
             if (out != null) {
                 try {
                     out.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
             }
             if (byteStream != null) {
                 try {
                     byteStream.close();
-                } catch (IOException e) {}
+                } catch (IOException e) {
+                }
             }
         }
 
@@ -521,5 +523,4 @@ public class Event implements Parcelable {
         out.writeString(deviceId);
         out.writeSerializable(data);
     }
-
 }
