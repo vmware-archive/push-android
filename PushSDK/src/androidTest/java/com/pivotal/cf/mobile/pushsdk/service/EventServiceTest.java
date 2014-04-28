@@ -9,7 +9,7 @@ import android.test.ServiceTestCase;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
 import com.pivotal.cf.mobile.pushsdk.backend.FakeBackEndMessageReceiptApiRequest;
 import com.pivotal.cf.mobile.pushsdk.broadcastreceiver.FakeEventsSenderAlarmProvider;
-import com.pivotal.cf.mobile.pushsdk.database.EventsDatabaseWrapper;
+import com.pivotal.cf.mobile.pushsdk.database.DatabaseWrapper;
 import com.pivotal.cf.mobile.pushsdk.database.FakeEventsStorage;
 import com.pivotal.cf.mobile.pushsdk.jobs.DummyJob;
 import com.pivotal.cf.mobile.pushsdk.jobs.PrepareDatabaseJob;
@@ -158,7 +158,7 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
 
     public void testRunsPrepareDatabaseJobIfReceivingAFreshDatabaseInstance() throws InterruptedException {
         EventService.eventsStorage = null;
-        EventsDatabaseWrapper.removeDatabaseInstance();
+        DatabaseWrapper.removeDatabaseInstance();
         final DummyJob inputJob = new DummyJob();
         final Intent intent = EventService.getIntentToRunJob(getContext(), inputJob);
         addResultReceiverToIntent(intent);

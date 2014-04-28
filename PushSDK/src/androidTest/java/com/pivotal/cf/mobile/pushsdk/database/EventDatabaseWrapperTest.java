@@ -38,7 +38,7 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
 	}
 
 	private void resetDatabase() {
-		EventsDatabaseWrapper.delete(DatabaseConstants.EVENTS_CONTENT_URI, null, null); // empty table
+		DatabaseWrapper.delete(Database.EVENTS_CONTENT_URI, null, null); // empty table
 		assertNoEventsInDatabase();
 	}
 
@@ -100,7 +100,7 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
 		final Uri existingUri = insertEvent(EVENT_1);
 
 		// Make up a URI that shouldn't exist
-		final Uri nonExistingUri = Uri.withAppendedPath(DatabaseConstants.EVENTS_CONTENT_URI, "9999");
+		final Uri nonExistingUri = Uri.withAppendedPath(Database.EVENTS_CONTENT_URI, "9999");
 		assertFalse(existingUri.equals(nonExistingUri));
 
 		// Try to read the non-existent URI from the table
@@ -120,7 +120,7 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
 		assertFalse(EVENT_1.getStatus() == event.getStatus());
 
 		// Update the Event in the table
-		final int rowsAffected = EventsDatabaseWrapper.update(uri, event.getContentValues(), null, null);
+		final int rowsAffected = DatabaseWrapper.update(uri, event.getContentValues(), null, null);
 		assertEquals(1, rowsAffected);
 
 		// Read the Event back and verify that it was updated
@@ -140,7 +140,7 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
 		assertFalse(EVENT_1.equals(EVENT_2));
 
 		// Update them all at once
-		final int rowsAffected = EventsDatabaseWrapper.update(DatabaseConstants.EVENTS_CONTENT_URI, EVENT_2.getContentValues(), null, null);
+		final int rowsAffected = DatabaseWrapper.update(Database.EVENTS_CONTENT_URI, EVENT_2.getContentValues(), null, null);
 		assertEquals(3, rowsAffected);
 
 		// Read them all back and verify they were updated
@@ -161,7 +161,7 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
 		assertEventCountInDatabase(3);
 
 		// Delete all of them
-		final int rowsDeleted = EventsDatabaseWrapper.delete(DatabaseConstants.EVENTS_CONTENT_URI, null, null);
+		final int rowsDeleted = DatabaseWrapper.delete(Database.EVENTS_CONTENT_URI, null, null);
 		assertEquals(3, rowsDeleted);
 		assertNoEventsInDatabase();
 	}
@@ -178,7 +178,7 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
 		assertEquals(EVENT_1, event1);
 		event1.setStatus(BaseEvent.Status.POSTED);
 		assertFalse(EVENT_1.getStatus() == event1.getStatus());
-		final int rowsAffected1 = EventsDatabaseWrapper.update(uri1, event1.getContentValues(), null, null);
+		final int rowsAffected1 = DatabaseWrapper.update(uri1, event1.getContentValues(), null, null);
 		assertEquals(1, rowsAffected1);
 
 		// Assert that the update record was modified correctly after reading back
@@ -201,12 +201,12 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
 		assertEventCountInDatabase(2);
 
 		// Delete the first one
-		final int rowsAffected1 = EventsDatabaseWrapper.delete(uri1, null, null);
+		final int rowsAffected1 = DatabaseWrapper.delete(uri1, null, null);
 		assertEventCountInDatabase(1);
 		assertEquals(1, rowsAffected1);
 
 		// Delete the other one
-		final int rowsAffected2 = EventsDatabaseWrapper.delete(uri2, null, null);
+		final int rowsAffected2 = DatabaseWrapper.delete(uri2, null, null);
 		assertEquals(1, rowsAffected2);
 		assertEventCountInDatabase(0);
 	}
@@ -215,7 +215,7 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
 		Cursor c = null;
 		try {
 			List<BaseEvent> events = new LinkedList<BaseEvent>();
-			c = EventsDatabaseWrapper.query(DatabaseConstants.EVENTS_CONTENT_URI, null, null, null, null);
+			c = DatabaseWrapper.query(Database.EVENTS_CONTENT_URI, null, null, null, null);
 			assertNotNull(c);
 			for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
 				final BaseEvent event = new BaseEvent(c);
@@ -233,7 +233,7 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
 	private BaseEvent getEvent(final Uri uri) {
 		Cursor c = null;
 		try {
-			c = EventsDatabaseWrapper.query(uri, null, null, null, null);
+			c = DatabaseWrapper.query(uri, null, null, null, null);
 			assertNotNull(c);
 			c.moveToFirst();
 			if (c.isAfterLast())
@@ -249,7 +249,7 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
 	}
 
 	private Uri insertEvent(BaseEvent event) {
-		final Uri uri = EventsDatabaseWrapper.insert(DatabaseConstants.EVENTS_CONTENT_URI, event.getContentValues());
+		final Uri uri = DatabaseWrapper.insert(Database.EVENTS_CONTENT_URI, event.getContentValues());
 		assertNotNull(uri);
 		return uri;
 	}
@@ -259,25 +259,25 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
 	}
 
 	private void assertEventCountInDatabase(int rowCount) {
-		assertEquals(rowCount, EventsDatabaseWrapper.getNumberOfRowsInTable(DatabaseConstants.EVENTS_TABLE_NAME));
+		assertEquals(rowCount, DatabaseWrapper.getNumberOfRowsInTable(Database.EVENTS_TABLE_NAME));
 	}
 
 	public void testGetNumberOfRowsInTableForBadTablenames() {
-		assertEquals(-1, EventsDatabaseWrapper.getNumberOfRowsInTable(null));
-		assertEquals(-1, EventsDatabaseWrapper.getNumberOfRowsInTable("COBRA COMMANDER WUZ HERE"));
+		assertEquals(-1, DatabaseWrapper.getNumberOfRowsInTable(null));
+		assertEquals(-1, DatabaseWrapper.getNumberOfRowsInTable("COBRA COMMANDER WUZ HERE"));
 	}
 
 	public void testBadInsert() {
 		ContentValues values = EVENT_1.getContentValues();
 		values.put(BaseColumns._ID, "THIS AIN'T NO ID");
-		assertNull(EventsDatabaseWrapper.insert(DatabaseConstants.EVENTS_CONTENT_URI, values));
+		assertNull(DatabaseWrapper.insert(Database.EVENTS_CONTENT_URI, values));
 	}
 
 	public void testBadUpdate() {
 		ContentValues values = EVENT_1.getContentValues();
-		final Uri uri = EventsDatabaseWrapper.insert(DatabaseConstants.EVENTS_CONTENT_URI, values);
+		final Uri uri = DatabaseWrapper.insert(Database.EVENTS_CONTENT_URI, values);
 		assertNotNull(uri);
 		values.put(BaseColumns._ID, "THIS AIN'T NO ID");
-		assertEquals(-1, EventsDatabaseWrapper.update(uri, values, null, null));
+		assertEquals(-1, DatabaseWrapper.update(uri, values, null, null));
 	}
 }

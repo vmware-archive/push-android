@@ -7,7 +7,7 @@ import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
 
 import com.google.gson.Gson;
-import com.pivotal.cf.mobile.pushsdk.database.DatabaseConstants;
+import com.pivotal.cf.mobile.pushsdk.database.Database;
 import com.pivotal.cf.mobile.pushsdk.database.FakeCursor;
 import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 
@@ -266,7 +266,7 @@ public class BaseEventTest extends AndroidTestCase {
         assertNotNull(sql);
         PushLibLogger.i("Create table statement: " + sql);
         assertTrue(sql.contains("CREATE TABLE IF NOT EXISTS"));
-        assertTrue(sql.contains(DatabaseConstants.EVENTS_TABLE_NAME));
+        assertTrue(sql.contains(Database.EVENTS_TABLE_NAME));
         assertTrue(sql.contains("'" + BaseColumns._ID + "'"));
         assertTrue(sql.contains("'" + BaseEvent.Columns.TYPE + "'"));
         assertTrue(sql.contains("'" + BaseEvent.Columns.EVENT_UUID + "'"));
@@ -281,7 +281,7 @@ public class BaseEventTest extends AndroidTestCase {
         assertNotNull(sql);
         PushLibLogger.i("Drop table statement: " + sql);
         assertTrue(sql.contains("DROP TABLE IF EXISTS"));
-        assertTrue(sql.contains(DatabaseConstants.EVENTS_TABLE_NAME));
+        assertTrue(sql.contains(Database.EVENTS_TABLE_NAME));
     }
 
     public void testGetContentValues1() {

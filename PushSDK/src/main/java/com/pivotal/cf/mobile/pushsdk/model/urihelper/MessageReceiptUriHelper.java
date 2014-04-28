@@ -3,11 +3,11 @@ package com.pivotal.cf.mobile.pushsdk.model.urihelper;
 import android.net.Uri;
 import android.provider.BaseColumns;
 
+import com.pivotal.cf.mobile.pushsdk.database.Database;
 import com.pivotal.cf.mobile.pushsdk.database.urihelpers.DeleteParams;
+import com.pivotal.cf.mobile.pushsdk.database.urihelpers.QueryParams;
 import com.pivotal.cf.mobile.pushsdk.database.urihelpers.UpdateParams;
 import com.pivotal.cf.mobile.pushsdk.database.urihelpers.UriHelper;
-import com.pivotal.cf.mobile.pushsdk.database.DatabaseConstants;
-import com.pivotal.cf.mobile.pushsdk.database.urihelpers.QueryParams;
 import com.pivotal.cf.mobile.pushsdk.database.urihelpers.UriMatcherParams;
 import com.pivotal.cf.mobile.pushsdk.util.StringUtil;
 
@@ -20,13 +20,13 @@ public class MessageReceiptUriHelper implements UriHelper {
 
 	@Override
 	public String getDefaultTableName() {
-		return DatabaseConstants.EVENTS_TABLE_NAME;
+		return Database.EVENTS_TABLE_NAME;
 	}
 	
 	@Override
 	public UriMatcherParams getUriMatcherParams() {
 		final UriMatcherParams uriMatcherParams = new UriMatcherParams();
-		uriMatcherParams.authority = DatabaseConstants.AUTHORITY;
+		uriMatcherParams.authority = Database.AUTHORITY;
 		uriMatcherParams.path = getDefaultTableName() + "/*";
 		return uriMatcherParams;
 	}

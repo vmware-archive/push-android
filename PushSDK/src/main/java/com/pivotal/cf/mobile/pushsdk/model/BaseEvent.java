@@ -9,7 +9,7 @@ import android.provider.BaseColumns;
 import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
-import com.pivotal.cf.mobile.pushsdk.database.DatabaseConstants;
+import com.pivotal.cf.mobile.pushsdk.database.Database;
 import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 
 import java.io.ByteArrayInputStream;
@@ -378,7 +378,7 @@ public class BaseEvent implements Parcelable {
         final StringBuilder sb = new StringBuilder();
         sb.append("CREATE TABLE IF NOT EXISTS ");
         sb.append('\'');
-        sb.append(DatabaseConstants.EVENTS_TABLE_NAME);
+        sb.append(Database.EVENTS_TABLE_NAME);
         sb.append("\' ('");
         sb.append(BaseColumns._ID);
         sb.append("' INTEGER PRIMARY KEY AUTOINCREMENT, '");
@@ -402,7 +402,7 @@ public class BaseEvent implements Parcelable {
     public static String getDropTableSqlStatement() {
         final StringBuilder sb = new StringBuilder();
         sb.append("DROP TABLE IF EXISTS '");
-        sb.append(DatabaseConstants.EVENTS_TABLE_NAME);
+        sb.append(Database.EVENTS_TABLE_NAME);
         sb.append("';");
         return sb.toString();
     }

@@ -11,8 +11,7 @@ import com.pivotal.cf.mobile.pushsdk.broadcastreceiver.EventsSenderAlarmProvider
 import com.pivotal.cf.mobile.pushsdk.broadcastreceiver.EventsSenderAlarmProviderImpl;
 import com.pivotal.cf.mobile.pushsdk.broadcastreceiver.EventsSenderAlarmReceiver;
 import com.pivotal.cf.mobile.pushsdk.database.DatabaseEventsStorage;
-import com.pivotal.cf.mobile.pushsdk.database.DatabaseHelper;
-import com.pivotal.cf.mobile.pushsdk.database.EventsDatabaseWrapper;
+import com.pivotal.cf.mobile.pushsdk.database.DatabaseWrapper;
 import com.pivotal.cf.mobile.pushsdk.database.EventsStorage;
 import com.pivotal.cf.mobile.pushsdk.jobs.BaseJob;
 import com.pivotal.cf.mobile.pushsdk.jobs.JobParams;
@@ -110,8 +109,7 @@ public class EventService extends IntentService {
     }
 
     private boolean setupDatabase() {
-        DatabaseHelper.init();
-        final boolean wasDatabaseInstanceCreated = EventsDatabaseWrapper.createDatabaseInstance(this);
+        final boolean wasDatabaseInstanceCreated = DatabaseWrapper.createDatabaseInstance(this);
         EventService.eventsStorage = new DatabaseEventsStorage();
         return wasDatabaseInstanceCreated;
     }

@@ -24,7 +24,7 @@ import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 import java.util.List;
 import java.util.Set;
 
-public class EventsDatabaseWrapper {
+public class DatabaseWrapper {
 
     private static final int MAX_DATABASE_SIZE_RELEASE = 1024 * 1024; // 1 MB
     private static final int MAX_DATABASE_SIZE_DEBUG = 32 * 1024; // 32 kB
@@ -40,15 +40,10 @@ public class EventsDatabaseWrapper {
     // Returns 'true' if the database instance was initialized.
     // Returns 'false' if the database instance was already initialized.
     public static boolean createDatabaseInstance(Context context) {
-
-        if (DatabaseHelper.needsInitializing()) {
-            throw new IllegalStateException("EventsDatabaseHelper needs initializing.");
-        }
-
         synchronized (lock) {
             if (database == null) {
                 final DebugCursorFactory factory = new DebugCursorFactory();
-                final DatabaseHelper databaseHelper = new DatabaseHelper(context, factory);
+                final Database databaseHelper = new Database(context, factory);
                 database = databaseHelper.getWritableDatabase();
 
                 final long maxDatabaseSize;
@@ -155,15 +150,9 @@ public class EventsDatabaseWrapper {
     }
 
     private static boolean cleanup() {
-//		boolean journalCleanup = cleanupJournal();
         boolean largestTableCleanUp = cleanupLargestTable();
-        return /*journalCleanup ||*/ largestTableCleanUp;
+        return largestTableCleanUp;
     }
-
-//	private static boolean cleanupJournal() {
-//		boolean journalCleanup = cleanup(DatabaseConstants.JOURNAL_TABLE_NAME);
-//		return journalCleanup;
-//	}
 
     private static boolean cleanupLargestTable() {
         final String largestTableName = getLargestTable();

@@ -9,9 +9,9 @@ import android.test.RenamingDelegatingContext;
 import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
 import com.pivotal.cf.mobile.pushsdk.model.MessageReceiptEvent;
 
-public class EventDatabaseHelperTest extends AndroidTestCase {
+public class DatabaseTest extends AndroidTestCase {
 
-    private static final String TABLE_NAME = DatabaseConstants.EVENTS_TABLE_NAME;
+    private static final String TABLE_NAME = Database.EVENTS_TABLE_NAME;
     private static final String TEST_FILE_PREFIX = "test_";
     private static final String TEST_VARIANT_UUID_1 = "TEST-VARIANT-UUID-1";
     private static final String TEST_MESSAGE_UUID_1 = "TEST-MESSAGE-UUID-1";
@@ -30,7 +30,7 @@ public class EventDatabaseHelperTest extends AndroidTestCase {
     }
 
     public void testDatabaseSettings() {
-        assertEquals(DatabaseHelper.DATABASE_VERSION, database.getVersion());
+        assertEquals(Database.DATABASE_VERSION, database.getVersion());
     }
 
     public void testDatabaseOpen() {
@@ -63,7 +63,7 @@ public class EventDatabaseHelperTest extends AndroidTestCase {
     }
 
     private SQLiteDatabase getWritableDatabase() {
-        final DatabaseHelper helper = new DatabaseHelper(CONTEXT, null);
+        final Database helper = new Database(CONTEXT, null);
         assertNotNull(helper);
         final SQLiteDatabase database = helper.getWritableDatabase();
         assertNotNull(database);
@@ -84,9 +84,7 @@ public class EventDatabaseHelperTest extends AndroidTestCase {
         } finally {
             if (c != null) {
                 c.close();
-                c = null;
             }
         }
     }
-
 }

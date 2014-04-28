@@ -108,7 +108,7 @@ public class FakeEventsStorage implements EventsStorage {
     }
 
     private static Uri getNextFileId() {
-        Uri baseUri = DatabaseConstants.EVENTS_CONTENT_URI;
+        Uri baseUri = Database.EVENTS_CONTENT_URI;
         return Uri.withAppendedPath(baseUri, String.valueOf(fileId++));
     }
 

@@ -19,7 +19,7 @@ public class DatabaseEventsStorageTest extends AndroidTestCase {
     private static final String TEST_VARIANT_UUID_2 = "TEST-VARIANT-UUID-2";
     private static final String TEST_MESSAGE_UUID_2 = "TEST-MESSAGE-UUID-2";
     private static final String TEST_DEVICE_ID_2 = "TEST-DEVICE-ID-2";
-    private static final Uri NON_EXISTENT_FILE_1 = Uri.withAppendedPath(DatabaseConstants.EVENTS_CONTENT_URI, "/999999");
+    private static final Uri NON_EXISTENT_FILE_1 = Uri.withAppendedPath(Database.EVENTS_CONTENT_URI, "/999999");
     private DatabaseEventsStorage eventsStorage;
     private BaseEvent EVENT_1;
     private BaseEvent EVENT_2;
@@ -28,8 +28,7 @@ public class DatabaseEventsStorageTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        DatabaseHelper.init();
-        EventsDatabaseWrapper.createDatabaseInstance(getContext());
+        DatabaseWrapper.createDatabaseInstance(getContext());
         EVENT_1 = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_UUID_1, TEST_MESSAGE_UUID_1, TEST_DEVICE_ID_1);
         EVENT_2 = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_UUID_2, TEST_MESSAGE_UUID_2, TEST_DEVICE_ID_2);
         eventsStorage = new DatabaseEventsStorage();
