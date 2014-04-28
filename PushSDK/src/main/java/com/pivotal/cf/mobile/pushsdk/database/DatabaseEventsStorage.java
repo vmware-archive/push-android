@@ -5,7 +5,6 @@ import android.database.Cursor;
 import android.net.Uri;
 
 import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
-import com.pivotal.cf.mobile.pushsdk.model.utilities.EventHelper;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -18,7 +17,7 @@ public class DatabaseEventsStorage implements EventsStorage {
 	@Override
 	public Uri saveEvent(BaseEvent event) {
 		final ContentValues contentValues = event.getContentValues();
-		final Uri uri = EventsDatabaseWrapper.insert(EventHelper.getUriForEventType(), contentValues);
+		final Uri uri = EventsDatabaseWrapper.insert(DatabaseConstants.EVENTS_CONTENT_URI, contentValues);
 		return uri;
 	}
 
@@ -32,15 +31,13 @@ public class DatabaseEventsStorage implements EventsStorage {
 	}
 
 	private List<Uri> getGeneralQuery(String[] projection, String selection, String[] selectionArgs, String sortOrder) {
-		final Uri uri = EventHelper.getUriForEventType();
 		Cursor cursor = null;
 		try {
-			cursor = EventsDatabaseWrapper.query(uri, projection, selection, selectionArgs, sortOrder);
+			cursor = EventsDatabaseWrapper.query(DatabaseConstants.EVENTS_CONTENT_URI, projection, selection, selectionArgs, sortOrder);
 			return getEventUrisFromCursor(cursor);
 		} finally {
 			if (cursor != null) {
 				cursor.close();
-				cursor = null;
 			}
 		}
 	}
@@ -50,7 +47,7 @@ public class DatabaseEventsStorage implements EventsStorage {
 		if (cursor != null) {
 			for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
 				final int id = BaseEvent.getRowIdFromCursor(cursor);
-				final Uri uri = Uri.withAppendedPath(EventHelper.getUriForEventType(), String.valueOf(id));
+				final Uri uri = Uri.withAppendedPath(DatabaseConstants.EVENTS_CONTENT_URI, String.valueOf(id));
 				uris.add(uri);
 			}
 		}
@@ -61,7 +58,7 @@ public class DatabaseEventsStorage implements EventsStorage {
 	public int getNumberOfEvents() {
 		Cursor cursor = null;
 		try {
-			cursor = EventsDatabaseWrapper.query(EventHelper.getUriForEventType(), null, null, null, null);
+			cursor = EventsDatabaseWrapper.query(DatabaseConstants.EVENTS_CONTENT_URI, null, null, null, null);
 			if (cursor != null) {
 				cursor.moveToFirst();
 				return cursor.getCount();
@@ -69,7 +66,6 @@ public class DatabaseEventsStorage implements EventsStorage {
 		} finally {
 			if (cursor != null) {
 				cursor.close();
-				cursor = null;
 			}
 		}
 		return 0;
@@ -83,7 +79,7 @@ public class DatabaseEventsStorage implements EventsStorage {
 			if (cursor != null) {
 				cursor.moveToFirst();
 				if (cursor.getCount() > 0) {
-					final BaseEvent event = EventHelper.makeEventFromCursor(cursor, uri);
+					final BaseEvent event = new BaseEvent(cursor);
 					return event;
 				}
 			}
@@ -91,7 +87,6 @@ public class DatabaseEventsStorage implements EventsStorage {
 		} finally {
 			if (cursor != null) {
 				cursor.close();
-				cursor = null;
 			}
 		}
 	}
@@ -103,7 +98,7 @@ public class DatabaseEventsStorage implements EventsStorage {
 
 	@Override
 	public void reset() {
-        EventsDatabaseWrapper.delete(EventHelper.getUriForEventType(), null, null);
+        EventsDatabaseWrapper.delete(DatabaseConstants.EVENTS_CONTENT_URI, null, null);
 	}
 
 	@Override

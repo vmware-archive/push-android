@@ -427,6 +427,7 @@ public class BaseEvent implements Parcelable {
             byteStream = new ByteArrayInputStream(bytes);
             in = new ObjectInputStream(byteStream);
             return (Serializable) in.readObject();
+
         } catch (IOException i) {
             PushLibLogger.ex("Error deserializing data: ", i);
         } catch (ClassNotFoundException c) {
@@ -458,8 +459,8 @@ public class BaseEvent implements Parcelable {
             byteStream = new ByteArrayOutputStream();
             out = new ObjectOutputStream(byteStream);
             out.writeObject(data);
-
             return byteStream.toByteArray();
+
         } catch (IOException i) {
             PushLibLogger.w("Warning: Serializable object didn't serialize.");
         }
@@ -520,4 +521,5 @@ public class BaseEvent implements Parcelable {
         out.writeString(deviceId);
         out.writeSerializable(data);
     }
+
 }

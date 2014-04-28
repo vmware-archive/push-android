@@ -4,7 +4,6 @@ import android.os.Parcel;
 import android.os.Parcelable;
 
 import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
-import com.pivotal.cf.mobile.pushsdk.model.utilities.EventHelper;
 import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 
 public class EnqueueEventJob extends BaseJob {
@@ -93,7 +92,11 @@ public class EnqueueEventJob extends BaseJob {
 
     private EnqueueEventJob(Parcel in) {
         super(in);
-        event = EventHelper.readEventFromParcel(in);
+        event = readEventFromParcel(in);
+    }
+
+    private BaseEvent readEventFromParcel(Parcel parcel) {
+        return parcel.readParcelable(BaseEvent.class.getClassLoader());
     }
 
     @Override

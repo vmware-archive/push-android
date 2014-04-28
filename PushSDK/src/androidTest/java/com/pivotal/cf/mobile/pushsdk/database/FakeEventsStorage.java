@@ -3,7 +3,6 @@ package com.pivotal.cf.mobile.pushsdk.database;
 import android.net.Uri;
 
 import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
-import com.pivotal.cf.mobile.pushsdk.model.utilities.EventHelper;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -35,7 +34,7 @@ public class FakeEventsStorage implements EventsStorage {
             return null;
         }
         final Uri uri = getNextFileId();
-        final BaseEvent clonedEvent = EventHelper.copyEvent(event);
+        final BaseEvent clonedEvent = new BaseEvent(event);
         events.put(uri, clonedEvent);
         return uri;
     }
