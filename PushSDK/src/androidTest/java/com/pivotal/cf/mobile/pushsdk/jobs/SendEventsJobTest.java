@@ -4,7 +4,7 @@ import android.net.Uri;
 import android.test.MoreAsserts;
 
 import com.pivotal.cf.mobile.pushsdk.backend.FakeBackEndMessageReceiptApiRequest;
-import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
+import com.pivotal.cf.mobile.pushsdk.model.events.Event;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,10 +30,10 @@ public class SendEventsJobTest extends JobTest {
 
     public void testSuccessfulSend() throws InterruptedException {
 
-        final Uri uri1 = saveEventWithStatus(BaseEvent.Status.NOT_POSTED);
-        final Uri uri2 = saveEventWithStatus(BaseEvent.Status.POSTING);
-        final Uri uri3 = saveEventWithStatus(BaseEvent.Status.POSTING_ERROR);
-        final Uri uri4 = saveEventWithStatus(BaseEvent.Status.POSTED);
+        final Uri uri1 = saveEventWithStatus(Event.Status.NOT_POSTED);
+        final Uri uri2 = saveEventWithStatus(Event.Status.POSTING);
+        final Uri uri3 = saveEventWithStatus(Event.Status.POSTING_ERROR);
+        final Uri uri4 = saveEventWithStatus(Event.Status.POSTED);
 
         backEndMessageReceiptApiRequest.setWillBeSuccessfulRequest(true);
         backEndMessageReceiptApiRequest.setRequestHook(new FakeBackEndMessageReceiptApiRequest.RequestHook() {
@@ -47,10 +47,10 @@ public class SendEventsJobTest extends JobTest {
                 MoreAsserts.assertContentsInAnyOrder(expectedUrisInRequest, uris);
 
                 // Checks that events have the POSTING status while they are being posted
-                assertEventHasStatus(uri1, BaseEvent.Status.POSTING);
-                assertEventHasStatus(uri1, BaseEvent.Status.POSTING);
-                assertEventHasStatus(uri1, BaseEvent.Status.POSTING);
-                assertEventHasStatus(uri1, BaseEvent.Status.POSTED);
+                assertEventHasStatus(uri1, Event.Status.POSTING);
+                assertEventHasStatus(uri1, Event.Status.POSTING);
+                assertEventHasStatus(uri1, Event.Status.POSTING);
+                assertEventHasStatus(uri1, Event.Status.POSTED);
             }
         });
 
@@ -71,15 +71,15 @@ public class SendEventsJobTest extends JobTest {
         assertTrue(backEndMessageReceiptApiRequest.wasRequestAttempted());
         assertEquals(2, backEndMessageReceiptApiRequest.numberOfMessageReceiptsSent());
 
-        assertEventHasStatus(uri2, BaseEvent.Status.POSTING);
-        assertEventHasStatus(uri4, BaseEvent.Status.POSTED);
+        assertEventHasStatus(uri2, Event.Status.POSTING);
+        assertEventHasStatus(uri4, Event.Status.POSTED);
         assertEventNotInStorage(uri1); // posted events should be removed
         assertEventNotInStorage(uri3);
     }
 
     public void testFailedSendWithOneNotPostedEventInStorage() throws InterruptedException {
 
-        final Uri uri = saveEventWithStatus(BaseEvent.Status.NOT_POSTED);
+        final Uri uri = saveEventWithStatus(Event.Status.NOT_POSTED);
 
         backEndMessageReceiptApiRequest.setWillBeSuccessfulRequest(false);
         backEndMessageReceiptApiRequest.setRequestHook(new FakeBackEndMessageReceiptApiRequest.RequestHook() {
@@ -88,7 +88,7 @@ public class SendEventsJobTest extends JobTest {
             public void onRequestMade(FakeBackEndMessageReceiptApiRequest request, List<Uri> uris) {
                 assertEquals(1, uris.size());
                 assertEquals(uri, uris.get(0));
-                assertEventHasStatus(uri, BaseEvent.Status.POSTING);
+                assertEventHasStatus(uri, Event.Status.POSTING);
             }
         });
 
@@ -106,7 +106,7 @@ public class SendEventsJobTest extends JobTest {
         assertEquals(1, eventsStorage.getNumberOfEvents());
         assertTrue(backEndMessageReceiptApiRequest.wasRequestAttempted());
         assertEquals(0, backEndMessageReceiptApiRequest.numberOfMessageReceiptsSent());
-        assertEventHasStatus(uri, BaseEvent.Status.POSTING_ERROR);
+        assertEventHasStatus(uri, Event.Status.POSTING_ERROR);
     }
 
     public void testEquals() {

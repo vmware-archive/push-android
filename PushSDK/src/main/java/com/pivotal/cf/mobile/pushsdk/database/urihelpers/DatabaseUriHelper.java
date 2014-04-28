@@ -2,8 +2,8 @@ package com.pivotal.cf.mobile.pushsdk.database.urihelpers;
 
 import android.net.Uri;
 
-import com.pivotal.cf.mobile.pushsdk.model.urihelpers.EventsAllUriHelper;
-import com.pivotal.cf.mobile.pushsdk.model.urihelpers.EventsUriHelper;
+import com.pivotal.cf.mobile.pushsdk.model.events.urihelpers.EventsAllUriHelper;
+import com.pivotal.cf.mobile.pushsdk.model.events.urihelpers.EventsUriHelper;
 
 import java.util.Set;
 

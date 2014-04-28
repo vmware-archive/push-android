@@ -6,7 +6,7 @@ import android.os.Parcelable;
 
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndMessageReceiptApiRequest;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndMessageReceiptListener;
-import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
+import com.pivotal.cf.mobile.pushsdk.model.events.Event;
 import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 
 import java.util.LinkedList;
@@ -28,7 +28,7 @@ public class SendEventsJob extends BaseJob {
         PushLibLogger.fd("SendEventsJob: package %s: events available to send: %d", getPackageName(jobParams), uris.size());
 
         if (uris.size() > 0) {
-            setStatusForEvents(jobParams, uris, BaseEvent.Status.POSTING);
+            setStatusForEvents(jobParams, uris, Event.Status.POSTING);
             sendEvents(jobParams, uris);
         } else {
             sendJobResult(RESULT_NO_WORK_TO_DO, jobParams);
@@ -56,7 +56,7 @@ public class SendEventsJob extends BaseJob {
 
             @Override
             public void onBackEndMessageReceiptFailed(String reason) {
-                setStatusForEvents(jobParams, uris, BaseEvent.Status.POSTING_ERROR);
+                setStatusForEvents(jobParams, uris, Event.Status.POSTING_ERROR);
                 sendJobResult(RESULT_FAILED_TO_SEND_RECEIPTS, jobParams);
             }
         });
@@ -68,8 +68,8 @@ public class SendEventsJob extends BaseJob {
     }
 
     private List<Uri> getUnpostedEvents(JobParams jobParams) {
-        final List<Uri> uris1 = jobParams.eventsStorage.getEventUrisWithStatus(BaseEvent.Status.NOT_POSTED);
-        final List<Uri> uris2 = jobParams.eventsStorage.getEventUrisWithStatus(BaseEvent.Status.POSTING_ERROR);
+        final List<Uri> uris1 = jobParams.eventsStorage.getEventUrisWithStatus(Event.Status.NOT_POSTED);
+        final List<Uri> uris2 = jobParams.eventsStorage.getEventUrisWithStatus(Event.Status.POSTING_ERROR);
         final List<Uri> uris = new LinkedList<Uri>(uris1);
         uris.addAll(uris2);
         return uris;

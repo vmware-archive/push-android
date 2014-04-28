@@ -13,8 +13,7 @@ import com.pivotal.cf.mobile.pushsdk.database.DatabaseWrapper;
 import com.pivotal.cf.mobile.pushsdk.database.FakeEventsStorage;
 import com.pivotal.cf.mobile.pushsdk.jobs.DummyJob;
 import com.pivotal.cf.mobile.pushsdk.jobs.PrepareDatabaseJob;
-import com.pivotal.cf.mobile.pushsdk.model.BaseEventTest;
-import com.pivotal.cf.mobile.pushsdk.model.MessageReceiptEvent;
+import com.pivotal.cf.mobile.pushsdk.model.events.EventTest;
 import com.pivotal.cf.mobile.pushsdk.network.FakeNetworkWrapper;
 import com.pivotal.cf.mobile.pushsdk.prefs.FakePreferencesProvider;
 
@@ -37,8 +36,6 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
 
     // Captures result codes from the service itself
     public class TestResultReceiver extends ResultReceiver {
-
-        public List<MessageReceiptEvent> extraEventsToAdd = null;
 
         public TestResultReceiver(Handler handler) {
             super(handler);
@@ -125,7 +122,7 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
 
     public void testRunNotAJob() throws InterruptedException {
         final Intent intent = EventService.getIntentToRunJob(getContext(), null);
-        intent.putExtra(EventService.KEY_JOB, BaseEventTest.getBaseEvent1());
+        intent.putExtra(EventService.KEY_JOB, EventTest.getBaseEvent1());
         addResultReceiverToIntent(intent);
         startService(intent);
         EventService.semaphore.acquire();

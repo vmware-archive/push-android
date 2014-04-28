@@ -4,7 +4,7 @@ import android.net.Uri;
 import android.test.AndroidTestCase;
 
 import com.pivotal.cf.mobile.pushsdk.database.FakeEventsStorage;
-import com.pivotal.cf.mobile.pushsdk.model.BaseEventTest;
+import com.pivotal.cf.mobile.pushsdk.model.events.EventTest;
 import com.pivotal.cf.mobile.pushsdk.network.FakeHttpURLConnection;
 import com.pivotal.cf.mobile.pushsdk.network.FakeNetworkWrapper;
 import com.pivotal.cf.mobile.pushsdk.network.NetworkWrapper;
@@ -34,7 +34,7 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
         FakeHttpURLConnection.reset();
         emptyList = new LinkedList<Uri>();
         listWithOneItem = new LinkedList<Uri>();
-        final Uri uri = eventsStorage.saveEvent(BaseEventTest.getBaseEvent1());
+        final Uri uri = eventsStorage.saveEvent(EventTest.getBaseEvent1());
         listWithOneItem.add(uri);
     }
 

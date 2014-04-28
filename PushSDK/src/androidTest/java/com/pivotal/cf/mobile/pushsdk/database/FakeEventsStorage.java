@@ -2,7 +2,7 @@ package com.pivotal.cf.mobile.pushsdk.database;
 
 import android.net.Uri;
 
-import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
+import com.pivotal.cf.mobile.pushsdk.model.events.Event;
 
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -11,12 +11,12 @@ import java.util.Map;
 
 public class FakeEventsStorage implements EventsStorage {
 
-    private final Map<Uri, BaseEvent> events;
+    private final Map<Uri, Event> events;
     private static int fileId = 0;
     private boolean willSaveFail;
 
     public FakeEventsStorage() {
-        events = new HashMap<Uri, BaseEvent>();
+        events = new HashMap<Uri, Event>();
     }
 
     public void setWillSaveFail(boolean willSaveFail) {
@@ -24,23 +24,23 @@ public class FakeEventsStorage implements EventsStorage {
     }
 
     /**
-     * Saves a {@link com.pivotal.cf.mobile.pushsdk.model.BaseEvent} object into the fake filesystem.
+     * Saves a {@link com.pivotal.cf.mobile.pushsdk.model.events.Event} object into the fake filesystem.
      *
      * @param event
      */
     @Override
-    public Uri saveEvent(BaseEvent event) {
+    public Uri saveEvent(Event event) {
         if (willSaveFail) {
             return null;
         }
         final Uri uri = getNextFileId();
-        final BaseEvent clonedEvent = new BaseEvent(event);
+        final Event clonedEvent = new Event(event);
         events.put(uri, clonedEvent);
         return uri;
     }
 
     /**
-     * Gets the filenames for all the {@link com.pivotal.cf.mobile.pushsdk.model.BaseEvent} objects currently in the fake filesystem.
+     * Gets the filenames for all the {@link com.pivotal.cf.mobile.pushsdk.model.events.Event} objects currently in the fake filesystem.
      */
     @Override
     public List<Uri> getEventUris() {
@@ -48,7 +48,7 @@ public class FakeEventsStorage implements EventsStorage {
     }
 
     /**
-     * Gets the {@link com.pivotal.cf.mobile.pushsdk.model.BaseEvent} objects currently in the fake filesystem that match the given status
+     * Gets the {@link com.pivotal.cf.mobile.pushsdk.model.events.Event} objects currently in the fake filesystem that match the given status
      *
      * @param status
      */
@@ -61,7 +61,7 @@ public class FakeEventsStorage implements EventsStorage {
 
     private void getEventUrisWithStatusForEventType(int status, final List<Uri> result) {
         for (final Uri uri : events.keySet()) {
-            final BaseEvent event = events.get(uri);
+            final Event event = events.get(uri);
             if (event.getStatus() == status) {
                 result.add(uri);
             }
@@ -69,10 +69,10 @@ public class FakeEventsStorage implements EventsStorage {
     }
 
     /**
-     * Retrieves the {@link com.pivotal.cf.mobile.pushsdk.model.BaseEvent} object with the given filename from the fake filesystem.
+     * Retrieves the {@link com.pivotal.cf.mobile.pushsdk.model.events.Event} object with the given filename from the fake filesystem.
      */
     @Override
-    public BaseEvent readEvent(Uri uri) {
+    public Event readEvent(Uri uri) {
         if (events.containsKey(uri)) {
             return events.get(uri);
         } else {
@@ -81,7 +81,7 @@ public class FakeEventsStorage implements EventsStorage {
     }
 
     /**
-     * Deletes the {@link com.pivotal.cf.mobile.pushsdk.model.BaseEvent} objects from the fake filesystem with the given list of filenames.
+     * Deletes the {@link com.pivotal.cf.mobile.pushsdk.model.events.Event} objects from the fake filesystem with the given list of filenames.
      */
     @Override
     public void deleteEvents(List<Uri> eventUris) {
@@ -93,14 +93,14 @@ public class FakeEventsStorage implements EventsStorage {
     }
 
     /**
-     * Returns the number of {@link com.pivotal.cf.mobile.pushsdk.model.BaseEvent} objects currently in the fake filesystem.
+     * Returns the number of {@link com.pivotal.cf.mobile.pushsdk.model.events.Event} objects currently in the fake filesystem.
      */
     public int getNumberOfEvents() {
         return events.size();
     }
 
     /**
-     * Clears all {@link com.pivotal.cf.mobile.pushsdk.model.BaseEvent} objects from the fake filesystem.
+     * Clears all {@link com.pivotal.cf.mobile.pushsdk.model.events.Event} objects from the fake filesystem.
      */
     @Override
     public void reset() {
@@ -114,7 +114,7 @@ public class FakeEventsStorage implements EventsStorage {
 
     @Override
     public void setEventStatus(Uri eventUri, int status) {
-        final BaseEvent event = readEvent(eventUri);
+        final Event event = readEvent(eventUri);
         event.setStatus(status);
     }
 }

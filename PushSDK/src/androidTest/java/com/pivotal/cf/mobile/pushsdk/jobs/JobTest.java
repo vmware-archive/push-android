@@ -9,8 +9,8 @@ import com.pivotal.cf.mobile.pushsdk.backend.BackEndMessageReceiptApiRequestProv
 import com.pivotal.cf.mobile.pushsdk.backend.FakeBackEndMessageReceiptApiRequest;
 import com.pivotal.cf.mobile.pushsdk.broadcastreceiver.FakeEventsSenderAlarmProvider;
 import com.pivotal.cf.mobile.pushsdk.database.FakeEventsStorage;
-import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
-import com.pivotal.cf.mobile.pushsdk.model.BaseEventTest;
+import com.pivotal.cf.mobile.pushsdk.model.events.Event;
+import com.pivotal.cf.mobile.pushsdk.model.events.EventTest;
 import com.pivotal.cf.mobile.pushsdk.network.FakeNetworkWrapper;
 import com.pivotal.cf.mobile.pushsdk.prefs.FakePreferencesProvider;
 
@@ -19,8 +19,8 @@ import java.util.concurrent.Semaphore;
 
 public abstract class JobTest extends AndroidTestCase {
 
-    protected BaseEvent event1;
-    protected BaseEvent event2;
+    protected Event event1;
+    protected Event event2;
     protected FakeEventsStorage eventsStorage;
     protected FakeNetworkWrapper networkWrapper;
     protected FakePreferencesProvider preferencesProvider;
@@ -32,8 +32,8 @@ public abstract class JobTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        event1 = BaseEventTest.getBaseEvent1();
-        event2 = BaseEventTest.getBaseEvent2();
+        event1 = EventTest.getBaseEvent1();
+        event2 = EventTest.getBaseEvent2();
         eventsStorage = new FakeEventsStorage();
         networkWrapper = new FakeNetworkWrapper();
         alarmProvider = new FakeEventsSenderAlarmProvider();
@@ -56,7 +56,7 @@ public abstract class JobTest extends AndroidTestCase {
     }
 
     protected void assertEventHasStatus(Uri uri, int expectedStatus) {
-        final BaseEvent event = eventsStorage.readEvent(uri);
+        final Event event = eventsStorage.readEvent(uri);
         assertNotNull(event);
         assertEquals(expectedStatus, event.getStatus());
     }

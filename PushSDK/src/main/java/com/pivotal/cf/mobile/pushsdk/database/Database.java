@@ -6,7 +6,7 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 import android.net.Uri;
 
-import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
+import com.pivotal.cf.mobile.pushsdk.model.events.Event;
 import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 
 public class Database extends SQLiteOpenHelper {
@@ -24,7 +24,7 @@ public class Database extends SQLiteOpenHelper {
     @Override
     public void onCreate(final SQLiteDatabase db) {
         final String[] createTableStatements = new String[]{
-            BaseEvent.getCreateTableSqlStatement()
+            Event.getCreateTableSqlStatement()
         };
         for (final String sql : createTableStatements) {
             db.execSQL(sql);
@@ -38,7 +38,7 @@ public class Database extends SQLiteOpenHelper {
             // TODO - do something more sophisticated on upgrading database schema IF it is important to keep
             // data. Since this database is just a cache, it is unlikely that keeping data is important.
             final String[] dropTableStatements = new String[] {
-                BaseEvent.getDropTableSqlStatement()
+                Event.getDropTableSqlStatement()
             };
             for (final String dropTableStatement : dropTableStatements) {
                 db.execSQL(dropTableStatement);

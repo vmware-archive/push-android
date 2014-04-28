@@ -6,8 +6,8 @@ import android.database.sqlite.SQLiteDatabase;
 import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;
 
-import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
-import com.pivotal.cf.mobile.pushsdk.model.MessageReceiptEvent;
+import com.pivotal.cf.mobile.pushsdk.model.events.Event;
+import com.pivotal.cf.mobile.pushsdk.model.events.EventPushReceived;
 
 public class DatabaseTest extends AndroidTestCase {
 
@@ -46,17 +46,17 @@ public class DatabaseTest extends AndroidTestCase {
     }
 
     public void testInsertOneRow() {
-        final BaseEvent event = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_UUID_1, TEST_MESSAGE_UUID_1, TEST_DEVICE_ID_1);
+        final Event event = EventPushReceived.getEvent(TEST_VARIANT_UUID_1, TEST_MESSAGE_UUID_1, TEST_DEVICE_ID_1);
         long rowId = database.insert(TABLE_NAME, null, event.getContentValues());
         assertFalse(-1 == rowId);
         assertTableRowCount(1, TABLE_NAME);
     }
 
     public void testInsertTwoRows() {
-        final BaseEvent event1 = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_UUID_1, TEST_MESSAGE_UUID_1, TEST_DEVICE_ID_1);
+        final Event event1 = EventPushReceived.getEvent(TEST_VARIANT_UUID_1, TEST_MESSAGE_UUID_1, TEST_DEVICE_ID_1);
         long rowId1 = database.insert(TABLE_NAME, null, event1.getContentValues());
         assertFalse(-1 == rowId1);
-        final BaseEvent event2 = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_UUID_2, TEST_MESSAGE_UUID_2, TEST_DEVICE_ID_2);
+        final Event event2 = EventPushReceived.getEvent(TEST_VARIANT_UUID_2, TEST_MESSAGE_UUID_2, TEST_DEVICE_ID_2);
         long rowId2 = database.insert(TABLE_NAME, null, event2.getContentValues());
         assertFalse(-1 == rowId2);
         assertTableRowCount(2, TABLE_NAME);

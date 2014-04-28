@@ -4,7 +4,7 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
+import com.pivotal.cf.mobile.pushsdk.model.events.Event;
 import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 
 import java.util.List;
@@ -24,8 +24,8 @@ public class PrepareDatabaseJob extends BaseJob {
 
     private void cleanupDatabase(JobParams jobParams) {
         int numberOfFixedEvents = 0;
-        numberOfFixedEvents += fixEventsWithStatus(BaseEvent.Status.POSTING, jobParams);
-        numberOfFixedEvents += deleteEventsWithStatus(BaseEvent.Status.POSTED, jobParams);
+        numberOfFixedEvents += fixEventsWithStatus(Event.Status.POSTING, jobParams);
+        numberOfFixedEvents += deleteEventsWithStatus(Event.Status.POSTED, jobParams);
         if (numberOfFixedEvents <= 0) {
             PushLibLogger.fd("PrepareDatabaseJob: no events in the database that need to be cleaned.", numberOfFixedEvents);
         }
@@ -35,9 +35,9 @@ public class PrepareDatabaseJob extends BaseJob {
         final List<Uri> uris = jobParams.eventsStorage.getEventUrisWithStatus(status);
         if (uris.size() > 0) {
             for (final Uri uri : uris) {
-                jobParams.eventsStorage.setEventStatus(uri, BaseEvent.Status.NOT_POSTED);
+                jobParams.eventsStorage.setEventStatus(uri, Event.Status.NOT_POSTED);
             }
-            PushLibLogger.fd("PrepareDatabaseJob: set %d '%s' events to status '%s'", uris.size(), BaseEvent.statusString(status), BaseEvent.statusString(BaseEvent.Status.NOT_POSTED));
+            PushLibLogger.fd("PrepareDatabaseJob: set %d '%s' events to status '%s'", uris.size(), Event.statusString(status), Event.statusString(Event.Status.NOT_POSTED));
         }
         return uris.size();
     }
@@ -46,15 +46,15 @@ public class PrepareDatabaseJob extends BaseJob {
         final List<Uri> uris = jobParams.eventsStorage.getEventUrisWithStatus(status);
         jobParams.eventsStorage.deleteEvents(uris);
         if (uris.size() > 0) {
-            PushLibLogger.fd("PrepareDatabaseJob: deleted %d events with status '%s'", uris.size(), BaseEvent.statusString(status));
+            PushLibLogger.fd("PrepareDatabaseJob: deleted %d events with status '%s'", uris.size(), Event.statusString(status));
         }
         return uris.size();
     }
 
     private void enableAlarmIfRequired(JobParams jobParams) {
         int numberOfPendingMessageReceipts = 0;
-        numberOfPendingMessageReceipts += jobParams.eventsStorage.getEventUrisWithStatus(BaseEvent.Status.NOT_POSTED).size();
-        numberOfPendingMessageReceipts += jobParams.eventsStorage.getEventUrisWithStatus(BaseEvent.Status.POSTING_ERROR).size();
+        numberOfPendingMessageReceipts += jobParams.eventsStorage.getEventUrisWithStatus(Event.Status.NOT_POSTED).size();
+        numberOfPendingMessageReceipts += jobParams.eventsStorage.getEventUrisWithStatus(Event.Status.POSTING_ERROR).size();
         if (numberOfPendingMessageReceipts > 0) {
             PushLibLogger.fd("PrepareDatabaseJob: There are %d events(s) queued for sending. Enabling alarm.", numberOfPendingMessageReceipts);
             jobParams.alarmProvider.enableAlarmIfDisabled();

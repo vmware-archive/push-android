@@ -4,7 +4,7 @@ import android.content.ContentValues;
 import android.database.Cursor;
 import android.net.Uri;
 
-import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
+import com.pivotal.cf.mobile.pushsdk.model.events.Event;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -15,7 +15,7 @@ public class DatabaseEventsStorage implements EventsStorage {
 	}
 
 	@Override
-	public Uri saveEvent(BaseEvent event) {
+	public Uri saveEvent(Event event) {
 		final ContentValues contentValues = event.getContentValues();
 		final Uri uri = DatabaseWrapper.insert(Database.EVENTS_CONTENT_URI, contentValues);
 		return uri;
@@ -46,7 +46,7 @@ public class DatabaseEventsStorage implements EventsStorage {
 		final List<Uri> uris = new LinkedList<Uri>();
 		if (cursor != null) {
 			for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-				final int id = BaseEvent.getRowIdFromCursor(cursor);
+				final int id = Event.getRowIdFromCursor(cursor);
 				final Uri uri = Uri.withAppendedPath(Database.EVENTS_CONTENT_URI, String.valueOf(id));
 				uris.add(uri);
 			}
@@ -72,14 +72,14 @@ public class DatabaseEventsStorage implements EventsStorage {
 	}
 
 	@Override
-	public BaseEvent readEvent(Uri uri) {
+	public Event readEvent(Uri uri) {
 		Cursor cursor = null;
 		try {
 			cursor = DatabaseWrapper.query(uri, null, null, null, null);
 			if (cursor != null) {
 				cursor.moveToFirst();
 				if (cursor.getCount() > 0) {
-					final BaseEvent event = new BaseEvent(cursor);
+					final Event event = new Event(cursor);
 					return event;
 				}
 			}
@@ -104,7 +104,7 @@ public class DatabaseEventsStorage implements EventsStorage {
 	@Override
 	public void setEventStatus(Uri eventUri, int status) {
 		final ContentValues values = new ContentValues();
-		values.put(BaseEvent.Columns.STATUS, status);
+		values.put(Event.Columns.STATUS, status);
 		final int numberOfRowsUpdated = DatabaseWrapper.update(eventUri, values, null, null);
 		if (numberOfRowsUpdated == 0) {
 			throw new IllegalArgumentException("Could not find event with Uri " + eventUri.getPath());

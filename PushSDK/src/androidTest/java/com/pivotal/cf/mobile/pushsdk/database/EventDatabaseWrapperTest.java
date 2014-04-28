@@ -6,8 +6,8 @@ import android.net.Uri;
 import android.provider.BaseColumns;
 import android.test.AndroidTestCase;
 
-import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
-import com.pivotal.cf.mobile.pushsdk.model.MessageReceiptEvent;
+import com.pivotal.cf.mobile.pushsdk.model.events.Event;
+import com.pivotal.cf.mobile.pushsdk.model.events.EventPushReceived;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -20,14 +20,14 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
     private static final String TEST_VARIANT_UUID_2 = "TEST-VARIANT-UUID-2";
     private static final String TEST_MESSAGE_UUID_2 = "TEST-MESSAGE-UUID-2";
     private static final String TEST_DEVICE_ID_2 = "TEST-DEVICE-ID-2";
-	private BaseEvent EVENT_1;
-	private BaseEvent EVENT_2;
+	private Event EVENT_1;
+	private Event EVENT_2;
 
 	@Override
 	protected void setUp() throws Exception {
 		super.setUp();
-		EVENT_1 = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_UUID_1, TEST_MESSAGE_UUID_1, TEST_DEVICE_ID_1);
-		EVENT_2 = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_UUID_2, TEST_MESSAGE_UUID_2, TEST_DEVICE_ID_2);
+		EVENT_1 = EventPushReceived.getEvent(TEST_VARIANT_UUID_1, TEST_MESSAGE_UUID_1, TEST_DEVICE_ID_1);
+		EVENT_2 = EventPushReceived.getEvent(TEST_VARIANT_UUID_2, TEST_MESSAGE_UUID_2, TEST_DEVICE_ID_2);
 		resetDatabase();
 	}
 
@@ -63,11 +63,11 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
 		final Uri uri = insertEvent(EVENT_1);
 
 		// Read it back and check that it matches
-		final BaseEvent event = getEvent(uri);
+		final Event event = getEvent(uri);
 		assertEquals(EVENT_1, event);
 
 		// Read it back using a different method and check that it matches
-		final List<BaseEvent> events = getAllEvents();
+		final List<Event> events = getAllEvents();
 		assertEquals(1, events.size());
 		assertEquals(EVENT_1, events.iterator().next());
 	}
@@ -79,16 +79,16 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
 		final Uri uri2 = insertEvent(EVENT_2);
 
 		// Read them back individually and check they are correct
-		final BaseEvent event1 = getEvent(uri1);
-		final BaseEvent event2 = getEvent(uri2);
+		final Event event1 = getEvent(uri1);
+		final Event event2 = getEvent(uri2);
 		assertEquals(EVENT_1, event1);
 		assertEquals(EVENT_2, event2);
 
 		// Assert that the crash records table contents match if we
 		// query them all at once
-		final List<BaseEvent> events = getAllEvents();
+		final List<Event> events = getAllEvents();
 		assertEquals(2, events.size());
-		final List<BaseEvent> comparisonSet = new LinkedList<BaseEvent>();
+		final List<Event> comparisonSet = new LinkedList<Event>();
 		comparisonSet.add(EVENT_1);
 		comparisonSet.add(EVENT_2);
 		assertEquals(events, comparisonSet);
@@ -104,7 +104,7 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
 		assertFalse(existingUri.equals(nonExistingUri));
 
 		// Try to read the non-existent URI from the table
-		final BaseEvent event = getEvent(nonExistingUri);
+		final Event event = getEvent(nonExistingUri);
 		assertNull(event);
 	}
 
@@ -114,9 +114,9 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
 		final Uri uri = insertEvent(EVENT_1);
 
 		// Read it back and change its status
-		final BaseEvent event = getEvent(uri);
+		final Event event = getEvent(uri);
 		assertEquals(EVENT_1, event);
-		event.setStatus(BaseEvent.Status.POSTED);
+		event.setStatus(Event.Status.POSTED);
 		assertFalse(EVENT_1.getStatus() == event.getStatus());
 
 		// Update the Event in the table
@@ -124,7 +124,7 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
 		assertEquals(1, rowsAffected);
 
 		// Read the Event back and verify that it was updated
-		final BaseEvent updatedEvent = getEvent(uri);
+		final Event updatedEvent = getEvent(uri);
 		assertEquals(event, updatedEvent);
 	}
 
@@ -144,11 +144,11 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
 		assertEquals(3, rowsAffected);
 
 		// Read them all back and verify they were updated
-		final BaseEvent updatedEvent1 = getEvent(uri1);
+		final Event updatedEvent1 = getEvent(uri1);
 		assertEquals(updatedEvent1, EVENT_2);
-		final BaseEvent updatedEvent2 = getEvent(uri2);
+		final Event updatedEvent2 = getEvent(uri2);
 		assertEquals(updatedEvent2, EVENT_2);
-		final BaseEvent updatedEvent3 = getEvent(uri3);
+		final Event updatedEvent3 = getEvent(uri3);
 		assertEquals(updatedEvent3, EVENT_2);
 	}
 
@@ -174,19 +174,19 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
 		assertFalse(uri1.equals(uri2));
 
 		// Read the first one back and change its status
-		final BaseEvent event1 = getEvent(uri1);
+		final Event event1 = getEvent(uri1);
 		assertEquals(EVENT_1, event1);
-		event1.setStatus(BaseEvent.Status.POSTED);
+		event1.setStatus(Event.Status.POSTED);
 		assertFalse(EVENT_1.getStatus() == event1.getStatus());
 		final int rowsAffected1 = DatabaseWrapper.update(uri1, event1.getContentValues(), null, null);
 		assertEquals(1, rowsAffected1);
 
 		// Assert that the update record was modified correctly after reading back
-		final BaseEvent updatedEvent1 = getEvent(uri1);
+		final Event updatedEvent1 = getEvent(uri1);
 		assertEquals(event1, updatedEvent1);
 
 		// Assert that the other record in the table wasn't changed
-		final BaseEvent event2 = getEvent(uri2);
+		final Event event2 = getEvent(uri2);
 		assertEquals(EVENT_2, event2);
 		assertFalse(event2.equals(updatedEvent1));
 		assertFalse(EVENT_1.equals(updatedEvent1));
@@ -211,14 +211,14 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
 		assertEventCountInDatabase(0);
 	}
 
-	private List<BaseEvent> getAllEvents() {
+	private List<Event> getAllEvents() {
 		Cursor c = null;
 		try {
-			List<BaseEvent> events = new LinkedList<BaseEvent>();
+			List<Event> events = new LinkedList<Event>();
 			c = DatabaseWrapper.query(Database.EVENTS_CONTENT_URI, null, null, null, null);
 			assertNotNull(c);
 			for (c.moveToFirst(); !c.isAfterLast(); c.moveToNext()) {
-				final BaseEvent event = new BaseEvent(c);
+				final Event event = new Event(c);
 				events.add(event);
 			}
 			return events;
@@ -230,7 +230,7 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
 		}
 	}
 
-	private BaseEvent getEvent(final Uri uri) {
+	private Event getEvent(final Uri uri) {
 		Cursor c = null;
 		try {
 			c = DatabaseWrapper.query(uri, null, null, null, null);
@@ -238,7 +238,7 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
 			c.moveToFirst();
 			if (c.isAfterLast())
 				return null;
-			final BaseEvent event = new BaseEvent(c);
+			final Event event = new Event(c);
 			return event;
 		} finally {
 			if (c != null) {
@@ -248,7 +248,7 @@ public class EventDatabaseWrapperTest extends AndroidTestCase {
 		}
 	}
 
-	private Uri insertEvent(BaseEvent event) {
+	private Uri insertEvent(Event event) {
 		final Uri uri = DatabaseWrapper.insert(Database.EVENTS_CONTENT_URI, event.getContentValues());
 		assertNotNull(uri);
 		return uri;

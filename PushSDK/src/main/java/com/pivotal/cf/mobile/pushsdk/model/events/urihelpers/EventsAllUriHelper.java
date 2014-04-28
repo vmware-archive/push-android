@@ -1,4 +1,4 @@
-package com.pivotal.cf.mobile.pushsdk.model.urihelpers;
+package com.pivotal.cf.mobile.pushsdk.model.events.urihelpers;
 
 import android.net.Uri;
 

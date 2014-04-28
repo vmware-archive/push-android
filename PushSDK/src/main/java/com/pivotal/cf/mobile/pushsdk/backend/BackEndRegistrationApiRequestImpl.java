@@ -20,8 +20,8 @@ import android.os.Build;
 
 import com.google.gson.Gson;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
-import com.pivotal.cf.mobile.pushsdk.model.BackEndApiRegistrationRequestData;
-import com.pivotal.cf.mobile.pushsdk.model.BackEndApiRegistrationResponseData;
+import com.pivotal.cf.mobile.pushsdk.model.api.BackEndApiRegistrationRequestData;
+import com.pivotal.cf.mobile.pushsdk.model.api.BackEndApiRegistrationResponseData;
 import com.pivotal.cf.mobile.pushsdk.network.NetworkWrapper;
 import com.pivotal.cf.mobile.pushsdk.util.Const;
 import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;

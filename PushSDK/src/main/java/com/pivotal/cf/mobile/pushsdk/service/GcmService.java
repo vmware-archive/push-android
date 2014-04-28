@@ -22,8 +22,8 @@ import android.os.ResultReceiver;
 
 import com.pivotal.cf.mobile.pushsdk.broadcastreceiver.GcmBroadcastReceiver;
 import com.pivotal.cf.mobile.pushsdk.jobs.EnqueueEventJob;
-import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
-import com.pivotal.cf.mobile.pushsdk.model.MessageReceiptEvent;
+import com.pivotal.cf.mobile.pushsdk.model.events.Event;
+import com.pivotal.cf.mobile.pushsdk.model.events.EventPushReceived;
 import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProvider;
 import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProviderImpl;
 import com.pivotal.cf.mobile.pushsdk.util.Const;
@@ -127,7 +127,7 @@ public class GcmService extends IntentService {
     }
 
     private void enqueueMessageReceivedEvent(Intent intent) {
-        final BaseEvent messageReceipt = getMessageReceivedEvent(intent);
+        final Event messageReceipt = getMessageReceivedEvent(intent);
         final EnqueueEventJob enqueueEventJob = new EnqueueEventJob(messageReceipt);
         final Intent enqueueEventJobIntent = EventService.getIntentToRunJob(this, enqueueEventJob);
         if (GcmService.serviceStarter.startService(this, enqueueEventJobIntent) == null) {
@@ -135,11 +135,11 @@ public class GcmService extends IntentService {
         }
     }
 
-    private BaseEvent getMessageReceivedEvent(Intent intent) {
+    private Event getMessageReceivedEvent(Intent intent) {
         final String messageUuid = intent.getStringExtra(KEY_MESSAGE_UUID);
         final String variantUuid = GcmService.preferencesProvider.getVariantUuid();
         final String deviceId = GcmService.preferencesProvider.getBackEndDeviceRegistrationId();
-        final BaseEvent event = MessageReceiptEvent.getMessageReceiptEvent(variantUuid, messageUuid, deviceId);
+        final Event event = EventPushReceived.getEvent(variantUuid, messageUuid, deviceId);
         return event;
     }
 

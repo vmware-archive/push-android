@@ -1,4 +1,4 @@
-package com.pivotal.cf.mobile.pushsdk.model;
+package com.pivotal.cf.mobile.pushsdk.model.events;
 
 import android.content.ContentValues;
 import android.database.Cursor;
@@ -23,7 +23,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 
-public class BaseEvent implements Parcelable {
+public class Event implements Parcelable {
 
     public static class Columns {
         public static final String EVENT_UUID = "id";
@@ -78,11 +78,11 @@ public class BaseEvent implements Parcelable {
     @SerializedName(Columns.DATA)
     private HashMap<String, String> data;
 
-    public BaseEvent() {
+    public Event() {
     }
 
     // Construct from cursor
-    public BaseEvent(Cursor cursor) {
+    public Event(Cursor cursor) {
         int columnIndex;
 
         columnIndex = cursor.getColumnIndex(BaseColumns._ID);
@@ -137,7 +137,7 @@ public class BaseEvent implements Parcelable {
     }
 
     // Copy constructor
-    public BaseEvent(BaseEvent source) {
+    public Event(Event source) {
         // TODO - do a deep copy (i.e.: new copies of all of the individual fields)
         this.status = source.status;
         this.id = source.id;
@@ -242,11 +242,11 @@ public class BaseEvent implements Parcelable {
             return false;
         }
 
-        if (!(o instanceof BaseEvent)) {
+        if (!(o instanceof Event)) {
             return false;
         }
 
-        final BaseEvent other = (BaseEvent) o;
+        final Event other = (Event) o;
 
         if (other.status != status) {
             return false;
@@ -329,14 +329,14 @@ public class BaseEvent implements Parcelable {
 
     // JSON helpers
 
-    public static List<BaseEvent> jsonStringToList(String str) {
+    public static List<Event> jsonStringToList(String str) {
         final Gson gson = new Gson();
         final Type type = getTypeToken();
         final List list = gson.fromJson(str, type);
         return list;
     }
 
-    public static String listToJsonString(List<BaseEvent> list) {
+    public static String listToJsonString(List<Event> list) {
         if (list == null) {
             return null;
         } else {
@@ -348,7 +348,7 @@ public class BaseEvent implements Parcelable {
     }
 
     private static Type getTypeToken() {
-        return new TypeToken<List<BaseEvent>>(){}.getType();
+        return new TypeToken<List<Event>>(){}.getType();
     }
 
     // Database helpers
@@ -483,18 +483,18 @@ public class BaseEvent implements Parcelable {
 
     // Parcelable stuff
 
-    public static final Parcelable.Creator<BaseEvent> CREATOR = new Parcelable.Creator<BaseEvent>() {
+    public static final Parcelable.Creator<Event> CREATOR = new Parcelable.Creator<Event>() {
 
-        public BaseEvent createFromParcel(Parcel in) {
-            return new BaseEvent(in);
+        public Event createFromParcel(Parcel in) {
+            return new Event(in);
         }
 
-        public BaseEvent[] newArray(int size) {
-            return new BaseEvent[size];
+        public Event[] newArray(int size) {
+            return new Event[size];
         }
     };
 
-    private BaseEvent(Parcel in) {
+    private Event(Parcel in) {
         id = in.readInt();
         status = in.readInt();
         eventType = in.readString();

@@ -3,28 +3,28 @@ package com.pivotal.cf.mobile.pushsdk.jobs;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
+import com.pivotal.cf.mobile.pushsdk.model.events.Event;
 import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 
 public class EnqueueEventJob extends BaseJob {
 
     public static final int RESULT_COULD_NOT_SAVE_EVENT_TO_STORAGE = 200;
 
-    private BaseEvent event;
+    private Event event;
 
-    public EnqueueEventJob(BaseEvent event) {
+    public EnqueueEventJob(Event event) {
         super();
         verifyArguments(event);
         saveArguments(event);
     }
 
-    private void verifyArguments(BaseEvent event) {
+    private void verifyArguments(Event event) {
         if (event == null) {
             throw new IllegalArgumentException("event may not be null");
         }
     }
 
-    private void saveArguments(BaseEvent event) {
+    private void saveArguments(Event event) {
         this.event = event;
     }
 
@@ -95,8 +95,8 @@ public class EnqueueEventJob extends BaseJob {
         event = readEventFromParcel(in);
     }
 
-    private BaseEvent readEventFromParcel(Parcel parcel) {
-        return parcel.readParcelable(BaseEvent.class.getClassLoader());
+    private Event readEventFromParcel(Parcel parcel) {
+        return parcel.readParcelable(Event.class.getClassLoader());
     }
 
     @Override

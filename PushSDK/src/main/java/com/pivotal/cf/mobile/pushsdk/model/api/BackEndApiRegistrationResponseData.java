@@ -13,33 +13,33 @@
  * limitations under the License.
  */
 
-package com.pivotal.cf.mobile.pushsdk.model;
+package com.pivotal.cf.mobile.pushsdk.model.api;
 
 /*
 {
-        "variant_uuid": "guid_provided_by_developer",
-        "secret": "guid_provided_by_developer",
-        "device_alias": "developer-specific",
-        "device_manufacturer": "ACME INC."
-        "device_model": "Nexus 5",
+        "variant_uuid": "9e60c311-f5c7-4416-aea2-d07bbc94f208",
+        "secret": "3c676b20-3c49-4215-be1a-3932e3458514",
+        "device_alias": "andoidtest",
+        "device_manufacturer": "Phone Corp",
+        "device_model": "Ultimate Phono 1999",
         "os": "android",
-        "os_version": "4.4",
-        "registration_token": "provided_by_GCM"
+        "os_version": "version",
+        "registration_token": "SomeString"
         }
 */
 
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Model used in the Pivotal CF Mobile Services device registration API.
+ * Model returned by the Pivotal CF Mobile Services device registration API.
  */
-public class BackEndApiRegistrationRequestData {
+public class BackEndApiRegistrationResponseData {
 
     @SerializedName("variant_uuid")
     private String variantUuid;
 
-    @SerializedName("secret")
-    private String secret;
+    @SerializedName("device_uuid")
+    private String deviceUuid;
 
     @SerializedName("device_alias")
     private String deviceAlias;
@@ -59,7 +59,7 @@ public class BackEndApiRegistrationRequestData {
     @SerializedName("registration_token")
     private String registrationToken;
 
-    public BackEndApiRegistrationRequestData() {
+    public BackEndApiRegistrationResponseData() {
     }
 
     public String getVariantUuid() {
@@ -70,12 +70,12 @@ public class BackEndApiRegistrationRequestData {
         this.variantUuid = variantUuid;
     }
 
-    public String getSecret() {
-        return secret;
+    public String getDeviceUuid() {
+        return deviceUuid;
     }
 
-    public void setSecret(String secret) {
-        this.secret = secret;
+    public void setDeviceUuid(String deviceUuid) {
+        this.deviceUuid = deviceUuid;
     }
 
     public String getDeviceAlias() {

@@ -3,7 +3,7 @@ package com.pivotal.cf.mobile.pushsdk.jobs;
 import android.net.Uri;
 import android.test.MoreAsserts;
 
-import com.pivotal.cf.mobile.pushsdk.model.BaseEvent;
+import com.pivotal.cf.mobile.pushsdk.model.events.Event;
 
 import java.util.List;
 
@@ -42,7 +42,7 @@ public class EnqueueEventJobTest extends JobTest {
         assertEquals(1, eventsStorage.getNumberOfEvents());
         final List<Uri> uris = eventsStorage.getEventUris();
         assertEquals(1, uris.size());
-        final BaseEvent savedEvent = eventsStorage.readEvent(uris.get(0));
+        final Event savedEvent = eventsStorage.readEvent(uris.get(0));
         assertEquals(event1, savedEvent);
 
         // Ensure alarm was enabled
