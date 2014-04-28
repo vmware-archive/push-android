@@ -15,7 +15,7 @@ public class MessageReceiptUriHelper implements UriHelper {
 
 	@Override
 	public String getType() {
-		return "vnd.android.cursor.item/vnd.com.pivotal.cf.mobile.pushsdk.message_receipts";
+		return "vnd.android.cursor.item/vnd.com.pivotal.cf.mobile.pushsdk.events";
 	}
 
 	@Override
@@ -30,7 +30,6 @@ public class MessageReceiptUriHelper implements UriHelper {
 		uriMatcherParams.path = getDefaultTableName() + "/*";
 		return uriMatcherParams;
 	}
-
 
 	@Override
 	public QueryParams getQueryParams(final Uri uri, final String[] projection, final String whereClause, final String[] whereArgs, final String sortOrder) {

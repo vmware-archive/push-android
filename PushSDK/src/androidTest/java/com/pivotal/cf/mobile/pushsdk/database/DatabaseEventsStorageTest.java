@@ -28,7 +28,7 @@ public class DatabaseEventsStorageTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        EventsDatabaseHelper.init();
+        DatabaseHelper.init();
         EventsDatabaseWrapper.createDatabaseInstance(getContext());
         EVENT_1 = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_UUID_1, TEST_MESSAGE_UUID_1, TEST_DEVICE_ID_1);
         EVENT_2 = MessageReceiptEvent.getMessageReceiptEvent(TEST_VARIANT_UUID_2, TEST_MESSAGE_UUID_2, TEST_DEVICE_ID_2);

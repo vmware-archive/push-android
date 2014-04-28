@@ -1,35 +1,38 @@
 package com.pivotal.cf.mobile.pushsdk.database;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import android.content.Context;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.database.sqlite.SQLiteOpenHelper;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class DatabaseHelper extends SQLiteOpenHelper {
 
 	private static Set<DatabaseInitializer> initializers = new HashSet<DatabaseInitializer>();
 
-	private static String databaseName = null;
-	private static int databaseVersion = -1;
+    public static final int DATABASE_VERSION = 3;
+    public static final String DATABASE_NAME = "com.pivotal.cf.mobile.pushsdk.events.db";
+    public static boolean isInitialized = false;
 
-	public static synchronized void init(final String databaseName, final int databaseVersion) {
-		DatabaseHelper.databaseName = databaseName;
-		DatabaseHelper.databaseVersion = databaseVersion;
-	}
+    public static synchronized void init() {
+        if (needsInitializing()) {
+            addInitializer(new EventsDatabaseInitializer());
+            isInitialized = true;
+        }
+    }
 
 	public static synchronized void addInitializer(final DatabaseInitializer initializer) {
 		initializers.add(initializer);
 	}
 
 	public static synchronized boolean needsInitializing() {
-		return databaseName == null || databaseVersion < 0;
+		return !isInitialized;
 	}
 
 	public DatabaseHelper(final Context context, final CursorFactory factory) {
-		super(context, databaseName, factory, databaseVersion);
+		super(context, DATABASE_NAME, factory, DATABASE_VERSION);
 	}
 
 	@Override
@@ -56,5 +59,4 @@ public class DatabaseHelper extends SQLiteOpenHelper {
 			}
 		}
 	}
-
 }

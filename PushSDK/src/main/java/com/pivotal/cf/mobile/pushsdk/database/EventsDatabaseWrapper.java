@@ -41,14 +41,14 @@ public class EventsDatabaseWrapper {
     // Returns 'false' if the database instance was already initialized.
     public static boolean createDatabaseInstance(Context context) {
 
-        if (EventsDatabaseHelper.needsInitializing()) {
+        if (DatabaseHelper.needsInitializing()) {
             throw new IllegalStateException("EventsDatabaseHelper needs initializing.");
         }
 
         synchronized (lock) {
             if (database == null) {
                 final DebugCursorFactory factory = new DebugCursorFactory();
-                final EventsDatabaseHelper databaseHelper = new EventsDatabaseHelper(context, factory);
+                final DatabaseHelper databaseHelper = new DatabaseHelper(context, factory);
                 database = databaseHelper.getWritableDatabase();
 
                 final long maxDatabaseSize;

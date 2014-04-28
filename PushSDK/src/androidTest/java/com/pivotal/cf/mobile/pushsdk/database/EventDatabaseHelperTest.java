@@ -30,7 +30,7 @@ public class EventDatabaseHelperTest extends AndroidTestCase {
     }
 
     public void testDatabaseSettings() {
-        assertEquals(EventsDatabaseHelper.DATABASE_VERSION, database.getVersion());
+        assertEquals(DatabaseHelper.DATABASE_VERSION, database.getVersion());
     }
 
     public void testDatabaseOpen() {
@@ -63,7 +63,7 @@ public class EventDatabaseHelperTest extends AndroidTestCase {
     }
 
     private SQLiteDatabase getWritableDatabase() {
-        final EventsDatabaseHelper helper = new EventsDatabaseHelper(CONTEXT, null);
+        final DatabaseHelper helper = new DatabaseHelper(CONTEXT, null);
         assertNotNull(helper);
         final SQLiteDatabase database = helper.getWritableDatabase();
         assertNotNull(database);

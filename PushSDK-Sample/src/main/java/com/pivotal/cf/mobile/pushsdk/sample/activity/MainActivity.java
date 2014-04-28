@@ -37,13 +37,13 @@ import com.google.gson.Gson;
 import com.pivotal.cf.mobile.pushsdk.PushLib;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.database.DatabaseEventsStorage;
-import com.pivotal.cf.mobile.pushsdk.database.EventsStorage;
 import com.pivotal.cf.mobile.pushsdk.registration.RegistrationListener;
 import com.pivotal.cf.mobile.pushsdk.registration.UnregistrationListener;
 import com.pivotal.cf.mobile.pushsdk.sample.adapter.LogAdapter;
 import com.pivotal.cf.mobile.pushsdk.sample.broadcastreceiver.MyPivotalCFMSRemotePushLibBroadcastReceiver;
 import com.pivotal.cf.mobile.pushsdk.sample.dialogfragment.ClearRegistrationDialogFragment;
 import com.pivotal.cf.mobile.pushsdk.sample.dialogfragment.LogItemLongClickDialogFragment;
+import com.pivotal.cf.mobile.pushsdk.sample.dialogfragment.SendMessageDialogFragment;
 import com.pivotal.cf.mobile.pushsdk.sample.model.BackEndMessageRequest;
 import com.pivotal.cf.mobile.pushsdk.sample.model.GcmMessageRequest;
 import com.pivotal.cf.mobile.pushsdk.sample.model.LogItem;
@@ -53,8 +53,6 @@ import com.pivotal.cf.mobile.pushsdk.util.DebugUtil;
 import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 import com.pivotal.cf.mobile.pushsdk.util.StringUtil;
 import com.pivotal.cf.mobile.pushsdk.util.ThreadUtil;
-
-import com.pivotal.cf.mobile.pushsdk.sample.dialogfragment.SendMessageDialogFragment;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -441,9 +439,9 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void clearMessageReceipts() {
-        addLogMessage("Clearing all message receipts.");
+        addLogMessage("Clearing all events.");
         final DatabaseEventsStorage eventsStorage = new DatabaseEventsStorage();
-        eventsStorage.reset(EventsStorage.EventType.MESSAGE_RECEIPT);
+        eventsStorage.reset();
     }
 
     private void clearRegistration() {

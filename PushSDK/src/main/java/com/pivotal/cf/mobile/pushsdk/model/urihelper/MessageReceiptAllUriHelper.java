@@ -13,7 +13,7 @@ public class MessageReceiptAllUriHelper implements UriHelper {
 
 	@Override
 	public String getType() {
-		return "vnd.android.cursor.dir/vnd.com.pivotal.cf.mobile.pushsdk.message_receipts";
+		return "vnd.android.cursor.dir/vnd.com.pivotal.cf.mobile.pushsdk.events";
 	}
 
 	@Override
@@ -46,7 +46,6 @@ public class MessageReceiptAllUriHelper implements UriHelper {
 		updateParams.uri = uri;
 		updateParams.whereClause = whereClause;
 		updateParams.whereArgs = whereArgs;
-
 		return updateParams;
 	}
 
@@ -56,8 +55,6 @@ public class MessageReceiptAllUriHelper implements UriHelper {
 		deleteParams.uri = uri;
 		deleteParams.whereClause = whereClause;
 		deleteParams.whereArgs = whereArgs;
-
 		return deleteParams;
 	}
-
 }
