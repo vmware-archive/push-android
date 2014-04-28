@@ -14,8 +14,8 @@ import android.database.sqlite.SQLiteFullException;
 import android.database.sqlite.SQLiteQuery;
 import android.net.Uri;
 
+import com.pivotal.cf.mobile.pushsdk.database.urihelpers.DatabaseUriHelper;
 import com.pivotal.cf.mobile.pushsdk.database.urihelpers.DeleteParams;
-import com.pivotal.cf.mobile.pushsdk.database.urihelpers.EventsUriHelper;
 import com.pivotal.cf.mobile.pushsdk.database.urihelpers.QueryParams;
 import com.pivotal.cf.mobile.pushsdk.database.urihelpers.UpdateParams;
 import com.pivotal.cf.mobile.pushsdk.util.DebugUtil;
@@ -69,8 +69,8 @@ public class DatabaseWrapper {
     }
 
     public static Cursor query(final Uri uri, final String[] projection, final String whereClause, final String[] whereArgs, final String sortOrder) {
-        final QueryParams queryParams = EventsUriHelper.getUriHelper(uri).getQueryParams(uri, projection, whereClause, whereArgs, sortOrder);
-        return getDatabase().query(EventsUriHelper.getUriHelper(uri).getDefaultTableName(), queryParams.projection, queryParams.whereClause, queryParams.whereArgs, null, null, queryParams.sortOrder);
+        final QueryParams queryParams = DatabaseUriHelper.getUriHelper(uri).getQueryParams(uri, projection, whereClause, whereArgs, sortOrder);
+        return getDatabase().query(DatabaseUriHelper.getUriHelper(uri).getDefaultTableName(), queryParams.projection, queryParams.whereClause, queryParams.whereArgs, null, null, queryParams.sortOrder);
     }
 
     public static int update(Uri uri, ContentValues values, String whereClause, String[] whereArgs) {
@@ -83,19 +83,19 @@ public class DatabaseWrapper {
                 return tryUpdate(uri, values, whereClause, whereArgs);
             }
         } catch (SQLException e) {
-            PushLibLogger.ex("Caught error upon updating into table " + EventsUriHelper.getUriHelper(uri).getDefaultTableName(), e);
+            PushLibLogger.ex("Caught error upon updating into table " + DatabaseUriHelper.getUriHelper(uri).getDefaultTableName(), e);
         }
         return -1;
     }
 
     private static int tryUpdate(Uri uri, ContentValues values, String whereClause, String[] whereArgs) {
-        final UpdateParams updateParams = EventsUriHelper.getUriHelper(uri).getUpdateParams(uri, whereClause, whereArgs);
-        return getDatabase().update(EventsUriHelper.getUriHelper(uri).getDefaultTableName(), values, updateParams.whereClause, updateParams.whereArgs);
+        final UpdateParams updateParams = DatabaseUriHelper.getUriHelper(uri).getUpdateParams(uri, whereClause, whereArgs);
+        return getDatabase().update(DatabaseUriHelper.getUriHelper(uri).getDefaultTableName(), values, updateParams.whereClause, updateParams.whereArgs);
     }
 
     public static int delete(Uri uri, String whereClause, String[] whereArgs) {
-        final DeleteParams deleteParams = EventsUriHelper.getUriHelper(uri).getDeleteParams(uri, whereClause, whereArgs);
-        return getDatabase().delete(EventsUriHelper.getUriHelper(uri).getDefaultTableName(), deleteParams.whereClause, deleteParams.whereArgs);
+        final DeleteParams deleteParams = DatabaseUriHelper.getUriHelper(uri).getDeleteParams(uri, whereClause, whereArgs);
+        return getDatabase().delete(DatabaseUriHelper.getUriHelper(uri).getDefaultTableName(), deleteParams.whereClause, deleteParams.whereArgs);
     }
 
     public static void delete(final List<Uri> eventUris, final String whereClause, final String[] whereArgs) {
@@ -138,14 +138,14 @@ public class DatabaseWrapper {
                     return tryInsert(uri, values);
                 }
             } else {
-                PushLibLogger.ex("Caught error upon inserting into table " + EventsUriHelper.getUriHelper(uri).getDefaultTableName(), e);
+                PushLibLogger.ex("Caught error upon inserting into table " + DatabaseUriHelper.getUriHelper(uri).getDefaultTableName(), e);
             }
         }
         return null;
     }
 
     private static Uri tryInsert(final Uri uri, final ContentValues values) {
-        long rowId = getDatabase().insertOrThrow(EventsUriHelper.getUriHelper(uri).getDefaultTableName(), null, values);
+        long rowId = getDatabase().insertOrThrow(DatabaseUriHelper.getUriHelper(uri).getDefaultTableName(), null, values);
         return ContentUris.withAppendedId(uri, rowId);
     }
 
@@ -160,7 +160,7 @@ public class DatabaseWrapper {
     }
 
     public static String getLargestTable() {
-        final Set<String> tableNames = EventsUriHelper.getAllTableNames();
+        final Set<String> tableNames = DatabaseUriHelper.getAllTableNames();
         String largestTableName = null;
         int largestNumberOfRows = -1;
         for (final String tableName : tableNames) {

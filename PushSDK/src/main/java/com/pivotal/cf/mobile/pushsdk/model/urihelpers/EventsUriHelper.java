@@ -1,4 +1,4 @@
-package com.pivotal.cf.mobile.pushsdk.model.urihelper;
+package com.pivotal.cf.mobile.pushsdk.model.urihelpers;
 
 import android.net.Uri;
 import android.provider.BaseColumns;
@@ -11,7 +11,7 @@ import com.pivotal.cf.mobile.pushsdk.database.urihelpers.UriHelper;
 import com.pivotal.cf.mobile.pushsdk.database.urihelpers.UriMatcherParams;
 import com.pivotal.cf.mobile.pushsdk.util.StringUtil;
 
-public class MessageReceiptUriHelper implements UriHelper {
+public class EventsUriHelper implements UriHelper {
 
 	@Override
 	public String getType() {

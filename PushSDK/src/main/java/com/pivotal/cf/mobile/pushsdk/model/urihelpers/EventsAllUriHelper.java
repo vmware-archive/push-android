@@ -1,4 +1,4 @@
-package com.pivotal.cf.mobile.pushsdk.model.urihelper;
+package com.pivotal.cf.mobile.pushsdk.model.urihelpers;
 
 import android.net.Uri;
 
@@ -9,7 +9,7 @@ import com.pivotal.cf.mobile.pushsdk.database.urihelpers.UpdateParams;
 import com.pivotal.cf.mobile.pushsdk.database.urihelpers.UriHelper;
 import com.pivotal.cf.mobile.pushsdk.database.urihelpers.UriMatcherParams;
 
-public class MessageReceiptAllUriHelper implements UriHelper {
+public class EventsAllUriHelper implements UriHelper {
 
 	@Override
 	public String getType() {
