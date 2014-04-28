@@ -34,7 +34,7 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
         FakeHttpURLConnection.reset();
         emptyList = new LinkedList<Uri>();
         listWithOneItem = new LinkedList<Uri>();
-        final Uri uri = eventsStorage.saveEvent(EventTest.getBaseEvent1());
+        final Uri uri = eventsStorage.saveEvent(EventTest.getEvent1());
         listWithOneItem.add(uri);
     }
 

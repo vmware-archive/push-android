@@ -122,7 +122,7 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
 
     public void testRunNotAJob() throws InterruptedException {
         final Intent intent = EventService.getIntentToRunJob(getContext(), null);
-        intent.putExtra(EventService.KEY_JOB, EventTest.getBaseEvent1());
+        intent.putExtra(EventService.KEY_JOB, EventTest.getEvent1());
         addResultReceiverToIntent(intent);
         startService(intent);
         EventService.semaphore.acquire();

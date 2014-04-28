@@ -32,8 +32,8 @@ public abstract class JobTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        event1 = EventTest.getBaseEvent1();
-        event2 = EventTest.getBaseEvent2();
+        event1 = EventTest.getEvent1();
+        event2 = EventTest.getEvent2();
         eventsStorage = new FakeEventsStorage();
         networkWrapper = new FakeNetworkWrapper();
         alarmProvider = new FakeEventsSenderAlarmProvider();

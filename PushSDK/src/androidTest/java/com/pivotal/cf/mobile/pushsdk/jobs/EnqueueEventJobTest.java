@@ -18,7 +18,6 @@ public class EnqueueEventJobTest extends JobTest {
         }
     }
 
-
     public void testEnqueuesObject() throws InterruptedException {
 
         // Setup environment
@@ -89,8 +88,6 @@ public class EnqueueEventJobTest extends JobTest {
         MoreAsserts.assertNotEqual(event1, event2);
         MoreAsserts.assertNotEqual(job1, job2);
     }
-
-    // TODO - test more event types after we define some.
 
     public void testParcelsData() {
         final EnqueueEventJob inputJob = new EnqueueEventJob(event1);

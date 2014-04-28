@@ -47,15 +47,15 @@ public class EventTest extends AndroidTestCase {
     private static final String SOME_OTHER_EVENT_TYPE = "SOME_OTHER_EVENT_TYPE";
 
     public void testEquals1() {
-        final Event model1 = getBaseEvent1();
-        final Event model2 = getBaseEvent1();
+        final Event model1 = getEvent1();
+        final Event model2 = getEvent1();
         assertEquals(model1, model2);
         assertEquals(model2, model1);
     }
 
     public void testNotEquals() {
-        final Event model1 = getBaseEvent1();
-        final Event model2 = getBaseEvent2();
+        final Event model1 = getEvent1();
+        final Event model2 = getEvent2();
         MoreAsserts.assertNotEqual(model1, model2);
         MoreAsserts.assertNotEqual(model2, model1);
     }
@@ -68,7 +68,7 @@ public class EventTest extends AndroidTestCase {
     }
 
     public void testCopyConstructor2() {
-        final Event model1 = getBaseEvent1();
+        final Event model1 = getEvent1();
         final Event model2 = new Event(model1);
         assertEquals(model1, model2);
         assertFalse(model1 == model2);
@@ -157,10 +157,10 @@ public class EventTest extends AndroidTestCase {
     public void testNotEqualsWithMessageUuids() {
 
         final Event model1 = new Event();
-        model1.setData(getBaseEventData1());
+        model1.setData(getEventData1());
 
         final Event model2 = new Event();
-        model2.setData(getBaseEventData2());
+        model2.setData(getEventData2());
 
         MoreAsserts.assertNotEqual(model1, model2);
         MoreAsserts.assertNotEqual(model2, model1);
@@ -186,23 +186,23 @@ public class EventTest extends AndroidTestCase {
     }
 
     public void testNotEqualsNull() {
-        final Event model1 = getBaseEvent1();
+        final Event model1 = getEvent1();
         assertFalse(model1.equals(null));
     }
 
     public void testNotEqualsOtherObject() {
-        final Event model1 = getBaseEvent1();
+        final Event model1 = getEvent1();
         assertFalse(model1.equals("INTERLOPER STRING"));
     }
 
     public void testHashCode() {
-        final Event model1 = getBaseEvent1();
-        final Event model2 = getBaseEvent1();
+        final Event model1 = getEvent1();
+        final Event model2 = getEvent1();
         assertEquals(model1.hashCode(), model2.hashCode());
     }
 
     public void testToJson1() {
-        final Event event = getBaseEvent1();
+        final Event event = getEvent1();
 
         final Gson gson = new Gson();
         final String json = gson.toJson(event);
@@ -220,7 +220,7 @@ public class EventTest extends AndroidTestCase {
 
     public void testToJson2() {
         final Event event = new Event();
-        event.setData(getBaseEventData3());
+        event.setData(getEventData3());
         final Gson gson = new Gson();
         final String json = gson.toJson(event);
         assertTrue(json.startsWith("{\"data\":{\"A LIST\":["));
@@ -254,8 +254,8 @@ public class EventTest extends AndroidTestCase {
 
     public void testConvertListToString() {
         List<Event> list = new LinkedList<Event>();
-        list.add(getBaseEvent1());
-        list.add(getBaseEvent2());
+        list.add(getEvent1());
+        list.add(getEvent2());
         final String str = Event.listToJsonString(list);
         assertTrue(str.contains("\"data\":{\"msg_uuid\":"));
         assertTrue(str.contains("\"type\":\"" + EventPushReceived.EVENT_TYPE + "\""));
@@ -299,7 +299,7 @@ public class EventTest extends AndroidTestCase {
     }
 
     public void testGetContentValues1() {
-        final Event event = getBaseEvent1();
+        final Event event = getEvent1();
         final ContentValues cv = event.getContentValues();
         assertFalse(cv.containsKey(BaseColumns._ID));
         assertTrue(cv.containsKey(Event.Columns.TIME));
@@ -346,7 +346,7 @@ public class EventTest extends AndroidTestCase {
         cursor.addField(Event.Columns.DEVICE_ID, TEST_DEVICE_ID_1);
         cursor.addField(Event.Columns.VARIANT_UUID, TEST_EVENT_VARIANT_UUID_1);
         cursor.addField(Event.Columns.TYPE, EventPushReceived.EVENT_TYPE);
-        cursor.addField(Event.Columns.DATA, Event.serialize(getBaseEventData1()));
+        cursor.addField(Event.Columns.DATA, Event.serialize(getEventData1()));
         cursor.addField(EventPushReceived.MESSAGE_UUID, TEST_MESSAGE_UUID_1);
         final Event event = new Event(cursor);
         assertEquals(TEST_ROW_ID_1, event.getId());
@@ -374,7 +374,7 @@ public class EventTest extends AndroidTestCase {
     }
 
     public void testIsParcelable1() {
-        final Event inputEvent = getBaseEvent1();
+        final Event inputEvent = getEvent1();
         final Event outputEvent = getObjectViaParcel(inputEvent);
         assertNotNull(outputEvent);
         assertEquals(inputEvent, outputEvent);
@@ -388,8 +388,8 @@ public class EventTest extends AndroidTestCase {
     }
 
     public void testIsParcelable3() {
-        final Event inputEvent = getBaseEvent1();
-        inputEvent.setData(getBaseEventData3());
+        final Event inputEvent = getEvent1();
+        inputEvent.setData(getEventData3());
         final Event outputEvent = getObjectViaParcel(inputEvent);
         assertNotNull(outputEvent);
         assertEquals(inputEvent, outputEvent);
@@ -427,35 +427,35 @@ public class EventTest extends AndroidTestCase {
         return sb.toString();
     }
 
-    public static Event getBaseEvent1() {
+    public static Event getEvent1() {
         final Event event = new Event();
         event.setEventId(TEST_EVENT_ID_1);
         event.setVariantUuid(TEST_EVENT_VARIANT_UUID_1);
         event.setDeviceId(TEST_DEVICE_ID_1);
         event.setTime(getTestDate1());
-        event.setData(getBaseEventData1());
+        event.setData(getEventData1());
         event.setEventType(EventPushReceived.EVENT_TYPE);
         return event;
     }
 
-    public static Event getBaseEvent2() {
+    public static Event getEvent2() {
         final Event event = new Event();
         event.setEventId(TEST_EVENT_ID_2);
         event.setVariantUuid(TEST_EVENT_VARIANT_UUID_2);
         event.setDeviceId(TEST_DEVICE_ID_2);
         event.setTime(getTestDate1());
-        event.setData(getBaseEventData2());
+        event.setData(getEventData2());
         event.setEventType(SOME_OTHER_EVENT_TYPE);
         return event;
     }
 
-    private static HashMap<String, Object> getBaseEventData1() {
+    private static HashMap<String, Object> getEventData1() {
         final HashMap<String, Object> map = new HashMap<String, Object>();
         map.put(EventPushReceived.MESSAGE_UUID, TEST_MESSAGE_UUID_1);
         return map;
     }
 
-    private static HashMap<String, Object> getBaseEventData2() {
+    private static HashMap<String, Object> getEventData2() {
         final HashMap<String, Object> map = new HashMap<String, Object>();
         map.put(EventPushReceived.MESSAGE_UUID, TEST_MESSAGE_UUID_2);
         map.put("AND NOW", "FOR SOMETHING");
@@ -463,7 +463,7 @@ public class EventTest extends AndroidTestCase {
         return map;
     }
 
-    private static HashMap<String, Object> getBaseEventData3() {
+    private static HashMap<String, Object> getEventData3() {
         final HashMap<String, Object> map = new HashMap<String, Object>();
         final List<String> list = new LinkedList<String>();
         list.add("ZEBRAS");

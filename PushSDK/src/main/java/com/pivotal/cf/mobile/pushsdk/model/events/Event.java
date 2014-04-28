@@ -137,7 +137,6 @@ public class Event implements Parcelable {
 
     // Copy constructor
     public Event(Event source) {
-        // TODO - do a deep copy (i.e.: new copies of all of the individual fields)
         this.status = source.status;
         this.id = source.id;
         this.eventId = source.eventId;
@@ -145,7 +144,7 @@ public class Event implements Parcelable {
         this.time = source.time;
         this.variantUuid = source.variantUuid;
         this.deviceId = source.deviceId;
-        this.data = source.data;
+        this.data = new HashMap<String, Object>(source.data);
     }
 
     public int getId() {
