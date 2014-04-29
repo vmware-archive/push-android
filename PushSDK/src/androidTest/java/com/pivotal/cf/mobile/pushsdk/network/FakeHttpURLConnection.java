@@ -8,6 +8,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FakeHttpURLConnection extends HttpURLConnection {
 
@@ -16,11 +18,13 @@ public class FakeHttpURLConnection extends HttpURLConnection {
     private static String receivedHttpMethod;
     private static IOException connectionException;
     private static boolean willThrowConnectionException;
+    private static Map<String, String> requestProperties;
     private static URL url;
 
     protected FakeHttpURLConnection(URL url) {
         super(url);
         FakeHttpURLConnection.url = url;
+        FakeHttpURLConnection.requestProperties = new HashMap<String, String>();
     }
 
     public static void setResponseCode(int responseCode) {
@@ -43,6 +47,10 @@ public class FakeHttpURLConnection extends HttpURLConnection {
         return FakeHttpURLConnection.receivedHttpMethod;
     }
 
+    public static Map<String, String> getRequestPropertiesMap() {
+        return FakeHttpURLConnection.requestProperties;
+    }
+
     public static URL getReceivedURL() {
         return FakeHttpURLConnection.url;
     }
@@ -51,6 +59,7 @@ public class FakeHttpURLConnection extends HttpURLConnection {
         FakeHttpURLConnection.url = null;
         FakeHttpURLConnection.responseCode = 0;
         FakeHttpURLConnection.responseData = null;
+        FakeHttpURLConnection.requestProperties = null;
         FakeHttpURLConnection.receivedHttpMethod = null;
         FakeHttpURLConnection.connectionException = null;
         FakeHttpURLConnection.willThrowConnectionException = false;
@@ -95,4 +104,9 @@ public class FakeHttpURLConnection extends HttpURLConnection {
         return responseCode;
     }
 
+    @Override
+    public void addRequestProperty(String field, String newValue) {
+        super.addRequestProperty(field, newValue);
+        FakeHttpURLConnection.requestProperties.put(field, newValue);
+    }
 }

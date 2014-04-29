@@ -32,6 +32,7 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     private static final String TEST_VARIANT_UUID = "TEST_VARIANT_UUID";
     private static final String TEST_VARIANT_SECRET = "TEST_VARIANT_SECRET";
     private static final String TEST_DEVICE_ALIAS = "TEST_DEVICE_ALIAS";
+    private static final String TEST_BASE64_ENCODED_AUTHORIZATION = "VEVTVF9WQVJJQU5UX1VVSUQ6VEVTVF9WQVJJQU5UX1NFQ1JFVA==";
     private static final long TEN_SECOND_TIMEOUT = 10000L;
     private static final String HTTP_POST = "POST";
     private static final String HTTP_PUT = "PUT";
@@ -235,6 +236,11 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
         assertTrue(delayedLoop.isSuccess());
     }
 
+    public void testAuthorization() {
+        final String base64encodedAuthorization = BackEndRegistrationApiRequestImpl.getBasicAuthorizationValue(getParameters());
+        assertEquals("Basic  " + TEST_BASE64_ENCODED_AUTHORIZATION, base64encodedAuthorization);
+    }
+
     private void makeListenersForSuccessfulRequestFromNetwork(boolean isSuccessfulResult, int expectedHttpStatusCode, String expectedHttpMethod, String previousBackEndDeviceRegistrationId) {
         final String resultantJson = "{\"device_uuid\" : \"" + TEST_BACK_END_DEVICE_REGISTRATION_ID + "\"}";
         FakeHttpURLConnection.setResponseData(resultantJson);
@@ -278,6 +284,7 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
             public void onBackEndRegistrationSuccess(String backEndDeviceRegistrationId) {
                 assertTrue(isSuccessfulRequest);
                 assertEquals(expectedHttpMethod, FakeHttpURLConnection.getReceivedHttpMethod());
+                assertTrue(FakeHttpURLConnection.getRequestPropertiesMap().containsKey("Authorization"));
                 if (previousBackEndDeviceRegistrationId != null) {
                     assertTrue(FakeHttpURLConnection.getReceivedURL().toString().endsWith(previousBackEndDeviceRegistrationId));
                 }

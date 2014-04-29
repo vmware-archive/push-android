@@ -17,6 +17,7 @@ package com.pivotal.cf.mobile.pushsdk.backend;
 
 import android.content.Context;
 import android.os.Build;
+import android.util.Base64;
 
 import com.google.gson.Gson;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
@@ -102,6 +103,7 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
             urlConnection.setDoInput(true);
             urlConnection.setRequestMethod(getRequestMethod(isUpdate));
             urlConnection.addRequestProperty("Content-Type", "application/json");
+            urlConnection.addRequestProperty("Authorization", getBasicAuthorizationValue(parameters));
             urlConnection.connect();
 
             outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
@@ -211,6 +213,11 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
         data.setOsVersion(Build.VERSION.RELEASE);
         data.setRegistrationToken(deviceRegistrationId);
         return data;
+    }
+
+    public static String getBasicAuthorizationValue(RegistrationParameters parameters) {
+        final String stringToEncode = parameters.getVariantUuid() + ":" + parameters.getVariantSecret();
+        return "Basic  " + Base64.encodeToString(stringToEncode.getBytes(), Base64.DEFAULT | Base64.NO_WRAP);
     }
 
     @Override

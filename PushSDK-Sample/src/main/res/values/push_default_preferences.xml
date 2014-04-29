@@ -18,11 +18,11 @@
 
     <!-- Set this parameter to the Variant UUID of your project in the Pivotal CF Mobile Services Push Server        -->
     <!-- admin console.  It is used during the registration process.                                                 -->
-    <string name="pref_default_variant_uuid">f45938cb-c9cd-49cf-8f11-98084f5b8452</string>
+    <string name="pref_default_variant_uuid">bb1e0482-4c9f-447d-87b7-78053d8956ff</string>
 
     <!-- Set this parameter to the Variant Secret of your project in the Pivotal CF Mobile Services Push Server      -->
     <!-- admin console.  It is used during the registration process.                                                 -->
-    <string name="pref_default_variant_secret">77f7940c-ffb4-4fb4-a2c3-583a16bf9d87</string>
+    <string name="pref_default_variant_secret">60230af9-e6b5-4211-8c9d-7a06495c3af3</string>
 
     <!-- You are free to set this parameter to whatever you like.  It is used during the registration process.       -->
     <string name="pref_default_device_alias">android_test_device_alias</string>
@@ -30,7 +30,7 @@
     <!-- These two parameters are only required if you want to send push messages via the Pivotal CF server in the   -->
     <!-- sample app.  They are not used during the registration process.  You should be able to obtain them          -->
     <!-- by creating an application in the Pivotal CF Mobile Services Push Server admin console.                     -->
-    <string name="pref_default_back_end_environment_uuid">2c668af0-69e2-440d-be84-74d280845969</string>
-    <string name="pref_default_back_end_environment_key">ea3962d3-66d1-47dc-a0fd-28ba72d56fae</string>
+    <string name="pref_default_back_end_environment_uuid">ddb1aa25-23df-4d53-86f7-37d1e4a5d67d</string>
+    <string name="pref_default_back_end_environment_key">6d34aaec-e1e4-49cf-9e96-1ebf45584eb6</string>
 
 </resources>
