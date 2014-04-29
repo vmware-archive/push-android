@@ -19,13 +19,13 @@ import java.util.LinkedList;
 import java.util.List;
 
 // TODO: generalize to other event types
-public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implements BackEndMessageReceiptApiRequest {
+public class BackEndSendEventsApiRequestImpl extends ApiRequestImpl implements BackEndSendEventsApiRequest {
 
     private static final boolean POST_TO_BACK_END = false;
     private Context context;
     private EventsStorage eventsStorage;
 
-    public BackEndMessageReceiptApiRequestImpl(Context context, EventsStorage eventsStorage, NetworkWrapper networkWrapper) {
+    public BackEndSendEventsApiRequestImpl(Context context, EventsStorage eventsStorage, NetworkWrapper networkWrapper) {
         super(networkWrapper);
         verifyArguments(context, eventsStorage);
         saveArguments(context, eventsStorage);
@@ -45,12 +45,12 @@ public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implemen
         this.eventsStorage = eventsStorage;
     }
 
-    public void startSendMessageReceipts(List<Uri> uris, BackEndMessageReceiptListener listener) {
-        verifyRequestArguments(uris, listener);
-        processRequest(uris, listener);
+    public void startSendEvents(List<Uri> eventUris, BackEndSendEventsListener listener) {
+        verifyRequestArguments(eventUris, listener);
+        processRequest(eventUris, listener);
     }
 
-    private void verifyRequestArguments(List<Uri> uris, BackEndMessageReceiptListener listener) {
+    private void verifyRequestArguments(List<Uri> uris, BackEndSendEventsListener listener) {
         if (uris == null || uris.isEmpty()) {
             throw new IllegalArgumentException("uris may not be null or empty");
         }
@@ -59,20 +59,20 @@ public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implemen
         }
     }
 
-    private void processRequest(List<Uri> uris, BackEndMessageReceiptListener listener) {
+    private void processRequest(List<Uri> uris, BackEndSendEventsListener listener) {
 
         OutputStream outputStream = null;
 
         try {
 
-            // TODO - once the server supports received message receipts then remove
-            // this silly 'if' block and let the library post the message receipts for real.
-            // At this time, if you attempt to post message receipt events to the server
+            // TODO - once the server supports receiving analytics events then remove
+            // this silly 'if' block and let the library post the events for real.
+            // At this time, if you attempt to post events to the server
             // then you will get a 405 error.
 
             if (POST_TO_BACK_END) {
 
-                final URL url = new URL(Const.BACKEND_MESSAGE_RECEIPT_URL);
+                final URL url = new URL(Const.BACKEND_SEND_EVENTS_URL);
                 final HttpURLConnection urlConnection = getHttpURLConnection(url);
                 urlConnection.addRequestProperty("Content-Type", "application/json");
                 urlConnection.setRequestMethod("POST");
@@ -94,7 +94,7 @@ public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implemen
 
             } else { // FAKE IT!
 
-                // NOTE: the server does not support receiving message receipts at this time.  In the meanwhile,
+                // NOTE: the server does not support receiving events at this time.  In the meanwhile,
                 // this block of code is hard-coded to pretend that the library posts to the server and succeeds.
 
                 final String requestBodyData = getRequestBodyData(uris);
@@ -106,7 +106,7 @@ public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implemen
 
         } catch (Exception e) {
             PushLibLogger.ex("Sending event data to back-end server failed", e);
-            listener.onBackEndMessageReceiptFailed(e.getLocalizedMessage());
+            listener.onBackEndSendEventsFailed(e.getLocalizedMessage());
 
         } finally {
             if (outputStream != null) {
@@ -133,20 +133,20 @@ public class BackEndMessageReceiptApiRequestImpl extends ApiRequestImpl implemen
         return events;
     }
 
-    private void onSuccessfulNetworkRequest(int statusCode, BackEndMessageReceiptListener listener) {
+    private void onSuccessfulNetworkRequest(int statusCode, BackEndSendEventsListener listener) {
 
         if (isFailureStatusCode(statusCode)) {
             PushLibLogger.e("Sending event data to back-end server failed: server returned HTTP status " + statusCode);
-            listener.onBackEndMessageReceiptFailed("Sending event data to back-end server returned HTTP status " + statusCode);
+            listener.onBackEndSendEventsFailed("Sending event data to back-end server returned HTTP status " + statusCode);
             return;
         }
 
         PushLibLogger.i("Sending event data to back-end server succeeded.");
-        listener.onBackEndMessageReceiptSuccess();
+        listener.onBackEndSendEventsSuccess();
     }
 
     @Override
-    public BackEndMessageReceiptApiRequest copy() {
-        return new BackEndMessageReceiptApiRequestImpl(context, eventsStorage, networkWrapper);
+    public BackEndSendEventsApiRequest copy() {
+        return new BackEndSendEventsApiRequestImpl(context, eventsStorage, networkWrapper);
     }
 }

@@ -25,6 +25,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
+import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -200,8 +201,8 @@ public class MainActivity extends ActionBarActivity {
                 startRegistration();
                 break;
 
-            case com.pivotal.cf.mobile.pushsdk.sample.R.id.action_clear_message_receipts:
-                clearMessageReceipts();
+            case com.pivotal.cf.mobile.pushsdk.sample.R.id.action_clear_events:
+                clearEvents();
                 break;
 
             case com.pivotal.cf.mobile.pushsdk.sample.R.id.action_clear_registration:
@@ -271,6 +272,7 @@ public class MainActivity extends ActionBarActivity {
                     final URL url = new URL(BACK_END_SEND_MESSAGE_URL);
                     final HttpURLConnection urlConnection = getUrlConnection(url);
                     urlConnection.setDoOutput(true);
+                    urlConnection.addRequestProperty("Authorization", getBasicAuthorizationValue());
                     urlConnection.connect();
 
                     outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
@@ -302,6 +304,13 @@ public class MainActivity extends ActionBarActivity {
         asyncTask.execute((Void)null);
     }
 
+    private String getBasicAuthorizationValue() {
+        final String environmentUuid = Settings.getBackEndEnvironmentUuid(this);
+        final String environmentKey = Settings.getBackEndEnvironmentKey(this);
+        final String stringToEncode = environmentUuid + ":" + environmentKey;
+        return "Basic  " + Base64.encodeToString(stringToEncode.getBytes(), Base64.DEFAULT | Base64.NO_WRAP);
+    }
+
     private void writeConnectionOutput(String requestBodyData, OutputStream outputStream) throws IOException {
         final byte[] bytes = requestBodyData.getBytes();
         for (byte b : bytes) {
@@ -319,9 +328,7 @@ public class MainActivity extends ActionBarActivity {
         final String platforms = "android";
         final String messageTitle = "Sample Message Title";
         final String messageBody = "This message was sent to the back-end at " + getTimestamp() + "." ;
-        final String environmentUuid = Settings.getBackEndEnvironmentUuid(this);
-        final String environmentKey = Settings.getBackEndEnvironmentKey(this);
-        final BackEndMessageRequest messageRequest = new BackEndMessageRequest(environmentUuid, environmentKey, messageTitle, messageBody, platforms, devices);
+        final BackEndMessageRequest messageRequest = new BackEndMessageRequest(messageTitle, messageBody, platforms, devices);
         final Gson gson = new Gson();
         return gson.toJson(messageRequest);
     }
@@ -438,7 +445,7 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
-    private void clearMessageReceipts() {
+    private void clearEvents() {
         addLogMessage("Clearing all events.");
         final DatabaseEventsStorage eventsStorage = new DatabaseEventsStorage();
         eventsStorage.reset();

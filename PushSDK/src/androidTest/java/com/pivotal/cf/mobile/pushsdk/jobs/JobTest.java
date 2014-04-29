@@ -5,8 +5,8 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.test.AndroidTestCase;
 
-import com.pivotal.cf.mobile.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
-import com.pivotal.cf.mobile.pushsdk.backend.FakeBackEndMessageReceiptApiRequest;
+import com.pivotal.cf.mobile.pushsdk.backend.BackEndSendEventsApiRequestProvider;
+import com.pivotal.cf.mobile.pushsdk.backend.FakeBackEndSendEventsApiRequest;
 import com.pivotal.cf.mobile.pushsdk.broadcastreceiver.FakeEventsSenderAlarmProvider;
 import com.pivotal.cf.mobile.pushsdk.database.FakeEventsStorage;
 import com.pivotal.cf.mobile.pushsdk.model.events.Event;
@@ -25,8 +25,8 @@ public abstract class JobTest extends AndroidTestCase {
     protected FakeNetworkWrapper networkWrapper;
     protected FakePreferencesProvider preferencesProvider;
     protected FakeEventsSenderAlarmProvider alarmProvider;
-    protected FakeBackEndMessageReceiptApiRequest backEndMessageReceiptApiRequest;
-    protected BackEndMessageReceiptApiRequestProvider backEndMessageReceiptApiRequestProvider;
+    protected FakeBackEndSendEventsApiRequest backEndMessageReceiptApiRequest;
+    protected BackEndSendEventsApiRequestProvider backEndSendEventsApiRequestProvider;
     protected Semaphore semaphore = new Semaphore(0);
 
     @Override
@@ -38,12 +38,12 @@ public abstract class JobTest extends AndroidTestCase {
         networkWrapper = new FakeNetworkWrapper();
         alarmProvider = new FakeEventsSenderAlarmProvider();
         preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null);
-        backEndMessageReceiptApiRequest = new FakeBackEndMessageReceiptApiRequest();
-        backEndMessageReceiptApiRequestProvider = new BackEndMessageReceiptApiRequestProvider(backEndMessageReceiptApiRequest);
+        backEndMessageReceiptApiRequest = new FakeBackEndSendEventsApiRequest();
+        backEndSendEventsApiRequestProvider = new BackEndSendEventsApiRequestProvider(backEndMessageReceiptApiRequest);
     }
 
     protected JobParams getJobParams(JobResultListener listener) {
-        return new JobParams(getContext(), listener, networkWrapper, eventsStorage, preferencesProvider, alarmProvider, backEndMessageReceiptApiRequestProvider);
+        return new JobParams(getContext(), listener, networkWrapper, eventsStorage, preferencesProvider, alarmProvider, backEndSendEventsApiRequestProvider);
     }
 
     protected Uri saveEventWithStatus(int status) {

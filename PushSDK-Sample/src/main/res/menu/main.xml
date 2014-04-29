@@ -22,9 +22,9 @@
         app:showAsAction="withText"/>
 
     <item
-        android:id="@+id/action_clear_message_receipts"
+        android:id="@+id/action_clear_events"
         android:icon="@drawable/ic_menu_delete"
-        android:title="@string/action_clear_message_receipts"
+        android:title="@string/action_clear_events"
         app:showAsAction="withText"/>
 
     <item

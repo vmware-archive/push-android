@@ -3,7 +3,7 @@ package com.pivotal.cf.mobile.pushsdk.jobs;
 import android.net.Uri;
 import android.test.MoreAsserts;
 
-import com.pivotal.cf.mobile.pushsdk.backend.FakeBackEndMessageReceiptApiRequest;
+import com.pivotal.cf.mobile.pushsdk.backend.FakeBackEndSendEventsApiRequest;
 import com.pivotal.cf.mobile.pushsdk.model.events.Event;
 
 import java.util.ArrayList;
@@ -36,10 +36,10 @@ public class SendEventsJobTest extends JobTest {
         final Uri uri4 = saveEventWithStatus(Event.Status.POSTED);
 
         backEndMessageReceiptApiRequest.setWillBeSuccessfulRequest(true);
-        backEndMessageReceiptApiRequest.setRequestHook(new FakeBackEndMessageReceiptApiRequest.RequestHook() {
+        backEndMessageReceiptApiRequest.setRequestHook(new FakeBackEndSendEventsApiRequest.RequestHook() {
 
             @Override
-            public void onRequestMade(FakeBackEndMessageReceiptApiRequest request, List<Uri> uris) {
+            public void onRequestMade(FakeBackEndSendEventsApiRequest request, List<Uri> uris) {
                 assertEquals(2, uris.size());
                 final List<Uri> expectedUrisInRequest = new ArrayList<Uri>(2);
                 expectedUrisInRequest.add(uri1);
@@ -69,7 +69,7 @@ public class SendEventsJobTest extends JobTest {
         semaphore.acquire();
         assertEquals(2, eventsStorage.getNumberOfEvents());
         assertTrue(backEndMessageReceiptApiRequest.wasRequestAttempted());
-        assertEquals(2, backEndMessageReceiptApiRequest.numberOfMessageReceiptsSent());
+        assertEquals(2, backEndMessageReceiptApiRequest.numberOfEventsSent());
 
         assertEventHasStatus(uri2, Event.Status.POSTING);
         assertEventHasStatus(uri4, Event.Status.POSTED);
@@ -82,10 +82,10 @@ public class SendEventsJobTest extends JobTest {
         final Uri uri = saveEventWithStatus(Event.Status.NOT_POSTED);
 
         backEndMessageReceiptApiRequest.setWillBeSuccessfulRequest(false);
-        backEndMessageReceiptApiRequest.setRequestHook(new FakeBackEndMessageReceiptApiRequest.RequestHook() {
+        backEndMessageReceiptApiRequest.setRequestHook(new FakeBackEndSendEventsApiRequest.RequestHook() {
 
             @Override
-            public void onRequestMade(FakeBackEndMessageReceiptApiRequest request, List<Uri> uris) {
+            public void onRequestMade(FakeBackEndSendEventsApiRequest request, List<Uri> uris) {
                 assertEquals(1, uris.size());
                 assertEquals(uri, uris.get(0));
                 assertEventHasStatus(uri, Event.Status.POSTING);
@@ -105,7 +105,7 @@ public class SendEventsJobTest extends JobTest {
         semaphore.acquire();
         assertEquals(1, eventsStorage.getNumberOfEvents());
         assertTrue(backEndMessageReceiptApiRequest.wasRequestAttempted());
-        assertEquals(0, backEndMessageReceiptApiRequest.numberOfMessageReceiptsSent());
+        assertEquals(0, backEndMessageReceiptApiRequest.numberOfEventsSent());
         assertEventHasStatus(uri, Event.Status.POSTING_ERROR);
     }
 

@@ -2,10 +2,10 @@ package com.pivotal.cf.mobile.pushsdk.jobs;
 
 import android.test.AndroidTestCase;
 
-import com.pivotal.cf.mobile.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
+import com.pivotal.cf.mobile.pushsdk.backend.BackEndSendEventsApiRequestProvider;
+import com.pivotal.cf.mobile.pushsdk.backend.FakeBackEndSendEventsApiRequest;
 import com.pivotal.cf.mobile.pushsdk.network.FakeNetworkWrapper;
 import com.pivotal.cf.mobile.pushsdk.prefs.FakePreferencesProvider;
-import com.pivotal.cf.mobile.pushsdk.backend.FakeBackEndMessageReceiptApiRequest;
 import com.pivotal.cf.mobile.pushsdk.broadcastreceiver.FakeEventsSenderAlarmProvider;
 import com.pivotal.cf.mobile.pushsdk.database.FakeEventsStorage;
 
@@ -15,8 +15,8 @@ public class JobParamsTest extends AndroidTestCase {
     private FakeNetworkWrapper networkWrapper;
     private FakePreferencesProvider preferencesProvider;
     private FakeEventsSenderAlarmProvider alarmProvider;
-    private FakeBackEndMessageReceiptApiRequest backEndMessageReceiptApiRequest;
-    private BackEndMessageReceiptApiRequestProvider backEndMessageReceiptApiRequestProvider;
+    private FakeBackEndSendEventsApiRequest backEndMessageReceiptApiRequest;
+    private BackEndSendEventsApiRequestProvider backEndSendEventsApiRequestProvider;
     private JobResultListener listener;
 
     @Override
@@ -26,8 +26,8 @@ public class JobParamsTest extends AndroidTestCase {
         networkWrapper = new FakeNetworkWrapper();
         alarmProvider = new FakeEventsSenderAlarmProvider();
         preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null);
-        backEndMessageReceiptApiRequest = new FakeBackEndMessageReceiptApiRequest();
-        backEndMessageReceiptApiRequestProvider = new BackEndMessageReceiptApiRequestProvider(backEndMessageReceiptApiRequest);
+        backEndMessageReceiptApiRequest = new FakeBackEndSendEventsApiRequest();
+        backEndSendEventsApiRequestProvider = new BackEndSendEventsApiRequestProvider(backEndMessageReceiptApiRequest);
         listener = new JobResultListener() {
             @Override
             public void onJobComplete(int resultCode) {
@@ -38,7 +38,7 @@ public class JobParamsTest extends AndroidTestCase {
 
     public void testRequiresContext() {
         try {
-            new JobParams(null, listener, networkWrapper, eventsStorage, preferencesProvider, alarmProvider, backEndMessageReceiptApiRequestProvider);
+            new JobParams(null, listener, networkWrapper, eventsStorage, preferencesProvider, alarmProvider, backEndSendEventsApiRequestProvider);
             fail();
         } catch (IllegalArgumentException e) {
             // success
@@ -47,7 +47,7 @@ public class JobParamsTest extends AndroidTestCase {
 
     public void testRequiresListener() {
         try {
-            new JobParams(getContext(), null, networkWrapper, eventsStorage, preferencesProvider, alarmProvider, backEndMessageReceiptApiRequestProvider);
+            new JobParams(getContext(), null, networkWrapper, eventsStorage, preferencesProvider, alarmProvider, backEndSendEventsApiRequestProvider);
             fail();
         } catch (IllegalArgumentException e) {
             // success
@@ -56,7 +56,7 @@ public class JobParamsTest extends AndroidTestCase {
 
     public void testRequiresNetworkWrapper() {
         try {
-            new JobParams(getContext(), listener, null, eventsStorage, preferencesProvider, alarmProvider, backEndMessageReceiptApiRequestProvider);
+            new JobParams(getContext(), listener, null, eventsStorage, preferencesProvider, alarmProvider, backEndSendEventsApiRequestProvider);
             fail();
         } catch (IllegalArgumentException e) {
             // success
@@ -65,7 +65,7 @@ public class JobParamsTest extends AndroidTestCase {
 
     public void testRequiresEventsStorage() {
         try {
-            new JobParams(getContext(), listener, networkWrapper, null, preferencesProvider, alarmProvider, backEndMessageReceiptApiRequestProvider);
+            new JobParams(getContext(), listener, networkWrapper, null, preferencesProvider, alarmProvider, backEndSendEventsApiRequestProvider);
             fail();
         } catch (IllegalArgumentException e) {
             // success
@@ -74,7 +74,7 @@ public class JobParamsTest extends AndroidTestCase {
 
     public void testRequiresPreferencesProvider() {
         try {
-            new JobParams(getContext(), listener, networkWrapper, eventsStorage, null, alarmProvider, backEndMessageReceiptApiRequestProvider);
+            new JobParams(getContext(), listener, networkWrapper, eventsStorage, null, alarmProvider, backEndSendEventsApiRequestProvider);
             fail();
         } catch (IllegalArgumentException e) {
             // success
@@ -83,7 +83,7 @@ public class JobParamsTest extends AndroidTestCase {
 
     public void testRequiresAlarmProvider() {
         try {
-            new JobParams(getContext(), listener, networkWrapper, eventsStorage, preferencesProvider, null, backEndMessageReceiptApiRequestProvider);
+            new JobParams(getContext(), listener, networkWrapper, eventsStorage, preferencesProvider, null, backEndSendEventsApiRequestProvider);
             fail();
         } catch (IllegalArgumentException e) {
             // success

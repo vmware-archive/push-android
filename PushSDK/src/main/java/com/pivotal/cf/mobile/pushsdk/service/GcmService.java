@@ -125,11 +125,11 @@ public class GcmService extends IntentService {
     }
 
     private void enqueueMessageReceivedEvent(Intent intent) {
-        final Event messageReceipt = getMessageReceivedEvent(intent);
-        final EnqueueEventJob enqueueEventJob = new EnqueueEventJob(messageReceipt);
+        final Event event = getMessageReceivedEvent(intent);
+        final EnqueueEventJob enqueueEventJob = new EnqueueEventJob(event);
         final Intent enqueueEventJobIntent = EventService.getIntentToRunJob(this, enqueueEventJob);
         if (GcmService.serviceStarter.startService(this, enqueueEventJobIntent) == null) {
-            PushLibLogger.e("ERROR: could not start service '" + enqueueEventJobIntent + ". A message receipt event for this message will not be sent.");
+            PushLibLogger.e("ERROR: could not start service '" + enqueueEventJobIntent + ". A 'message received' event for this message will not be sent.");
         }
     }
 

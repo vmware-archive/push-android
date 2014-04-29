@@ -13,11 +13,11 @@ import com.pivotal.cf.mobile.pushsdk.util.DelayedLoop;
 import java.util.LinkedList;
 import java.util.List;
 
-public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
+public class BackEndSendEventsApiRequestImplTest extends AndroidTestCase {
 
     private static final String TEST_MESSAGE_UUID = "TEST-MESSAGE-UUID";
     private NetworkWrapper networkWrapper;
-    private BackEndMessageReceiptListener backEndMessageReceiptListener;
+    private BackEndSendEventsListener backEndSendEventsListener;
     private DelayedLoop delayedLoop;
     private FakeEventsStorage eventsStorage;
     private static final long TEN_SECOND_TIMEOUT = 10000L;
@@ -40,7 +40,7 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresContext() {
         try {
-            new BackEndMessageReceiptApiRequestImpl(null, eventsStorage, networkWrapper);
+            new BackEndSendEventsApiRequestImpl(null, eventsStorage, networkWrapper);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
             // Success
@@ -49,7 +49,7 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresEventsStorage() {
         try {
-            new BackEndMessageReceiptApiRequestImpl(getContext(), null, networkWrapper);
+            new BackEndSendEventsApiRequestImpl(getContext(), null, networkWrapper);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
             // Success
@@ -58,7 +58,7 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresNetworkWrapper() {
         try {
-            new BackEndMessageReceiptApiRequestImpl(getContext(), eventsStorage, null);
+            new BackEndSendEventsApiRequestImpl(getContext(), eventsStorage, null);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
             // Success
@@ -67,9 +67,9 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresMessageReceipts() {
         try {
-            final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(getContext(), eventsStorage, networkWrapper);
+            final BackEndSendEventsApiRequestImpl request = new BackEndSendEventsApiRequestImpl(getContext(), eventsStorage, networkWrapper);
             makeBackEndMessageReceiptListener(true);
-            request.startSendMessageReceipts(null, backEndMessageReceiptListener);
+            request.startSendEvents(null, backEndSendEventsListener);
             fail("Should not have succeeded");
         } catch (Exception e) {
             // Success
@@ -78,9 +78,9 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
 
     public void testMessageReceiptsMayNotBeEmpty() {
         try {
-            final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(getContext(), eventsStorage, networkWrapper);
+            final BackEndSendEventsApiRequestImpl request = new BackEndSendEventsApiRequestImpl(getContext(), eventsStorage, networkWrapper);
             makeBackEndMessageReceiptListener(true);
-            request.startSendMessageReceipts(emptyList, backEndMessageReceiptListener);
+            request.startSendEvents(emptyList, backEndSendEventsListener);
             fail("Should not have succeeded");
         } catch (Exception e) {
             // Success
@@ -89,8 +89,8 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresListener() {
         try {
-            final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(getContext(), eventsStorage, networkWrapper);
-            request.startSendMessageReceipts(listWithOneItem, null);
+            final BackEndSendEventsApiRequestImpl request = new BackEndSendEventsApiRequestImpl(getContext(), eventsStorage, networkWrapper);
+            request.startSendEvents(listWithOneItem, null);
             fail("Should not have succeeded");
         } catch (Exception e) {
             // Success
@@ -99,8 +99,8 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
 
     public void testSuccessfulRequest() {
         makeListenersForSuccessfulRequestFromNetwork(true, 200);
-        final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(getContext(), eventsStorage, networkWrapper);
-        request.startSendMessageReceipts(listWithOneItem, backEndMessageReceiptListener);
+        final BackEndSendEventsApiRequestImpl request = new BackEndSendEventsApiRequestImpl(getContext(), eventsStorage, networkWrapper);
+        request.startSendEvents(listWithOneItem, backEndSendEventsListener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
@@ -109,7 +109,7 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
 //    public void testCouldNotConnect() {
 //        makeListenersFromFailedRequestFromNetwork("Your server is busted", 0);
 //        final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
-//        request.startSendMessageReceipts(listWithOneItem, backEndMessageReceiptListener);
+//        request.startSendEvents(listWithOneItem, backEndMessageReceiptListener);
 //        delayedLoop.startLoop();
 //        assertTrue(delayedLoop.isSuccess());
 //    }
@@ -118,7 +118,7 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
 //    public void testSuccessful400() {
 //        makeListenersForSuccessfulRequestFromNetwork(false, 400);
 //        final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
-//        request.startSendMessageReceipts(listWithOneItem, backEndMessageReceiptListener);
+//        request.startSendEvents(listWithOneItem, backEndMessageReceiptListener);
 //        delayedLoop.startLoop();
 //        assertTrue(delayedLoop.isSuccess());
 //    }
@@ -140,10 +140,10 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
     }
 
     private void makeBackEndMessageReceiptListener(final boolean isSuccessfulRequest) {
-        backEndMessageReceiptListener = new BackEndMessageReceiptListener() {
+        backEndSendEventsListener = new BackEndSendEventsListener() {
 
             @Override
-            public void onBackEndMessageReceiptSuccess() {
+            public void onBackEndSendEventsSuccess() {
                 assertTrue(isSuccessfulRequest);
                 if (isSuccessfulRequest) {
                     delayedLoop.flagSuccess();
@@ -153,7 +153,7 @@ public class BackEndMessageReceiptApiRequestImplTest extends AndroidTestCase {
             }
 
             @Override
-            public void onBackEndMessageReceiptFailed(String reason) {
+            public void onBackEndSendEventsFailed(String reason) {
                 assertFalse(isSuccessfulRequest);
                 if (isSuccessfulRequest) {
                     delayedLoop.flagFailure();

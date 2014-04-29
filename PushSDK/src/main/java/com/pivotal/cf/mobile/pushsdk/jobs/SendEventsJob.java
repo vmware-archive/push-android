@@ -4,8 +4,8 @@ import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import com.pivotal.cf.mobile.pushsdk.backend.BackEndMessageReceiptApiRequest;
-import com.pivotal.cf.mobile.pushsdk.backend.BackEndMessageReceiptListener;
+import com.pivotal.cf.mobile.pushsdk.backend.BackEndSendEventsApiRequest;
+import com.pivotal.cf.mobile.pushsdk.backend.BackEndSendEventsListener;
 import com.pivotal.cf.mobile.pushsdk.model.events.Event;
 import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 
@@ -43,11 +43,11 @@ public class SendEventsJob extends BaseJob {
 
     private void sendEvents(final JobParams jobParams, final List<Uri> uris) {
 
-        final BackEndMessageReceiptApiRequest apiRequest = jobParams.backEndMessageReceiptApiRequestProvider.getRequest();
-        apiRequest.startSendMessageReceipts(uris, new BackEndMessageReceiptListener() {
+        final BackEndSendEventsApiRequest apiRequest = jobParams.backEndSendEventsApiRequestProvider.getRequest();
+        apiRequest.startSendEvents(uris, new BackEndSendEventsListener() {
 
             @Override
-            public void onBackEndMessageReceiptSuccess() {
+            public void onBackEndSendEventsSuccess() {
                 if (uris != null) {
                     jobParams.eventsStorage.deleteEvents(uris);
                 }
@@ -55,7 +55,7 @@ public class SendEventsJob extends BaseJob {
             }
 
             @Override
-            public void onBackEndMessageReceiptFailed(String reason) {
+            public void onBackEndSendEventsFailed(String reason) {
                 setStatusForEvents(jobParams, uris, Event.Status.POSTING_ERROR);
                 sendJobResult(RESULT_FAILED_TO_SEND_RECEIPTS, jobParams);
             }

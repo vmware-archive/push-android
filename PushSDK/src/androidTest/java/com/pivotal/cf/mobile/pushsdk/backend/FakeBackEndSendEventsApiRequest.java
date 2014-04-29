@@ -5,29 +5,29 @@ import android.net.Uri;
 import java.util.Collections;
 import java.util.List;
 
-public class FakeBackEndMessageReceiptApiRequest implements BackEndMessageReceiptApiRequest {
+public class FakeBackEndSendEventsApiRequest implements BackEndSendEventsApiRequest {
 
-    private final FakeBackEndMessageReceiptApiRequest originatingRequest;
+    private final FakeBackEndSendEventsApiRequest originatingRequest;
     private boolean willBeSuccessfulRequest = false;
     private boolean wasRequestAttempted = false;
     private RequestHook requestHook = null;
     private List<Uri> receivedUris = null;
 
     public interface RequestHook {
-        public void onRequestMade(FakeBackEndMessageReceiptApiRequest request, List<Uri> uris);
+        public void onRequestMade(FakeBackEndSendEventsApiRequest request, List<Uri> uris);
     }
 
-    public FakeBackEndMessageReceiptApiRequest(FakeBackEndMessageReceiptApiRequest originatingRequest) {
+    public FakeBackEndSendEventsApiRequest(FakeBackEndSendEventsApiRequest originatingRequest) {
         this.originatingRequest = originatingRequest;
     }
 
-    public FakeBackEndMessageReceiptApiRequest() {
+    public FakeBackEndSendEventsApiRequest() {
         this.originatingRequest = null;
         this.willBeSuccessfulRequest = false;
     }
 
     @Override
-    public void startSendMessageReceipts(List<Uri> uris, BackEndMessageReceiptListener listener) {
+    public void startSendEvents(List<Uri> eventUris, BackEndSendEventsListener listener) {
 
         wasRequestAttempted = true;
         if (originatingRequest != null) {
@@ -35,23 +35,23 @@ public class FakeBackEndMessageReceiptApiRequest implements BackEndMessageReceip
         }
 
         if (requestHook != null) {
-            requestHook.onRequestMade(this, uris);
+            requestHook.onRequestMade(this, eventUris);
         }
 
         if (willBeSuccessfulRequest) {
-            receivedUris = uris;
+            receivedUris = eventUris;
             if (originatingRequest != null) {
-                originatingRequest.receivedUris = uris;
+                originatingRequest.receivedUris = eventUris;
             }
-            listener.onBackEndMessageReceiptSuccess();
+            listener.onBackEndSendEventsSuccess();
         } else {
-            listener.onBackEndMessageReceiptFailed("The fake request failed fakely.");
+            listener.onBackEndSendEventsFailed("The fake request failed fakely.");
         }
     }
 
     @Override
-    public BackEndMessageReceiptApiRequest copy() {
-        final FakeBackEndMessageReceiptApiRequest newRequest = new FakeBackEndMessageReceiptApiRequest(this);
+    public BackEndSendEventsApiRequest copy() {
+        final FakeBackEndSendEventsApiRequest newRequest = new FakeBackEndSendEventsApiRequest(this);
         newRequest.willBeSuccessfulRequest = willBeSuccessfulRequest;
         return newRequest;
     }
@@ -68,7 +68,7 @@ public class FakeBackEndMessageReceiptApiRequest implements BackEndMessageReceip
         this.requestHook = requestHook;
     }
 
-    public int numberOfMessageReceiptsSent() {
+    public int numberOfEventsSent() {
         if (receivedUris == null) {
             return 0;
         } else {

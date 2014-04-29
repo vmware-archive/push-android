@@ -15,16 +15,15 @@
 
 package com.pivotal.cf.mobile.pushsdk.backend;
 
-// TODO: generalize to other event types
-public class BackEndMessageReceiptApiRequestProvider {
+public class BackEndSendEventsApiRequestProvider {
 
-    private final BackEndMessageReceiptApiRequest dummyRequest;
+    private final BackEndSendEventsApiRequest dummyRequest;
 
-    public BackEndMessageReceiptApiRequestProvider(BackEndMessageReceiptApiRequest dummyRequest) {
+    public BackEndSendEventsApiRequestProvider(BackEndSendEventsApiRequest dummyRequest) {
         this.dummyRequest = dummyRequest;
     }
 
-    public BackEndMessageReceiptApiRequest getRequest() {
+    public BackEndSendEventsApiRequest getRequest() {
         return dummyRequest.copy();
     }
 }

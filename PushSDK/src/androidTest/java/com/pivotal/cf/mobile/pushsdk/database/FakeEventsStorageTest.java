@@ -11,7 +11,7 @@ import java.util.List;
 
 public class FakeEventsStorageTest extends AndroidTestCase {
 
-	private static final Uri NON_EXISTENT_FILE_1 = Uri.parse("file://message_receipts/this_name_does_not_exist_come_on!");
+	private static final Uri NON_EXISTENT_FILE_1 = Uri.parse("file://events/this_name_does_not_exist_come_on!");
     private static final String TEST_VARIANT_ID_1 = "TEST_VARIANT_ID_1";
     private static final String TEST_VARIANT_ID_2 = "TEST_VARIANT_ID_2";
     private static final String TEST_VARIANT_ID_3 = "TEST_VARIANT_ID_3";

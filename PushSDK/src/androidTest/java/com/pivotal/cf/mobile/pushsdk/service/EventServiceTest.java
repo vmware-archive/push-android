@@ -6,8 +6,8 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.test.ServiceTestCase;
 
-import com.pivotal.cf.mobile.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
-import com.pivotal.cf.mobile.pushsdk.backend.FakeBackEndMessageReceiptApiRequest;
+import com.pivotal.cf.mobile.pushsdk.backend.BackEndSendEventsApiRequestProvider;
+import com.pivotal.cf.mobile.pushsdk.backend.FakeBackEndSendEventsApiRequest;
 import com.pivotal.cf.mobile.pushsdk.broadcastreceiver.FakeEventsSenderAlarmProvider;
 import com.pivotal.cf.mobile.pushsdk.database.DatabaseWrapper;
 import com.pivotal.cf.mobile.pushsdk.database.FakeEventsStorage;
@@ -28,8 +28,8 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
     private FakeNetworkWrapper networkWrapper;
     private FakeEventsStorage eventsStorage;
     private FakePreferencesProvider preferencesProvider;
-    private FakeEventsSenderAlarmProvider messageReceiptAlarmProvider;
-    private FakeBackEndMessageReceiptApiRequest backEndMessageReceiptApiRequest;
+    private FakeEventsSenderAlarmProvider alarmProvider;
+    private FakeBackEndSendEventsApiRequest backEndMessageReceiptApiRequest;
     private List<String> listOfCompletedJobs;
     private int testResultCode = EventService.NO_RESULT;
     private TestResultReceiver testResultReceiver;
@@ -58,19 +58,19 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
         networkWrapper = new FakeNetworkWrapper();
         eventsStorage = new FakeEventsStorage();
         preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null);
-        backEndMessageReceiptApiRequest = new FakeBackEndMessageReceiptApiRequest();
+        backEndMessageReceiptApiRequest = new FakeBackEndSendEventsApiRequest();
         testResultReceiver = new TestResultReceiver(null);
         listOfCompletedJobs = new LinkedList<String>();
 
-        messageReceiptAlarmProvider = new FakeEventsSenderAlarmProvider();
-        messageReceiptAlarmProvider.enableAlarm();
+        alarmProvider = new FakeEventsSenderAlarmProvider();
+        alarmProvider.enableAlarm();
 
         EventService.semaphore = new Semaphore(0);
         EventService.networkWrapper = networkWrapper;
         EventService.eventsStorage = eventsStorage;
         EventService.preferencesProvider = preferencesProvider;
-        EventService.backEndMessageReceiptApiRequestProvider = new BackEndMessageReceiptApiRequestProvider(backEndMessageReceiptApiRequest);
-        EventService.alarmProvider = messageReceiptAlarmProvider;
+        EventService.backEndSendEventsApiRequestProvider = new BackEndSendEventsApiRequestProvider(backEndMessageReceiptApiRequest);
+        EventService.alarmProvider = alarmProvider;
         EventService.listOfCompletedJobs = listOfCompletedJobs;
     }
 
@@ -81,7 +81,7 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
         EventService.eventsStorage = null;
         EventService.preferencesProvider = null;
         EventService.alarmProvider = null;
-        EventService.backEndMessageReceiptApiRequestProvider = null;
+        EventService.backEndSendEventsApiRequestProvider = null;
         super.tearDown();
     }
 

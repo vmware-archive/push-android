@@ -5,8 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.ResultReceiver;
 
-import com.pivotal.cf.mobile.pushsdk.backend.BackEndMessageReceiptApiRequestImpl;
-import com.pivotal.cf.mobile.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
+import com.pivotal.cf.mobile.pushsdk.backend.BackEndSendEventsApiRequestImpl;
+import com.pivotal.cf.mobile.pushsdk.backend.BackEndSendEventsApiRequestProvider;
 import com.pivotal.cf.mobile.pushsdk.broadcastreceiver.EventsSenderAlarmProvider;
 import com.pivotal.cf.mobile.pushsdk.broadcastreceiver.EventsSenderAlarmProviderImpl;
 import com.pivotal.cf.mobile.pushsdk.broadcastreceiver.EventsSenderAlarmReceiver;
@@ -41,7 +41,7 @@ public class EventService extends IntentService {
     /* package */ static EventsStorage eventsStorage = null;
     /* package */ static PreferencesProvider preferencesProvider = null;
     /* package */ static EventsSenderAlarmProvider alarmProvider = null;
-    /* package */ static BackEndMessageReceiptApiRequestProvider backEndMessageReceiptApiRequestProvider = null;
+    /* package */ static BackEndSendEventsApiRequestProvider backEndSendEventsApiRequestProvider = null;
     /* package */ static List<String> listOfCompletedJobs = null;
 
     public static Intent getIntentToRunJob(Context context, BaseJob job) {
@@ -90,9 +90,9 @@ public class EventService extends IntentService {
         if (EventService.eventsStorage == null) {
             needToCleanDatabase = setupDatabase();
         }
-        if (EventService.backEndMessageReceiptApiRequestProvider == null) {
-            final BackEndMessageReceiptApiRequestImpl backEndMessageReceiptApiRequest = new BackEndMessageReceiptApiRequestImpl(this, EventService.eventsStorage, EventService.networkWrapper);
-            EventService.backEndMessageReceiptApiRequestProvider = new BackEndMessageReceiptApiRequestProvider(backEndMessageReceiptApiRequest);
+        if (EventService.backEndSendEventsApiRequestProvider == null) {
+            final BackEndSendEventsApiRequestImpl backEndMessageReceiptApiRequest = new BackEndSendEventsApiRequestImpl(this, EventService.eventsStorage, EventService.networkWrapper);
+            EventService.backEndSendEventsApiRequestProvider = new BackEndSendEventsApiRequestProvider(backEndMessageReceiptApiRequest);
         }
 
         if (!isIntentForCleanup(intent) && needToCleanDatabase) {
@@ -187,7 +187,7 @@ public class EventService extends IntentService {
                 EventService.eventsStorage,
                 EventService.preferencesProvider,
                 EventService.alarmProvider,
-                EventService.backEndMessageReceiptApiRequestProvider);
+                EventService.backEndSendEventsApiRequestProvider);
     }
 
     // Used by unit tests
@@ -231,7 +231,7 @@ public class EventService extends IntentService {
         EventService.eventsStorage = null;
         EventService.preferencesProvider = null;
         EventService.alarmProvider = null;
-        EventService.backEndMessageReceiptApiRequestProvider = null;
+        EventService.backEndSendEventsApiRequestProvider = null;
         EventService.listOfCompletedJobs = null;
     }
 }

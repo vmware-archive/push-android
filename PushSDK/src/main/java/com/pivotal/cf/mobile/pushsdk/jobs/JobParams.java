@@ -2,7 +2,7 @@ package com.pivotal.cf.mobile.pushsdk.jobs;
 
 import android.content.Context;
 
-import com.pivotal.cf.mobile.pushsdk.backend.BackEndMessageReceiptApiRequestProvider;
+import com.pivotal.cf.mobile.pushsdk.backend.BackEndSendEventsApiRequestProvider;
 import com.pivotal.cf.mobile.pushsdk.broadcastreceiver.EventsSenderAlarmProvider;
 import com.pivotal.cf.mobile.pushsdk.database.EventsStorage;
 import com.pivotal.cf.mobile.pushsdk.network.NetworkWrapper;
@@ -16,7 +16,7 @@ public class JobParams {
     public final PreferencesProvider preferencesProvider;
     public final EventsStorage eventsStorage;
     public final EventsSenderAlarmProvider alarmProvider;
-    public final BackEndMessageReceiptApiRequestProvider backEndMessageReceiptApiRequestProvider;
+    public final BackEndSendEventsApiRequestProvider backEndSendEventsApiRequestProvider;
 
     public JobParams(Context context,
                      JobResultListener listener,
@@ -24,9 +24,9 @@ public class JobParams {
                      EventsStorage eventsStorage,
                      PreferencesProvider preferencesProvider,
                      EventsSenderAlarmProvider alarmProvider,
-                     BackEndMessageReceiptApiRequestProvider backEndMessageReceiptApiRequestProvider) {
+                     BackEndSendEventsApiRequestProvider backEndSendEventsApiRequestProvider) {
 
-        verifyArguments(context, listener, networkWrapper, eventsStorage, preferencesProvider, alarmProvider, backEndMessageReceiptApiRequestProvider);
+        verifyArguments(context, listener, networkWrapper, eventsStorage, preferencesProvider, alarmProvider, backEndSendEventsApiRequestProvider);
 
         this.context = context;
         this.listener = listener;
@@ -34,7 +34,7 @@ public class JobParams {
         this.eventsStorage = eventsStorage;
         this.preferencesProvider = preferencesProvider;
         this.alarmProvider = alarmProvider;
-        this.backEndMessageReceiptApiRequestProvider = backEndMessageReceiptApiRequestProvider;
+        this.backEndSendEventsApiRequestProvider = backEndSendEventsApiRequestProvider;
     }
 
     private void verifyArguments(Context context,
@@ -43,7 +43,7 @@ public class JobParams {
                                  EventsStorage eventsStorage,
                                  PreferencesProvider preferencesProvider,
                                  EventsSenderAlarmProvider alarmProvider,
-                                 BackEndMessageReceiptApiRequestProvider backEndMessageReceiptApiRequestProvider) {
+                                 BackEndSendEventsApiRequestProvider backEndSendEventsApiRequestProvider) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
@@ -62,7 +62,7 @@ public class JobParams {
         if (alarmProvider == null) {
             throw new IllegalArgumentException("alarmProvider may not be null");
         }
-        if (backEndMessageReceiptApiRequestProvider == null) {
+        if (backEndSendEventsApiRequestProvider == null) {
             throw new IllegalArgumentException("backEndMessageReceiptApiRequestProvider may not be null");
         }
     }
