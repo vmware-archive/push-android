@@ -15,7 +15,9 @@
 
 package com.pivotal.cf.mobile.pushsdk.backend;
 
+import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
+
 public interface BackEndUnregisterDeviceApiRequest {
-    void startUnregisterDevice(String backEndDeviceRegistrationId, BackEndUnregisterDeviceListener listener);
+    void startUnregisterDevice(String backEndDeviceRegistrationId, RegistrationParameters parameters, BackEndUnregisterDeviceListener listener);
     BackEndUnregisterDeviceApiRequest copy();
 }

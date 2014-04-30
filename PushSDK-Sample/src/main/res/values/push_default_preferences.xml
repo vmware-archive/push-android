@@ -16,6 +16,10 @@
     <!-- also have to provide it in your "variant" in the Pivotal CF Mobile Services Push Server admin console.      -->
     <string name="pref_default_gcm_browser_api_key">AIzaSyCXEJN2mC0rAupa3Df5ZX-1O0ww5V308ZU</string>
 
+    <!-- The base URI of the Pivotal CF Mobile Services server that is used to provide client push and related       -->
+    <!-- analytics services.                                                                                         -->
+    <string name="pref_default_base_server_url">http://ec2-54-87-125-154.compute-1.amazonaws.com</string>
+
     <!-- Set this parameter to the Variant UUID of your project in the Pivotal CF Mobile Services Push Server        -->
     <!-- admin console.  It is used during the registration process.                                                 -->
     <string name="pref_default_variant_uuid">5ad8f487-c7ea-4d4e-8c8c-8799528d53d9</string>

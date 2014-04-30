@@ -19,6 +19,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.pivotal.cf.mobile.pushsdk.util.Const;
+import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
+
+import java.net.MalformedURLException;
+import java.net.URL;
 
 /**
  * Saves preferences to the SharedPreferences on the filesystem.
@@ -35,6 +39,7 @@ public class PreferencesProviderImpl implements PreferencesProvider {
     private static final String PROPERTY_VARIANT_SECRET = "variant_secret";
     private static final String PROPERTY_DEVICE_ALIAS = "device_alias";
     private static final String PROPERTY_PACKAGE_NAME = "package_name";
+    private static final String PROPERTY_BASE_SERVER_URL = "base_server_url";
 
     private final Context context;
 
@@ -146,6 +151,32 @@ public class PreferencesProviderImpl implements PreferencesProvider {
         final SharedPreferences prefs = getSharedPreferences();
         final SharedPreferences.Editor editor = prefs.edit();
         editor.putString(PROPERTY_PACKAGE_NAME, packageName);
+        editor.commit();
+    }
+
+    @Override
+    public URL getBaseServerUrl() {
+        final String setting = getSharedPreferences().getString(PROPERTY_BASE_SERVER_URL, null);
+        if (setting == null) {
+            return null;
+        }
+        try {
+            return new URL(setting);
+        } catch (MalformedURLException e) {
+            PushLibLogger.w("Invalid base server URL stored in settings: " + setting);
+            return null;
+        }
+    }
+
+    @Override
+    public void setBaseServerUrl(URL baseServerUrl) {
+        final SharedPreferences prefs = getSharedPreferences();
+        final SharedPreferences.Editor editor = prefs.edit();
+        if (baseServerUrl != null) {
+            editor.putString(PROPERTY_BASE_SERVER_URL, baseServerUrl.toString());
+        } else {
+            editor.putString(PROPERTY_BASE_SERVER_URL, null);
+        }
         editor.commit();
     }
 

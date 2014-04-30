@@ -15,6 +15,7 @@
 
 package com.pivotal.cf.mobile.pushsdk.backend;
 
+import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.network.NetworkWrapper;
 import com.pivotal.cf.mobile.pushsdk.util.Const;
 import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
@@ -32,13 +33,15 @@ public class BackEndUnregisterDeviceApiRequestImpl extends ApiRequestImpl implem
     }
 
     @Override
-    public void startUnregisterDevice(String backEndDeviceRegistrationId, BackEndUnregisterDeviceListener listener) {
+    public void startUnregisterDevice(String backEndDeviceRegistrationId, RegistrationParameters parameters, BackEndUnregisterDeviceListener listener) {
+
+        // TODO - add verification: parameters may not be null
 
         verifyUnregistrationArguments(backEndDeviceRegistrationId, listener);
 
         try {
             PushLibLogger.v("Making network request to the back-end server to unregister the device ID:" + backEndDeviceRegistrationId);
-            final URL url = new URL(Const.BACKEND_REGISTRATION_REQUEST_URL + "/" + backEndDeviceRegistrationId);
+            final URL url = new URL(parameters.getBaseServerUrl(), Const.BACKEND_REGISTRATION_REQUEST_ENDPOINT + "/" + backEndDeviceRegistrationId);
             final HttpURLConnection urlConnection = getHttpURLConnection(url);
             urlConnection.setRequestMethod("DELETE");
             urlConnection.connect();

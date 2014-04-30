@@ -15,6 +15,8 @@
 
 package com.pivotal.cf.mobile.pushsdk.backend;
 
+import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
+
 public class FakeBackEndUnregisterDeviceApiRequest implements BackEndUnregisterDeviceApiRequest {
 
     private final FakeBackEndUnregisterDeviceApiRequest originatingRequest;
@@ -37,7 +39,7 @@ public class FakeBackEndUnregisterDeviceApiRequest implements BackEndUnregisterD
     }
 
     @Override
-    public void startUnregisterDevice(String backEndDeviceRegistrationId, BackEndUnregisterDeviceListener listener) {
+    public void startUnregisterDevice(String backEndDeviceRegistrationId, RegistrationParameters parameters, BackEndUnregisterDeviceListener listener) {
         wasUnregisterCalled = true;
         if (originatingRequest != null) {
             originatingRequest.wasUnregisterCalled = true;

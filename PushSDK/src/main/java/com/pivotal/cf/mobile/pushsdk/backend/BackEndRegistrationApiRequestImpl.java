@@ -69,6 +69,8 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
     @Override
     public void startUpdateDeviceRegistration(String gcmDeviceRegistrationId, String backEndDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener) {
 
+        // TODO - add verification: parameters may not be null
+
         verifyUpdateRegistrationArguments(gcmDeviceRegistrationId, backEndDeviceRegistrationId, listener);
         handleRequest(gcmDeviceRegistrationId, backEndDeviceRegistrationId, parameters, listener, true);
     }
@@ -97,7 +99,7 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
     private void handleRequest(String gcmDeviceRegistrationId, String previousBackEndDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener, boolean isUpdate) {
         OutputStream outputStream = null;
         try {
-            final URL url = getURL(isUpdate, previousBackEndDeviceRegistrationId);
+            final URL url = getURL(isUpdate, previousBackEndDeviceRegistrationId, parameters);
             final HttpURLConnection urlConnection = getHttpURLConnection(url);
             urlConnection.setDoOutput(true); // indicate "POST" request
             urlConnection.setDoInput(true);
@@ -134,11 +136,11 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
         }
     }
 
-    private URL getURL(boolean isUpdate, String previousBackEndDeviceRegistrationId) throws MalformedURLException {
+    private URL getURL(boolean isUpdate, String previousBackEndDeviceRegistrationId, RegistrationParameters parameters) throws MalformedURLException {
         if (isUpdate) {
-            return new URL(Const.BACKEND_REGISTRATION_REQUEST_URL + "/" +  previousBackEndDeviceRegistrationId);
+            return new URL(parameters.getBaseServerUrl(), Const.BACKEND_REGISTRATION_REQUEST_ENDPOINT + "/" +  previousBackEndDeviceRegistrationId);
         } else {
-            return new URL(Const.BACKEND_REGISTRATION_REQUEST_URL);
+            return new URL(parameters.getBaseServerUrl(), Const.BACKEND_REGISTRATION_REQUEST_ENDPOINT);
         }
     }
 

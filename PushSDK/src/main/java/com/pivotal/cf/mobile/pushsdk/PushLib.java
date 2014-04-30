@@ -170,10 +170,10 @@ public class PushLib {
     /**
      * Asynchronously unregisters the device and application from receiving push notifications.  If the application
      *
+     * @param parameters Provides the parameters required for unregistration.  May not be null.
      * @param listener Optional listener for receiving a callback after un`registration finishes. This callback may
-     *                 be called on a background thread.  May be null.
      */
-    public void startUnregistration(final UnregistrationListener listener) {
+    public void startUnregistration(final RegistrationParameters parameters, final UnregistrationListener listener) {
         final GcmProvider gcmProvider = new RealGcmProvider(context);
         final PreferencesProvider preferencesProvider = new PreferencesProviderImpl(context);
         final GcmUnregistrationApiRequest dummyGcmUnregistrationApiRequest = new GcmUnregistrationApiRequestImpl(context, gcmProvider);
@@ -187,7 +187,7 @@ public class PushLib {
             public void run() {
                 try {
                     final UnregistrationEngine unregistrationEngine = new UnregistrationEngine(context, gcmProvider, preferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
-                    unregistrationEngine.unregisterDevice(listener);
+                    unregistrationEngine.unregisterDevice(parameters, listener);
                 } catch (Exception e) {
                     PushLibLogger.ex("PushLib unregistration failed", e);
                 }

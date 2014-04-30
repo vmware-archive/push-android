@@ -48,6 +48,16 @@
             android:singleLine="true"
             android:maxLines="1"/>
 
+        <EditTextPreference
+            android:key="test_base_server_url"
+            android:title="@string/pref_title_base_server_url"
+            android:defaultValue="@string/pref_default_base_server_url"
+            android:persistent="true"
+            android:selectAllOnFocus="true"
+            android:inputType="text"
+            android:singleLine="true"
+            android:maxLines="1"/>
+
     </PreferenceCategory>
 
     <PreferenceCategory

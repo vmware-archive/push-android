@@ -2,6 +2,7 @@ package com.pivotal.cf.mobile.pushsdk.registration;
 
 import android.content.Context;
 
+import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndUnregisterDeviceApiRequestProvider;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndUnregisterDeviceListener;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmProvider;
@@ -64,14 +65,18 @@ public class UnregistrationEngine {
         this.previousBackEndDeviceRegistrationId = preferencesProvider.getBackEndDeviceRegistrationId();
     }
 
-    public void unregisterDevice(UnregistrationListener listener) {
+    public void unregisterDevice(RegistrationParameters parameters, UnregistrationListener listener) {
+
+        if (parameters == null) {
+            throw new IllegalArgumentException("parameters may not be null");
+        }
 
         // Clear the saved package name so that the message receiver service won't be able to send
         // the application any more broadcasts
         preferencesProvider.setPackageName(null);
 
         if (gcmProvider.isGooglePlayServicesInstalled(context)) {
-            unregisterDeviceWithGcm(listener);
+            unregisterDeviceWithGcm(parameters, listener);
         } else {
             if (listener != null) {
                 listener.onUnregistrationFailed("Google Play Services is not available");
@@ -79,38 +84,38 @@ public class UnregistrationEngine {
         }
     }
 
-    private void unregisterDeviceWithGcm(final UnregistrationListener listener) {
+    private void unregisterDeviceWithGcm(RegistrationParameters parameters, final UnregistrationListener listener) {
         PushLibLogger.i("Unregistering sender ID with GCM.");
         final GcmUnregistrationApiRequest gcmUnregistrationApiRequest = gcmUnregistrationApiRequestProvider.getRequest();
-        gcmUnregistrationApiRequest.startUnregistration(getGcmUnregistrationListener(listener));
+        gcmUnregistrationApiRequest.startUnregistration(getGcmUnregistrationListener(parameters, listener));
     }
 
-    private GcmUnregistrationListener getGcmUnregistrationListener(final UnregistrationListener listener) {
+    private GcmUnregistrationListener getGcmUnregistrationListener(final RegistrationParameters parameters, final UnregistrationListener listener) {
         return new GcmUnregistrationListener() {
             @Override
             public void onGcmUnregistrationComplete() {
                 preferencesProvider.setGcmDeviceRegistrationId(null);
                 preferencesProvider.setGcmSenderId(null);
                 preferencesProvider.setAppVersion(-1);
-                unregisterDeviceWithBackEnd(previousBackEndDeviceRegistrationId, listener);
+                unregisterDeviceWithBackEnd(previousBackEndDeviceRegistrationId, parameters, listener);
             }
 
             @Override
             public void onGcmUnregistrationFailed(String reason) {
                 // Even if we couldn't unregister from GCM we need to continue and unregister the device from the back-end
-                unregisterDeviceWithBackEnd(previousBackEndDeviceRegistrationId, listener);
+                unregisterDeviceWithBackEnd(previousBackEndDeviceRegistrationId, parameters, listener);
             }
         };
     }
 
-    private void unregisterDeviceWithBackEnd(final String backEndDeviceRegistrationId, final UnregistrationListener listener) {
+    private void unregisterDeviceWithBackEnd(final String backEndDeviceRegistrationId, RegistrationParameters parameters, final UnregistrationListener listener) {
         if (backEndDeviceRegistrationId == null) {
             PushLibLogger.i("Not currently registered with the back-end.  Unregistration is not required.");
             listener.onUnregistrationComplete();
         } else {
             PushLibLogger.i("Initiating device unregistration with the back-end.");
             final BackEndUnregisterDeviceApiRequest backEndUnregisterDeviceApiRequest = backEndUnregisterDeviceApiRequestProvider.getRequest();
-            backEndUnregisterDeviceApiRequest.startUnregisterDevice(backEndDeviceRegistrationId, getBackEndUnregisterDeviceListener(listener));
+            backEndUnregisterDeviceApiRequest.startUnregisterDevice(backEndDeviceRegistrationId, parameters, getBackEndUnregisterDeviceListener(listener));
         }
     }
 
@@ -123,6 +128,7 @@ public class UnregistrationEngine {
                 preferencesProvider.setVariantUuid(null);
                 preferencesProvider.setVariantSecret(null);
                 preferencesProvider.setDeviceAlias(null);
+                preferencesProvider.setBaseServerUrl(null);
                 listener.onUnregistrationComplete();
             }
 

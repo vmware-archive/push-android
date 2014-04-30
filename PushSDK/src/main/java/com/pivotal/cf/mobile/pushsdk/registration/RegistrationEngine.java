@@ -32,6 +32,9 @@ import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProvider;
 import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 import com.pivotal.cf.mobile.pushsdk.version.VersionProvider;
 
+import java.net.URL;
+
+// TODO update this comment
 /**
  * This class is responsible for all the business logic behind device registration.  For a description
  * of its operation you can refer to the following diagrams:
@@ -77,6 +80,7 @@ public class RegistrationEngine {
     private String previousVariantUuid;
     private String previousVariantSecret;
     private String previousDeviceAlias;
+    private URL previousBackEndServerUrl;
 
     /**
      * Instantiate an instance of the RegistrationEngine.
@@ -96,7 +100,15 @@ public class RegistrationEngine {
         saveArguments(context, packageName, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
     }
 
-    private void verifyArguments(Context context, String packageName, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, VersionProvider versionProvider) {
+    private void verifyArguments(Context context,
+                                 String packageName,
+                                 GcmProvider gcmProvider,
+                                 PreferencesProvider preferencesProvider,
+                                 GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
+                                 GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
+                                 BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider,
+                                 VersionProvider versionProvider) {
+
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
@@ -123,7 +135,15 @@ public class RegistrationEngine {
         }
     }
 
-    private void saveArguments(Context context, String packageName, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, VersionProvider versionProvider) {
+    private void saveArguments(Context context,
+                               String packageName,
+                               GcmProvider gcmProvider,
+                               PreferencesProvider preferencesProvider,
+                               GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
+                               GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
+                               BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider,
+                               VersionProvider versionProvider) {
+
         this.context = context;
         this.packageName = packageName;
         this.gcmProvider = gcmProvider;
@@ -138,6 +158,7 @@ public class RegistrationEngine {
         this.previousVariantUuid = preferencesProvider.getVariantUuid();
         this.previousVariantSecret = preferencesProvider.getVariantSecret();
         this.previousDeviceAlias = preferencesProvider.getDeviceAlias();
+        this.previousBackEndServerUrl = preferencesProvider.getBaseServerUrl();
     }
 
     /**
@@ -202,6 +223,9 @@ public class RegistrationEngine {
         if (parameters.getDeviceAlias() == null) {
             throw new IllegalArgumentException("parameters.deviceAlias may not be null");
         }
+        if (parameters.getBaseServerUrl() == null) {
+            throw new IllegalArgumentException("parameters.baseServerUrl may not be null");
+        }
     }
 
     private boolean isGcmRegistrationRequired(RegistrationParameters parameters) {
@@ -245,13 +269,17 @@ public class RegistrationEngine {
 
     private boolean isBackEndNewRegistrationRequired(RegistrationParameters parameters) {
         final boolean isPreviousVariantUuidEmpty = previousVariantUuid == null || previousVariantUuid.isEmpty();
+        final boolean isBackEndServerUrlUpdated = isBackEndServerUrlUpdated(parameters);
         if (isEmptyPreviousGcmDeviceRegistrationId()) {
             PushLibLogger.v("previousGcmDeviceRegistrationId is empty. Device registration with the back-end will be required.");
         }
         if (isPreviousVariantUuidEmpty) {
             PushLibLogger.v("previousVariantUuid is empty. Device registration with the back-end will be required.");
         }
-        return isEmptyPreviousGcmDeviceRegistrationId() || isPreviousVariantUuidEmpty || areRegistrationParametersUpdated(parameters);
+        if (isBackEndServerUrlUpdated) {
+            PushLibLogger.v("The backEndServerUrl has been updated. Device registration with the back-end will be required.");
+        }
+        return isEmptyPreviousGcmDeviceRegistrationId() || isPreviousVariantUuidEmpty || areRegistrationParametersUpdated(parameters) || isBackEndServerUrlUpdated;
     }
 
 
@@ -283,6 +311,12 @@ public class RegistrationEngine {
         final boolean isNewDeviceAliasEmpty = parameters.getDeviceAlias() == null || parameters.getDeviceAlias().isEmpty();
         final boolean isDeviceAliasUpdated = (isPreviousDeviceAliasEmpty && !isNewDeviceAliasEmpty) || (!isPreviousDeviceAliasEmpty && isNewDeviceAliasEmpty) || !parameters.getDeviceAlias().equals(previousDeviceAlias);
         return isDeviceAliasUpdated || isVariantSecretUpdated || isVariantUuidUpdated;
+    }
+
+    private boolean isBackEndServerUrlUpdated(RegistrationParameters parameters) {
+        final boolean isPreviousBackEndServerUrlEmpty = previousBackEndServerUrl == null;
+        final boolean isBackEndServerUrlUpdated = (isPreviousBackEndServerUrlEmpty && parameters.getBaseServerUrl() != null) || !parameters.getBaseServerUrl().equals(previousBackEndServerUrl);
+        return isBackEndServerUrlUpdated;
     }
 
     private void unregisterDeviceWithGcm(final RegistrationParameters parameters, final RegistrationListener listener) {
@@ -333,11 +367,17 @@ public class RegistrationEngine {
                     isNewGcmDeviceRegistrationId = true;
                 }
 
+                final boolean isBackEndServerUrlUpdated = isBackEndServerUrlUpdated(parameters);
+                if (isBackEndServerUrlUpdated) {
+                    PushLibLogger.v("The back-end server has been updated. A new registration with the back-end server is required.");
+                }
 
-                if (isBackEndUpdateRegistrationRequired(gcmDeviceRegistrationId, parameters)) {
+                if (isBackEndUpdateRegistrationRequired(gcmDeviceRegistrationId, parameters) && !isBackEndServerUrlUpdated) {
                     registerUpdateDeviceWithBackEnd(gcmDeviceRegistrationId, previousBackEndDeviceRegistrationId, parameters, listener);
-                }  else if (isNewGcmDeviceRegistrationId) {
+
+                }  else if (isNewGcmDeviceRegistrationId || isBackEndServerUrlUpdated) {
                     registerNewDeviceWithBackEnd(gcmDeviceRegistrationId, parameters, listener);
+
                 } else if (listener != null) {
                     listener.onRegistrationComplete();
                 }
@@ -371,10 +411,7 @@ public class RegistrationEngine {
 
                     // The server didn't return a valid registration response.  We should clear our local
                     // registration data so that we can attempt to reregister next time.
-                    preferencesProvider.setBackEndDeviceRegistrationId(null);
-                    preferencesProvider.setVariantUuid(null);
-                    preferencesProvider.setVariantSecret(null);
-                    preferencesProvider.setDeviceAlias(null);
+                    clearBackEndRegistrationPreferences();
 
                     if (listener != null) {
                         listener.onRegistrationFailed("Back-end server return null backEndDeviceRegistrationId upon registration update.");
@@ -385,10 +422,11 @@ public class RegistrationEngine {
                 PushLibLogger.i("Saving back-end device registration ID: " + backEndDeviceRegistrationId);
                 preferencesProvider.setBackEndDeviceRegistrationId(backEndDeviceRegistrationId);
 
-                PushLibLogger.v("Saving updated variantUuid, variantSecret, and deviceAlias");
+                PushLibLogger.v("Saving updated variantUuid, variantSecret, deviceAlias, and baseServerUrl");
                 preferencesProvider.setVariantUuid(parameters.getVariantUuid());
                 preferencesProvider.setVariantSecret(parameters.getVariantSecret());
                 preferencesProvider.setDeviceAlias(parameters.getDeviceAlias());
+                preferencesProvider.setBaseServerUrl(parameters.getBaseServerUrl());
 
                 if (listener != null) {
                     listener.onRegistrationComplete();
@@ -398,10 +436,7 @@ public class RegistrationEngine {
             @Override
             public void onBackEndRegistrationFailed(String reason) {
 
-                preferencesProvider.setBackEndDeviceRegistrationId(null);
-                preferencesProvider.setVariantUuid(null);
-                preferencesProvider.setVariantSecret(null);
-                preferencesProvider.setDeviceAlias(null);
+                clearBackEndRegistrationPreferences();
 
                 if (listener != null) {
                     listener.onRegistrationFailed(reason);
@@ -423,7 +458,13 @@ public class RegistrationEngine {
             public void onBackEndRegistrationSuccess(String backEndDeviceRegistrationId) {
 
                 if (backEndDeviceRegistrationId == null) {
-                    PushLibLogger.e("Back-end server return null backEndDeviceRegistrationId");
+
+                    PushLibLogger.e("Back-end server returned null backEndDeviceRegistrationId");
+
+                    // The server didn't return a valid registration response.  We should clear our local
+                    // registration data so that we can attempt to reregister next time.
+                    clearBackEndRegistrationPreferences();
+
                     if (listener != null) {
                         listener.onRegistrationFailed("Back-end server return null backEndDeviceRegistrationId");
                     }
@@ -433,10 +474,11 @@ public class RegistrationEngine {
                 PushLibLogger.i("Saving back-end device registration ID: " + backEndDeviceRegistrationId);
                 preferencesProvider.setBackEndDeviceRegistrationId(backEndDeviceRegistrationId);
 
-                PushLibLogger.v("Saving updated variantUuid, variantSecret, and deviceAlias");
+                PushLibLogger.v("Saving updated variantUuid, variantSecret, deviceAlias, and baseServerUrl");
                 preferencesProvider.setVariantUuid(parameters.getVariantUuid());
                 preferencesProvider.setVariantSecret(parameters.getVariantSecret());
                 preferencesProvider.setDeviceAlias(parameters.getDeviceAlias());
+                preferencesProvider.setBaseServerUrl(parameters.getBaseServerUrl());
 
                 if (listener != null) {
                     listener.onRegistrationComplete();
@@ -445,10 +487,21 @@ public class RegistrationEngine {
 
             @Override
             public void onBackEndRegistrationFailed(String reason) {
+
+                clearBackEndRegistrationPreferences();
+
                 if (listener != null) {
                     listener.onRegistrationFailed(reason);
                 }
             }
         };
+    }
+
+    private void clearBackEndRegistrationPreferences() {
+        preferencesProvider.setBackEndDeviceRegistrationId(null);
+        preferencesProvider.setVariantUuid(null);
+        preferencesProvider.setVariantSecret(null);
+        preferencesProvider.setDeviceAlias(null);
+        preferencesProvider.setBaseServerUrl(null);
     }
 }

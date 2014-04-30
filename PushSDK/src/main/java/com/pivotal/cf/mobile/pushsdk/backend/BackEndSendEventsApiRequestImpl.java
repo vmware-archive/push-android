@@ -7,14 +7,10 @@ import com.google.gson.Gson;
 import com.pivotal.cf.mobile.pushsdk.database.EventsStorage;
 import com.pivotal.cf.mobile.pushsdk.model.events.Event;
 import com.pivotal.cf.mobile.pushsdk.network.NetworkWrapper;
-import com.pivotal.cf.mobile.pushsdk.util.Const;
 import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -72,25 +68,26 @@ public class BackEndSendEventsApiRequestImpl extends ApiRequestImpl implements B
 
             if (POST_TO_BACK_END) {
 
-                final URL url = new URL(Const.BACKEND_SEND_EVENTS_URL);
-                final HttpURLConnection urlConnection = getHttpURLConnection(url);
-                urlConnection.addRequestProperty("Content-Type", "application/json");
-                urlConnection.setRequestMethod("POST");
-                urlConnection.setDoInput(true);
-                urlConnection.connect();
-
-                outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
-
-                // TODO - serialize events directly as JSON into the url connection?
-
-                final String requestBodyData = getRequestBodyData(uris);
-                PushLibLogger.v("Making network request to post event data to the back-end server: " + requestBodyData);
-                writeOutput(requestBodyData, outputStream);
-
-                final int statusCode = urlConnection.getResponseCode();
-                urlConnection.disconnect();
-
-                onSuccessfulNetworkRequest(statusCode, listener);
+                // TODO - read URL from settings
+//                final URL url = new URL(Const.BACKEND_SEND_EVENTS_URL);
+//                final HttpURLConnection urlConnection = getHttpURLConnection(url);
+//                urlConnection.addRequestProperty("Content-Type", "application/json");
+//                urlConnection.setRequestMethod("POST");
+//                urlConnection.setDoInput(true);
+//                urlConnection.connect();
+//
+//                outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
+//
+//                // TODO - serialize events directly as JSON into the url connection?
+//
+//                final String requestBodyData = getRequestBodyData(uris);
+//                PushLibLogger.v("Making network request to post event data to the back-end server: " + requestBodyData);
+//                writeOutput(requestBodyData, outputStream);
+//
+//                final int statusCode = urlConnection.getResponseCode();
+//                urlConnection.disconnect();
+//
+//                onSuccessfulNetworkRequest(statusCode, listener);
 
             } else { // FAKE IT!
 

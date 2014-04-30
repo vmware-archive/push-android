@@ -15,6 +15,8 @@
 
 package com.pivotal.cf.mobile.pushsdk.prefs;
 
+import java.net.URL;
+
 public interface PreferencesProvider {
 
     public static int NO_SAVED_VERSION = -1;
@@ -50,4 +52,8 @@ public interface PreferencesProvider {
     String getPackageName();
 
     void setPackageName(String packageName);
+
+    URL getBaseServerUrl();
+
+    void setBaseServerUrl(URL baseServerUrl);
 }

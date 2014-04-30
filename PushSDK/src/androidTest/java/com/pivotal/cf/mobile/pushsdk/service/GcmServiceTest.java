@@ -63,7 +63,7 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        preferencesProvider = new FakePreferencesProvider(null, null, 0, null, TEST_VARIANT_UUID, null, null, null);
+        preferencesProvider = new FakePreferencesProvider(null, null, 0, null, TEST_VARIANT_UUID, null, null, null, null);
         serviceStarter = new FakeServiceStarter();
         GcmService.semaphore = new Semaphore(0);
         GcmService.preferencesProvider = preferencesProvider;

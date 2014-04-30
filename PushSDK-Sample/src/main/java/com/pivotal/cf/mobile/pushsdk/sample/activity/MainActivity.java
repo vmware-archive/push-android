@@ -62,6 +62,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -72,7 +73,8 @@ import java.util.List;
 public class MainActivity extends ActionBarActivity {
 
     private static final String GCM_SEND_MESSAGE_URL = "https://android.googleapis.com/gcm/send";
-    private static final String BACK_END_SEND_MESSAGE_URL = Const.BASE_SERVER_URL + "v1/push";
+    // TODO - get the back end server URL out of the preferences instead of using this constant
+//    private static final String BACK_END_SEND_MESSAGE_URL = Const.BASE_SERVER_URL + "v1/push";
 
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm:ss.SSS");
     private static final int[] baseRowColours = new int[]{0xddeeff, 0xddffee, 0xffeedd};
@@ -119,13 +121,11 @@ public class MainActivity extends ActionBarActivity {
         updateCurrentBaseRowColour();
         addLogMessage("Starting registration...");
 
-        final String gcmSenderId = Settings.getGcmSenderId(this);
-        final String variantUuid = Settings.getVariantUuid(this);
-        final String variantSecret = Settings.getVariantSecret(this);
-        final String deviceAlias = Settings.getDeviceAlias(this);
-        addLogMessage("GCM Sender ID: '" + gcmSenderId + "'\nVariant UUID: '" + variantUuid + "\nVariant Secret: '" + variantSecret + "'\nDevice Alias: '" + deviceAlias + "'");
+        final RegistrationParameters parameters = getRegistrationParameters();
+        if (parameters == null) {
+            return;
+        }
 
-        final RegistrationParameters parameters = new RegistrationParameters(gcmSenderId, variantUuid, variantSecret, deviceAlias);
         try {
             pushLib.startRegistration(parameters, new RegistrationListener() {
 
@@ -142,6 +142,26 @@ public class MainActivity extends ActionBarActivity {
         } catch (Exception e) {
             queueLogMessage("Registration failed: " + e.getLocalizedMessage());
         }
+    }
+
+    private RegistrationParameters getRegistrationParameters() {
+        final String gcmSenderId = Settings.getGcmSenderId(this);
+        final String variantUuid = Settings.getVariantUuid(this);
+        final String variantSecret = Settings.getVariantSecret(this);
+        final String deviceAlias = Settings.getDeviceAlias(this);
+        final String baseServerUrl = Settings.getBaseServerUrl(this);
+
+        final URL parsedBaseServerUrl;
+        try {
+            parsedBaseServerUrl = new URL(baseServerUrl);
+        } catch (MalformedURLException e) {
+            addLogMessage("Invalid base server URL: '" + baseServerUrl + "'");
+            return null;
+        }
+
+        addLogMessage("GCM Sender ID: '" + gcmSenderId + "'\nVariant UUID: '" + variantUuid + "\nVariant Secret: '" + variantSecret + "'\nDevice Alias: '" + deviceAlias + "'\nBase Server URL: '" + baseServerUrl + "'.");
+        final RegistrationParameters parameters = new RegistrationParameters(gcmSenderId, variantUuid, variantSecret, deviceAlias, parsedBaseServerUrl);
+        return parameters;
     }
 
     public PushLibLogger.Listener getLogListener() {
@@ -253,55 +273,55 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void sendMessageViaBackEnd() {
-        updateCurrentBaseRowColour();
-        final String data = getBackEndMessageRequestString();
-        if (data == null) {
-            addLogMessage("Can not send message. Please register first.");
-            return;
-        }
-        addLogMessage("Sending message via back-end server...");
-        addLogMessage("Message body data: \"" + data + "\"");
-
-        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
-            @Override
-            protected Void doInBackground(Void... params) {
-
-                OutputStream outputStream = null;
-
-                try {
-                    final URL url = new URL(BACK_END_SEND_MESSAGE_URL);
-                    final HttpURLConnection urlConnection = getUrlConnection(url);
-                    urlConnection.setDoOutput(true);
-                    urlConnection.addRequestProperty("Authorization", getBasicAuthorizationValue());
-                    urlConnection.connect();
-
-                    outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
-                    writeConnectionOutput(data, outputStream);
-
-                    final int statusCode = urlConnection.getResponseCode();
-                    if (statusCode >= 200 && statusCode < 300) {
-                        queueLogMessage("Back-end server accepted network request to send message. HTTP response status code is " + statusCode + ".");
-                    } else {
-                        queueLogMessage("Back-end server rejected network request to send message. HTTP response status code is " + statusCode + ".");
-                    }
-
-                    urlConnection.disconnect();
-
-                } catch (IOException e) {
-                    queueLogMessage("ERROR: got exception parsing network response from Back-end server: " + e.getLocalizedMessage());
-
-                } finally {
-                    if (outputStream != null) {
-                        try {
-                            outputStream.close();
-                        } catch (IOException e) {}
-                    }
-                }
-                return null;
-            }
-        };
-
-        asyncTask.execute((Void)null);
+//        updateCurrentBaseRowColour();
+//        final String data = getBackEndMessageRequestString();
+//        if (data == null) {
+//            addLogMessage("Can not send message. Please register first.");
+//            return;
+//        }
+//        addLogMessage("Sending message via back-end server...");
+//        addLogMessage("Message body data: \"" + data + "\"");
+//
+//        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+//            @Override
+//            protected Void doInBackground(Void... params) {
+//
+//                OutputStream outputStream = null;
+//
+//                try {
+//                    final URL url = new URL(BACK_END_SEND_MESSAGE_URL);
+//                    final HttpURLConnection urlConnection = getUrlConnection(url);
+//                    urlConnection.setDoOutput(true);
+//                    urlConnection.addRequestProperty("Authorization", getBasicAuthorizationValue());
+//                    urlConnection.connect();
+//
+//                    outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
+//                    writeConnectionOutput(data, outputStream);
+//
+//                    final int statusCode = urlConnection.getResponseCode();
+//                    if (statusCode >= 200 && statusCode < 300) {
+//                        queueLogMessage("Back-end server accepted network request to send message. HTTP response status code is " + statusCode + ".");
+//                    } else {
+//                        queueLogMessage("Back-end server rejected network request to send message. HTTP response status code is " + statusCode + ".");
+//                    }
+//
+//                    urlConnection.disconnect();
+//
+//                } catch (IOException e) {
+//                    queueLogMessage("ERROR: got exception parsing network response from Back-end server: " + e.getLocalizedMessage());
+//
+//                } finally {
+//                    if (outputStream != null) {
+//                        try {
+//                            outputStream.close();
+//                        } catch (IOException e) {}
+//                    }
+//                }
+//                return null;
+//            }
+//        };
+//
+//        asyncTask.execute((Void)null);
     }
 
     private String getBasicAuthorizationValue() {
@@ -470,6 +490,7 @@ public class MainActivity extends ActionBarActivity {
                         editor.remove("variant_secret");
                         editor.remove("device_alias");
                         editor.remove("backend_device_registration_id");
+                        editor.remove("base_server_url");
                     }
                     editor.commit();
                 }
@@ -542,8 +563,13 @@ public class MainActivity extends ActionBarActivity {
         updateCurrentBaseRowColour();
         addLogMessage("Starting unregistration...");
 
+        final RegistrationParameters parameters = getRegistrationParameters();
+        if (parameters == null) {
+            return;
+        }
+
         try {
-            pushLib.startUnregistration(new UnregistrationListener() {
+            pushLib.startUnregistration(parameters, new UnregistrationListener() {
                 @Override
                 public void onUnregistrationComplete() {
                     queueLogMessage("Unregistration successful.");

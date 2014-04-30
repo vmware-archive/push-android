@@ -48,7 +48,8 @@ public class MainActivity extends ActionBarActivity {
     private void registerForPushNotifications() {
 
         // Create the parameters object
-        final RegistrationParameters parameters = new RegistrationParameters(GCM_SENDER_ID, VARIANT_UUID, VARIANT_SECRET, DEVICE_ALIAS);
+        // TODO - fix base server URL
+        final RegistrationParameters parameters = new RegistrationParameters(GCM_SENDER_ID, VARIANT_UUID, VARIANT_SECRET, DEVICE_ALIAS, baseServerUrl);
         try {
 
             // Register for push notifications.  The listener itself is optional (may be null).

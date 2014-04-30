@@ -16,12 +16,7 @@
 package com.pivotal.cf.mobile.pushsdk.util;
 
 public class Const {
-
     public static final String TAG_NAME = "PivotalCFMSPushSDK";
-
-    // TODO - update this to the production server when it is set up.
-//    public static final String BASE_SERVER_URL = "http://push-staging-ui.main.vchs.cfms-apps.com/";
-    public static final String BASE_SERVER_URL = "http://ec2-54-87-125-154.compute-1.amazonaws.com/";
-    public static final String BACKEND_REGISTRATION_REQUEST_URL = BASE_SERVER_URL + "v1/registration";
-    public static final String BACKEND_SEND_EVENTS_URL = BASE_SERVER_URL + "v1/events";
+    public static final String BACKEND_REGISTRATION_REQUEST_ENDPOINT = "v1/registration";
+    public static final String BACKEND_SEND_EVENTS_ENDPOINT = "v1/events";
 }

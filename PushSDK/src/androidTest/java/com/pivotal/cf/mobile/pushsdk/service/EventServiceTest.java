@@ -57,7 +57,7 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
 
         networkWrapper = new FakeNetworkWrapper();
         eventsStorage = new FakeEventsStorage();
-        preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null);
+        preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null, null);
         backEndMessageReceiptApiRequest = new FakeBackEndSendEventsApiRequest();
         testResultReceiver = new TestResultReceiver(null);
         listOfCompletedJobs = new LinkedList<String>();

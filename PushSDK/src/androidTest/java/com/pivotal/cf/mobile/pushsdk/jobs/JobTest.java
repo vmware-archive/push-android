@@ -37,7 +37,7 @@ public abstract class JobTest extends AndroidTestCase {
         eventsStorage = new FakeEventsStorage();
         networkWrapper = new FakeNetworkWrapper();
         alarmProvider = new FakeEventsSenderAlarmProvider();
-        preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null);
+        preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null, null);
         backEndMessageReceiptApiRequest = new FakeBackEndSendEventsApiRequest();
         backEndSendEventsApiRequestProvider = new BackEndSendEventsApiRequestProvider(backEndMessageReceiptApiRequest);
     }

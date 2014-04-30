@@ -21,8 +21,11 @@ import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.network.FakeHttpURLConnection;
 import com.pivotal.cf.mobile.pushsdk.network.FakeNetworkWrapper;
 import com.pivotal.cf.mobile.pushsdk.util.DelayedLoop;
+import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 
 public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
 
@@ -32,6 +35,7 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     private static final String TEST_VARIANT_UUID = "TEST_VARIANT_UUID";
     private static final String TEST_VARIANT_SECRET = "TEST_VARIANT_SECRET";
     private static final String TEST_DEVICE_ALIAS = "TEST_DEVICE_ALIAS";
+    private static final String TEST_BASE_SERVER_URL = "http://test.com";
     private static final String TEST_BASE64_ENCODED_AUTHORIZATION = "VEVTVF9WQVJJQU5UX1VVSUQ6VEVTVF9WQVJJQU5UX1NFQ1JFVA==";
     private static final long TEN_SECOND_TIMEOUT = 10000L;
     private static final String HTTP_POST = "POST";
@@ -313,6 +317,13 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     }
 
     private RegistrationParameters getParameters() {
-        return new RegistrationParameters(TEST_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_DEVICE_ALIAS);
+        URL url;
+        try {
+            url = new URL(TEST_BASE_SERVER_URL);
+        } catch (MalformedURLException e) {
+            PushLibLogger.ex(e);
+            url = null;
+        }
+        return new RegistrationParameters(TEST_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_DEVICE_ALIAS, url);
     }
 }

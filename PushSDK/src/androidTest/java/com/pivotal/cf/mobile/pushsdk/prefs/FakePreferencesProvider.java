@@ -15,6 +15,8 @@
 
 package com.pivotal.cf.mobile.pushsdk.prefs;
 
+import java.net.URL;
+
 public class FakePreferencesProvider implements PreferencesProvider {
 
     private String gcmDeviceRegistrationId;
@@ -24,6 +26,7 @@ public class FakePreferencesProvider implements PreferencesProvider {
     private String variantSecret;
     private String deviceAlias;
     private String packageName;
+    private URL baseServerUrl;
     private int appVersion;
     private boolean wasGcmDeviceRegistrationIdSaved = false;
     private boolean wasBackEndDeviceRegistrationIdSaved = false;
@@ -33,8 +36,17 @@ public class FakePreferencesProvider implements PreferencesProvider {
     private boolean wasVariantSecretSaved = false;
     private boolean wasDeviceAliasSaved = false;
     private boolean wasPackageNameSaved = false;
+    private boolean wasBaseServerUrlSaved = false;
 
-    public FakePreferencesProvider(String gcmDeviceRegistrationIdToLoad, String backEndDeviceRegistrationIdToLoad, int appVersionToLoad, String gcmSenderIdToLoad, String variantUuidToLoad, String variantSecretToLoad, String deviceAliasToLoad, String packageNameToLoad) {
+    public FakePreferencesProvider(String gcmDeviceRegistrationIdToLoad,
+                                   String backEndDeviceRegistrationIdToLoad,
+                                   int appVersionToLoad,
+                                   String gcmSenderIdToLoad,
+                                   String variantUuidToLoad,
+                                   String variantSecretToLoad,
+                                   String deviceAliasToLoad,
+                                   String packageNameToLoad,
+                                   URL baseServerUrlToLoad) {
         this.gcmDeviceRegistrationId = gcmDeviceRegistrationIdToLoad;
         this.backEndDeviceRegistrationId = backEndDeviceRegistrationIdToLoad;
         this.appVersion = appVersionToLoad;
@@ -43,6 +55,7 @@ public class FakePreferencesProvider implements PreferencesProvider {
         this.variantSecret = variantSecretToLoad;
         this.deviceAlias = deviceAliasToLoad;
         this.packageName = packageNameToLoad;
+        this.baseServerUrl = baseServerUrlToLoad;
     }
 
     @Override
@@ -83,6 +96,11 @@ public class FakePreferencesProvider implements PreferencesProvider {
     @Override
     public String getPackageName() {
         return packageName;
+    }
+
+    @Override
+    public URL getBaseServerUrl() {
+        return baseServerUrl;
     }
 
     @Override
@@ -133,6 +151,12 @@ public class FakePreferencesProvider implements PreferencesProvider {
         wasPackageNameSaved = true;
     }
 
+    @Override
+    public void setBaseServerUrl(URL baseServerUrl) {
+        this.baseServerUrl = baseServerUrl;
+        wasBaseServerUrlSaved = true;
+    }
+
     public boolean wasGcmDeviceRegistrationIdSaved() {
         return wasGcmDeviceRegistrationIdSaved;
     }
@@ -163,5 +187,9 @@ public class FakePreferencesProvider implements PreferencesProvider {
 
     public boolean isWasPackageNameSaved() {
         return wasPackageNameSaved;
+    }
+
+    public boolean wasBaseServerUrlSaved() {
+        return wasBaseServerUrlSaved;
     }
 }

@@ -37,6 +37,7 @@ public class SettingsActivity extends PreferenceActivity {
     private EditTextPreference variantSecretPreference;
     private EditTextPreference deviceAliasPreference;
     private EditTextPreference gcmBrowserApiPreference;
+    private EditTextPreference baseServerUrlPreference;
     private EditTextPreference backEndEnvironmentUuidPreference;
     private EditTextPreference backEndEnvironmentKeyPreference;
     private SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener;
@@ -55,6 +56,7 @@ public class SettingsActivity extends PreferenceActivity {
         gcmBrowserApiPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.GCM_BROWSER_API_KEY);
         backEndEnvironmentUuidPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.BACK_END_ENVIRONMENT_UUID);
         backEndEnvironmentKeyPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.BACK_END_ENVIRONMENT_KEY);
+        baseServerUrlPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.BASE_SERVER_URL);
         preferenceChangeListener = getPreferenceChangeListener();
     }
 
@@ -120,12 +122,19 @@ public class SettingsActivity extends PreferenceActivity {
 
     private void showCurrentPreferences() {
         final SharedPreferences prefs = getPreferenceScreen().getSharedPreferences();
-        gcmSenderIdPreference.setSummary(prefs.getString(Settings.GCM_SENDER_ID, null));
-        variantUuidPreference.setSummary(prefs.getString(Settings.VARIANT_UUID, null));
-        variantSecretPreference.setSummary(prefs.getString(Settings.VARIANT_SECRET, null));
-        deviceAliasPreference.setSummary(prefs.getString(Settings.DEVICE_ALIAS, null));
-        gcmBrowserApiPreference.setSummary(prefs.getString(Settings.GCM_BROWSER_API_KEY, null));
-        backEndEnvironmentUuidPreference.setSummary(prefs.getString(Settings.BACK_END_ENVIRONMENT_UUID, null));
-        backEndEnvironmentKeyPreference.setSummary(prefs.getString(Settings.BACK_END_ENVIRONMENT_KEY, null));
+        setupPreferenceField(gcmSenderIdPreference, prefs.getString(Settings.GCM_SENDER_ID, null));
+        setupPreferenceField(variantUuidPreference, prefs.getString(Settings.VARIANT_UUID, null));
+        setupPreferenceField(variantSecretPreference, prefs.getString(Settings.VARIANT_SECRET, null));
+        setupPreferenceField(deviceAliasPreference, prefs.getString(Settings.DEVICE_ALIAS, null));
+        setupPreferenceField(gcmBrowserApiPreference, prefs.getString(Settings.GCM_BROWSER_API_KEY, null));
+        setupPreferenceField(baseServerUrlPreference, prefs.getString(Settings.BASE_SERVER_URL, null));
+        setupPreferenceField(backEndEnvironmentUuidPreference, prefs.getString(Settings.BACK_END_ENVIRONMENT_UUID, null));
+        setupPreferenceField(backEndEnvironmentKeyPreference, prefs.getString(Settings.BACK_END_ENVIRONMENT_KEY, null));
+        setupPreferenceField(deviceAliasPreference, prefs.getString(Settings.DEVICE_ALIAS, null));
+    }
+
+    private void setupPreferenceField(EditTextPreference preference, String value) {
+        preference.setText(value);
+        preference.setSummary(value);
     }
 }
