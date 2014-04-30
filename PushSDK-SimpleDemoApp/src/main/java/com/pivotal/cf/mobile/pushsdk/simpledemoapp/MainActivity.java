@@ -10,19 +10,24 @@ import com.pivotal.cf.mobile.pushsdk.PushLib;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.registration.RegistrationListener;
 
+import java.net.URL;
+
 public class MainActivity extends ActionBarActivity {
 
     // Set to your "Project Number" on your Google Cloud project
     private static final String GCM_SENDER_ID = "961895792376";
 
     // Set to your "Variant UUID", as provided by the Pivotal CF Mobile Services console
-    private static final String VARIANT_UUID = "9a0bbe07-eb1e-483d-9517-ff9647de0fcc";
+    private static final String VARIANT_UUID = "8e00641c-b264-4ae9-98db-dd6f2ca858b2";
 
     // Set to your "Variant Secret" as provided by the Pivotal CF Mobile Services console
-    private static final String VARIANT_SECRET = "fbd90567-078d-4f3f-98bd-33e018cbb1a8";
+    private static final String VARIANT_SECRET = "0de0f14a-ab2c-4f47-aa44-a6cb06531c6c";
 
     // Set to your own defined alias for this device.  May not be null.  May be empty.
     private static final String DEVICE_ALIAS = "test_device_alias";
+
+    // Set to your instance of the Pivotal CF Mobile Services server providing your push related analytics services.
+    private static final String BASE_SERVER_URL = "http://ec2-54-87-125-154.compute-1.amazonaws.com";
 
     private TextView label;
     private Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -48,9 +53,9 @@ public class MainActivity extends ActionBarActivity {
     private void registerForPushNotifications() {
 
         // Create the parameters object
-        // TODO - fix base server URL
-        final RegistrationParameters parameters = new RegistrationParameters(GCM_SENDER_ID, VARIANT_UUID, VARIANT_SECRET, DEVICE_ALIAS, baseServerUrl);
         try {
+            final URL url = new URL(BASE_SERVER_URL);
+            final RegistrationParameters parameters = new RegistrationParameters(GCM_SENDER_ID, VARIANT_UUID, VARIANT_SECRET, DEVICE_ALIAS, url);
 
             // Register for push notifications.  The listener itself is optional (may be null).
             final PushLib pushLib = PushLib.init(this);
