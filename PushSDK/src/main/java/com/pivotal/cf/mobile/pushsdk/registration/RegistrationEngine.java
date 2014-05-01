@@ -34,7 +34,6 @@ import com.pivotal.cf.mobile.pushsdk.version.VersionProvider;
 
 import java.net.URL;
 
-// TODO update this comment
 /**
  * This class is responsible for all the business logic behind device registration.  For a description
  * of its operation you can refer to the following diagrams:
@@ -58,7 +57,11 @@ import java.net.URL;
  *
  *  If any of the Pivotal CF registration parameters (variant_uuid, variant_secret, device_alias), or if a GCM registration
  *  provides a different device registration ID than a previous install, then the Registration Engine will attempt
- *  to unregister with the Pivotal CF back-end server prior to re-registering.
+ *  to update its registration wih the Pivotal CF Mobile Services server (i.e.: HTTP PUT).
+ *
+ *  If, however, the base_server_url parameter is different than the existing registration, then the Registration
+ *  Engine will abandon its registration with the previous server and make a new one (i.e.: HTTP POST) with the new
+ *  server.
  *
  *  The Registration Engine is also designed to successfully complete previous registrations that have failed. For
  *  instance, if the previous registration attempt successfully registered with GCM but failed to complete the
@@ -86,7 +89,7 @@ public class RegistrationEngine {
      * Instantiate an instance of the RegistrationEngine.
      *
      * All the parameters are required.  None may be null.
-     *  @param context  A context
+     * @param context  A context
      * @param packageName
      * @param gcmProvider  Some object that can provide the GCM services.
      * @param preferencesProvider  Some object that can provide persistent storage of preferences.
@@ -95,9 +98,32 @@ public class RegistrationEngine {
      * @param backEndRegistrationApiRequestProvider  Some object that can provide BackEndRegistrationApiRequest objects.
      * @param versionProvider  Some object that can provide the application version.
      */
-    public RegistrationEngine(Context context, String packageName, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider, GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider, BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider, VersionProvider versionProvider) {
-        verifyArguments(context, packageName, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
-        saveArguments(context, packageName, gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+    public RegistrationEngine(Context context,
+                              String packageName,
+                              GcmProvider gcmProvider,
+                              PreferencesProvider preferencesProvider,
+                              GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
+                              GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
+                              BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider,
+                              VersionProvider versionProvider) {
+
+        verifyArguments(context,
+                packageName,
+                gcmProvider,
+                preferencesProvider,
+                gcmRegistrationApiRequestProvider,
+                gcmUnregistrationApiRequestProvider,
+                backEndRegistrationApiRequestProvider,
+                versionProvider);
+
+        saveArguments(context,
+                packageName,
+                gcmProvider,
+                preferencesProvider,
+                gcmRegistrationApiRequestProvider,
+                gcmUnregistrationApiRequestProvider,
+                backEndRegistrationApiRequestProvider,
+                versionProvider);
     }
 
     private void verifyArguments(Context context,

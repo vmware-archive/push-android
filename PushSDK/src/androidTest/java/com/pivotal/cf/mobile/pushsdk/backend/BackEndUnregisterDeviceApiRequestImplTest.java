@@ -73,6 +73,7 @@ public class BackEndUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
     public void testRequiresParameters() {
         try {
             final BackEndUnregisterDeviceApiRequestImpl backEndRegistrationApiRequestImpl = new BackEndUnregisterDeviceApiRequestImpl(new FakeNetworkWrapper());
+            makeBackEndUnegisterDeviceApiRequestListener(true);
             backEndRegistrationApiRequestImpl.startUnregisterDevice(TEST_BACK_END_DEVICE_REGISTRATION_ID, null, backEndUnregisterDeviceListener);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {

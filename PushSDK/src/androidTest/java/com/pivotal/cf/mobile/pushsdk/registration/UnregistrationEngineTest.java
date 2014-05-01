@@ -97,6 +97,17 @@ public class UnregistrationEngineTest extends AndroidTestCase {
         }
     }
 
+    public void testNullBaseServerUrl() {
+        try {
+            final UnregistrationEngine engine = new UnregistrationEngine(getContext(),gcmProvider, preferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
+            parameters = new RegistrationParameters(TEST_GCM_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_DEVICE_ALIAS, null);
+            engine.unregisterDevice(parameters, getListenerForUnregistration(false));
+            fail("should not have succeeded");
+        } catch (IllegalArgumentException e) {
+            // success
+        }
+    }
+
     public void testGooglePlayServicesNotAvailable() throws InterruptedException {
         gcmProvider.setIsGooglePlayServicesInstalled(false);
         final UnregistrationEngine engine = new UnregistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);

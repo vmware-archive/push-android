@@ -91,7 +91,7 @@ public class EventService extends IntentService {
             needToCleanDatabase = setupDatabase();
         }
         if (EventService.backEndSendEventsApiRequestProvider == null) {
-            final BackEndSendEventsApiRequestImpl backEndMessageReceiptApiRequest = new BackEndSendEventsApiRequestImpl(this, EventService.eventsStorage, EventService.networkWrapper);
+            final BackEndSendEventsApiRequestImpl backEndMessageReceiptApiRequest = new BackEndSendEventsApiRequestImpl(this, EventService.eventsStorage, preferencesProvider, EventService.networkWrapper);
             EventService.backEndSendEventsApiRequestProvider = new BackEndSendEventsApiRequestProvider(backEndMessageReceiptApiRequest);
         }
 

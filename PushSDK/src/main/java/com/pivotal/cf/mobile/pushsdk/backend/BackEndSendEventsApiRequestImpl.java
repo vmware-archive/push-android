@@ -7,38 +7,48 @@ import com.google.gson.Gson;
 import com.pivotal.cf.mobile.pushsdk.database.EventsStorage;
 import com.pivotal.cf.mobile.pushsdk.model.events.Event;
 import com.pivotal.cf.mobile.pushsdk.network.NetworkWrapper;
+import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProvider;
+import com.pivotal.cf.mobile.pushsdk.util.Const;
 import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 
+import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 
-// TODO: generalize to other event types
 public class BackEndSendEventsApiRequestImpl extends ApiRequestImpl implements BackEndSendEventsApiRequest {
 
+    // Set to 'true' to test really send events to the server. The server does not accept these events right now.
     private static final boolean POST_TO_BACK_END = false;
     private Context context;
     private EventsStorage eventsStorage;
+    private PreferencesProvider preferencesProvider;
 
-    public BackEndSendEventsApiRequestImpl(Context context, EventsStorage eventsStorage, NetworkWrapper networkWrapper) {
+    public BackEndSendEventsApiRequestImpl(Context context, EventsStorage eventsStorage, PreferencesProvider preferencesProvider, NetworkWrapper networkWrapper) {
         super(networkWrapper);
-        verifyArguments(context, eventsStorage);
-        saveArguments(context, eventsStorage);
+        verifyArguments(context, eventsStorage, preferencesProvider);
+        saveArguments(context, eventsStorage, preferencesProvider);
     }
 
-    private void verifyArguments(Context context, EventsStorage eventsStorage) {
+    private void verifyArguments(Context context, EventsStorage eventsStorage, PreferencesProvider preferencesProvider) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
         if (eventsStorage == null) {
             throw new IllegalArgumentException("eventsStorage may not be null");
         }
+        if (preferencesProvider == null) {
+            throw new IllegalArgumentException("preferencesProvider may not be null");
+        }
     }
 
-    private void saveArguments(Context context, EventsStorage eventsStorage) {
+    private void saveArguments(Context context, EventsStorage eventsStorage, PreferencesProvider preferencesProvider) {
         this.context = context;
         this.eventsStorage = eventsStorage;
+        this.preferencesProvider = preferencesProvider;
     }
 
     public void startSendEvents(List<Uri> eventUris, BackEndSendEventsListener listener) {
@@ -68,26 +78,26 @@ public class BackEndSendEventsApiRequestImpl extends ApiRequestImpl implements B
 
             if (POST_TO_BACK_END) {
 
-                // TODO - read URL from settings
-//                final URL url = new URL(Const.BACKEND_SEND_EVENTS_URL);
-//                final HttpURLConnection urlConnection = getHttpURLConnection(url);
-//                urlConnection.addRequestProperty("Content-Type", "application/json");
-//                urlConnection.setRequestMethod("POST");
-//                urlConnection.setDoInput(true);
-//                urlConnection.connect();
-//
-//                outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
-//
-//                // TODO - serialize events directly as JSON into the url connection?
-//
-//                final String requestBodyData = getRequestBodyData(uris);
-//                PushLibLogger.v("Making network request to post event data to the back-end server: " + requestBodyData);
-//                writeOutput(requestBodyData, outputStream);
-//
-//                final int statusCode = urlConnection.getResponseCode();
-//                urlConnection.disconnect();
-//
-//                onSuccessfulNetworkRequest(statusCode, listener);
+                final URL baseServerUrl = preferencesProvider.getBaseServerUrl();
+                final URL sendEventsUrl = new URL(baseServerUrl, Const.BACKEND_SEND_EVENTS_ENDPOINT);
+                final HttpURLConnection urlConnection = getHttpURLConnection(sendEventsUrl);
+                urlConnection.addRequestProperty("Content-Type", "application/json");
+                urlConnection.setRequestMethod("POST");
+                urlConnection.setDoInput(true);
+                urlConnection.connect();
+
+                outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
+
+                // TODO - serialize events directly as JSON into the url connection?
+
+                final String requestBodyData = getRequestBodyData(uris);
+                PushLibLogger.v("Making network request to post event data to the back-end server: " + requestBodyData);
+                writeOutput(requestBodyData, outputStream);
+
+                final int statusCode = urlConnection.getResponseCode();
+                urlConnection.disconnect();
+
+                onSuccessfulNetworkRequest(statusCode, listener);
 
             } else { // FAKE IT!
 
@@ -124,7 +134,7 @@ public class BackEndSendEventsApiRequestImpl extends ApiRequestImpl implements B
     private List<Event> getEvents(List<Uri> uris) {
         final List<Event> events = new LinkedList<Event>();
         for (final Uri uri : uris) {
-            final Event event = (Event) eventsStorage.readEvent(uri);
+            final Event event = eventsStorage.readEvent(uri);
             events.add(event);
         }
         return events;
@@ -144,6 +154,6 @@ public class BackEndSendEventsApiRequestImpl extends ApiRequestImpl implements B
 
     @Override
     public BackEndSendEventsApiRequest copy() {
-        return new BackEndSendEventsApiRequestImpl(context, eventsStorage, networkWrapper);
+        return new BackEndSendEventsApiRequestImpl(context, eventsStorage, preferencesProvider, networkWrapper);
     }
 }

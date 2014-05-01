@@ -8,8 +8,10 @@ import com.pivotal.cf.mobile.pushsdk.model.events.EventTest;
 import com.pivotal.cf.mobile.pushsdk.network.FakeHttpURLConnection;
 import com.pivotal.cf.mobile.pushsdk.network.FakeNetworkWrapper;
 import com.pivotal.cf.mobile.pushsdk.network.NetworkWrapper;
+import com.pivotal.cf.mobile.pushsdk.prefs.FakePreferencesProvider;
 import com.pivotal.cf.mobile.pushsdk.util.DelayedLoop;
 
+import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -20,6 +22,7 @@ public class BackEndSendEventsApiRequestImplTest extends AndroidTestCase {
     private BackEndSendEventsListener backEndSendEventsListener;
     private DelayedLoop delayedLoop;
     private FakeEventsStorage eventsStorage;
+    private FakePreferencesProvider preferencesProvider;
     private static final long TEN_SECOND_TIMEOUT = 10000L;
 
     private List<Uri> emptyList;
@@ -29,6 +32,7 @@ public class BackEndSendEventsApiRequestImplTest extends AndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         eventsStorage = new FakeEventsStorage();
+        preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null, new URL("http://some/fake/host"));
         networkWrapper = new FakeNetworkWrapper();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
         FakeHttpURLConnection.reset();
@@ -40,7 +44,7 @@ public class BackEndSendEventsApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresContext() {
         try {
-            new BackEndSendEventsApiRequestImpl(null, eventsStorage, networkWrapper);
+            new BackEndSendEventsApiRequestImpl(null, eventsStorage, preferencesProvider, networkWrapper);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
             // Success
@@ -49,7 +53,16 @@ public class BackEndSendEventsApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresEventsStorage() {
         try {
-            new BackEndSendEventsApiRequestImpl(getContext(), null, networkWrapper);
+            new BackEndSendEventsApiRequestImpl(getContext(), null, preferencesProvider, networkWrapper);
+            fail("Should not have succeeded");
+        } catch (IllegalArgumentException ex) {
+            // Success
+        }
+    }
+
+    public void testRequiresPreferencesProvider() {
+        try {
+            new BackEndSendEventsApiRequestImpl(getContext(), eventsStorage, null, networkWrapper);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
             // Success
@@ -58,7 +71,7 @@ public class BackEndSendEventsApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresNetworkWrapper() {
         try {
-            new BackEndSendEventsApiRequestImpl(getContext(), eventsStorage, null);
+            new BackEndSendEventsApiRequestImpl(getContext(), eventsStorage, preferencesProvider, null);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
             // Success
@@ -67,7 +80,7 @@ public class BackEndSendEventsApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresMessageReceipts() {
         try {
-            final BackEndSendEventsApiRequestImpl request = new BackEndSendEventsApiRequestImpl(getContext(), eventsStorage, networkWrapper);
+            final BackEndSendEventsApiRequestImpl request = new BackEndSendEventsApiRequestImpl(getContext(), eventsStorage, preferencesProvider, networkWrapper);
             makeBackEndMessageReceiptListener(true);
             request.startSendEvents(null, backEndSendEventsListener);
             fail("Should not have succeeded");
@@ -78,7 +91,7 @@ public class BackEndSendEventsApiRequestImplTest extends AndroidTestCase {
 
     public void testMessageReceiptsMayNotBeEmpty() {
         try {
-            final BackEndSendEventsApiRequestImpl request = new BackEndSendEventsApiRequestImpl(getContext(), eventsStorage, networkWrapper);
+            final BackEndSendEventsApiRequestImpl request = new BackEndSendEventsApiRequestImpl(getContext(), eventsStorage, preferencesProvider, networkWrapper);
             makeBackEndMessageReceiptListener(true);
             request.startSendEvents(emptyList, backEndSendEventsListener);
             fail("Should not have succeeded");
@@ -89,7 +102,7 @@ public class BackEndSendEventsApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresListener() {
         try {
-            final BackEndSendEventsApiRequestImpl request = new BackEndSendEventsApiRequestImpl(getContext(), eventsStorage, networkWrapper);
+            final BackEndSendEventsApiRequestImpl request = new BackEndSendEventsApiRequestImpl(getContext(), eventsStorage, preferencesProvider, networkWrapper);
             request.startSendEvents(listWithOneItem, null);
             fail("Should not have succeeded");
         } catch (Exception e) {
@@ -99,7 +112,7 @@ public class BackEndSendEventsApiRequestImplTest extends AndroidTestCase {
 
     public void testSuccessfulRequest() {
         makeListenersForSuccessfulRequestFromNetwork(true, 200);
-        final BackEndSendEventsApiRequestImpl request = new BackEndSendEventsApiRequestImpl(getContext(), eventsStorage, networkWrapper);
+        final BackEndSendEventsApiRequestImpl request = new BackEndSendEventsApiRequestImpl(getContext(), eventsStorage, preferencesProvider, networkWrapper);
         request.startSendEvents(listWithOneItem, backEndSendEventsListener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());

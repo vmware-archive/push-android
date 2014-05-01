@@ -85,6 +85,7 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     public void testNewDeviceRegistrationRequiresParameters() {
         try {
             final BackEndRegistrationApiRequestImpl request = new BackEndRegistrationApiRequestImpl(getContext(), new FakeNetworkWrapper());
+            makeBackEndRegistrationApiRequestListener(true, HTTP_POST, null);
             request.startNewDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, null, listener);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
@@ -127,6 +128,7 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     public void testUpdateDeviceRegistrationRequiresParameters() {
         try {
             final BackEndRegistrationApiRequestImpl request = new BackEndRegistrationApiRequestImpl(getContext(), new FakeNetworkWrapper());
+            makeBackEndRegistrationApiRequestListener(true, HTTP_PUT, TEST_BACK_END_DEVICE_REGISTRATION_ID);
             request.startUpdateDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, TEST_BACK_END_DEVICE_REGISTRATION_ID, null, listener);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {

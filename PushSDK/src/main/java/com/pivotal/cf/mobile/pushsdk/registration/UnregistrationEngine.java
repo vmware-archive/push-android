@@ -33,12 +33,31 @@ public class UnregistrationEngine {
      * @param gcmUnregistrationApiRequestProvider  Some object that can provide GCMUnregistrationApiRequest objects.
      * @param backEndUnregisterDeviceApiRequestProvider  Some object that can provide BackEndUnregisterDeviceApiRequest objects.
      */
-    public UnregistrationEngine(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
-        verifyArguments(context, gcmProvider, preferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
-        saveArguments(context, gcmProvider, preferencesProvider,  gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
+    public UnregistrationEngine(Context context,
+                                GcmProvider gcmProvider,
+                                PreferencesProvider preferencesProvider,
+                                GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
+                                BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
+
+        verifyArguments(context,
+                gcmProvider,
+                preferencesProvider,
+                gcmUnregistrationApiRequestProvider,
+                backEndUnregisterDeviceApiRequestProvider);
+
+        saveArguments(context,
+                gcmProvider,
+                preferencesProvider,
+                gcmUnregistrationApiRequestProvider,
+                backEndUnregisterDeviceApiRequestProvider);
     }
 
-    private void verifyArguments(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
+    private void verifyArguments(Context context,
+                                 GcmProvider gcmProvider,
+                                 PreferencesProvider preferencesProvider,
+                                 GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
+                                 BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
+
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
@@ -56,7 +75,12 @@ public class UnregistrationEngine {
         }
     }
 
-    private void saveArguments(Context context, GcmProvider gcmProvider, PreferencesProvider preferencesProvider, GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider, BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
+    private void saveArguments(Context context,
+                               GcmProvider gcmProvider,
+                               PreferencesProvider preferencesProvider,
+                               GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
+                               BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
+
         this.context = context;
         this.gcmProvider = gcmProvider;
         this.preferencesProvider = preferencesProvider;
@@ -67,9 +91,7 @@ public class UnregistrationEngine {
 
     public void unregisterDevice(RegistrationParameters parameters, UnregistrationListener listener) {
 
-        if (parameters == null) {
-            throw new IllegalArgumentException("parameters may not be null");
-        }
+        verifyUnregisterDeviceArguments(parameters);
 
         // Clear the saved package name so that the message receiver service won't be able to send
         // the application any more broadcasts
@@ -84,6 +106,15 @@ public class UnregistrationEngine {
         }
     }
 
+    private void verifyUnregisterDeviceArguments(RegistrationParameters parameters) {
+        if (parameters == null) {
+            throw new IllegalArgumentException("parameters may not be null");
+        }
+        if (parameters.getBaseServerUrl() == null) {
+            throw new IllegalArgumentException("parameters.baseServerUrl may not be null");
+        }
+    }
+
     private void unregisterDeviceWithGcm(RegistrationParameters parameters, final UnregistrationListener listener) {
         PushLibLogger.i("Unregistering sender ID with GCM.");
         final GcmUnregistrationApiRequest gcmUnregistrationApiRequest = gcmUnregistrationApiRequestProvider.getRequest();
@@ -91,6 +122,7 @@ public class UnregistrationEngine {
     }
 
     private GcmUnregistrationListener getGcmUnregistrationListener(final RegistrationParameters parameters, final UnregistrationListener listener) {
+
         return new GcmUnregistrationListener() {
             @Override
             public void onGcmUnregistrationComplete() {

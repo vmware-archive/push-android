@@ -35,9 +35,7 @@ public class BackEndUnregisterDeviceApiRequestImpl extends ApiRequestImpl implem
     @Override
     public void startUnregisterDevice(String backEndDeviceRegistrationId, RegistrationParameters parameters, BackEndUnregisterDeviceListener listener) {
 
-        // TODO - add verification: parameters may not be null
-
-        verifyUnregistrationArguments(backEndDeviceRegistrationId, listener);
+        verifyUnregistrationArguments(backEndDeviceRegistrationId, parameters, listener);
 
         try {
             PushLibLogger.v("Making network request to the back-end server to unregister the device ID:" + backEndDeviceRegistrationId);
@@ -58,9 +56,12 @@ public class BackEndUnregisterDeviceApiRequestImpl extends ApiRequestImpl implem
         }
     }
 
-    private void verifyUnregistrationArguments(String backEndDeviceRegistrationId, BackEndUnregisterDeviceListener listener) {
+    private void verifyUnregistrationArguments(String backEndDeviceRegistrationId, RegistrationParameters parameters, BackEndUnregisterDeviceListener listener) {
         if (backEndDeviceRegistrationId == null) {
             throw new IllegalArgumentException("backEndDeviceRegistrationId may not be null");
+        }
+        if (parameters == null) {
+            throw new IllegalArgumentException("parameters may not be null");
         }
         if (listener == null) {
             throw new IllegalArgumentException("listener may not be null");

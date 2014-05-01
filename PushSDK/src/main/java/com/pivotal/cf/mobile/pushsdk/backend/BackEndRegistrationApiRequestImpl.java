@@ -60,39 +60,34 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
         this.context = context;
     }
 
+    @Override
     public void startNewDeviceRegistration(String gcmDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener) {
-
-        verifyNewRegistrationArguments(gcmDeviceRegistrationId, listener);
+        verifyNewRegistrationArguments(gcmDeviceRegistrationId, parameters, listener);
         handleRequest(gcmDeviceRegistrationId, null, parameters, listener, false);
     }
 
     @Override
     public void startUpdateDeviceRegistration(String gcmDeviceRegistrationId, String backEndDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener) {
-
-        // TODO - add verification: parameters may not be null
-
-        verifyUpdateRegistrationArguments(gcmDeviceRegistrationId, backEndDeviceRegistrationId, listener);
+        verifyUpdateRegistrationArguments(gcmDeviceRegistrationId, backEndDeviceRegistrationId, parameters, listener);
         handleRequest(gcmDeviceRegistrationId, backEndDeviceRegistrationId, parameters, listener, true);
     }
 
-    private void verifyNewRegistrationArguments(String gcmDeviceRegistrationId, BackEndRegistrationListener listener) {
+    private void verifyNewRegistrationArguments(String gcmDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener) {
         if (gcmDeviceRegistrationId == null) {
             throw new IllegalArgumentException("gcmDeviceRegistrationId may not be null");
+        }
+        if (parameters == null) {
+            throw new IllegalArgumentException("parameters may not be null");
         }
         if (listener == null) {
             throw new IllegalArgumentException("listener may not be null");
         }
     }
 
-    private void verifyUpdateRegistrationArguments(String gcmDeviceRegistrationId, String backEndDeviceRegistrationId, BackEndRegistrationListener listener) {
-        if (gcmDeviceRegistrationId == null) {
-            throw new IllegalArgumentException("gcmDeviceRegistrationId may not be null");
-        }
+    private void verifyUpdateRegistrationArguments(String gcmDeviceRegistrationId, String backEndDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener) {
+        verifyNewRegistrationArguments(gcmDeviceRegistrationId, parameters, listener);
         if (backEndDeviceRegistrationId == null) {
             throw new IllegalArgumentException("backEndDeviceRegistrationId may not be null");
-        }
-        if (listener == null) {
-            throw new IllegalArgumentException("listener may not be null");
         }
     }
 
