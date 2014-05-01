@@ -73,8 +73,7 @@ import java.util.List;
 public class MainActivity extends ActionBarActivity {
 
     private static final String GCM_SEND_MESSAGE_URL = "https://android.googleapis.com/gcm/send";
-    // TODO - get the back end server URL out of the preferences instead of using this constant
-//    private static final String BACK_END_SEND_MESSAGE_URL = Const.BASE_SERVER_URL + "v1/push";
+    private static final String BACK_END_SEND_MESSAGE_URL = "v1/push";
 
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm:ss.SSS");
     private static final int[] baseRowColours = new int[]{0xddeeff, 0xddffee, 0xffeedd};
@@ -273,55 +272,55 @@ public class MainActivity extends ActionBarActivity {
     }
 
     private void sendMessageViaBackEnd() {
-//        updateCurrentBaseRowColour();
-//        final String data = getBackEndMessageRequestString();
-//        if (data == null) {
-//            addLogMessage("Can not send message. Please register first.");
-//            return;
-//        }
-//        addLogMessage("Sending message via back-end server...");
-//        addLogMessage("Message body data: \"" + data + "\"");
-//
-//        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
-//            @Override
-//            protected Void doInBackground(Void... params) {
-//
-//                OutputStream outputStream = null;
-//
-//                try {
-//                    final URL url = new URL(BACK_END_SEND_MESSAGE_URL);
-//                    final HttpURLConnection urlConnection = getUrlConnection(url);
-//                    urlConnection.setDoOutput(true);
-//                    urlConnection.addRequestProperty("Authorization", getBasicAuthorizationValue());
-//                    urlConnection.connect();
-//
-//                    outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
-//                    writeConnectionOutput(data, outputStream);
-//
-//                    final int statusCode = urlConnection.getResponseCode();
-//                    if (statusCode >= 200 && statusCode < 300) {
-//                        queueLogMessage("Back-end server accepted network request to send message. HTTP response status code is " + statusCode + ".");
-//                    } else {
-//                        queueLogMessage("Back-end server rejected network request to send message. HTTP response status code is " + statusCode + ".");
-//                    }
-//
-//                    urlConnection.disconnect();
-//
-//                } catch (IOException e) {
-//                    queueLogMessage("ERROR: got exception parsing network response from Back-end server: " + e.getLocalizedMessage());
-//
-//                } finally {
-//                    if (outputStream != null) {
-//                        try {
-//                            outputStream.close();
-//                        } catch (IOException e) {}
-//                    }
-//                }
-//                return null;
-//            }
-//        };
-//
-//        asyncTask.execute((Void)null);
+        updateCurrentBaseRowColour();
+        final String data = getBackEndMessageRequestString();
+        if (data == null) {
+            addLogMessage("Can not send message. Please register first.");
+            return;
+        }
+        addLogMessage("Sending message via back-end server...");
+        addLogMessage("Message body data: \"" + data + "\"");
+
+        AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
+            @Override
+            protected Void doInBackground(Void... params) {
+
+                OutputStream outputStream = null;
+
+                try {
+                    final URL url = new URL(Settings.getBaseServerUrl(MainActivity.this) + "/" + BACK_END_SEND_MESSAGE_URL);
+                    final HttpURLConnection urlConnection = getUrlConnection(url);
+                    urlConnection.setDoOutput(true);
+                    urlConnection.addRequestProperty("Authorization", getBasicAuthorizationValue());
+                    urlConnection.connect();
+
+                    outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
+                    writeConnectionOutput(data, outputStream);
+
+                    final int statusCode = urlConnection.getResponseCode();
+                    if (statusCode >= 200 && statusCode < 300) {
+                        queueLogMessage("Back-end server accepted network request to send message. HTTP response status code is " + statusCode + ".");
+                    } else {
+                        queueLogMessage("Back-end server rejected network request to send message. HTTP response status code is " + statusCode + ".");
+                    }
+
+                    urlConnection.disconnect();
+
+                } catch (IOException e) {
+                    queueLogMessage("ERROR: got exception parsing network response from Back-end server: " + e.getLocalizedMessage());
+
+                } finally {
+                    if (outputStream != null) {
+                        try {
+                            outputStream.close();
+                        } catch (IOException e) {}
+                    }
+                }
+                return null;
+            }
+        };
+
+        asyncTask.execute((Void)null);
     }
 
     private String getBasicAuthorizationValue() {
