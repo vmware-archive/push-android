@@ -17,11 +17,11 @@ package com.pivotal.cf.mobile.pushsdk.backend;
 
 import android.test.AndroidTestCase;
 
+import com.pivotal.cf.mobile.common.test.network.FakeHttpURLConnection;
+import com.pivotal.cf.mobile.common.test.network.FakeNetworkWrapper;
+import com.pivotal.cf.mobile.common.util.DelayedLoop;
+import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
-import com.pivotal.cf.mobile.pushsdk.network.FakeHttpURLConnection;
-import com.pivotal.cf.mobile.pushsdk.network.FakeNetworkWrapper;
-import com.pivotal.cf.mobile.pushsdk.util.DelayedLoop;
-import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -323,7 +323,7 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
         try {
             url = new URL(TEST_BASE_SERVER_URL);
         } catch (MalformedURLException e) {
-            PushLibLogger.ex(e);
+            Logger.ex(e);
             url = null;
         }
         return new RegistrationParameters(TEST_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_DEVICE_ALIAS, url);

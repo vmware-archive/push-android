@@ -20,7 +20,7 @@ import android.content.Context;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
+import com.pivotal.cf.mobile.common.util.Logger;
 
 import java.io.IOException;
 
@@ -50,7 +50,7 @@ public class RealGcmProvider implements GcmProvider {
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
         if (resultCode != ConnectionResult.SUCCESS) {
             final String errorString = GooglePlayServicesUtil.getErrorString(resultCode);
-            PushLibLogger.e("Google Play Services is not available: " + errorString);
+            Logger.e("Google Play Services is not available: " + errorString);
             return false;
         }
         return true;

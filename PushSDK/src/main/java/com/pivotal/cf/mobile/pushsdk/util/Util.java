@@ -19,6 +19,9 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
+import com.pivotal.cf.mobile.common.util.DebugUtil;
+import com.pivotal.cf.mobile.common.util.Logger;
+
 import java.io.File;
 import java.io.PrintWriter;
 
@@ -59,7 +62,7 @@ public class Util {
                 try {
                     final File externalFilesDir = context.getExternalFilesDir(null);
                     if (externalFilesDir == null) {
-                        PushLibLogger.d("Was not able to get the externalFilesDir");
+                        Logger.d("Was not able to get the externalFilesDir");
                         return;
                     }
                     final File dir = new File(externalFilesDir.getAbsolutePath() + File.separator + "pushlib");
@@ -70,9 +73,9 @@ public class Util {
                     pw = new PrintWriter(deviceUuidFile);
                     pw.println(id);
                     pw.close();
-                    PushLibLogger.d("Saved " + idType + " to file: " + deviceUuidFile.getAbsolutePath());
+                    Logger.d("Saved " + idType + " to file: " + deviceUuidFile.getAbsolutePath());
                 } catch (Exception e) {
-                    PushLibLogger.w("Was not able to save " + idType + " to filesystem. This error is not-fatal. " + e.getLocalizedMessage());
+                    Logger.w("Was not able to save " + idType + " to filesystem. This error is not-fatal. " + e.getLocalizedMessage());
                 }
             }
         }

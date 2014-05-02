@@ -10,8 +10,8 @@ import com.pivotal.cf.mobile.pushsdk.backend.FakeBackEndUnregisterDeviceApiReque
 import com.pivotal.cf.mobile.pushsdk.gcm.FakeGcmProvider;
 import com.pivotal.cf.mobile.pushsdk.gcm.FakeGcmUnregistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
-import com.pivotal.cf.mobile.pushsdk.prefs.FakePreferencesProvider;
-import com.pivotal.cf.mobile.pushsdk.util.DelayedLoop;
+import com.pivotal.cf.mobile.common.test.prefs.FakePreferencesProvider;
+import com.pivotal.cf.mobile.common.util.DelayedLoop;
 
 import java.net.URL;
 

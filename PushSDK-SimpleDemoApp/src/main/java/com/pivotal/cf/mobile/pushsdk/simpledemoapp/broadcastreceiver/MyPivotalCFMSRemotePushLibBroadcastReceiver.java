@@ -9,8 +9,7 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
-
+import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.pushsdk.simpledemoapp.MainActivity;
 
 /*
@@ -43,10 +42,10 @@ public class MyPivotalCFMSRemotePushLibBroadcastReceiver extends WakefulBroadcas
              * recognize.
              */
             if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
-                PushLibLogger.i("Received message with type 'MESSAGE_TYPE_SEND_ERROR'.");
+                Logger.i("Received message with type 'MESSAGE_TYPE_SEND_ERROR'.");
                 sendNotification(context, "Send error: " + extras.toString());
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
-                PushLibLogger.i("Received message with type 'MESSAGE_TYPE_DELETED'.");
+                Logger.i("Received message with type 'MESSAGE_TYPE_DELETED'.");
                 sendNotification(context, "Deleted messages on server: " + extras.toString());
 
             // If it's a regular GCM message, do some work.
@@ -58,11 +57,11 @@ public class MyPivotalCFMSRemotePushLibBroadcastReceiver extends WakefulBroadcas
                 } else {
                     message = "Received message with no extras.";
                 }
-                PushLibLogger.i(message);
+                Logger.i(message);
                 sendNotification(context, message);
             }
         } else {
-            PushLibLogger.i("Received message with no content.");
+            Logger.i("Received message with no content.");
         }
 
         MyPivotalCFMSRemotePushLibBroadcastReceiver.completeWakefulIntent(intent);

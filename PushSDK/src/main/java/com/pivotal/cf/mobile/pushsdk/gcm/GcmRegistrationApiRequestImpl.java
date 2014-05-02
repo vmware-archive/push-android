@@ -17,7 +17,7 @@ package com.pivotal.cf.mobile.pushsdk.gcm;
 
 import android.content.Context;
 
-import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
+import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.pushsdk.util.Util;
 
 import java.io.IOException;
@@ -74,7 +74,7 @@ public class GcmRegistrationApiRequestImpl implements GcmRegistrationApiRequest 
     private void executeRegistration() {
         try {
             final String deviceRegistrationId = gcmProvider.register(senderId);
-            PushLibLogger.i("Device registered with GCM. Device registration ID:" + deviceRegistrationId);
+            Logger.i("Device registered with GCM. Device registration ID:" + deviceRegistrationId);
 
             Util.saveIdToFilesystem(context, deviceRegistrationId, "gcm_registration_id");
 
@@ -84,7 +84,7 @@ public class GcmRegistrationApiRequestImpl implements GcmRegistrationApiRequest 
             }
 
         } catch (IOException ex) {
-            PushLibLogger.ex("Error registering device with GCM:", ex);
+            Logger.ex("Error registering device with GCM:", ex);
             // If there is an error, don't just keep trying to register.
             // Require the user to click a button again, or perform
             // exponential back-off.

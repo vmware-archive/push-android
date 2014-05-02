@@ -10,7 +10,8 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.test.ServiceTestCase;
 
-import com.pivotal.cf.mobile.pushsdk.prefs.FakePreferencesProvider;
+import com.pivotal.cf.mobile.analyticssdk.service.EventService;
+import com.pivotal.cf.mobile.common.test.prefs.FakePreferencesProvider;
 import com.pivotal.cf.mobile.pushsdk.util.FakeServiceStarter;
 
 import java.util.concurrent.Semaphore;

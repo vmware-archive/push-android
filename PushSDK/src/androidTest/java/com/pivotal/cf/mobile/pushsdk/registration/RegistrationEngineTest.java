@@ -17,6 +17,9 @@ package com.pivotal.cf.mobile.pushsdk.registration;
 
 import android.test.AndroidTestCase;
 
+import com.pivotal.cf.mobile.common.prefs.PreferencesProvider;
+import com.pivotal.cf.mobile.common.test.prefs.FakePreferencesProvider;
+import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndRegistrationApiRequestProvider;
 import com.pivotal.cf.mobile.pushsdk.backend.FakeBackEndRegistrationApiRequest;
@@ -25,9 +28,6 @@ import com.pivotal.cf.mobile.pushsdk.gcm.FakeGcmRegistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.gcm.FakeGcmUnregistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmRegistrationApiRequestProvider;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
-import com.pivotal.cf.mobile.pushsdk.prefs.FakePreferencesProvider;
-import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProvider;
-import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 import com.pivotal.cf.mobile.pushsdk.version.FakeVersionProvider;
 import com.pivotal.cf.mobile.pushsdk.version.VersionProvider;
 
@@ -979,7 +979,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
             @Override
             public void onRegistrationFailed(String reason) {
                 if (isSuccessfulRegistration) {
-                    PushLibLogger.e("Test failed due to error:" + reason);
+                    Logger.e("Test failed due to error:" + reason);
                 }
                 assertFalse(isSuccessfulRegistration);
                 semaphore.release();

@@ -15,10 +15,11 @@
 
 package com.pivotal.cf.mobile.pushsdk.backend;
 
+import com.pivotal.cf.mobile.common.backend.ApiRequestImpl;
+import com.pivotal.cf.mobile.common.network.NetworkWrapper;
+import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
-import com.pivotal.cf.mobile.pushsdk.network.NetworkWrapper;
 import com.pivotal.cf.mobile.pushsdk.util.Const;
-import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -38,7 +39,7 @@ public class BackEndUnregisterDeviceApiRequestImpl extends ApiRequestImpl implem
         verifyUnregistrationArguments(backEndDeviceRegistrationId, parameters, listener);
 
         try {
-            PushLibLogger.v("Making network request to the back-end server to unregister the device ID:" + backEndDeviceRegistrationId);
+            Logger.v("Making network request to the back-end server to unregister the device ID:" + backEndDeviceRegistrationId);
             final URL url = new URL(parameters.getBaseServerUrl(), Const.BACKEND_REGISTRATION_REQUEST_ENDPOINT + "/" + backEndDeviceRegistrationId);
             final HttpURLConnection urlConnection = getHttpURLConnection(url);
             urlConnection.setRequestMethod("DELETE");
@@ -51,7 +52,7 @@ public class BackEndUnregisterDeviceApiRequestImpl extends ApiRequestImpl implem
             onSuccessfulRequest(statusCode, listener);
 
         } catch (Exception e) {
-            PushLibLogger.ex("Back-end device unregistration attempt failed", e);
+            Logger.ex("Back-end device unregistration attempt failed", e);
             listener.onBackEndUnregisterDeviceFailed(e.getLocalizedMessage());
         }
     }
@@ -73,12 +74,12 @@ public class BackEndUnregisterDeviceApiRequestImpl extends ApiRequestImpl implem
         // HTTP status 404 is not considered a failure.  If the server doesn't know about
         // this device registration ID then the device can already been considered unregistered.
         if (statusCode != 404 && isFailureStatusCode(statusCode)) {
-            PushLibLogger.e("Back-end server unregistration failed: server returned HTTP status " + statusCode);
+            Logger.e("Back-end server unregistration failed: server returned HTTP status " + statusCode);
             listener.onBackEndUnregisterDeviceFailed("Back-end server returned HTTP status " + statusCode);
             return;
         }
 
-        PushLibLogger.i("Back-end Server device unregistration succeeded.");
+        Logger.i("Back-end Server device unregistration succeeded.");
         listener.onBackEndUnregisterDeviceSuccess();
     }
 

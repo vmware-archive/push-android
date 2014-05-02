@@ -18,5 +18,4 @@ package com.pivotal.cf.mobile.pushsdk.util;
 public class Const {
     public static final String TAG_NAME = "PivotalCFMSPushSDK";
     public static final String BACKEND_REGISTRATION_REQUEST_ENDPOINT = "v1/registration";
-    public static final String BACKEND_SEND_EVENTS_ENDPOINT = "v1/events";
 }

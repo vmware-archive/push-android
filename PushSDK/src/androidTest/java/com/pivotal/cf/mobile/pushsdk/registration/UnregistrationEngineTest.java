@@ -2,14 +2,14 @@ package com.pivotal.cf.mobile.pushsdk.registration;
 
 import android.test.AndroidTestCase;
 
+import com.pivotal.cf.mobile.common.test.prefs.FakePreferencesProvider;
+import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
-import com.pivotal.cf.mobile.pushsdk.gcm.FakeGcmProvider;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndUnregisterDeviceApiRequestProvider;
 import com.pivotal.cf.mobile.pushsdk.backend.FakeBackEndUnregisterDeviceApiRequest;
+import com.pivotal.cf.mobile.pushsdk.gcm.FakeGcmProvider;
 import com.pivotal.cf.mobile.pushsdk.gcm.FakeGcmUnregistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
-import com.pivotal.cf.mobile.pushsdk.prefs.FakePreferencesProvider;
-import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 
 import java.net.URL;
 import java.util.concurrent.Semaphore;
@@ -172,7 +172,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
             @Override
             public void onUnregistrationFailed(String reason) {
                 if (isSuccessfulUnregistration) {
-                    PushLibLogger.e("Test failed due to error:" + reason);
+                    Logger.e("Test failed due to error:" + reason);
                 }
                 assertFalse(isSuccessfulUnregistration);
                 semaphore.release();

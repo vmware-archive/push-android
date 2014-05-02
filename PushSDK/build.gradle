@@ -48,4 +48,7 @@ android {
 dependencies {
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'com.google.android.gms:play-services:4.2.42'
+    compile project(":Common")
+    compile project(":AnalyticsSDK")
+    androidTestCompile project(":CommonTest")
 }

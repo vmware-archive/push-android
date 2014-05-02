@@ -1,5 +1,7 @@
 package com.pivotal.cf.mobile.pushsdk.model.events;
 
+import com.pivotal.cf.mobile.analyticssdk.model.events.Event;
+
 import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;

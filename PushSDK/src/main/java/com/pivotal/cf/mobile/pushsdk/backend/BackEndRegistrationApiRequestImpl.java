@@ -20,12 +20,13 @@ import android.os.Build;
 import android.util.Base64;
 
 import com.google.gson.Gson;
+import com.pivotal.cf.mobile.common.backend.ApiRequestImpl;
+import com.pivotal.cf.mobile.common.network.NetworkWrapper;
+import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.model.api.BackEndApiRegistrationRequestData;
 import com.pivotal.cf.mobile.pushsdk.model.api.BackEndApiRegistrationResponseData;
-import com.pivotal.cf.mobile.pushsdk.network.NetworkWrapper;
 import com.pivotal.cf.mobile.pushsdk.util.Const;
-import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 import com.pivotal.cf.mobile.pushsdk.util.Util;
 
 import java.io.BufferedInputStream;
@@ -105,7 +106,7 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
 
             outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
             final String requestBodyData = getRequestBodyData(gcmDeviceRegistrationId, parameters, isUpdate);
-            PushLibLogger.v("Making network request to register this device with the back-end server: " + requestBodyData);
+            Logger.v("Making network request to register this device with the back-end server: " + requestBodyData);
             writeOutput(requestBodyData, outputStream);
 
             final int statusCode = urlConnection.getResponseCode();
@@ -118,7 +119,7 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
             onSuccessfulNetworkRequest(statusCode, responseString, listener);
 
         } catch (Exception e) {
-            PushLibLogger.ex("Back-end device registration attempt failed", e);
+            Logger.ex("Back-end device registration attempt failed", e);
             listener.onBackEndRegistrationFailed(e.getLocalizedMessage());
         }
 
@@ -150,13 +151,13 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
     public void onSuccessfulNetworkRequest(int statusCode, String responseString, final BackEndRegistrationListener listener) {
 
         if (isFailureStatusCode(statusCode)) {
-            PushLibLogger.e("Back-end server registration failed: server returned HTTP status " + statusCode);
+            Logger.e("Back-end server registration failed: server returned HTTP status " + statusCode);
             listener.onBackEndRegistrationFailed("Back-end server returned HTTP status " + statusCode);
             return;
         }
 
         if (responseString == null) {
-            PushLibLogger.e("Back-end server registration failed: server response empty");
+            Logger.e("Back-end server registration failed: server response empty");
             listener.onBackEndRegistrationFailed("Back-end server response empty");
             return;
         }
@@ -169,21 +170,21 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
                 throw new Exception("unable to parse server response");
             }
         } catch (Exception e) {
-            PushLibLogger.e("Back-end server registration failed: " + e.getLocalizedMessage());
+            Logger.e("Back-end server registration failed: " + e.getLocalizedMessage());
             listener.onBackEndRegistrationFailed(e.getLocalizedMessage());
             return;
         }
 
         final String deviceUuid = responseData.getDeviceUuid();
         if (deviceUuid == null || deviceUuid.isEmpty()) {
-            PushLibLogger.e("Back-end server registration failed: did not return device_uuid");
+            Logger.e("Back-end server registration failed: did not return device_uuid");
             listener.onBackEndRegistrationFailed("Back-end server did not return device_uuid");
             return;
         }
 
         Util.saveIdToFilesystem(context, deviceUuid, "device_uuid");
 
-        PushLibLogger.i("Back-end Server registration succeeded.");
+        Logger.i("Back-end Server registration succeeded.");
         listener.onBackEndRegistrationSuccess(deviceUuid);
     }
 

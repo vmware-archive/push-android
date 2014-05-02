@@ -26,9 +26,9 @@ import com.pivotal.cf.mobile.pushsdk.gcm.FakeGcmRegistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.gcm.FakeGcmUnregistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmRegistrationApiRequestProvider;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
-import com.pivotal.cf.mobile.pushsdk.prefs.FakePreferencesProvider;
-import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProvider;
-import com.pivotal.cf.mobile.pushsdk.util.DelayedLoop;
+import com.pivotal.cf.mobile.common.test.prefs.FakePreferencesProvider;
+import com.pivotal.cf.mobile.common.prefs.PreferencesProvider;
+import com.pivotal.cf.mobile.common.util.DelayedLoop;
 import com.pivotal.cf.mobile.pushsdk.version.FakeVersionProvider;
 
 import java.net.URL;

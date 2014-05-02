@@ -1,0 +1,26 @@
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="com.pivotal.cf.mobile.analyticssdk"
+    android:versionCode="4"
+    android:versionName="0.4">
+
+    <application>
+
+        <service
+            android:name="com.pivotal.cf.mobile.analyticssdk.service.EventService"
+            android:exported="false"/>
+
+        <receiver
+            android:name="com.pivotal.cf.mobile.analyticssdk.broadcastreceiver.BootCompletedBroadcastReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+            </intent-filter>
+        </receiver>
+
+        <receiver
+            android:name="com.pivotal.cf.mobile.analyticssdk.broadcastreceiver.EventsSenderAlarmReceiver"
+            android:exported="false"/>
+
+    </application>
+
+</manifest>

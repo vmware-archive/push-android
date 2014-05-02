@@ -19,33 +19,32 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 
+import com.pivotal.cf.mobile.analyticssdk.jobs.PrepareDatabaseJob;
+import com.pivotal.cf.mobile.analyticssdk.service.EventService;
+import com.pivotal.cf.mobile.common.network.NetworkWrapper;
+import com.pivotal.cf.mobile.common.network.NetworkWrapperImpl;
+import com.pivotal.cf.mobile.common.prefs.PreferencesProvider;
+import com.pivotal.cf.mobile.common.prefs.PreferencesProviderImpl;
+import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndRegistrationApiRequest;
-import com.pivotal.cf.mobile.pushsdk.backend.BackEndRegistrationApiRequestProvider;
-import com.pivotal.cf.mobile.pushsdk.gcm.GcmProvider;
-import com.pivotal.cf.mobile.pushsdk.gcm.GcmRegistrationApiRequestProvider;
-import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
-import com.pivotal.cf.mobile.pushsdk.jobs.PrepareDatabaseJob;
-import com.pivotal.cf.mobile.pushsdk.registration.UnregistrationListener;
-import com.pivotal.cf.mobile.pushsdk.version.VersionProvider;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndRegistrationApiRequestImpl;
+import com.pivotal.cf.mobile.pushsdk.backend.BackEndRegistrationApiRequestProvider;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndUnregisterDeviceApiRequest;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndUnregisterDeviceApiRequestImpl;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndUnregisterDeviceApiRequestProvider;
+import com.pivotal.cf.mobile.pushsdk.gcm.GcmProvider;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmRegistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmRegistrationApiRequestImpl;
+import com.pivotal.cf.mobile.pushsdk.gcm.GcmRegistrationApiRequestProvider;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequestImpl;
+import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
 import com.pivotal.cf.mobile.pushsdk.gcm.RealGcmProvider;
-import com.pivotal.cf.mobile.pushsdk.network.NetworkWrapper;
-import com.pivotal.cf.mobile.pushsdk.network.NetworkWrapperImpl;
-import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProvider;
-import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProviderImpl;
 import com.pivotal.cf.mobile.pushsdk.registration.RegistrationEngine;
 import com.pivotal.cf.mobile.pushsdk.registration.RegistrationListener;
 import com.pivotal.cf.mobile.pushsdk.registration.UnregistrationEngine;
-import com.pivotal.cf.mobile.pushsdk.service.EventService;
-import com.pivotal.cf.mobile.pushsdk.util.Const;
-import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
+import com.pivotal.cf.mobile.pushsdk.registration.UnregistrationListener;
+import com.pivotal.cf.mobile.pushsdk.version.VersionProvider;
 import com.pivotal.cf.mobile.pushsdk.version.VersionProviderImpl;
 
 import java.util.concurrent.ExecutorService;
@@ -88,8 +87,8 @@ public class PushSDK {
         verifyArguments(context);
         saveArguments(context);
 
-        if (!PushLibLogger.isSetup()) {
-            PushLibLogger.setup(context, Const.TAG_NAME);
+        if (!Logger.isSetup()) {
+            Logger.setup(context);
         }
 
         cleanupDatabase(context);
@@ -148,7 +147,7 @@ public class PushSDK {
                     final RegistrationEngine registrationEngine = new RegistrationEngine(context, context.getPackageName(), gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
                     registrationEngine.registerDevice(parameters, listener);
                 } catch (Exception e) {
-                    PushLibLogger.ex("PushLib registration failed", e);
+                    Logger.ex("PushSDK registration failed", e);
                 }
             }
         };
@@ -196,7 +195,7 @@ public class PushSDK {
                     final UnregistrationEngine unregistrationEngine = new UnregistrationEngine(context, gcmProvider, preferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
                     unregistrationEngine.unregisterDevice(parameters, listener);
                 } catch (Exception e) {
-                    PushLibLogger.ex("PushLib unregistration failed", e);
+                    Logger.ex("PushSDK unregistration failed", e);
                 }
             }
         };

@@ -35,9 +35,13 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.pivotal.cf.mobile.analyticssdk.database.DatabaseEventsStorage;
+import com.pivotal.cf.mobile.common.util.DebugUtil;
+import com.pivotal.cf.mobile.common.util.Logger;
+import com.pivotal.cf.mobile.common.util.StringUtil;
+import com.pivotal.cf.mobile.common.util.ThreadUtil;
 import com.pivotal.cf.mobile.pushsdk.PushSDK;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
-import com.pivotal.cf.mobile.pushsdk.database.DatabaseEventsStorage;
 import com.pivotal.cf.mobile.pushsdk.registration.RegistrationListener;
 import com.pivotal.cf.mobile.pushsdk.registration.UnregistrationListener;
 import com.pivotal.cf.mobile.pushsdk.sample.adapter.LogAdapter;
@@ -50,10 +54,6 @@ import com.pivotal.cf.mobile.pushsdk.sample.model.GcmMessageRequest;
 import com.pivotal.cf.mobile.pushsdk.sample.model.LogItem;
 import com.pivotal.cf.mobile.pushsdk.sample.util.Settings;
 import com.pivotal.cf.mobile.pushsdk.util.Const;
-import com.pivotal.cf.mobile.pushsdk.util.DebugUtil;
-import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
-import com.pivotal.cf.mobile.pushsdk.util.StringUtil;
-import com.pivotal.cf.mobile.pushsdk.util.ThreadUtil;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -95,8 +95,8 @@ public class MainActivity extends ActionBarActivity {
         listView.setDividerHeight(0);
         listView.setLongClickable(true);
         listView.setOnItemLongClickListener(getLogItemLongClickListener());
-        PushLibLogger.setup(this, Const.TAG_NAME);
-        PushLibLogger.setListener(getLogListener());
+        Logger.setup(this);
+        Logger.setListener(getLogListener());
         if (logItems.isEmpty()) {
             addLogMessage("Press the \"Register\" button to attempt registration.");
         }
@@ -163,8 +163,8 @@ public class MainActivity extends ActionBarActivity {
         return parameters;
     }
 
-    public PushLibLogger.Listener getLogListener() {
-        return new PushLibLogger.Listener() {
+    public Logger.Listener getLogListener() {
+        return new Logger.Listener() {
             @Override
             public void onLogMessage(String message) {
                 addLogMessage(message);

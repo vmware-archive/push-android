@@ -20,14 +20,14 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.os.ResultReceiver;
 
+import com.pivotal.cf.mobile.analyticssdk.jobs.EnqueueEventJob;
+import com.pivotal.cf.mobile.analyticssdk.model.events.Event;
+import com.pivotal.cf.mobile.analyticssdk.service.EventService;
+import com.pivotal.cf.mobile.common.prefs.PreferencesProvider;
+import com.pivotal.cf.mobile.common.prefs.PreferencesProviderImpl;
+import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.pushsdk.broadcastreceiver.GcmBroadcastReceiver;
-import com.pivotal.cf.mobile.pushsdk.jobs.EnqueueEventJob;
-import com.pivotal.cf.mobile.pushsdk.model.events.Event;
 import com.pivotal.cf.mobile.pushsdk.model.events.EventPushReceived;
-import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProvider;
-import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProviderImpl;
-import com.pivotal.cf.mobile.pushsdk.util.Const;
-import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 import com.pivotal.cf.mobile.pushsdk.util.ServiceStarter;
 import com.pivotal.cf.mobile.pushsdk.util.ServiceStarterImpl;
 
@@ -81,8 +81,8 @@ public class GcmService extends IntentService {
     }
 
     private void setupLogger() {
-        if (!PushLibLogger.isSetup()) {
-            PushLibLogger.setup(this, Const.TAG_NAME);
+        if (!Logger.isSetup()) {
+            Logger.setup(this);
         }
     }
 
@@ -102,7 +102,7 @@ public class GcmService extends IntentService {
 
     private void doHandleIntent(Intent intent) {
 
-        PushLibLogger.fd("GcmService: Package '%s' has received a push message from GCM.", getPackageName());
+        Logger.fd("GcmService: Package '%s' has received a push message from GCM.", getPackageName());
 
         if (intent == null) {
             return;
@@ -129,7 +129,7 @@ public class GcmService extends IntentService {
         final EnqueueEventJob enqueueEventJob = new EnqueueEventJob(event);
         final Intent enqueueEventJobIntent = EventService.getIntentToRunJob(this, enqueueEventJob);
         if (GcmService.serviceStarter.startService(this, enqueueEventJobIntent) == null) {
-            PushLibLogger.e("ERROR: could not start service '" + enqueueEventJobIntent + ". A 'message received' event for this message will not be sent.");
+            Logger.e("ERROR: could not start service '" + enqueueEventJobIntent + ". A 'message received' event for this message will not be sent.");
         }
     }
 

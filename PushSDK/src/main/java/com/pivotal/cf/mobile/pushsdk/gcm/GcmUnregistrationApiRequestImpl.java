@@ -17,7 +17,7 @@ package com.pivotal.cf.mobile.pushsdk.gcm;
 
 import android.content.Context;
 
-import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
+import com.pivotal.cf.mobile.common.util.Logger;
 
 import java.io.IOException;
 
@@ -69,11 +69,11 @@ public class GcmUnregistrationApiRequestImpl implements GcmUnregistrationApiRequ
     private void executeUnregistration() {
         try {
             gcmProvider.unregister();
-            PushLibLogger.i("Device unregistered with GCM.");
+            Logger.i("Device unregistered with GCM.");
             listener.onGcmUnregistrationComplete();
 
         } catch (IOException ex) {
-            PushLibLogger.ex("Error unregistering device with GCM:", ex);
+            Logger.ex("Error unregistering device with GCM:", ex);
             listener.onGcmUnregistrationFailed(ex.getLocalizedMessage());
         }
     }

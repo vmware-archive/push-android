@@ -2,16 +2,16 @@ package com.pivotal.cf.mobile.pushsdk.registration;
 
 import android.content.Context;
 
+import com.pivotal.cf.mobile.common.prefs.PreferencesProvider;
+import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
+import com.pivotal.cf.mobile.pushsdk.backend.BackEndUnregisterDeviceApiRequest;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndUnregisterDeviceApiRequestProvider;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndUnregisterDeviceListener;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmProvider;
-import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
-import com.pivotal.cf.mobile.pushsdk.backend.BackEndUnregisterDeviceApiRequest;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequest;
+import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationListener;
-import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProvider;
-import com.pivotal.cf.mobile.pushsdk.util.PushLibLogger;
 
 public class UnregistrationEngine {
 
@@ -116,7 +116,7 @@ public class UnregistrationEngine {
     }
 
     private void unregisterDeviceWithGcm(RegistrationParameters parameters, final UnregistrationListener listener) {
-        PushLibLogger.i("Unregistering sender ID with GCM.");
+        Logger.i("Unregistering sender ID with GCM.");
         final GcmUnregistrationApiRequest gcmUnregistrationApiRequest = gcmUnregistrationApiRequestProvider.getRequest();
         gcmUnregistrationApiRequest.startUnregistration(getGcmUnregistrationListener(parameters, listener));
     }
@@ -142,10 +142,10 @@ public class UnregistrationEngine {
 
     private void unregisterDeviceWithBackEnd(final String backEndDeviceRegistrationId, RegistrationParameters parameters, final UnregistrationListener listener) {
         if (backEndDeviceRegistrationId == null) {
-            PushLibLogger.i("Not currently registered with the back-end.  Unregistration is not required.");
+            Logger.i("Not currently registered with the back-end.  Unregistration is not required.");
             listener.onUnregistrationComplete();
         } else {
-            PushLibLogger.i("Initiating device unregistration with the back-end.");
+            Logger.i("Initiating device unregistration with the back-end.");
             final BackEndUnregisterDeviceApiRequest backEndUnregisterDeviceApiRequest = backEndUnregisterDeviceApiRequestProvider.getRequest();
             backEndUnregisterDeviceApiRequest.startUnregisterDevice(backEndDeviceRegistrationId, parameters, getBackEndUnregisterDeviceListener(listener));
         }
