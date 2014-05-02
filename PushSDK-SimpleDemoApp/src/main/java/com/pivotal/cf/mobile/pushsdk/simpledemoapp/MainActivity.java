@@ -6,7 +6,7 @@ import android.os.Looper;
 import android.support.v7.app.ActionBarActivity;
 import android.widget.TextView;
 
-import com.pivotal.cf.mobile.pushsdk.PushLib;
+import com.pivotal.cf.mobile.pushsdk.PushSDK;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.registration.RegistrationListener;
 
@@ -58,8 +58,8 @@ public class MainActivity extends ActionBarActivity {
             final RegistrationParameters parameters = new RegistrationParameters(GCM_SENDER_ID, VARIANT_UUID, VARIANT_SECRET, DEVICE_ALIAS, url);
 
             // Register for push notifications.  The listener itself is optional (may be null).
-            final PushLib pushLib = PushLib.init(this);
-            pushLib.startRegistration(parameters, new RegistrationListener() {
+            final PushSDK pushSDK = PushSDK.init(this);
+            pushSDK.startRegistration(parameters, new RegistrationListener() {
 
                 @Override
                 public void onRegistrationComplete() {

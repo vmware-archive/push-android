@@ -59,9 +59,12 @@ import java.util.concurrent.Executors;
  * If the user clears the cache then the registration will be "forgotten" and it will
  * be attempted again the next time the registration method is called.
  */
-public class PushLib {
+public class PushSDK {
 
-    private static PushLib instance;
+    private static PushSDK instance;
+
+    // TODO - consider creating an IntentService (instead of a thread pool) in order to process
+    // registration and unregistration requests.
     private static final ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
     /**
@@ -72,16 +75,16 @@ public class PushLib {
      * @param context  A context object.  May not be null.
      * @return  A reference to the singleton PushLib object.
      */
-    public static PushLib init(Context context) {
+    public static PushSDK init(Context context) {
         if (instance == null) {
-            instance = new PushLib(context);
+            instance = new PushSDK(context);
         }
         return instance;
     }
 
     private Context context;
 
-    private PushLib(Context context) {
+    private PushSDK(Context context) {
         verifyArguments(context);
         saveArguments(context);
 
@@ -165,6 +168,9 @@ public class PushLib {
         if (parameters.getVariantSecret() == null || parameters.getVariantSecret().isEmpty()) {
             throw new IllegalArgumentException("parameters.variantSecret may not be null or empty");
         }
+        if (parameters.getBaseServerUrl() == null) {
+            throw new IllegalArgumentException("parameters.baseServerUrl may not be null");
+        }
     }
 
     /**
@@ -174,6 +180,7 @@ public class PushLib {
      * @param listener Optional listener for receiving a callback after un`registration finishes. This callback may
      */
     public void startUnregistration(final RegistrationParameters parameters, final UnregistrationListener listener) {
+        verifyUnregistrationArguments(parameters);
         final GcmProvider gcmProvider = new RealGcmProvider(context);
         final PreferencesProvider preferencesProvider = new PreferencesProviderImpl(context);
         final GcmUnregistrationApiRequest dummyGcmUnregistrationApiRequest = new GcmUnregistrationApiRequestImpl(context, gcmProvider);
@@ -194,5 +201,14 @@ public class PushLib {
             }
         };
         threadPool.execute(runnable);
+    }
+
+    private void verifyUnregistrationArguments(RegistrationParameters parameters) {
+        if (parameters == null) {
+            throw new IllegalArgumentException("parameters may not be null");
+        }
+        if (parameters.getBaseServerUrl() == null) {
+            throw new IllegalArgumentException("parameters.baseServerUrl may not be null");
+        }
     }
 }

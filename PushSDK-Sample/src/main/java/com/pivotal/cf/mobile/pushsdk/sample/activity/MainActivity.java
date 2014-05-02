@@ -35,7 +35,7 @@ import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
-import com.pivotal.cf.mobile.pushsdk.PushLib;
+import com.pivotal.cf.mobile.pushsdk.PushSDK;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.database.DatabaseEventsStorage;
 import com.pivotal.cf.mobile.pushsdk.registration.RegistrationListener;
@@ -83,7 +83,7 @@ public class MainActivity extends ActionBarActivity {
 
     private ListView listView;
     private LogAdapter adapter;
-    private PushLib pushLib;
+    private PushSDK pushSDK;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -101,7 +101,7 @@ public class MainActivity extends ActionBarActivity {
             addLogMessage("Press the \"Register\" button to attempt registration.");
         }
         PreferenceManager.setDefaultValues(this, com.pivotal.cf.mobile.pushsdk.sample.R.xml.preferences, false);
-        pushLib = PushLib.init(this);
+        pushSDK = PushSDK.init(this);
     }
 
     @Override
@@ -126,7 +126,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
         try {
-            pushLib.startRegistration(parameters, new RegistrationListener() {
+            pushSDK.startRegistration(parameters, new RegistrationListener() {
 
                 @Override
                 public void onRegistrationComplete() {
@@ -568,7 +568,7 @@ public class MainActivity extends ActionBarActivity {
         }
 
         try {
-            pushLib.startUnregistration(parameters, new UnregistrationListener() {
+            pushSDK.startUnregistration(parameters, new UnregistrationListener() {
                 @Override
                 public void onUnregistrationComplete() {
                     queueLogMessage("Unregistration successful.");

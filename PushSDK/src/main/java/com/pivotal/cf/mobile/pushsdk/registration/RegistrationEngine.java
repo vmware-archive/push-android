@@ -38,8 +38,8 @@ import java.net.URL;
  * This class is responsible for all the business logic behind device registration.  For a description
  * of its operation you can refer to the following diagrams:
  *
- *  1. Flow chart: https://docs.google.com/a/pivotallabs.com/drawings/d/1LFzm3BmQWBnHFnt5R4HGF4ki0qNF0FpXg_HYJgEvxvE
- *  2. Sequence diagram: https://docs.google.com/a/pivotallabs.com/drawings/d/1hJYWt_bh8Vf2CPElDnxD1qcnpWRdEdIcGZWa6OYipz8/edit
+ *  1. Flow chart: https://docs.google.com/a/pivotallabs.com/drawings/d/1e1P4R5AOz486lMjhlrNO22gLyfADBPsBpYkYYKfbmYk
+ *  2. Sequence diagram: https://docs.google.com/a/pivotallabs.com/drawings/d/1MoOFqKZvljEwu9M6ZNjZlEq3iOPBZKm2NMRw7TN6GKM
  *
  *  In general, though, the Registration Engine tries to do as little work as it thinks is required.
  *
@@ -421,7 +421,8 @@ public class RegistrationEngine {
     private void registerUpdateDeviceWithBackEnd(String gcmDeviceRegistrationId, String backEndDeviceRegistrationId, RegistrationParameters parameters, final RegistrationListener listener) {
         PushLibLogger.i("Initiating update device registration with the back-end.");
         final BackEndRegistrationApiRequest backEndRegistrationApiRequest = backEndRegistrationApiRequestProvider.getRequest();
-        backEndRegistrationApiRequest.startUpdateDeviceRegistration(gcmDeviceRegistrationId, backEndDeviceRegistrationId,
+        backEndRegistrationApiRequest.startUpdateDeviceRegistration(gcmDeviceRegistrationId,
+                backEndDeviceRegistrationId,
                 parameters,
                 getBackEndUpdateRegistrationListener(parameters, listener));
     }
