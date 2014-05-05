@@ -1,3 +1,5 @@
 <resources>
     <string name="app_name">Analytics Sample App</string>
+    <string name="action_log_event">Log Event</string>
+    <string name="action_clear_events">Clear Unsent Events</string>
 </resources>

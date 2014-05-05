@@ -1,0 +1,18 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context=".MainActivity">
+
+    <item
+        android:id="@+id/action_log_event"
+        android:icon="@drawable/ic_menu_add"
+        android:title="@string/action_log_event"
+        app:showAsAction="always|withText"/>
+
+    <item
+        android:id="@+id/action_clear_events"
+        android:icon="@drawable/ic_menu_delete"
+        android:title="@string/action_clear_events"
+        app:showAsAction="withText"/>
+
+</menu>

@@ -40,7 +40,9 @@ public class EnqueueEventJob extends BaseJob {
 
     private boolean saveEvent(JobParams jobParams) {
         if (jobParams.eventsStorage.saveEvent(event) != null) {
-            Logger.d("EnqueueEventJob: There are now " + jobParams.eventsStorage.getNumberOfEvents() + " events queued to send to the server.");
+            Logger.fd("EnqueueEventJob: Enqueuing event with type '%s'. There are now %d events queued to send to the server.",
+                    event.getEventType(),
+                    jobParams.eventsStorage.getNumberOfEvents());
             return true;
         } else {
             return false;

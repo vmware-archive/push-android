@@ -62,9 +62,6 @@ public class BaseMainActivity extends ActionBarActivity {
         listView.setOnItemLongClickListener(getLogItemLongClickListener());
         Logger.setup(this);
         Logger.setListener(getLogListener());
-        if (logItems.isEmpty()) {
-            addLogMessage("Press the \"Register\" button to attempt registration.");
-        }
     }
 
     @Override
