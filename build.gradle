@@ -1,2 +1,58 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
+buildscript {
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:0.9.+'
+    }
+}
+
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+
+// LIBRARIES
+configure ([
+    project(":Common"),
+    project(":CommonTest"),
+    project(":AnalyticsSDK"),
+    project(":PushSDK")
+]) {
+
+    apply plugin: 'android-library'
+
+    android {
+        compileSdkVersion 19
+        buildToolsVersion "19.0.3"
+
+        defaultConfig {
+            minSdkVersion 10
+            targetSdkVersion 19
+        }
+    }
+}
+
+// APPLICATIONS
+configure ([
+    project(":PushSDK-Sample"),
+    project(":PushSDK-SimpleDemoApp")
+]) {
+
+    apply plugin: 'android'
+
+    android {
+        compileSdkVersion 19
+        buildToolsVersion "19.0.3"
+
+        defaultConfig {
+            versionCode 66
+            versionName "6.6.6"
+            minSdkVersion 10
+            targetSdkVersion 19
+        }
+    }
+}

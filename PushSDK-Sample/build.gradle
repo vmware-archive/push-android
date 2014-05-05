@@ -1,26 +1,4 @@
-buildscript {
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath 'com.android.tools.build:gradle:0.9.+'
-    }
-}
-
-apply plugin: 'android'
-
-repositories {
-    mavenCentral()
-}
-
 android {
-    compileSdkVersion 19
-    buildToolsVersion "19.0.3"
-
-    defaultConfig {
-        minSdkVersion 10
-        targetSdkVersion 19
-    }
 
     signingConfigs {
         release {
@@ -41,7 +19,5 @@ android {
 dependencies {
     compile 'com.android.support:appcompat-v7:19.0.0'
     compile 'com.google.android.gms:play-services:4.0.30'
-    compile project(':Common')
-    compile project(':AnalyticsSDK')
     compile project(':PushSDK')
 }

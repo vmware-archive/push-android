@@ -1,4 +1,6 @@
-include ':AnalyticsSDK', ':Common', ':CommonTest'
+include ':Common'
+include ':AnalyticsSDK'
 include ':PushSDK'
+include ':CommonTest'
 include ':PushSDK-Sample'
 include ':PushSDK-SimpleDemoApp'
