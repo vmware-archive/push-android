@@ -17,10 +17,8 @@ package com.pivotal.cf.mobile.pushsdk;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.Intent;
 
-import com.pivotal.cf.mobile.analyticssdk.jobs.PrepareDatabaseJob;
-import com.pivotal.cf.mobile.analyticssdk.service.EventService;
+import com.pivotal.cf.mobile.analyticssdk.AnalyticsSDK;
 import com.pivotal.cf.mobile.common.network.NetworkWrapper;
 import com.pivotal.cf.mobile.common.network.NetworkWrapperImpl;
 import com.pivotal.cf.mobile.common.prefs.PreferencesProvider;
@@ -91,15 +89,7 @@ public class PushSDK {
             Logger.setup(context);
         }
 
-        cleanupDatabase(context);
-    }
-
-    private void saveArguments(Context context) {
-        if (!(context instanceof Application)) {
-            this.context = context.getApplicationContext();
-        } else {
-            this.context = context;
-        }
+        AnalyticsSDK.init(context);
     }
 
     private void verifyArguments(Context context) {
@@ -108,10 +98,12 @@ public class PushSDK {
         }
     }
 
-    private void cleanupDatabase(Context context) {
-        final PrepareDatabaseJob job = new PrepareDatabaseJob();
-        final Intent intent = EventService.getIntentToRunJob(context, job);
-        context.startService(intent);
+    private void saveArguments(Context context) {
+        if (!(context instanceof Application)) {
+            this.context = context.getApplicationContext();
+        } else {
+            this.context = context;
+        }
     }
 
     /**
@@ -136,8 +128,6 @@ public class PushSDK {
         final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
         final BackEndRegistrationApiRequest dummyBackEndRegistrationApiRequest = new BackEndRegistrationApiRequestImpl(context, networkWrapper);
         final BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider = new BackEndRegistrationApiRequestProvider(dummyBackEndRegistrationApiRequest);
-        final BackEndUnregisterDeviceApiRequest dummyBackEndUnregisterDeviceApiRequest = new BackEndUnregisterDeviceApiRequestImpl(networkWrapper);
-        final BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider = new BackEndUnregisterDeviceApiRequestProvider(dummyBackEndUnregisterDeviceApiRequest);
         final VersionProvider versionProvider = new VersionProviderImpl(context);
         final Runnable runnable = new Runnable() {
 

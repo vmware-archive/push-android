@@ -39,6 +39,7 @@ configure ([
 
 // APPLICATIONS
 configure ([
+    project(":AnalyticsSDK-Sample"),
     project(":PushSDK-Sample"),
     project(":PushSDK-SimpleDemoApp")
 ]) {

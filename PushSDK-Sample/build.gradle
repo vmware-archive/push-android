@@ -17,7 +17,6 @@ android {
 }
 
 dependencies {
-    compile 'com.android.support:appcompat-v7:19.0.0'
     compile 'com.google.android.gms:play-services:4.0.30'
     compile project(':PushSDK')
     compile project(':SampleAppCore')
