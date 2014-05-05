@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.pivotal.cf.mobile.pushsdk.sample.dialogfragment;
+package com.pivotal.cf.mobile.common.sample.dialogfragment;
 
 import android.app.AlertDialog;
 import android.app.Dialog;

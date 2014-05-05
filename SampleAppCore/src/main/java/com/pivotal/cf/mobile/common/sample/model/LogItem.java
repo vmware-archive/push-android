@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.pivotal.cf.mobile.pushsdk.sample.model;
+package com.pivotal.cf.mobile.common.sample.model;
 
 public class LogItem {
 

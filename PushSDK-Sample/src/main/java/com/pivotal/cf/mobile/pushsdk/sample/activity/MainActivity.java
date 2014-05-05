@@ -16,42 +16,31 @@
 package com.pivotal.cf.mobile.pushsdk.sample.activity;
 
 import android.app.NotificationManager;
-import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.os.Build;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Base64;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ListView;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.pivotal.cf.mobile.analyticssdk.database.DatabaseEventsStorage;
+import com.pivotal.cf.mobile.common.sample.activity.BaseMainActivity;
 import com.pivotal.cf.mobile.common.util.DebugUtil;
-import com.pivotal.cf.mobile.common.util.Logger;
-import com.pivotal.cf.mobile.common.util.StringUtil;
-import com.pivotal.cf.mobile.common.util.ThreadUtil;
 import com.pivotal.cf.mobile.pushsdk.PushSDK;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.registration.RegistrationListener;
 import com.pivotal.cf.mobile.pushsdk.registration.UnregistrationListener;
-import com.pivotal.cf.mobile.pushsdk.sample.adapter.LogAdapter;
 import com.pivotal.cf.mobile.pushsdk.sample.broadcastreceiver.MyPivotalCFMSRemotePushLibBroadcastReceiver;
 import com.pivotal.cf.mobile.pushsdk.sample.dialogfragment.ClearRegistrationDialogFragment;
-import com.pivotal.cf.mobile.pushsdk.sample.dialogfragment.LogItemLongClickDialogFragment;
 import com.pivotal.cf.mobile.pushsdk.sample.dialogfragment.SendMessageDialogFragment;
 import com.pivotal.cf.mobile.pushsdk.sample.model.BackEndMessageRequest;
 import com.pivotal.cf.mobile.pushsdk.sample.model.GcmMessageRequest;
-import com.pivotal.cf.mobile.pushsdk.sample.model.LogItem;
 import com.pivotal.cf.mobile.pushsdk.sample.util.Settings;
 import com.pivotal.cf.mobile.pushsdk.util.Const;
 
@@ -64,39 +53,17 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends BaseMainActivity {
 
     private static final String GCM_SEND_MESSAGE_URL = "https://android.googleapis.com/gcm/send";
     private static final String BACK_END_SEND_MESSAGE_URL = "v1/push";
 
-    private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm:ss.SSS");
-    private static final int[] baseRowColours = new int[]{0xddeeff, 0xddffee, 0xffeedd};
-
-    private static int currentBaseRowColour = 0;
-    private static List<LogItem> logItems = new ArrayList<LogItem>();
-
-    private ListView listView;
-    private LogAdapter adapter;
     private PushSDK pushSDK;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(com.pivotal.cf.mobile.pushsdk.sample.R.layout.activity_main);
-        adapter = new LogAdapter(getApplicationContext(), logItems);
-        listView = (ListView) findViewById(com.pivotal.cf.mobile.pushsdk.sample.R.id.listView);
-        listView.setAdapter(adapter);
-        listView.setDividerHeight(0);
-        listView.setLongClickable(true);
-        listView.setOnItemLongClickListener(getLogItemLongClickListener());
-        Logger.setup(this);
-        Logger.setListener(getLogListener());
         if (logItems.isEmpty()) {
             addLogMessage("Press the \"Register\" button to attempt registration.");
         }
@@ -107,7 +74,6 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
-        scrollToBottom();
         clearNotifications();
     }
 
@@ -161,48 +127,6 @@ public class MainActivity extends ActionBarActivity {
         addLogMessage("GCM Sender ID: '" + gcmSenderId + "'\nVariant UUID: '" + variantUuid + "\nVariant Secret: '" + variantSecret + "'\nDevice Alias: '" + deviceAlias + "'\nBase Server URL: '" + baseServerUrl + "'.");
         final RegistrationParameters parameters = new RegistrationParameters(gcmSenderId, variantUuid, variantSecret, deviceAlias, parsedBaseServerUrl);
         return parameters;
-    }
-
-    public Logger.Listener getLogListener() {
-        return new Logger.Listener() {
-            @Override
-            public void onLogMessage(String message) {
-                addLogMessage(message);
-            }
-        };
-    }
-
-    private void queueLogMessage(final String message) {
-        if (ThreadUtil.isUIThread()) {
-            addLogMessage(message);
-        } else {
-            ThreadUtil.getUIThreadHandler().post(new Runnable() {
-                @Override
-                public void run() {
-                    addLogMessage(message);
-                }
-            });
-        }
-    }
-
-    private void addLogMessage(String message) {
-        final String timestamp = getTimestamp();
-        final LogItem logItem = new LogItem(timestamp, message, baseRowColours[currentBaseRowColour]);
-        logItems.add(logItem);
-        adapter.notifyDataSetChanged();
-        scrollToBottom();
-    }
-
-    private String getTimestamp() {
-        return dateFormatter.format(new Date());
-    }
-
-    private void scrollToBottom() {
-        listView.setSelection(logItems.size() - 1);
-    }
-
-    private void updateCurrentBaseRowColour() {
-        currentBaseRowColour = (currentBaseRowColour + 1) % baseRowColours.length;
     }
 
     @Override
@@ -500,62 +424,9 @@ public class MainActivity extends ActionBarActivity {
         dialog.show(getSupportFragmentManager(), "ClearRegistrationDialogFragment");
     }
 
-    public AdapterView.OnItemLongClickListener getLogItemLongClickListener() {
-        return new AdapterView.OnItemLongClickListener() {
-
-            @Override
-            public boolean onItemLongClick(AdapterView<?> parent, final View view, int position, long id) {
-                final int originalViewBackgroundColour = adapter.getBackgroundColour(position);
-                final LogItem logItem = (LogItem) adapter.getItem(position);
-                final LogItemLongClickDialogFragment.Listener listener = new LogItemLongClickDialogFragment.Listener() {
-
-                    @Override
-                    public void onClickResult(int result) {
-                        if (result == LogItemLongClickDialogFragment.COPY_ITEM) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                                final ClipData clipData = ClipData.newPlainText("log item text", logItem.message);
-                                final android.content.ClipboardManager clipboardManager = (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                                clipboardManager.setPrimaryClip(clipData);
-                            } else {
-                                final android.text.ClipboardManager clipboardManager = (android.text.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                                clipboardManager.setText(logItem.message);
-                            }
-                            Toast.makeText(MainActivity.this, "Log item copied to clipboard", Toast.LENGTH_SHORT).show();
-                        } else if (result == LogItemLongClickDialogFragment.COPY_ALL_ITEMS) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-                                final ClipData clipData = ClipData.newPlainText("log text", getLogAsString());
-                                final android.content.ClipboardManager clipboardManager = (android.content.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                                clipboardManager.setPrimaryClip(clipData);
-                            } else {
-                                final android.text.ClipboardManager clipboardManager = (android.text.ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-                                clipboardManager.setText(getLogAsString());
-                            }
-                            Toast.makeText(MainActivity.this, "Log copied to clipboard", Toast.LENGTH_SHORT).show();
-                        } else if (result == LogItemLongClickDialogFragment.CLEAR_LOG) {
-                            logItems.clear();
-                            adapter.notifyDataSetChanged();
-                        }
-                    }
-                };
-                final LogItemLongClickDialogFragment dialog = new LogItemLongClickDialogFragment();
-                dialog.setListener(listener);
-                dialog.show(getSupportFragmentManager(), "LogItemLongClickDialogFragment");
-                return true;
-            }
-        };
-    }
-
     private void editRegistrationParameters() {
         final Intent intent = new Intent(this, SettingsActivity.class);
         startActivity(intent);
-    }
-
-    public String getLogAsString() {
-        final List<String> lines = new LinkedList<String>();
-        for (final LogItem logItem : logItems) {
-            lines.add(logItem.timestamp + "\t" + logItem.message);
-        }
-        return StringUtil.join(lines, "\n");
     }
 
     private void unregister() {

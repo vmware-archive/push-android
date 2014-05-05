@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.pivotal.cf.mobile.pushsdk.sample.adapter;
+package com.pivotal.cf.mobile.common.sample.adapter;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -22,7 +22,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.TextView;
 
-import com.pivotal.cf.mobile.pushsdk.sample.model.LogItem;
+import com.pivotal.cf.mobile.common.sample.R;
+import com.pivotal.cf.mobile.common.sample.model.LogItem;
 
 import java.util.List;
 
@@ -63,7 +64,7 @@ public class LogAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         if (convertView == null) {
-            convertView = inflater.inflate(com.pivotal.cf.mobile.pushsdk.sample.R.layout.list_item, parent, false);
+            convertView = inflater.inflate(R.layout.list_item, parent, false);
             convertView.setTag(new ViewHolder(convertView));
         }
         final ViewHolder viewHolder = (ViewHolder) convertView.getTag();
@@ -80,8 +81,8 @@ public class LogAdapter extends BaseAdapter {
         public TextView messageView;
 
         public ViewHolder(View v) {
-            timestampView = (TextView) v.findViewById(com.pivotal.cf.mobile.pushsdk.sample.R.id.textview_timestamp);
-            messageView = (TextView) v.findViewById(com.pivotal.cf.mobile.pushsdk.sample.R.id.textview_message);
+            timestampView = (TextView) v.findViewById(R.id.textview_timestamp);
+            messageView = (TextView) v.findViewById(R.id.textview_message);
         }
     }
 }

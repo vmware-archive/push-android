@@ -20,7 +20,8 @@ configure ([
     project(":Common"),
     project(":CommonTest"),
     project(":AnalyticsSDK"),
-    project(":PushSDK")
+    project(":PushSDK"),
+    project(':SampleAppCore')
 ]) {
 
     apply plugin: 'android-library'
