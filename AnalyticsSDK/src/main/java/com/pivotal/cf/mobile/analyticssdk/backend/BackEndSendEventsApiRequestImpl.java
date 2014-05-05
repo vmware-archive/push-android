@@ -72,6 +72,11 @@ public class BackEndSendEventsApiRequestImpl extends ApiRequestImpl implements B
 
         try {
 
+            final URL baseServerUrl = preferencesProvider.getBaseServerUrl();
+            if (baseServerUrl == null) {
+                throw new Exception("No baseServerUrl saved in preferences. Cannot send events to server.");
+            }
+
             // TODO - once the server supports receiving analytics events then remove
             // this silly 'if' block and let the library post the events for real.
             // At this time, if you attempt to post events to the server
@@ -79,7 +84,6 @@ public class BackEndSendEventsApiRequestImpl extends ApiRequestImpl implements B
 
             if (POST_TO_BACK_END) {
 
-                final URL baseServerUrl = preferencesProvider.getBaseServerUrl();
                 final URL sendEventsUrl = new URL(baseServerUrl, Const.BACKEND_SEND_EVENTS_ENDPOINT);
                 final HttpURLConnection urlConnection = getHttpURLConnection(sendEventsUrl);
                 urlConnection.addRequestProperty("Content-Type", "application/json");

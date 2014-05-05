@@ -15,126 +15,17 @@
 
 package com.pivotal.cf.mobile.pushsdk.sample.activity;
 
-import android.annotation.TargetApi;
-import android.app.ActionBar;
-import android.content.SharedPreferences;
-import android.os.Build;
-import android.os.Bundle;
-import android.preference.EditTextPreference;
-import android.preference.PreferenceActivity;
-import android.preference.PreferenceManager;
-import android.support.v4.app.NavUtils;
-import android.view.Menu;
-import android.view.MenuInflater;
-import android.view.MenuItem;
-
+import com.pivotal.cf.mobile.common.sample.activity.BaseSettingsActivity;
+import com.pivotal.cf.mobile.pushsdk.sample.R;
 import com.pivotal.cf.mobile.pushsdk.sample.util.Settings;
 
-public class SettingsActivity extends PreferenceActivity {
+public class SettingsActivity extends BaseSettingsActivity {
 
-    private EditTextPreference gcmSenderIdPreference;
-    private EditTextPreference variantUuidPreference;
-    private EditTextPreference variantSecretPreference;
-    private EditTextPreference deviceAliasPreference;
-    private EditTextPreference gcmBrowserApiPreference;
-    private EditTextPreference baseServerUrlPreference;
-    private EditTextPreference backEndEnvironmentUuidPreference;
-    private EditTextPreference backEndEnvironmentKeyPreference;
-    private SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener;
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setupActionBar();
-        // NOTE - many of the method calls in this class show up as deprecated.  However, I still want my
-        // app to run on old Android versions, so I'm going to leave them in here.
-        addPreferencesFromResource(com.pivotal.cf.mobile.pushsdk.sample.R.xml.preferences);
-        gcmSenderIdPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.GCM_SENDER_ID);
-        variantUuidPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.VARIANT_UUID);
-        variantSecretPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.VARIANT_SECRET);
-        deviceAliasPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.DEVICE_ALIAS);
-        gcmBrowserApiPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.GCM_BROWSER_API_KEY);
-        backEndEnvironmentUuidPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.BACK_END_ENVIRONMENT_UUID);
-        backEndEnvironmentKeyPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.BACK_END_ENVIRONMENT_KEY);
-        baseServerUrlPreference = (EditTextPreference) getPreferenceScreen().findPreference(Settings.BASE_SERVER_URL);
-        preferenceChangeListener = getPreferenceChangeListener();
+    protected String[] getPrefererenceNames() {
+        return Settings.PREFERENCE_NAMES;
     }
 
-    @Override
-    protected void onResume() {
-        super.onResume();
-        showCurrentPreferences();
-        getPreferenceScreen().getSharedPreferences().registerOnSharedPreferenceChangeListener(preferenceChangeListener);
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(preferenceChangeListener);
-    }
-
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
-    private void setupActionBar() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.HONEYCOMB) {
-            // Show the Up button in the action bar.
-            final ActionBar actionBar = getActionBar();
-            if (actionBar != null) {
-                actionBar.setDisplayHomeAsUpEnabled(true);
-            }
-        }
-    }
-
-    private SharedPreferences.OnSharedPreferenceChangeListener getPreferenceChangeListener() {
-        return new SharedPreferences.OnSharedPreferenceChangeListener() {
-
-            @Override
-            public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-                showCurrentPreferences();
-            }
-        };
-    }
-
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        final MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(com.pivotal.cf.mobile.pushsdk.sample.R.menu.settings, menu);
-        return true;
-    }
-
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        if (id == android.R.id.home) {
-            NavUtils.navigateUpFromSameTask(this);
-            return true;
-        } else if (id == com.pivotal.cf.mobile.pushsdk.sample.R.id.action_reset_preferences) {
-            resetPreferencesToDefault();
-        }
-        return super.onOptionsItemSelected(item);
-    }
-
-    private void resetPreferencesToDefault() {
-        final SharedPreferences prefs = getPreferenceScreen().getSharedPreferences();
-        prefs.edit().clear().commit();
-        PreferenceManager.setDefaultValues(this, com.pivotal.cf.mobile.pushsdk.sample.R.xml.preferences, true);
-        showCurrentPreferences();
-    }
-
-    private void showCurrentPreferences() {
-        final SharedPreferences prefs = getPreferenceScreen().getSharedPreferences();
-        setupPreferenceField(gcmSenderIdPreference, prefs.getString(Settings.GCM_SENDER_ID, null));
-        setupPreferenceField(variantUuidPreference, prefs.getString(Settings.VARIANT_UUID, null));
-        setupPreferenceField(variantSecretPreference, prefs.getString(Settings.VARIANT_SECRET, null));
-        setupPreferenceField(deviceAliasPreference, prefs.getString(Settings.DEVICE_ALIAS, null));
-        setupPreferenceField(gcmBrowserApiPreference, prefs.getString(Settings.GCM_BROWSER_API_KEY, null));
-        setupPreferenceField(baseServerUrlPreference, prefs.getString(Settings.BASE_SERVER_URL, null));
-        setupPreferenceField(backEndEnvironmentUuidPreference, prefs.getString(Settings.BACK_END_ENVIRONMENT_UUID, null));
-        setupPreferenceField(backEndEnvironmentKeyPreference, prefs.getString(Settings.BACK_END_ENVIRONMENT_KEY, null));
-        setupPreferenceField(deviceAliasPreference, prefs.getString(Settings.DEVICE_ALIAS, null));
-    }
-
-    private void setupPreferenceField(EditTextPreference preference, String value) {
-        preference.setText(value);
-        preference.setSummary(value);
+    protected int getPreferencesXmlResourceId() {
+        return R.xml.preferences;
     }
 }

@@ -30,6 +30,17 @@ public class Settings {
     public static final String BACK_END_ENVIRONMENT_UUID = "test_back_end_environment_uuid";
     public static final String BACK_END_ENVIRONMENT_KEY = "test_back_end_environment_key";
 
+    public static final String[] PREFERENCE_NAMES = {
+            GCM_SENDER_ID,
+            VARIANT_UUID,
+            VARIANT_SECRET,
+            DEVICE_ALIAS,
+            GCM_BROWSER_API_KEY,
+            BASE_SERVER_URL,
+            BACK_END_ENVIRONMENT_UUID,
+            BACK_END_ENVIRONMENT_KEY
+    };
+
     public static String getGcmSenderId(Context context) {
         return getSharedPreferences(context).getString(GCM_SENDER_ID, null);
     }
