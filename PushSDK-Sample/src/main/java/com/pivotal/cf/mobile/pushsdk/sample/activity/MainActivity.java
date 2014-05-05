@@ -17,7 +17,6 @@ package com.pivotal.cf.mobile.pushsdk.sample.activity;
 
 import android.app.NotificationManager;
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -31,11 +30,13 @@ import android.widget.Toast;
 import com.google.gson.Gson;
 import com.pivotal.cf.mobile.analyticssdk.database.DatabaseEventsStorage;
 import com.pivotal.cf.mobile.common.sample.activity.BaseMainActivity;
+import com.pivotal.cf.mobile.common.sample.activity.BaseSettingsActivity;
 import com.pivotal.cf.mobile.common.util.DebugUtil;
 import com.pivotal.cf.mobile.pushsdk.PushSDK;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.registration.RegistrationListener;
 import com.pivotal.cf.mobile.pushsdk.registration.UnregistrationListener;
+import com.pivotal.cf.mobile.pushsdk.sample.R;
 import com.pivotal.cf.mobile.pushsdk.sample.broadcastreceiver.MyPivotalCFMSRemotePushLibBroadcastReceiver;
 import com.pivotal.cf.mobile.pushsdk.sample.dialogfragment.ClearRegistrationDialogFragment;
 import com.pivotal.cf.mobile.pushsdk.sample.dialogfragment.SendMessageDialogFragment;
@@ -61,13 +62,17 @@ public class MainActivity extends BaseMainActivity {
 
     private PushSDK pushSDK;
 
+    protected Class<? extends BaseSettingsActivity> getSettingsActivity() {
+        return SettingsActivity.class;
+    }
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         if (logItems.isEmpty()) {
             addLogMessage("Press the \"Register\" button to attempt registration.");
         }
-        PreferenceManager.setDefaultValues(this, com.pivotal.cf.mobile.pushsdk.sample.R.xml.preferences, false);
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         pushSDK = PushSDK.init(this);
     }
 
@@ -131,8 +136,9 @@ public class MainActivity extends BaseMainActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
+        super.onCreateOptionsMenu(menu);
         final MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(com.pivotal.cf.mobile.pushsdk.sample.R.menu.main, menu);
+        menuInflater.inflate(R.menu.main, menu);
         return true;
     }
 
@@ -140,27 +146,23 @@ public class MainActivity extends BaseMainActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
 
-            case com.pivotal.cf.mobile.pushsdk.sample.R.id.action_register:
+            case R.id.action_register:
                 startRegistration();
                 break;
 
-            case com.pivotal.cf.mobile.pushsdk.sample.R.id.action_clear_events:
+            case R.id.action_clear_events:
                 clearEvents();
                 break;
 
-            case com.pivotal.cf.mobile.pushsdk.sample.R.id.action_clear_registration:
+            case R.id.action_clear_registration:
                 clearRegistration();
                 break;
 
-            case com.pivotal.cf.mobile.pushsdk.sample.R.id.action_edit_registration_parameters:
-                editRegistrationParameters();
-                break;
-
-            case com.pivotal.cf.mobile.pushsdk.sample.R.id.action_send_message:
+            case R.id.action_send_message:
                 sendMessage();
                 break;
 
-            case com.pivotal.cf.mobile.pushsdk.sample.R.id.action_unregister:
+            case R.id.action_unregister:
                 unregister();
                 break;
 
@@ -422,11 +424,6 @@ public class MainActivity extends BaseMainActivity {
         final ClearRegistrationDialogFragment dialog = new ClearRegistrationDialogFragment();
         dialog.setListener(listener);
         dialog.show(getSupportFragmentManager(), "ClearRegistrationDialogFragment");
-    }
-
-    private void editRegistrationParameters() {
-        final Intent intent = new Intent(this, SettingsActivity.class);
-        startActivity(intent);
     }
 
     private void unregister() {

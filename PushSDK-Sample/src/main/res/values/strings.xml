@@ -4,8 +4,9 @@
     <string name="app_name">PushSDK Sample</string>
     <string name="action_register">Register</string>
     <string name="action_clear_registration">Clear Registration</string>
-    <string name="action_edit_registration_parameters">Edit Parameters</string>
     <string name="action_send_message">Send Message</string>
+    <string name="action_unregister">Unregister</string>
+    <string name="action_clear_events">Clear Unsent Events</string>
     <string name="title_activity_settings">Settings</string>
     <string name="pref_title_gcm_registration_settings">GCM Registration Settings</string>
     <string name="pref_title_gcm_sender_id">GCM Sender ID</string>
@@ -19,8 +20,6 @@
     <string name="pref_title_back_end_push_settings">Pivotal CF MS Push Settings</string>
     <string name="pref_title_back_end_environment_uuid">Environment UUID</string>
     <string name="pref_title_back_end_environment_key">Environment Key</string>
-    <string name="action_unregister">Unregister</string>
-    <string name="action_clear_events">Clear Unsent Events</string>
     <string name="pref_title_base_server_url">Base Server URL</string>
 
 </resources>

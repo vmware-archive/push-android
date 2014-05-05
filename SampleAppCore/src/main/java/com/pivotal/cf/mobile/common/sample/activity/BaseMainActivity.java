@@ -17,9 +17,13 @@ package com.pivotal.cf.mobile.common.sample.activity;
 
 import android.content.ClipData;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
@@ -39,7 +43,7 @@ import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 
-public class BaseMainActivity extends ActionBarActivity {
+public abstract class BaseMainActivity extends ActionBarActivity {
 
     private static final SimpleDateFormat dateFormatter = new SimpleDateFormat("HH:mm:ss.SSS");
     private static final int[] baseRowColours = new int[]{0xddeeff, 0xddffee, 0xffeedd};
@@ -49,6 +53,8 @@ public class BaseMainActivity extends ActionBarActivity {
 
     private ListView listView;
     private LogAdapter adapter;
+
+    protected abstract Class<? extends BaseSettingsActivity> getSettingsActivity();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -163,5 +169,29 @@ public class BaseMainActivity extends ActionBarActivity {
             lines.add(logItem.timestamp + "\t" + logItem.message);
         }
         return StringUtil.join(lines, "\n");
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        final MenuInflater menuInflater = getMenuInflater();
+        menuInflater.inflate(R.menu.base_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        final int itemId = item.getItemId();
+        if (itemId == R.id.action_edit_preferences) {
+            editPreferences();
+        } else {
+            return super.onOptionsItemSelected(item);
+        }
+        return true;
+    }
+
+    private void editPreferences() {
+        final Class<? extends BaseSettingsActivity> activityClass = getSettingsActivity();
+        final Intent intent = new Intent(this, activityClass);
+        startActivity(intent);
     }
 }
