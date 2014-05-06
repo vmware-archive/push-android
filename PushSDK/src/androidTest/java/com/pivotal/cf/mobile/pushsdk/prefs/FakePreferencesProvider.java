@@ -13,9 +13,7 @@
  * limitations under the License.
  */
 
-package com.pivotal.cf.mobile.common.test.prefs;
-
-import com.pivotal.cf.mobile.common.prefs.PreferencesProvider;
+package com.pivotal.cf.mobile.pushsdk.prefs;
 
 import java.net.URL;
 

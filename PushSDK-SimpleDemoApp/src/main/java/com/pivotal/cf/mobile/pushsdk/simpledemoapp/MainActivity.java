@@ -6,6 +6,8 @@ import android.os.Looper;
 import android.support.v7.app.ActionBarActivity;
 import android.widget.TextView;
 
+import com.pivotal.cf.mobile.analyticssdk.AnalyticsParameters;
+import com.pivotal.cf.mobile.analyticssdk.AnalyticsSDK;
 import com.pivotal.cf.mobile.pushsdk.PushSDK;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.registration.RegistrationListener;
@@ -26,8 +28,12 @@ public class MainActivity extends ActionBarActivity {
     // Set to your own defined alias for this device.  May not be null.  May be empty.
     private static final String DEVICE_ALIAS = "test_device_alias";
 
-    // Set to your instance of the Pivotal CF Mobile Services server providing your push related analytics services.
-    private static final String BASE_SERVER_URL = "http://ec2-54-87-125-154.compute-1.amazonaws.com";
+    // Set to your instance of the Pivotal CF Mobile Services server providing your push services.
+    private static final String PUSH_BASE_SERVER_URL = "http://ec2-54-87-125-154.compute-1.amazonaws.com";
+
+    // Set to your instance of the Pivotal CF Mobile Services server providing your analytics services.
+    // Right now, we're assuming it's the same as the push server.
+    private static final String ANALYTICS_BASE_SERVER_URL = PUSH_BASE_SERVER_URL;
 
     private TextView label;
     private Handler mainHandler = new Handler(Looper.getMainLooper());
@@ -52,13 +58,20 @@ public class MainActivity extends ActionBarActivity {
     // you would register for push messages in your Application object
     private void registerForPushNotifications() {
 
-        // Create the parameters object
         try {
-            final URL url = new URL(BASE_SERVER_URL);
-            final RegistrationParameters parameters = new RegistrationParameters(GCM_SENDER_ID, VARIANT_UUID, VARIANT_SECRET, DEVICE_ALIAS, url);
+
+            // Setup the Analytics SDK.
+            final URL analyticsServerUrl = new URL(ANALYTICS_BASE_SERVER_URL);
+            final AnalyticsParameters analyticsParameters = new AnalyticsParameters(analyticsServerUrl);
+            final AnalyticsSDK analyticsSDK = AnalyticsSDK.getInstance(this);
+            analyticsSDK.setParameters(analyticsParameters);
+
+            // Setup the Push SDK.
+            final URL pushServerUrl = new URL(PUSH_BASE_SERVER_URL);
+            final RegistrationParameters parameters = new RegistrationParameters(GCM_SENDER_ID, VARIANT_UUID, VARIANT_SECRET, DEVICE_ALIAS, pushServerUrl);
 
             // Register for push notifications.  The listener itself is optional (may be null).
-            final PushSDK pushSDK = PushSDK.getInstance(analyticsParameters, this);
+            final PushSDK pushSDK = PushSDK.getInstance(analyticsSDK, this);
             pushSDK.startRegistration(parameters, new RegistrationListener() {
 
                 @Override

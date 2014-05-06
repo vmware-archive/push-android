@@ -17,7 +17,7 @@ package com.pivotal.cf.mobile.pushsdk.registration;
 
 import android.content.Context;
 
-import com.pivotal.cf.mobile.common.prefs.PreferencesProvider;
+import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProvider;
 import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndRegistrationApiRequest;

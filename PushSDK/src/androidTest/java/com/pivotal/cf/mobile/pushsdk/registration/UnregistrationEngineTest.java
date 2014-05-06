@@ -2,7 +2,7 @@ package com.pivotal.cf.mobile.pushsdk.registration;
 
 import android.test.AndroidTestCase;
 
-import com.pivotal.cf.mobile.common.test.prefs.FakePreferencesProvider;
+import com.pivotal.cf.mobile.pushsdk.prefs.FakePreferencesProvider;
 import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndUnregisterDeviceApiRequestProvider;

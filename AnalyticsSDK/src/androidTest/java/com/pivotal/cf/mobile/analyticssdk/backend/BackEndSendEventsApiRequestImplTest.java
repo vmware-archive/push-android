@@ -9,7 +9,7 @@ import com.pivotal.cf.mobile.analyticssdk.prefs.FakePreferencesProvider;
 import com.pivotal.cf.mobile.common.network.NetworkWrapper;
 import com.pivotal.cf.mobile.common.test.network.FakeHttpURLConnection;
 import com.pivotal.cf.mobile.common.test.network.FakeNetworkWrapper;
-import com.pivotal.cf.mobile.common.util.DelayedLoop;
+import com.pivotal.cf.mobile.common.test.util.DelayedLoop;
 
 import java.net.URL;
 import java.util.LinkedList;

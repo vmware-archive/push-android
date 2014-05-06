@@ -1,4 +1,6 @@
-package com.pivotal.cf.mobile.common.util;
+package com.pivotal.cf.mobile.common.test.util;
+
+import com.pivotal.cf.mobile.common.util.ThreadUtil;
 
 /**
  * This class simplifies the process of testing asynchronous code within unit tests.<br>

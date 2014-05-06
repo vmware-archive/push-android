@@ -19,7 +19,7 @@ import android.test.AndroidTestCase;
 
 import com.pivotal.cf.mobile.common.test.network.FakeHttpURLConnection;
 import com.pivotal.cf.mobile.common.test.network.FakeNetworkWrapper;
-import com.pivotal.cf.mobile.common.util.DelayedLoop;
+import com.pivotal.cf.mobile.common.test.util.DelayedLoop;
 import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 

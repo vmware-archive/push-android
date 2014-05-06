@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.pivotal.cf.mobile.common.prefs;
+package com.pivotal.cf.mobile.pushsdk.prefs;
 
 import android.content.Context;
 import android.content.SharedPreferences;
