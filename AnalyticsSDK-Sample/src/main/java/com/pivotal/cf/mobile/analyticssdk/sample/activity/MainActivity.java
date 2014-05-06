@@ -1,6 +1,7 @@
 package com.pivotal.cf.mobile.analyticssdk.sample.activity;
 
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -30,6 +31,7 @@ public class MainActivity extends BaseMainActivity {
         if (logItems.isEmpty()) {
             addLogMessage("Press the \"Log Event\" button to log a test event.");
         }
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
     }
 
     @Override
