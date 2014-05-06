@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
+import java.net.UnknownHostException;
 import java.util.Locale;
 
 /**
@@ -138,7 +139,14 @@ public class Logger {
     }
 
     public static void ex(String message, Throwable tr) {
-        final String formattedString = formatMessage(message, new Object[] {}) + ": " + Log.getStackTraceString(tr);
+        final String stackTraceString;
+        if (tr instanceof UnknownHostException) {
+            // Note: can't get the stack trace of an UnknownHostException
+            stackTraceString = tr.getLocalizedMessage();
+        } else {
+            stackTraceString = Log.getStackTraceString(tr);
+        }
+        final String formattedString = formatMessage(message, new Object[] {}) + ": " + stackTraceString;
         sendMessageToListener(formattedString);
         Log.e(TAG_NAME, formattedString);
     }

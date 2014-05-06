@@ -5,14 +5,14 @@ import android.os.Parcel;
 import android.os.Parcelable;
 import android.test.AndroidTestCase;
 
-import com.pivotal.cf.mobile.analyticssdk.backend.FakeBackEndSendEventsApiRequest;
-import com.pivotal.cf.mobile.analyticssdk.database.FakeEventsStorage;
-import com.pivotal.cf.mobile.analyticssdk.model.events.EventTest;
-import com.pivotal.cf.mobile.common.test.network.FakeNetworkWrapper;
-import com.pivotal.cf.mobile.common.test.prefs.FakePreferencesProvider;
 import com.pivotal.cf.mobile.analyticssdk.backend.BackEndSendEventsApiRequestProvider;
-import com.pivotal.cf.mobile.analyticssdk.model.events.Event;
+import com.pivotal.cf.mobile.analyticssdk.backend.FakeBackEndSendEventsApiRequest;
 import com.pivotal.cf.mobile.analyticssdk.broadcastreceiver.FakeEventsSenderAlarmProvider;
+import com.pivotal.cf.mobile.analyticssdk.database.FakeEventsStorage;
+import com.pivotal.cf.mobile.analyticssdk.model.events.Event;
+import com.pivotal.cf.mobile.analyticssdk.model.events.EventTest;
+import com.pivotal.cf.mobile.analyticssdk.prefs.FakePreferencesProvider;
+import com.pivotal.cf.mobile.common.test.network.FakeNetworkWrapper;
 
 import junit.framework.Assert;
 
@@ -39,7 +39,7 @@ public abstract class JobTest extends AndroidTestCase {
         eventsStorage = new FakeEventsStorage();
         networkWrapper = new FakeNetworkWrapper();
         alarmProvider = new FakeEventsSenderAlarmProvider();
-        preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null, null);
+        preferencesProvider = new FakePreferencesProvider(null);
         backEndMessageReceiptApiRequest = new FakeBackEndSendEventsApiRequest();
         backEndSendEventsApiRequestProvider = new BackEndSendEventsApiRequestProvider(backEndMessageReceiptApiRequest);
     }

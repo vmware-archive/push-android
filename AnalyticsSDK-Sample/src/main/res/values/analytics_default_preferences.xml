@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- The base URI of the Pivotal CF Mobile Services server that is used to provide analytics services.           -->
+    <string name="pref_default_analytics_base_server_url">http://ec2-54-87-125-154.compute-1.amazonaws.com</string>
+
+</resources>

@@ -58,7 +58,7 @@ public class MainActivity extends ActionBarActivity {
             final RegistrationParameters parameters = new RegistrationParameters(GCM_SENDER_ID, VARIANT_UUID, VARIANT_SECRET, DEVICE_ALIAS, url);
 
             // Register for push notifications.  The listener itself is optional (may be null).
-            final PushSDK pushSDK = PushSDK.init(this);
+            final PushSDK pushSDK = PushSDK.getInstance(analyticsParameters, this);
             pushSDK.startRegistration(parameters, new RegistrationListener() {
 
                 @Override

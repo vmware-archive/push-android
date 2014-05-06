@@ -6,16 +6,16 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.test.ServiceTestCase;
 
+import com.pivotal.cf.mobile.analyticssdk.backend.BackEndSendEventsApiRequestProvider;
 import com.pivotal.cf.mobile.analyticssdk.backend.FakeBackEndSendEventsApiRequest;
+import com.pivotal.cf.mobile.analyticssdk.broadcastreceiver.FakeEventsSenderAlarmProvider;
+import com.pivotal.cf.mobile.analyticssdk.database.DatabaseWrapper;
 import com.pivotal.cf.mobile.analyticssdk.database.FakeEventsStorage;
 import com.pivotal.cf.mobile.analyticssdk.jobs.DummyJob;
-import com.pivotal.cf.mobile.analyticssdk.model.events.EventTest;
-import com.pivotal.cf.mobile.common.test.network.FakeNetworkWrapper;
-import com.pivotal.cf.mobile.common.test.prefs.FakePreferencesProvider;
-import com.pivotal.cf.mobile.analyticssdk.backend.BackEndSendEventsApiRequestProvider;
-import com.pivotal.cf.mobile.analyticssdk.database.DatabaseWrapper;
 import com.pivotal.cf.mobile.analyticssdk.jobs.PrepareDatabaseJob;
-import com.pivotal.cf.mobile.analyticssdk.broadcastreceiver.FakeEventsSenderAlarmProvider;
+import com.pivotal.cf.mobile.analyticssdk.model.events.EventTest;
+import com.pivotal.cf.mobile.analyticssdk.prefs.FakePreferencesProvider;
+import com.pivotal.cf.mobile.common.test.network.FakeNetworkWrapper;
 
 import junit.framework.Assert;
 
@@ -59,7 +59,7 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
 
         networkWrapper = new FakeNetworkWrapper();
         eventsStorage = new FakeEventsStorage();
-        preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null, null);
+        preferencesProvider = new FakePreferencesProvider(null);
         backEndMessageReceiptApiRequest = new FakeBackEndSendEventsApiRequest();
         testResultReceiver = new TestResultReceiver(null);
         listOfCompletedJobs = new LinkedList<String>();

@@ -13,11 +13,11 @@
  * limitations under the License.
  */
 
-package com.pivotal.cf.mobile.pushsdk.sample.activity;
+package com.pivotal.cf.mobile.analyticssdk.sample.activity;
 
+import com.pivotal.cf.mobile.analyticssdk.sample.R;
+import com.pivotal.cf.mobile.analyticssdk.sample.util.Settings;
 import com.pivotal.cf.mobile.common.sample.activity.BaseSettingsActivity;
-import com.pivotal.cf.mobile.pushsdk.sample.R;
-import com.pivotal.cf.mobile.pushsdk.sample.util.Settings;
 
 public class SettingsActivity extends BaseSettingsActivity {
 

@@ -5,8 +5,8 @@ import android.content.Context;
 import com.pivotal.cf.mobile.analyticssdk.backend.BackEndSendEventsApiRequestProvider;
 import com.pivotal.cf.mobile.analyticssdk.broadcastreceiver.EventsSenderAlarmProvider;
 import com.pivotal.cf.mobile.analyticssdk.database.EventsStorage;
+import com.pivotal.cf.mobile.analyticssdk.prefs.PreferencesProvider;
 import com.pivotal.cf.mobile.common.network.NetworkWrapper;
-import com.pivotal.cf.mobile.common.prefs.PreferencesProvider;
 
 public class JobParams {
 

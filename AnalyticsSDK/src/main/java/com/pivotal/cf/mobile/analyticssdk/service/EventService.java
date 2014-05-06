@@ -17,10 +17,10 @@ import com.pivotal.cf.mobile.analyticssdk.jobs.BaseJob;
 import com.pivotal.cf.mobile.analyticssdk.jobs.JobParams;
 import com.pivotal.cf.mobile.analyticssdk.jobs.JobResultListener;
 import com.pivotal.cf.mobile.analyticssdk.jobs.PrepareDatabaseJob;
+import com.pivotal.cf.mobile.analyticssdk.prefs.PreferencesProvider;
+import com.pivotal.cf.mobile.analyticssdk.prefs.PreferencesProviderImpl;
 import com.pivotal.cf.mobile.common.network.NetworkWrapper;
 import com.pivotal.cf.mobile.common.network.NetworkWrapperImpl;
-import com.pivotal.cf.mobile.common.prefs.PreferencesProvider;
-import com.pivotal.cf.mobile.common.prefs.PreferencesProviderImpl;
 import com.pivotal.cf.mobile.common.util.Logger;
 
 import java.util.List;

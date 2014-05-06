@@ -28,6 +28,8 @@ import android.view.MenuItem;
 import android.widget.Toast;
 
 import com.google.gson.Gson;
+import com.pivotal.cf.mobile.analyticssdk.AnalyticsParameters;
+import com.pivotal.cf.mobile.analyticssdk.AnalyticsSDK;
 import com.pivotal.cf.mobile.analyticssdk.database.DatabaseEventsStorage;
 import com.pivotal.cf.mobile.common.sample.activity.BaseMainActivity;
 import com.pivotal.cf.mobile.common.sample.activity.BaseSettingsActivity;
@@ -61,6 +63,7 @@ public class MainActivity extends BaseMainActivity {
     private static final String BACK_END_SEND_MESSAGE_URL = "v1/push";
 
     private PushSDK pushSDK;
+    private AnalyticsSDK analyticsSDK;
 
     protected Class<? extends BaseSettingsActivity> getSettingsActivity() {
         return SettingsActivity.class;
@@ -73,13 +76,39 @@ public class MainActivity extends BaseMainActivity {
             addLogMessage("Press the \"Register\" button to attempt registration.");
         }
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-        pushSDK = PushSDK.init(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        updateCurrentBaseRowColour();
+        setupAnalyticsSDK();
+        setupPushSDK();
         clearNotifications();
+    }
+
+    private void setupAnalyticsSDK() {
+        try {
+            final AnalyticsParameters analyticsParameters = getAnalyticsParameters();
+            analyticsSDK = AnalyticsSDK.getInstance(this);
+            analyticsSDK.setParameters(analyticsParameters);
+        } catch (IllegalArgumentException e) {
+            addLogMessage("Not able to initialize Analytics SDK: " + e.getMessage());
+        }
+    }
+
+    private AnalyticsParameters getAnalyticsParameters() {
+        final URL baseServerUrl = getAnalyticsBaseServerUrl();
+        final AnalyticsParameters parameters = new AnalyticsParameters(baseServerUrl);
+        return parameters;
+    }
+
+    private void setupPushSDK() {
+        try {
+            pushSDK = PushSDK.getInstance(analyticsSDK, this);
+        } catch (IllegalArgumentException e) {
+            addLogMessage("Not able to initialize Push SDK: " + e.getMessage());
+        }
     }
 
     private void clearNotifications() {
@@ -119,19 +148,30 @@ public class MainActivity extends BaseMainActivity {
         final String variantUuid = Settings.getVariantUuid(this);
         final String variantSecret = Settings.getVariantSecret(this);
         final String deviceAlias = Settings.getDeviceAlias(this);
-        final String baseServerUrl = Settings.getBaseServerUrl(this);
+        final URL baseServerUrl = getPushBaseServerUrl();
+        addLogMessage("GCM Sender ID: '" + gcmSenderId + "'\nVariant UUID: '" + variantUuid + "\nVariant Secret: '" + variantSecret + "'\nDevice Alias: '" + deviceAlias + "'\nBase Server URL: '" + baseServerUrl + "'.");
+        final RegistrationParameters parameters = new RegistrationParameters(gcmSenderId, variantUuid, variantSecret, deviceAlias, baseServerUrl);
+        return parameters;
+    }
 
-        final URL parsedBaseServerUrl;
+    private URL getPushBaseServerUrl() {
+        final String baseServerUrl = Settings.getPushBaseServerUrl(this);
         try {
-            parsedBaseServerUrl = new URL(baseServerUrl);
+            return new URL(baseServerUrl);
         } catch (MalformedURLException e) {
-            addLogMessage("Invalid base server URL: '" + baseServerUrl + "'");
+            addLogMessage("Invalid push base server URL: '" + baseServerUrl + "'");
             return null;
         }
+    }
 
-        addLogMessage("GCM Sender ID: '" + gcmSenderId + "'\nVariant UUID: '" + variantUuid + "\nVariant Secret: '" + variantSecret + "'\nDevice Alias: '" + deviceAlias + "'\nBase Server URL: '" + baseServerUrl + "'.");
-        final RegistrationParameters parameters = new RegistrationParameters(gcmSenderId, variantUuid, variantSecret, deviceAlias, parsedBaseServerUrl);
-        return parameters;
+    private URL getAnalyticsBaseServerUrl() {
+        final String baseServerUrl = Settings.getAnalyticsBaseServerUrl(this);
+        try {
+            return new URL(baseServerUrl);
+        } catch (MalformedURLException e) {
+            addLogMessage("Invalid analytics base server URL: '" + baseServerUrl + "'");
+            return null;
+        }
     }
 
     @Override
@@ -214,7 +254,7 @@ public class MainActivity extends BaseMainActivity {
                 OutputStream outputStream = null;
 
                 try {
-                    final URL url = new URL(Settings.getBaseServerUrl(MainActivity.this) + "/" + BACK_END_SEND_MESSAGE_URL);
+                    final URL url = new URL(Settings.getPushBaseServerUrl(MainActivity.this) + "/" + BACK_END_SEND_MESSAGE_URL);
                     final HttpURLConnection urlConnection = getUrlConnection(url);
                     urlConnection.setDoOutput(true);
                     urlConnection.addRequestProperty("Authorization", getBasicAuthorizationValue());

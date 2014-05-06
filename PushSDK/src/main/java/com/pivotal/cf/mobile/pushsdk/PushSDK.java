@@ -64,46 +64,50 @@ public class PushSDK {
     // registration and unregistration requests.
     private static final ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
+    // TODO - decide if it is really appropriate to pass an instance of the Analytics SDK to the Push SDK.
+    // The Push SDK can generate analytics events without access to the Analytics engine front end, of course.
     /**
-     * Initializes the Push Library singleton object.  You will
-     * need to call this before you can attempt to register with the
-     * Push server.
+     * Retrieves an instance of the Pivotal CF Mobile Services Push SDK singleton object.
      *
-     * @param context  A context object.  May not be null.
-     * @return  A reference to the singleton PushLib object.
+     * @param analyticsSDK  An instance of the Pivotal CF Mobile Services Analytics SDK. Use `null` if you don't
+     *                      want analytics.
+     * @param context       A context object.  May not be null.
+     * @return  A reference to the singleton PushSDK object.
      */
-    public static PushSDK init(Context context) {
+    public static PushSDK getInstance(AnalyticsSDK analyticsSDK, Context context) {
         if (instance == null) {
-            instance = new PushSDK(context);
+            instance = new PushSDK(analyticsSDK, context);
         }
         return instance;
     }
 
     private Context context;
+    private AnalyticsSDK analyticsSDK;
 
-    private PushSDK(Context context) {
+    private PushSDK(AnalyticsSDK analyticsSDK, Context context) {
         verifyArguments(context);
-        saveArguments(context);
+        saveArguments(analyticsSDK, context);
 
         if (!Logger.isSetup()) {
             Logger.setup(context);
         }
-
-        AnalyticsSDK.init(context);
+        Logger.i("PushSDK initialized.");
     }
 
     private void verifyArguments(Context context) {
+        // NOTE - analyticsSDK is considered optional
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
     }
 
-    private void saveArguments(Context context) {
+    private void saveArguments(AnalyticsSDK analyticsSDK, Context context) {
         if (!(context instanceof Application)) {
             this.context = context.getApplicationContext();
         } else {
             this.context = context;
         }
+        this.analyticsSDK = analyticsSDK;
     }
 
     /**

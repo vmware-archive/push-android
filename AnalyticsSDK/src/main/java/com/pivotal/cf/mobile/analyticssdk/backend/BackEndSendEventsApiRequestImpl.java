@@ -6,11 +6,11 @@ import android.net.Uri;
 import com.google.gson.Gson;
 import com.pivotal.cf.mobile.analyticssdk.database.EventsStorage;
 import com.pivotal.cf.mobile.analyticssdk.model.events.Event;
+import com.pivotal.cf.mobile.analyticssdk.prefs.PreferencesProvider;
+import com.pivotal.cf.mobile.analyticssdk.util.Const;
 import com.pivotal.cf.mobile.common.backend.ApiRequestImpl;
 import com.pivotal.cf.mobile.common.network.NetworkWrapper;
-import com.pivotal.cf.mobile.common.prefs.PreferencesProvider;
 import com.pivotal.cf.mobile.common.util.Logger;
-import com.pivotal.cf.mobile.analyticssdk.util.Const;
 
 import java.io.BufferedOutputStream;
 import java.io.IOException;

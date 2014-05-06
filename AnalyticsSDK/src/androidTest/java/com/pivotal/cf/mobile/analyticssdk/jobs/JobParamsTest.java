@@ -4,10 +4,10 @@ import android.test.AndroidTestCase;
 
 import com.pivotal.cf.mobile.analyticssdk.backend.BackEndSendEventsApiRequestProvider;
 import com.pivotal.cf.mobile.analyticssdk.backend.FakeBackEndSendEventsApiRequest;
-import com.pivotal.cf.mobile.analyticssdk.database.FakeEventsStorage;
-import com.pivotal.cf.mobile.common.test.network.FakeNetworkWrapper;
-import com.pivotal.cf.mobile.common.test.prefs.FakePreferencesProvider;
 import com.pivotal.cf.mobile.analyticssdk.broadcastreceiver.FakeEventsSenderAlarmProvider;
+import com.pivotal.cf.mobile.analyticssdk.database.FakeEventsStorage;
+import com.pivotal.cf.mobile.analyticssdk.prefs.FakePreferencesProvider;
+import com.pivotal.cf.mobile.common.test.network.FakeNetworkWrapper;
 
 public class JobParamsTest extends AndroidTestCase {
 
@@ -25,7 +25,7 @@ public class JobParamsTest extends AndroidTestCase {
         eventsStorage = new FakeEventsStorage();
         networkWrapper = new FakeNetworkWrapper();
         alarmProvider = new FakeEventsSenderAlarmProvider();
-        preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null, null);
+        preferencesProvider = new FakePreferencesProvider(null);
         backEndMessageReceiptApiRequest = new FakeBackEndSendEventsApiRequest();
         backEndSendEventsApiRequestProvider = new BackEndSendEventsApiRequestProvider(backEndMessageReceiptApiRequest);
         listener = new JobResultListener() {

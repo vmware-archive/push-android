@@ -39,7 +39,7 @@ public abstract class BaseSettingsActivity extends PreferenceActivity {
     private Map<String, EditTextPreference> preferenceMap;
 
     protected abstract int getPreferencesXmlResourceId();
-    protected abstract String[] getPrefererenceNames();
+    protected abstract String[] getPreferenceNames();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,7 +48,7 @@ public abstract class BaseSettingsActivity extends PreferenceActivity {
         // NOTE - many of the method calls in this class show up as deprecated.  However, I still want my
         // app to run on old Android versions, so I'm going to leave them in here.
         addPreferencesFromResource(getPreferencesXmlResourceId());
-        addPreferences(getPrefererenceNames());
+        addPreferences(getPreferenceNames());
         preferenceChangeListener = getPreferenceChangeListener();
     }
 

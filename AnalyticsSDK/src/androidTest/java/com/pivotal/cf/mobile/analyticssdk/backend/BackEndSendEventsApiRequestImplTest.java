@@ -5,10 +5,10 @@ import android.test.AndroidTestCase;
 
 import com.pivotal.cf.mobile.analyticssdk.database.FakeEventsStorage;
 import com.pivotal.cf.mobile.analyticssdk.model.events.EventTest;
+import com.pivotal.cf.mobile.analyticssdk.prefs.FakePreferencesProvider;
+import com.pivotal.cf.mobile.common.network.NetworkWrapper;
 import com.pivotal.cf.mobile.common.test.network.FakeHttpURLConnection;
 import com.pivotal.cf.mobile.common.test.network.FakeNetworkWrapper;
-import com.pivotal.cf.mobile.common.network.NetworkWrapper;
-import com.pivotal.cf.mobile.common.test.prefs.FakePreferencesProvider;
 import com.pivotal.cf.mobile.common.util.DelayedLoop;
 
 import java.net.URL;
@@ -32,7 +32,7 @@ public class BackEndSendEventsApiRequestImplTest extends AndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         eventsStorage = new FakeEventsStorage();
-        preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null, new URL("http://some/fake/host"));
+        preferencesProvider = new FakePreferencesProvider(new URL("http://some/fake/host"));
         networkWrapper = new FakeNetworkWrapper();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
         FakeHttpURLConnection.reset();

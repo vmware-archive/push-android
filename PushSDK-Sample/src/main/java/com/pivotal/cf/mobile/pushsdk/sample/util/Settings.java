@@ -26,7 +26,8 @@ public class Settings {
     public static final String VARIANT_SECRET = "test_variant_secret";
     public static final String DEVICE_ALIAS = "test_device_alias";
     public static final String GCM_BROWSER_API_KEY = "test_gcm_browser_api_key";
-    public static final String BASE_SERVER_URL = "test_base_server_url";
+    public static final String PUSH_BASE_SERVER_URL = "test_push_base_server_url";
+    public static final String ANALYTICS_BASE_SERVER_URL = "test_analytics_base_server_url";
     public static final String BACK_END_ENVIRONMENT_UUID = "test_back_end_environment_uuid";
     public static final String BACK_END_ENVIRONMENT_KEY = "test_back_end_environment_key";
 
@@ -36,7 +37,8 @@ public class Settings {
             VARIANT_SECRET,
             DEVICE_ALIAS,
             GCM_BROWSER_API_KEY,
-            BASE_SERVER_URL,
+            PUSH_BASE_SERVER_URL,
+            ANALYTICS_BASE_SERVER_URL,
             BACK_END_ENVIRONMENT_UUID,
             BACK_END_ENVIRONMENT_KEY
     };
@@ -61,10 +63,13 @@ public class Settings {
         return getSharedPreferences(context).getString(GCM_BROWSER_API_KEY, null);
     }
 
-    public static String getBaseServerUrl(Context context) {
-        return getSharedPreferences(context).getString(BASE_SERVER_URL, null);
+    public static String getPushBaseServerUrl(Context context) {
+        return getSharedPreferences(context).getString(PUSH_BASE_SERVER_URL, null);
     }
 
+    public static String getAnalyticsBaseServerUrl(Context context) {
+        return getSharedPreferences(context).getString(ANALYTICS_BASE_SERVER_URL, null);
+    }
     public static String getBackEndEnvironmentUuid(Context context) {
         return getSharedPreferences(context).getString(BACK_END_ENVIRONMENT_UUID, null);
     }
