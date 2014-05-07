@@ -29,9 +29,7 @@ public class Event implements Parcelable {
         public static final String EVENT_UUID = "id";
         public static final String TYPE = "type";
         public static final String TIME = "time";
-        public static final String VARIANT_UUID = "variant_uuid";
         public static final String STATUS = "status";
-        public static final String DEVICE_ID = "device_id";
         public static final String DATA = "data";
     }
 
@@ -68,12 +66,6 @@ public class Event implements Parcelable {
     @SerializedName(Columns.TIME)
     private String time;
 
-    @SerializedName(Columns.VARIANT_UUID)
-    private String variantUuid;
-
-    @SerializedName(Columns.DEVICE_ID)
-    private String deviceId;
-
     @SerializedName(Columns.DATA)
     private HashMap<String, Object> data;
 
@@ -108,19 +100,9 @@ public class Event implements Parcelable {
             setEventId(cursor.getString(columnIndex));
         }
 
-        columnIndex = cursor.getColumnIndex(Columns.VARIANT_UUID);
-        if (columnIndex >= 0) {
-            setVariantUuid(cursor.getString(columnIndex));
-        }
-
         columnIndex = cursor.getColumnIndex(Columns.TIME);
         if (columnIndex >= 0) {
             setTime(cursor.getString(columnIndex));
-        }
-
-        columnIndex = cursor.getColumnIndex(Columns.DEVICE_ID);
-        if (columnIndex >= 0) {
-            setDeviceId(cursor.getString(columnIndex));
         }
 
         columnIndex = cursor.getColumnIndex(Columns.DATA);
@@ -142,8 +124,6 @@ public class Event implements Parcelable {
         this.eventId = source.eventId;
         this.eventType = source.eventType;
         this.time = source.time;
-        this.variantUuid = source.variantUuid;
-        this.deviceId = source.deviceId;
         if (source.data != null) {
             this.data = new HashMap<String, Object>(source.data);
         } else {
@@ -200,22 +180,6 @@ public class Event implements Parcelable {
         } else {
             this.time = null;
         }
-    }
-
-    public String getVariantUuid() {
-        return variantUuid;
-    }
-
-    public void setVariantUuid(String variantUuid) {
-        this.variantUuid = variantUuid;
-    }
-
-    public String getDeviceId() {
-        return deviceId;
-    }
-
-    public void setDeviceId(String deviceId) {
-        this.deviceId = deviceId;
     }
 
     public HashMap<String, Object> getData() {
@@ -286,26 +250,6 @@ public class Event implements Parcelable {
             return false;
         }
 
-        if (other.variantUuid == null && variantUuid != null) {
-            return false;
-        }
-        if (other.variantUuid != null && variantUuid == null) {
-            return false;
-        }
-        if (other.variantUuid != null && variantUuid != null && !(other.variantUuid.equals(variantUuid))) {
-            return false;
-        }
-
-        if (other.deviceId == null && deviceId != null) {
-            return false;
-        }
-        if (other.deviceId != null && deviceId == null) {
-            return false;
-        }
-        if (other.deviceId != null && deviceId != null && !(other.deviceId.equals(deviceId))) {
-            return false;
-        }
-
         if (other.data == null && data != null) {
             return false;
         }
@@ -325,8 +269,6 @@ public class Event implements Parcelable {
         result = (result * 31) + (eventId == null ? 0 : eventId.hashCode());
         result = (result * 31) + (eventType == null ? 0 : eventType.hashCode());
         result = (result * 31) + (time == null ? 0 : time.hashCode());
-        result = (result * 31) + (variantUuid == null ? 0 : variantUuid.hashCode());
-        result = (result * 31) + (deviceId == null ? 0 : deviceId.hashCode());
         result = (result * 31) + (data == null ? 0 : data.hashCode());
         return result;
     }
@@ -363,10 +305,8 @@ public class Event implements Parcelable {
         // figure out the 'id' itself.
         final ContentValues cv = new ContentValues();
         cv.put(Columns.EVENT_UUID, getEventId());
-        cv.put(Columns.VARIANT_UUID, getVariantUuid());
         cv.put(Columns.TIME, getTime());
         cv.put(Columns.STATUS, getStatus());
-        cv.put(Columns.DEVICE_ID, getDeviceId());
         cv.put(Columns.TYPE, getEventType());
 
         if (data != null) {
@@ -390,10 +330,6 @@ public class Event implements Parcelable {
         sb.append(Columns.TYPE);
         sb.append("' TEXT, '");
         sb.append(Columns.EVENT_UUID);
-        sb.append("' TEXT, '");
-        sb.append(Columns.VARIANT_UUID);
-        sb.append("' TEXT, '");
-        sb.append(Columns.DEVICE_ID);
         sb.append("' TEXT, '");
         sb.append(Columns.TIME);
         sb.append("' INT, '");
@@ -504,9 +440,7 @@ public class Event implements Parcelable {
         status = in.readInt();
         eventType = in.readString();
         eventId = in.readString();
-        variantUuid = in.readString();
         time = in.readString();
-        deviceId = in.readString();
         setData(in.readSerializable());
     }
 
@@ -521,9 +455,7 @@ public class Event implements Parcelable {
         out.writeInt(status);
         out.writeString(eventType);
         out.writeString(eventId);
-        out.writeString(variantUuid);
         out.writeString(time);
-        out.writeString(deviceId);
         out.writeSerializable(data);
     }
 }

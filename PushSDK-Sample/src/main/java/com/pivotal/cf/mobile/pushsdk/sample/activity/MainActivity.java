@@ -35,6 +35,7 @@ import com.pivotal.cf.mobile.common.sample.activity.BaseSettingsActivity;
 import com.pivotal.cf.mobile.common.util.DebugUtil;
 import com.pivotal.cf.mobile.pushsdk.PushSDK;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
+import com.pivotal.cf.mobile.pushsdk.prefs.PushPreferencesProviderImpl;
 import com.pivotal.cf.mobile.pushsdk.registration.RegistrationListener;
 import com.pivotal.cf.mobile.pushsdk.registration.UnregistrationListener;
 import com.pivotal.cf.mobile.pushsdk.sample.R;
@@ -44,7 +45,6 @@ import com.pivotal.cf.mobile.pushsdk.sample.dialogfragment.SendMessageDialogFrag
 import com.pivotal.cf.mobile.pushsdk.sample.model.BackEndMessageRequest;
 import com.pivotal.cf.mobile.pushsdk.sample.model.GcmMessageRequest;
 import com.pivotal.cf.mobile.pushsdk.sample.util.Settings;
-import com.pivotal.cf.mobile.pushsdk.util.Const;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -444,7 +444,7 @@ public class MainActivity extends BaseMainActivity {
             @Override
             public void onClickResult(int result) {
                 if (result != ClearRegistrationDialogFragment.CLEAR_REGISTRATIONS_CANCELLED) {
-                    final SharedPreferences.Editor editor = getSharedPreferences(Const.TAG_NAME, Context.MODE_PRIVATE).edit();
+                    final SharedPreferences.Editor editor = getSharedPreferences(PushPreferencesProviderImpl.TAG_NAME, Context.MODE_PRIVATE).edit();
                     if (result == ClearRegistrationDialogFragment.CLEAR_REGISTRATIONS_FROM_GCM || result == ClearRegistrationDialogFragment.CLEAR_REGISTRATIONS_FROM_BOTH) {
                         addLogMessage("Clearing device registration from GCM");
                         editor.remove("gcm_sender_id");

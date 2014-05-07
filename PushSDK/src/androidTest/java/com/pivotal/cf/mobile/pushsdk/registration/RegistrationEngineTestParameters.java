@@ -16,8 +16,15 @@
 package com.pivotal.cf.mobile.pushsdk.registration;
 
 import android.content.Context;
+import android.content.Intent;
 import android.test.AndroidTestCase;
 
+import com.pivotal.cf.mobile.analyticssdk.jobs.EnqueueEventJob;
+import com.pivotal.cf.mobile.analyticssdk.model.events.Event;
+import com.pivotal.cf.mobile.analyticssdk.service.EventService;
+import com.pivotal.cf.mobile.common.test.prefs.FakeAnalyticsPreferencesProvider;
+import com.pivotal.cf.mobile.common.test.util.DelayedLoop;
+import com.pivotal.cf.mobile.common.test.util.FakeServiceStarter;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndRegistrationApiRequestProvider;
 import com.pivotal.cf.mobile.pushsdk.backend.FakeBackEndRegistrationApiRequest;
@@ -26,12 +33,14 @@ import com.pivotal.cf.mobile.pushsdk.gcm.FakeGcmRegistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.gcm.FakeGcmUnregistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmRegistrationApiRequestProvider;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
+import com.pivotal.cf.mobile.pushsdk.model.events.EventPushRegistered;
+import com.pivotal.cf.mobile.pushsdk.model.events.PushEventHelper;
 import com.pivotal.cf.mobile.pushsdk.prefs.FakePushPreferencesProvider;
 import com.pivotal.cf.mobile.pushsdk.prefs.PushPreferencesProvider;
-import com.pivotal.cf.mobile.common.test.util.DelayedLoop;
 import com.pivotal.cf.mobile.pushsdk.version.FakeVersionProvider;
 
 import java.net.URL;
+import java.util.HashMap;
 
 public class RegistrationEngineTestParameters {
 
@@ -82,6 +91,7 @@ public class RegistrationEngineTestParameters {
     private boolean shouldPackageNameHaveBeenSaved = false;
     private boolean shouldBaseServerUrlHaveBeenSaved = false;
     private boolean shouldRegistrationHaveSucceeded = true;
+    private boolean shouldPushRegisteredEventHaveBeenLogged = false;
 
     private int appVersionInPrefs = PushPreferencesProvider.NO_SAVED_VERSION;
     private int currentAppVersion = PushPreferencesProvider.NO_SAVED_VERSION;
@@ -94,16 +104,29 @@ public class RegistrationEngineTestParameters {
 
     public void run() {
 
+        shouldPushRegisteredEventHaveBeenLogged =
+                shouldBackEndDeviceRegistrationBeSuccessful &&
+                (backEndDeviceRegistrationIdFromServer != null) &&
+                (shouldBackEndNewRegistrationHaveBeenCalled || shouldBackEndUpdateRegistrationHaveBeenCalled);
+
+        runWithAnalyticsEnabled(false, shouldPushRegisteredEventHaveBeenLogged);
+        runWithAnalyticsEnabled(true, shouldPushRegisteredEventHaveBeenLogged);
+    }
+
+    private void runWithAnalyticsEnabled(boolean isAnalyticsEnabled, boolean shouldPushRegisteredEventHaveBeenLogged) {
+
         final FakeGcmProvider gcmProvider = new FakeGcmProvider(gcmDeviceRegistrationIdFromServer, !shouldGcmDeviceRegistrationBeSuccessful, !shouldGcmDeviceUnregistrationBeSuccessful);
-        final FakePushPreferencesProvider prefsProvider = new FakePushPreferencesProvider(gcmDeviceRegistrationIdInPrefs, backEndDeviceRegistrationIdInPrefs, appVersionInPrefs, gcmSenderIdInPrefs, variantUuidInPrefs, variantSecretInPrefs, deviceAliasInPrefs, packageNameInPrefs, baseServerUrlInPrefs);
+        final FakePushPreferencesProvider pushPreferencesProvider = new FakePushPreferencesProvider(gcmDeviceRegistrationIdInPrefs, backEndDeviceRegistrationIdInPrefs, appVersionInPrefs, gcmSenderIdInPrefs, variantUuidInPrefs, variantSecretInPrefs, deviceAliasInPrefs, packageNameInPrefs, baseServerUrlInPrefs);
+        final FakeAnalyticsPreferencesProvider analyticsPreferencesProvider = new FakeAnalyticsPreferencesProvider(isAnalyticsEnabled, null);
         final FakeGcmRegistrationApiRequest gcmRegistrationApiRequest = new FakeGcmRegistrationApiRequest(gcmProvider);
         final GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider = new GcmRegistrationApiRequestProvider(gcmRegistrationApiRequest);
         final FakeGcmUnregistrationApiRequest gcmUnregistrationApiRequest = new FakeGcmUnregistrationApiRequest(gcmProvider);
         final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(gcmUnregistrationApiRequest);
         final FakeVersionProvider versionProvider = new FakeVersionProvider(currentAppVersion);
+        final FakeServiceStarter serviceStarter = new FakeServiceStarter();
         final FakeBackEndRegistrationApiRequest dummyBackEndRegistrationApiRequest = new FakeBackEndRegistrationApiRequest(backEndDeviceRegistrationIdFromServer, shouldBackEndDeviceRegistrationBeSuccessful);
         final BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider = new BackEndRegistrationApiRequestProvider(dummyBackEndRegistrationApiRequest);
-        final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, gcmProvider, prefsProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+        final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, gcmProvider, pushPreferencesProvider, analyticsPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, serviceStarter);
         final RegistrationParameters parameters = new RegistrationParameters(gcmSenderIdFromUser, variantUuidFromUser, variantSecretFromUser, deviceAliasFromUser, baseServerUrlFromUser);
 
         engine.registerDevice(parameters, new RegistrationListener() {
@@ -131,26 +154,41 @@ public class RegistrationEngineTestParameters {
         AndroidTestCase.assertTrue(delayedLoop.isSuccess());
         AndroidTestCase.assertEquals(shouldGcmProviderRegisterHaveBeenCalled, gcmProvider.wasRegisterCalled());
         AndroidTestCase.assertEquals(shouldGcmProviderUnregisterHaveBeenCalled, gcmProvider.wasUnregisterCalled());
-        AndroidTestCase.assertEquals(shouldBackEndDeviceRegistrationHaveBeenSaved, prefsProvider.wasBackEndDeviceRegistrationIdSaved());
+        AndroidTestCase.assertEquals(shouldBackEndDeviceRegistrationHaveBeenSaved, pushPreferencesProvider.wasBackEndDeviceRegistrationIdSaved());
         AndroidTestCase.assertEquals(shouldBackEndNewRegistrationHaveBeenCalled, dummyBackEndRegistrationApiRequest.isNewRegistration());
         AndroidTestCase.assertEquals(shouldBackEndUpdateRegistrationHaveBeenCalled, dummyBackEndRegistrationApiRequest.isUpdateRegistration());
-        AndroidTestCase.assertEquals(shouldAppVersionHaveBeenSaved, prefsProvider.wasAppVersionSaved());
-        AndroidTestCase.assertEquals(shouldGcmDeviceRegistrationIdHaveBeenSaved, prefsProvider.wasGcmDeviceRegistrationIdSaved());
-        AndroidTestCase.assertEquals(shouldGcmSenderIdHaveBeenSaved, prefsProvider.wasGcmSenderIdSaved());
-        AndroidTestCase.assertEquals(shouldVariantUuidHaveBeenSaved, prefsProvider.wasVariantUuidSaved());
-        AndroidTestCase.assertEquals(shouldVariantSecretHaveBeenSaved, prefsProvider.wasVariantSecretSaved());
-        AndroidTestCase.assertEquals(shouldDeviceAliasHaveBeenSaved, prefsProvider.wasDeviceAliasSaved());
-        AndroidTestCase.assertEquals(shouldPackageNameHaveBeenSaved, prefsProvider.isWasPackageNameSaved());
-        AndroidTestCase.assertEquals(shouldBaseServerUrlHaveBeenSaved, prefsProvider.wasBaseServerUrlSaved());
-        AndroidTestCase.assertEquals(finalGcmDeviceRegistrationIdInPrefs, prefsProvider.getGcmDeviceRegistrationId());
-        AndroidTestCase.assertEquals(finalBackEndDeviceRegistrationIdInPrefs, prefsProvider.getBackEndDeviceRegistrationId());
-        AndroidTestCase.assertEquals(finalGcmSenderIdInPrefs, prefsProvider.getGcmSenderId());
-        AndroidTestCase.assertEquals(finalVariantUuidInPrefs, prefsProvider.getVariantUuid());
-        AndroidTestCase.assertEquals(finalVariantSecretInPrefs, prefsProvider.getVariantSecret());
-        AndroidTestCase.assertEquals(finalDeviceAliasInPrefs, prefsProvider.getDeviceAlias());
-        AndroidTestCase.assertEquals(finalBaseServerUrlInPrefs, prefsProvider.getBaseServerUrl());
-        AndroidTestCase.assertEquals(finalAppVersionInPrefs, prefsProvider.getAppVersion());
-        AndroidTestCase.assertEquals(finalPackageNameInPrefs, prefsProvider.getPackageName());
+        AndroidTestCase.assertEquals(shouldAppVersionHaveBeenSaved, pushPreferencesProvider.wasAppVersionSaved());
+        AndroidTestCase.assertEquals(shouldGcmDeviceRegistrationIdHaveBeenSaved, pushPreferencesProvider.wasGcmDeviceRegistrationIdSaved());
+        AndroidTestCase.assertEquals(shouldGcmSenderIdHaveBeenSaved, pushPreferencesProvider.wasGcmSenderIdSaved());
+        AndroidTestCase.assertEquals(shouldVariantUuidHaveBeenSaved, pushPreferencesProvider.wasVariantUuidSaved());
+        AndroidTestCase.assertEquals(shouldVariantSecretHaveBeenSaved, pushPreferencesProvider.wasVariantSecretSaved());
+        AndroidTestCase.assertEquals(shouldDeviceAliasHaveBeenSaved, pushPreferencesProvider.wasDeviceAliasSaved());
+        AndroidTestCase.assertEquals(shouldPackageNameHaveBeenSaved, pushPreferencesProvider.isWasPackageNameSaved());
+        AndroidTestCase.assertEquals(shouldBaseServerUrlHaveBeenSaved, pushPreferencesProvider.wasBaseServerUrlSaved());
+        AndroidTestCase.assertEquals(finalGcmDeviceRegistrationIdInPrefs, pushPreferencesProvider.getGcmDeviceRegistrationId());
+        AndroidTestCase.assertEquals(finalBackEndDeviceRegistrationIdInPrefs, pushPreferencesProvider.getBackEndDeviceRegistrationId());
+        AndroidTestCase.assertEquals(finalGcmSenderIdInPrefs, pushPreferencesProvider.getGcmSenderId());
+        AndroidTestCase.assertEquals(finalVariantUuidInPrefs, pushPreferencesProvider.getVariantUuid());
+        AndroidTestCase.assertEquals(finalVariantSecretInPrefs, pushPreferencesProvider.getVariantSecret());
+        AndroidTestCase.assertEquals(finalDeviceAliasInPrefs, pushPreferencesProvider.getDeviceAlias());
+        AndroidTestCase.assertEquals(finalBaseServerUrlInPrefs, pushPreferencesProvider.getBaseServerUrl());
+        AndroidTestCase.assertEquals(finalAppVersionInPrefs, pushPreferencesProvider.getAppVersion());
+        AndroidTestCase.assertEquals(finalPackageNameInPrefs, pushPreferencesProvider.getPackageName());
+
+        if (isAnalyticsEnabled) {
+            AndroidTestCase.assertEquals(shouldPushRegisteredEventHaveBeenLogged, serviceStarter.wasStarted());
+            if (shouldPushRegisteredEventHaveBeenLogged) {
+                final Intent intent = serviceStarter.getStartedIntent();
+                final EnqueueEventJob job = intent.getParcelableExtra(EventService.KEY_JOB);
+                final Event event = job.getEvent();
+                AndroidTestCase.assertEquals(EventPushRegistered.EVENT_TYPE, event.getEventType());
+                final HashMap<String, Object> data = event.getData();
+                AndroidTestCase.assertEquals(finalVariantUuidInPrefs, data.get(PushEventHelper.VARIANT_UUID));
+                AndroidTestCase.assertEquals(finalBackEndDeviceRegistrationIdInPrefs, data.get(PushEventHelper.DEVICE_ID));
+            }
+        } else {
+            AndroidTestCase.assertFalse(serviceStarter.wasStarted());
+        }
     }
 
     public RegistrationEngineTestParameters setupPackageName(String inPrefs, String fromUser, String finalValue, boolean shouldHaveBeenSaved) {

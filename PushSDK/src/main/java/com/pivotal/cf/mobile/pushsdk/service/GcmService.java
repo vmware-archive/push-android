@@ -25,11 +25,11 @@ import com.pivotal.cf.mobile.analyticssdk.model.events.Event;
 import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProvider;
 import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProviderImpl;
 import com.pivotal.cf.mobile.analyticssdk.service.EventService;
+import com.pivotal.cf.mobile.pushsdk.model.events.EventPushReceived;
 import com.pivotal.cf.mobile.pushsdk.prefs.PushPreferencesProvider;
 import com.pivotal.cf.mobile.pushsdk.prefs.PushPreferencesProviderImpl;
 import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.pushsdk.broadcastreceiver.GcmBroadcastReceiver;
-import com.pivotal.cf.mobile.pushsdk.model.events.EventPushReceived;
 import com.pivotal.cf.mobile.common.util.ServiceStarter;
 import com.pivotal.cf.mobile.common.util.ServiceStarterImpl;
 
@@ -150,7 +150,7 @@ public class GcmService extends IntentService {
         final String messageUuid = intent.getStringExtra(KEY_MESSAGE_UUID);
         final String variantUuid = GcmService.pushPreferencesProvider.getVariantUuid();
         final String deviceId = GcmService.pushPreferencesProvider.getBackEndDeviceRegistrationId();
-        final Event event = EventPushReceived.getEvent(variantUuid, messageUuid, deviceId);
+        final Event event = EventPushReceived.getEvent(messageUuid, variantUuid, deviceId);
         return event;
     }
 

@@ -9,6 +9,8 @@ public class DummyEvent {
     public static final String EVENT_TYPE = "event_dummy";
 
     public static final String MESSAGE_UUID = "msg_uuid";
+    private static final String VARIANT_UUID = "variant_uuid";
+    private static final String DEVICE_ID = "device_id";
 
     public static Event getEvent(String variantUuid, String messageUuid, String deviceId) {
         final String eventId = UUID.randomUUID().toString();
@@ -20,12 +22,12 @@ public class DummyEvent {
         final Event event = new Event();
         event.setEventType(EVENT_TYPE);
         event.setEventId(eventId);
-        event.setVariantUuid(variantUuid);
         event.setTime(time);
-        event.setDeviceId(deviceId);
         event.setStatus(Event.Status.NOT_POSTED);
         final HashMap<String, Object> data = new HashMap<String, Object>();
         data.put(MESSAGE_UUID, messageUuid);
+        data.put(VARIANT_UUID, variantUuid);
+        data.put(DEVICE_ID, deviceId);
         event.setData(data);
         return event;
     }}

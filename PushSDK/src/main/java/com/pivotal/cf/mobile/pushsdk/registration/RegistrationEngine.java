@@ -16,9 +16,14 @@
 package com.pivotal.cf.mobile.pushsdk.registration;
 
 import android.content.Context;
+import android.content.Intent;
 
-import com.pivotal.cf.mobile.pushsdk.prefs.PushPreferencesProvider;
+import com.pivotal.cf.mobile.analyticssdk.jobs.EnqueueEventJob;
+import com.pivotal.cf.mobile.analyticssdk.model.events.Event;
+import com.pivotal.cf.mobile.analyticssdk.service.EventService;
+import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProvider;
 import com.pivotal.cf.mobile.common.util.Logger;
+import com.pivotal.cf.mobile.common.util.ServiceStarter;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndRegistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndRegistrationApiRequestProvider;
@@ -30,6 +35,8 @@ import com.pivotal.cf.mobile.pushsdk.gcm.GcmRegistrationListener;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationListener;
+import com.pivotal.cf.mobile.pushsdk.model.events.EventPushRegistered;
+import com.pivotal.cf.mobile.pushsdk.prefs.PushPreferencesProvider;
 import com.pivotal.cf.mobile.pushsdk.version.VersionProvider;
 
 import java.net.URL;
@@ -72,10 +79,12 @@ public class RegistrationEngine {
     private Context context;
     private GcmProvider gcmProvider;
     private PushPreferencesProvider pushPreferencesProvider;
+    private AnalyticsPreferencesProvider analyticsPreferencesProvider;
     private GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider;
     private GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider;
     private BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider;
     private VersionProvider versionProvider;
+    private ServiceStarter serviceStarter;
     private String packageName;
     private String previousGcmDeviceRegistrationId = null;
     private String previousBackEndDeviceRegistrationId = null;
@@ -92,48 +101,56 @@ public class RegistrationEngine {
      * @param context  A context
      * @param packageName
      * @param gcmProvider  Some object that can provide the GCM services.
-     * @param pushPreferencesProvider  Some object that can provide persistent storage of preferences.
+     * @param pushPreferencesProvider  Some object that can provide persistent storage for push preferences.
+     * @param analyticsPreferencesProvider  Some object that can provide persistent storage for analytics preferences.
      * @param gcmRegistrationApiRequestProvider  Some object that can provide GCMRegistrationApiRequest objects.
      * @param gcmUnregistrationApiRequestProvider  Some object that can provide GCMUnregistrationApiRequest objects.
      * @param backEndRegistrationApiRequestProvider  Some object that can provide BackEndRegistrationApiRequest objects.
      * @param versionProvider  Some object that can provide the application version.
+     * @param serviceStarter  Some object that can be used to start services.
      */
     public RegistrationEngine(Context context,
                               String packageName,
                               GcmProvider gcmProvider,
                               PushPreferencesProvider pushPreferencesProvider,
+                              AnalyticsPreferencesProvider analyticsPreferencesProvider,
                               GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
                               GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                               BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider,
-                              VersionProvider versionProvider) {
+                              VersionProvider versionProvider,
+                              ServiceStarter serviceStarter) {
 
         verifyArguments(context,
                 packageName,
                 gcmProvider,
                 pushPreferencesProvider,
+                analyticsPreferencesProvider,
                 gcmRegistrationApiRequestProvider,
                 gcmUnregistrationApiRequestProvider,
                 backEndRegistrationApiRequestProvider,
-                versionProvider);
+                versionProvider, serviceStarter);
 
         saveArguments(context,
                 packageName,
                 gcmProvider,
                 pushPreferencesProvider,
+                analyticsPreferencesProvider,
                 gcmRegistrationApiRequestProvider,
                 gcmUnregistrationApiRequestProvider,
                 backEndRegistrationApiRequestProvider,
-                versionProvider);
+                versionProvider, serviceStarter);
     }
 
     private void verifyArguments(Context context,
                                  String packageName,
                                  GcmProvider gcmProvider,
                                  PushPreferencesProvider pushPreferencesProvider,
+                                 AnalyticsPreferencesProvider analyticsPreferencesProvider,
                                  GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
                                  GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                  BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider,
-                                 VersionProvider versionProvider) {
+                                 VersionProvider versionProvider,
+                                 ServiceStarter serviceStarter) {
 
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
@@ -145,7 +162,10 @@ public class RegistrationEngine {
             throw new IllegalArgumentException("gcmProvider may not be null");
         }
         if (pushPreferencesProvider == null) {
-            throw new IllegalArgumentException("preferencesProvider may not be null");
+            throw new IllegalArgumentException("pushPreferencesProvider may not be null");
+        }
+        if (analyticsPreferencesProvider == null) {
+            throw new IllegalArgumentException("analyticsPreferencesProvider may not be null");
         }
         if (gcmRegistrationApiRequestProvider == null) {
             throw new IllegalArgumentException("gcmRegistrationApiRequestProvider may not be null");
@@ -159,25 +179,32 @@ public class RegistrationEngine {
         if (versionProvider == null) {
             throw new IllegalArgumentException("versionProvider may not be null");
         }
+        if (serviceStarter == null) {
+            throw new IllegalArgumentException("serviceStarter may not be null");
+        }
     }
 
     private void saveArguments(Context context,
                                String packageName,
                                GcmProvider gcmProvider,
                                PushPreferencesProvider pushPreferencesProvider,
+                               AnalyticsPreferencesProvider analyticsPreferencesProvider,
                                GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
                                GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider,
-                               VersionProvider versionProvider) {
+                               VersionProvider versionProvider,
+                               ServiceStarter serviceStarter) {
 
         this.context = context;
         this.packageName = packageName;
         this.gcmProvider = gcmProvider;
         this.pushPreferencesProvider = pushPreferencesProvider;
+        this.analyticsPreferencesProvider = analyticsPreferencesProvider;
         this.gcmRegistrationApiRequestProvider = gcmRegistrationApiRequestProvider;
         this.gcmUnregistrationApiRequestProvider = gcmUnregistrationApiRequestProvider;
         this.backEndRegistrationApiRequestProvider = backEndRegistrationApiRequestProvider;
         this.versionProvider = versionProvider;
+        this.serviceStarter = serviceStarter;
         this.previousGcmDeviceRegistrationId = pushPreferencesProvider.getGcmDeviceRegistrationId();
         this.previousBackEndDeviceRegistrationId = pushPreferencesProvider.getBackEndDeviceRegistrationId();
         this.previousGcmSenderId = pushPreferencesProvider.getGcmSenderId();
@@ -455,6 +482,8 @@ public class RegistrationEngine {
                 pushPreferencesProvider.setDeviceAlias(parameters.getDeviceAlias());
                 pushPreferencesProvider.setBaseServerUrl(parameters.getBaseServerUrl());
 
+                logPushRegisteredEvent(parameters.getVariantUuid(), backEndDeviceRegistrationId);
+
                 if (listener != null) {
                     listener.onRegistrationComplete();
                 }
@@ -507,6 +536,8 @@ public class RegistrationEngine {
                 pushPreferencesProvider.setDeviceAlias(parameters.getDeviceAlias());
                 pushPreferencesProvider.setBaseServerUrl(parameters.getBaseServerUrl());
 
+                logPushRegisteredEvent(parameters.getVariantUuid(), backEndDeviceRegistrationId);
+
                 if (listener != null) {
                     listener.onRegistrationComplete();
                 }
@@ -530,5 +561,16 @@ public class RegistrationEngine {
         pushPreferencesProvider.setVariantSecret(null);
         pushPreferencesProvider.setDeviceAlias(null);
         pushPreferencesProvider.setBaseServerUrl(null);
+    }
+
+    private void logPushRegisteredEvent(String variantUuid, String deviceId) {
+        if (analyticsPreferencesProvider.isAnalyticsEnabled()) {
+            final Event event = EventPushRegistered.getEvent(variantUuid, deviceId);
+            final EnqueueEventJob enqueueEventJob = new EnqueueEventJob(event);
+            final Intent enqueueEventJobIntent = EventService.getIntentToRunJob(context, enqueueEventJob);
+            if (serviceStarter.startService(context, enqueueEventJobIntent) == null) {
+                Logger.e("ERROR: could not start service '" + enqueueEventJobIntent + ". A 'push registered' event for this message will not be sent.");
+            }
+        }
     }
 }

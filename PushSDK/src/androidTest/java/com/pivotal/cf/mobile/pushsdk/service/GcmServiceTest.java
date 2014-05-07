@@ -10,11 +10,16 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.test.ServiceTestCase;
 
+import com.pivotal.cf.mobile.analyticssdk.jobs.EnqueueEventJob;
+import com.pivotal.cf.mobile.analyticssdk.model.events.Event;
 import com.pivotal.cf.mobile.analyticssdk.service.EventService;
 import com.pivotal.cf.mobile.common.test.prefs.FakeAnalyticsPreferencesProvider;
 import com.pivotal.cf.mobile.common.test.util.FakeServiceStarter;
+import com.pivotal.cf.mobile.pushsdk.model.events.EventPushReceived;
+import com.pivotal.cf.mobile.pushsdk.model.events.PushEventHelper;
 import com.pivotal.cf.mobile.pushsdk.prefs.FakePushPreferencesProvider;
 
+import java.util.HashMap;
 import java.util.concurrent.Semaphore;
 
 public class GcmServiceTest extends ServiceTestCase<GcmService> {
@@ -24,6 +29,7 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
     private static final String TEST_VARIANT_UUID = "some-variant-uuid";
     private static final String TEST_MESSAGE = "some fancy message";
     private static final String KEY_MESSAGE = "message";
+    private static final String TEST_DEVICE_ID = "some_device_id";
 
     private int testResultCode = GcmService.NO_RESULT;
     private Intent intent;
@@ -68,7 +74,7 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         super.setUp();
         serviceStarter = new FakeServiceStarter();
         analyticsPreferencesProvider = new FakeAnalyticsPreferencesProvider(false, null);
-        pushPreferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, TEST_VARIANT_UUID, null, null, null, null);
+        pushPreferencesProvider = new FakePushPreferencesProvider(null, TEST_DEVICE_ID, 0, null, TEST_VARIANT_UUID, null, null, null, null);
         GcmService.semaphore = new Semaphore(0);
         GcmService.serviceStarter = serviceStarter;
         GcmService.pushPreferencesProvider = pushPreferencesProvider;
@@ -187,7 +193,15 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         assertTrue(receivedIntent.hasExtra(GcmService.KEY_GCM_INTENT));
 
         assertTrue(serviceStarter.wasStarted());
-        assertEquals(EventService.class.getCanonicalName(), serviceStarter.getStartedIntent().getComponent().getClassName());
+        final Intent intent = serviceStarter.getStartedIntent();
+        assertEquals(EventService.class.getCanonicalName(), intent.getComponent().getClassName());
+        final EnqueueEventJob job = intent.getParcelableExtra(EventService.KEY_JOB);
+        final Event event = job.getEvent();
+        assertEquals(EventPushReceived.EVENT_TYPE, event.getEventType());
+        final HashMap<String, Object> map = event.getData();
+        assertEquals(TEST_MESSAGE_UUID, map.get(EventPushReceived.MESSAGE_UUID));
+        assertEquals(TEST_VARIANT_UUID, map.get(PushEventHelper.VARIANT_UUID));
+        assertEquals(TEST_DEVICE_ID, map.get(PushEventHelper.DEVICE_ID));
     }
 
     private Intent getServiceIntent() {

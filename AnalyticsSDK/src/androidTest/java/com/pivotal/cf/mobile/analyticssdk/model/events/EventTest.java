@@ -25,8 +25,6 @@ public class EventTest extends AndroidTestCase {
 
     private static final String TEST_EVENT_ID_1 = "EVENT-ID-1";
     private static final String TEST_MESSAGE_UUID_1 = "SOME-MESSAGE-UUID-1";
-    private static final String TEST_EVENT_VARIANT_UUID_1 = "VARIANT-UUID-1";
-    private static final String TEST_DEVICE_ID_1 = "DEVICE-ID-1";
     private static final String TEST_TIME_1 = "SOME BOGUS TIME";
     private static final int TEST_YEAR_1 = 1969;
     private static final int TEST_MONTH_1 = 6;
@@ -38,8 +36,6 @@ public class EventTest extends AndroidTestCase {
 
     private static final String TEST_EVENT_ID_2 = "EVENT-ID-2";
     private static final String TEST_MESSAGE_UUID_2 = "ANOTHER-MESSAGE-UUID";
-    private static final String TEST_EVENT_VARIANT_UUID_2 = "VARIANT-UUID-2";
-    private static final String TEST_DEVICE_ID_2 = "DEVICE-ID-2";
     private static final int TEST_YEAR_2 = 1957;
     private static final int TEST_MONTH_2 = 9;
     private static final int TEST_DAY_2 = 4;
@@ -118,44 +114,6 @@ public class EventTest extends AndroidTestCase {
         assertEquals(model1, model2);
     }
 
-    public void testNotEqualsWithVariantUuids() {
-
-        final Event model1 = new Event();
-        model1.setVariantUuid(TEST_EVENT_VARIANT_UUID_1);
-
-        final Event model2 = new Event();
-        model2.setVariantUuid(TEST_EVENT_VARIANT_UUID_2);
-
-        MoreAsserts.assertNotEqual(model1, model2);
-        MoreAsserts.assertNotEqual(model2, model1);
-
-        model1.setVariantUuid(null);
-        MoreAsserts.assertNotEqual(model1, model2);
-        MoreAsserts.assertNotEqual(model2, model1);
-
-        model2.setVariantUuid(null);
-        assertEquals(model1, model2);
-    }
-
-    public void testNotEqualsWithDeviceIds() {
-
-        final Event model1 = new Event();
-        model1.setDeviceId(TEST_DEVICE_ID_1);
-
-        final Event model2 = new Event();
-        model2.setDeviceId(TEST_DEVICE_ID_2);
-
-        MoreAsserts.assertNotEqual(model1, model2);
-        MoreAsserts.assertNotEqual(model2, model1);
-
-        model1.setDeviceId(null);
-        MoreAsserts.assertNotEqual(model1, model2);
-        MoreAsserts.assertNotEqual(model2, model1);
-
-        model2.setDeviceId(null);
-        assertEquals(model1, model2);
-    }
-
     public void testNotEqualsWithMessageUuids() {
 
         final Event model1 = new Event();
@@ -210,8 +168,6 @@ public class EventTest extends AndroidTestCase {
         final String json = gson.toJson(event);
         assertTrue(json.contains("\"id\":"));
         assertTrue(json.contains("\"" + TEST_EVENT_ID_1 + "\""));
-        assertTrue(json.contains("\"variant_uuid\":"));
-        assertTrue(json.contains("\"" + TEST_EVENT_VARIANT_UUID_1 + "\""));
         assertTrue(json.contains("\"type\":\"event_dummy\""));
         assertTrue(json.contains("\"data\":"));
         assertTrue(json.contains("\"msg_uuid\":"));
@@ -286,8 +242,6 @@ public class EventTest extends AndroidTestCase {
         assertTrue(sql.contains("'" + BaseColumns._ID + "'"));
         assertTrue(sql.contains("'" + Event.Columns.TYPE + "'"));
         assertTrue(sql.contains("'" + Event.Columns.EVENT_UUID + "'"));
-        assertTrue(sql.contains("'" + Event.Columns.VARIANT_UUID + "'"));
-        assertTrue(sql.contains("'" + Event.Columns.DEVICE_ID + "'"));
         assertTrue(sql.contains("'" + Event.Columns.TIME + "'"));
         assertTrue(sql.contains("'" + Event.Columns.DATA + "'"));
     }
@@ -307,15 +261,11 @@ public class EventTest extends AndroidTestCase {
         assertTrue(cv.containsKey(Event.Columns.TIME));
         assertTrue(cv.containsKey(Event.Columns.STATUS));
         assertTrue(cv.containsKey(Event.Columns.EVENT_UUID));
-        assertTrue(cv.containsKey(Event.Columns.VARIANT_UUID));
-        assertTrue(cv.containsKey(Event.Columns.DEVICE_ID));
         assertTrue(cv.containsKey(Event.Columns.TYPE));
         assertTrue(cv.containsKey(Event.Columns.DATA));
         assertEquals(event.getTime(), cv.getAsString(Event.Columns.TIME));
         assertEquals(event.getStatus(), cv.getAsInteger(Event.Columns.STATUS).intValue());
         assertEquals(event.getEventId(), cv.getAsString(Event.Columns.EVENT_UUID));
-        assertEquals(event.getDeviceId(), cv.getAsString(Event.Columns.DEVICE_ID));
-        assertEquals(event.getVariantUuid(), cv.getAsString(Event.Columns.VARIANT_UUID));
         assertEquals(event.getEventType(), cv.getAsString(Event.Columns.TYPE));
         assertNotNull(cv.getAsByteArray(Event.Columns.DATA));
     }
@@ -327,15 +277,11 @@ public class EventTest extends AndroidTestCase {
         assertTrue(cv.containsKey(Event.Columns.TIME));
         assertTrue(cv.containsKey(Event.Columns.STATUS));
         assertTrue(cv.containsKey(Event.Columns.EVENT_UUID));
-        assertTrue(cv.containsKey(Event.Columns.VARIANT_UUID));
-        assertTrue(cv.containsKey(Event.Columns.DEVICE_ID));
         assertTrue(cv.containsKey(Event.Columns.TYPE));
         assertTrue(cv.containsKey(Event.Columns.DATA));
         MoreAsserts.assertNotEqual(0, cv.getAsString(Event.Columns.TIME));
         assertEquals(Event.Status.NOT_POSTED, cv.getAsInteger(Event.Columns.STATUS).intValue());
         assertNull(cv.getAsString(Event.Columns.EVENT_UUID));
-        assertNull(cv.getAsString(Event.Columns.VARIANT_UUID));
-        assertNull(cv.getAsString(Event.Columns.DEVICE_ID));
         assertNull(cv.getAsByteArray(Event.Columns.DATA));
     }
 
@@ -345,8 +291,6 @@ public class EventTest extends AndroidTestCase {
         cursor.addField(Event.Columns.TIME, TEST_TIME_1);
         cursor.addField(Event.Columns.STATUS, Event.Status.POSTED);
         cursor.addField(Event.Columns.EVENT_UUID, TEST_EVENT_ID_1);
-        cursor.addField(Event.Columns.DEVICE_ID, TEST_DEVICE_ID_1);
-        cursor.addField(Event.Columns.VARIANT_UUID, TEST_EVENT_VARIANT_UUID_1);
         cursor.addField(Event.Columns.TYPE, DummyEvent.EVENT_TYPE);
         cursor.addField(Event.Columns.DATA, Event.serialize(getEventData1()));
         cursor.addField(DummyEvent.MESSAGE_UUID, TEST_MESSAGE_UUID_1);
@@ -355,8 +299,6 @@ public class EventTest extends AndroidTestCase {
         assertEquals(TEST_TIME_1, event.getTime());
         assertEquals(Event.Status.POSTED, event.getStatus());
         assertEquals(TEST_EVENT_ID_1, event.getEventId());
-        assertEquals(TEST_EVENT_VARIANT_UUID_1, event.getVariantUuid());
-        assertEquals(TEST_DEVICE_ID_1, event.getDeviceId());
         Assert.assertEquals(DummyEvent.EVENT_TYPE, event.getEventType());
         assertNotNull(event.getData());
         assertEquals(TEST_MESSAGE_UUID_1, event.getData().get(DummyEvent.MESSAGE_UUID));
@@ -369,8 +311,6 @@ public class EventTest extends AndroidTestCase {
         assertNull(event.getTime());
         assertEquals(Event.Status.NOT_POSTED, event.getStatus());
         assertNull(event.getEventId());
-        assertNull(event.getVariantUuid());
-        assertNull(event.getDeviceId());
         assertNull(event.getEventType());
         assertNull(event.getData());
     }
@@ -432,8 +372,6 @@ public class EventTest extends AndroidTestCase {
     public static Event getEvent1() {
         final Event event = new Event();
         event.setEventId(TEST_EVENT_ID_1);
-        event.setVariantUuid(TEST_EVENT_VARIANT_UUID_1);
-        event.setDeviceId(TEST_DEVICE_ID_1);
         event.setTime(getTestDate1());
         event.setData(getEventData1());
         event.setEventType(DummyEvent.EVENT_TYPE);
@@ -443,8 +381,6 @@ public class EventTest extends AndroidTestCase {
     public static Event getEvent2() {
         final Event event = new Event();
         event.setEventId(TEST_EVENT_ID_2);
-        event.setVariantUuid(TEST_EVENT_VARIANT_UUID_2);
-        event.setDeviceId(TEST_DEVICE_ID_2);
         event.setTime(getTestDate1());
         event.setData(getEventData2());
         event.setEventType(SOME_OTHER_EVENT_TYPE);

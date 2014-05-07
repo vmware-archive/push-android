@@ -22,7 +22,11 @@ import com.pivotal.cf.mobile.analyticssdk.AnalyticsParameters;
 import com.pivotal.cf.mobile.analyticssdk.AnalyticsSDK;
 import com.pivotal.cf.mobile.common.network.NetworkWrapper;
 import com.pivotal.cf.mobile.common.network.NetworkWrapperImpl;
+import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProvider;
+import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProviderImpl;
 import com.pivotal.cf.mobile.common.util.Logger;
+import com.pivotal.cf.mobile.common.util.ServiceStarter;
+import com.pivotal.cf.mobile.common.util.ServiceStarterImpl;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndRegistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndRegistrationApiRequestImpl;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndRegistrationApiRequestProvider;
@@ -130,6 +134,7 @@ public class PushSDK {
         verifyRegistrationArguments(parameters);
         final GcmProvider gcmProvider = new RealGcmProvider(context);
         final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
+        final AnalyticsPreferencesProvider analyticsPreferencesProvider = new AnalyticsPreferencesProviderImpl(context);
         final GcmRegistrationApiRequest dummyGcmRegistrationApiRequest = new GcmRegistrationApiRequestImpl(context, gcmProvider);
         final GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider = new GcmRegistrationApiRequestProvider(dummyGcmRegistrationApiRequest);
         final GcmUnregistrationApiRequest dummyGcmUnregistrationApiRequest = new GcmUnregistrationApiRequestImpl(context, gcmProvider);
@@ -138,12 +143,13 @@ public class PushSDK {
         final BackEndRegistrationApiRequest dummyBackEndRegistrationApiRequest = new BackEndRegistrationApiRequestImpl(context, networkWrapper);
         final BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider = new BackEndRegistrationApiRequestProvider(dummyBackEndRegistrationApiRequest);
         final VersionProvider versionProvider = new VersionProviderImpl(context);
+        final ServiceStarter serviceStarter = new ServiceStarterImpl();
         final Runnable runnable = new Runnable() {
 
             @Override
             public void run() {
                 try {
-                    final RegistrationEngine registrationEngine = new RegistrationEngine(context, context.getPackageName(), gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+                    final RegistrationEngine registrationEngine = new RegistrationEngine(context, context.getPackageName(), gcmProvider, pushPreferencesProvider, analyticsPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, serviceStarter);
                     registrationEngine.registerDevice(parameters, listener);
                 } catch (Exception e) {
                     Logger.ex("PushSDK registration failed", e);
