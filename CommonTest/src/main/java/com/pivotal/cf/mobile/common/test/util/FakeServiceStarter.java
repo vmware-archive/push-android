@@ -1,8 +1,10 @@
-package com.pivotal.cf.mobile.pushsdk.util;
+package com.pivotal.cf.mobile.common.test.util;
 
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+
+import com.pivotal.cf.mobile.common.util.ServiceStarter;
 
 public class FakeServiceStarter implements ServiceStarter {
 

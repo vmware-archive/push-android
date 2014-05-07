@@ -28,6 +28,10 @@ public class EnqueueEventJob extends BaseJob {
         this.event = event;
     }
 
+    public Event getEvent() {
+        return this.event;
+    }
+
     @Override
     public void run(JobParams jobParams) {
         if (saveEvent(jobParams)) {

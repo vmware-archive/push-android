@@ -105,6 +105,6 @@ public class MainActivity extends BaseMainActivity {
 
     private void logEvent() {
         updateCurrentBaseRowColour();
-        analyticsSDK.logEvent("user_event");
+        analyticsSDK.getEventLogger().logEvent("user_event");
     }
 }

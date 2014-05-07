@@ -6,16 +6,13 @@ import android.content.Intent;
 
 import com.pivotal.cf.mobile.analyticssdk.broadcastreceiver.EventsSenderAlarmProvider;
 import com.pivotal.cf.mobile.analyticssdk.broadcastreceiver.EventsSenderAlarmProviderImpl;
-import com.pivotal.cf.mobile.analyticssdk.jobs.EnqueueEventJob;
 import com.pivotal.cf.mobile.analyticssdk.jobs.PrepareDatabaseJob;
-import com.pivotal.cf.mobile.analyticssdk.model.events.Event;
+import com.pivotal.cf.mobile.analyticssdk.service.EventService;
 import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProvider;
 import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProviderImpl;
-import com.pivotal.cf.mobile.analyticssdk.service.EventService;
 import com.pivotal.cf.mobile.common.util.Logger;
-
-import java.util.Date;
-import java.util.UUID;
+import com.pivotal.cf.mobile.common.util.ServiceStarter;
+import com.pivotal.cf.mobile.common.util.ServiceStarterImpl;
 
 public class AnalyticsSDK {
 
@@ -113,42 +110,13 @@ public class AnalyticsSDK {
     }
 
     /**
-     * Logs an event into the analytics database.  This event will be posted to the analytics
-     * server sometime in the near future.
+     * Gets an instance of the EventLogger - which can be used to log analytics events.
      *
-     * @param eventType The type of the event being logged.
+     * @return
      */
-    public void logEvent(String eventType) {
-        if (isAnalyticsEnabled()) {
-            final Event event = getEvent(eventType);
-            final EnqueueEventJob job = new EnqueueEventJob(event);
-            final Intent intent = EventService.getIntentToRunJob(context, job);
-            context.startService(intent);
-        } else {
-            Logger.w("Event not logged. Analytics is either not set up or disabled.");
-        }
-    }
-
-    private Event getEvent(String eventType) {
-        final Event event = new Event();
-        event.setEventType(eventType);
-        event.setEventId(getEventId());
-        event.setTime(new Date());
-        event.setStatus(Event.Status.NOT_POSTED);
-        return event;
-    }
-
-    public String getEventId() {
-        final String eventId = UUID.randomUUID().toString();
-        return eventId;
-    }
-
-    private boolean isAnalyticsEnabled() {
-        if (context != null) {
-            final AnalyticsPreferencesProvider preferencesProvider = new AnalyticsPreferencesProviderImpl(context);
-            return preferencesProvider.isAnalyticsEnabled();
-        } else {
-            return false;
-        }
+    public EventLogger getEventLogger() {
+        final ServiceStarter serviceStarter = new ServiceStarterImpl();
+        final AnalyticsPreferencesProvider preferencesProvider = new AnalyticsPreferencesProviderImpl(context);
+        return new EventLogger(serviceStarter, preferencesProvider, context);
     }
 }

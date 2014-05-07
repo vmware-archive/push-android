@@ -30,8 +30,8 @@ import com.pivotal.cf.mobile.pushsdk.prefs.PushPreferencesProviderImpl;
 import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.pushsdk.broadcastreceiver.GcmBroadcastReceiver;
 import com.pivotal.cf.mobile.pushsdk.model.events.EventPushReceived;
-import com.pivotal.cf.mobile.pushsdk.util.ServiceStarter;
-import com.pivotal.cf.mobile.pushsdk.util.ServiceStarterImpl;
+import com.pivotal.cf.mobile.common.util.ServiceStarter;
+import com.pivotal.cf.mobile.common.util.ServiceStarterImpl;
 
 import java.util.concurrent.Semaphore;
 

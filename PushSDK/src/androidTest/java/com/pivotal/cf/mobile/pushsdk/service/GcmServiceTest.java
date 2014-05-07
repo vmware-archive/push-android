@@ -10,10 +10,10 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.test.ServiceTestCase;
 
-import com.pivotal.cf.mobile.common.test.prefs.FakeAnalyticsPreferencesProvider;
 import com.pivotal.cf.mobile.analyticssdk.service.EventService;
+import com.pivotal.cf.mobile.common.test.prefs.FakeAnalyticsPreferencesProvider;
+import com.pivotal.cf.mobile.common.test.util.FakeServiceStarter;
 import com.pivotal.cf.mobile.pushsdk.prefs.FakePushPreferencesProvider;
-import com.pivotal.cf.mobile.pushsdk.util.FakeServiceStarter;
 
 import java.util.concurrent.Semaphore;
 
@@ -114,6 +114,7 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
 
     public void testSendNotificationWithAnalyticsDisabled() throws InterruptedException {
         intent.putExtra(KEY_MESSAGE, TEST_MESSAGE);
+        GcmService.pushPreferencesProvider.setPackageName(TEST_PACKAGE_NAME);
         startService(intent);
         GcmService.semaphore.acquire(2);
 
