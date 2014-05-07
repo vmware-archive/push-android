@@ -42,8 +42,6 @@ public class BackEndSendEventsApiRequestImplTest extends AndroidTestCase {
         listWithOneItem.add(uri);
     }
 
-    // TODO - add test with analytics disabled?  is it correct to send events when analytics are disabled?
-
     public void testRequiresContext() {
         try {
             new BackEndSendEventsApiRequestImpl(null, eventsStorage, preferencesProvider, networkWrapper);

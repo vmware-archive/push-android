@@ -7,14 +7,27 @@ import android.support.v4.content.WakefulBroadcastReceiver;
 
 import com.pivotal.cf.mobile.analyticssdk.jobs.SendEventsJob;
 import com.pivotal.cf.mobile.analyticssdk.service.EventService;
+import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProvider;
+import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProviderImpl;
+import com.pivotal.cf.mobile.common.util.Logger;
 
 public class EventsSenderAlarmReceiver extends WakefulBroadcastReceiver {
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        final SendEventsJob job = new SendEventsJob();
-        final Intent sendEventsJobIntent = EventService.getIntentToRunJob(context, job);
-        WakefulBroadcastReceiver.startWakefulService(context, sendEventsJobIntent);
+        if (isAnalyticsEnabled(context)) {
+            final SendEventsJob job = new SendEventsJob();
+            final Intent sendEventsJobIntent = EventService.getIntentToRunJob(context, job);
+            WakefulBroadcastReceiver.startWakefulService(context, sendEventsJobIntent);
+        } else {
+            Logger.i("Ignoring EventsSenderAlarm since Analytics have been disabled.");
+            EventsSenderAlarmReceiver.completeWakefulIntent(intent);
+        }
+    }
+
+    private boolean isAnalyticsEnabled(Context context) {
+        final AnalyticsPreferencesProvider preferencesProvider = new AnalyticsPreferencesProviderImpl(context);
+        return preferencesProvider.isAnalyticsEnabled();
     }
 
     public static PendingIntent getPendingIntent(Context context, int pendingIntentFlags) {

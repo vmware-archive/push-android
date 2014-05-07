@@ -65,8 +65,6 @@ public class PushSDK {
     // registration and unregistration requests.
     private static final ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
-    // TODO - decide if it is really appropriate to pass an instance of the Analytics SDK to the Push SDK.
-    // The Push SDK can generate analytics events without access to the Analytics engine front end, of course.
     /**
      * Retrieves an instance of the Pivotal CF Mobile Services Push SDK singleton object.
      *
