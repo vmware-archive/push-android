@@ -17,6 +17,9 @@ public class EventLoggerTest extends AndroidTestCase {
     private static final String TEST_EVENT_TYPE = "TEST_EVENT_TYPE";
     private static final String TEST_EVENT_DATA_KEY = "SOME_KEY";
     private static final String TEST_EVENT_DATA_VALUE = "SOME_VALUE";
+    private static final String TEST_ERROR_ID = "TEST_ERROR_ID";
+    private static final String TEST_ERROR_MESSAGE = "TEST_ERROR_MESSAGE";
+    private static final String TEST_EXCEPTION_MESSAGE = "TEST_EXCEPTION_MESSAGE";
     private static HashMap<String, Object> TEST_EVENT_DATA;
 
     private FakeServiceStarter serviceStarter;
@@ -89,6 +92,30 @@ public class EventLoggerTest extends AndroidTestCase {
         assertEquals(TEST_EVENT_TYPE, getLoggedEvent().getEventType());
         assertTrue(getLoggedEvent().getData().containsKey(TEST_EVENT_DATA_KEY));
         assertEquals(TEST_EVENT_DATA_VALUE, getLoggedEvent().getData().get(TEST_EVENT_DATA_KEY));
+    }
+
+    public void testLogError() {
+        final EventLogger eventLogger = getEventLoggerWithAnalyticsEnabled();
+        eventLogger.logError(TEST_ERROR_ID, TEST_ERROR_MESSAGE);
+        assertTrue(serviceStarter.wasStarted());
+        assertEquals(EventLogger.EVENT_TYPE_ERROR, getLoggedEvent().getEventType());
+        assertEquals(TEST_ERROR_ID, getLoggedEvent().getData().get(EventLogger.ERROR_ID));
+        assertEquals(TEST_ERROR_MESSAGE, getLoggedEvent().getData().get(EventLogger.ERROR_MESSAGE));
+        assertFalse(getLoggedEvent().getData().containsKey(EventLogger.EXCEPTION_DATA));
+    }
+
+    public void testLogException() {
+        final Exception e = new NullPointerException(TEST_EXCEPTION_MESSAGE);
+        final EventLogger eventLogger = getEventLoggerWithAnalyticsEnabled();
+        eventLogger.logException(TEST_ERROR_ID, TEST_ERROR_MESSAGE, e);
+        assertTrue(serviceStarter.wasStarted());
+        assertEquals(EventLogger.EVENT_TYPE_ERROR, getLoggedEvent().getEventType());
+        assertEquals(TEST_ERROR_ID, getLoggedEvent().getData().get(EventLogger.ERROR_ID));
+        assertEquals(TEST_ERROR_MESSAGE, getLoggedEvent().getData().get(EventLogger.ERROR_MESSAGE));
+        final HashMap<String, Object> exceptionData = (HashMap<String, Object>) getLoggedEvent().getData().get(EventLogger.EXCEPTION_DATA);
+        assertEquals("java.lang.NullPointerException", exceptionData.get(EventLogger.EXCEPTION_NAME));
+        assertEquals(TEST_EXCEPTION_MESSAGE, exceptionData.get(EventLogger.EXCEPTION_REASON));
+        assertTrue(((String)exceptionData.get(EventLogger.EXCEPTION_STACK_TRACE)).contains("testLogException")); // put method name here
     }
 
     private EventLogger getEventLoggerWithAnalyticsDisabled() {

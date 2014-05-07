@@ -16,6 +16,7 @@ import com.pivotal.cf.mobile.common.sample.activity.BaseSettingsActivity;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.HashMap;
 
 public class MainActivity extends BaseMainActivity {
 
@@ -87,6 +88,18 @@ public class MainActivity extends BaseMainActivity {
                 logEvent();
                 break;
 
+            case R.id.action_log_error_with_data:
+                logEventWithData();
+                break;
+
+            case R.id.action_log_error:
+                logError();
+                break;
+
+            case R.id.action_log_exception:
+                logException();
+                break;
+
             default:
                 return super.onOptionsItemSelected(item);
         }
@@ -106,5 +119,22 @@ public class MainActivity extends BaseMainActivity {
     private void logEvent() {
         updateCurrentBaseRowColour();
         analyticsSDK.getEventLogger().logEvent("user_event");
+    }
+
+    private void logEventWithData() {
+        updateCurrentBaseRowColour();
+        final HashMap<String, Object> eventData = new HashMap<String, Object>();
+        eventData.put("field", "value");
+        analyticsSDK.getEventLogger().logEvent("user_event", eventData);
+    }
+
+    private void logError() {
+        updateCurrentBaseRowColour();
+        analyticsSDK.getEventLogger().logError("TEST_ERROR_ID", "TEST_ERROR_MESSAGE");
+    }
+
+    private void logException() {
+        updateCurrentBaseRowColour();
+        analyticsSDK.getEventLogger().logException("TEST_ERROR_ID", "TEST_ERROR_MESSAGE", new Exception("TEST_EXCEPTION_MESSAGE"));
     }
 }

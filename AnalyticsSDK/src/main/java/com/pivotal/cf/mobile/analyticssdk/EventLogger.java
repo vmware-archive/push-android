@@ -10,11 +10,23 @@ import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProvider;
 import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.common.util.ServiceStarter;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.UUID;
 
 public class EventLogger {
+
+    public static final String EVENT_TYPE_ERROR = "event_error";
+    public static final String ERROR_ID = "id";
+    public static final String ERROR_MESSAGE = "message";
+    public static final String EXCEPTION_DATA = "exception";
+    public static final String EXCEPTION_NAME = "name";
+    public static final String EXCEPTION_REASON = "reason";
+    public static final String EXCEPTION_STACK_TRACE = "stack_trace";
+
+    private static final int MAX_STACK_TRACE_SIZE = 2048;
 
     private Context context;
     private ServiceStarter serviceStarter;
@@ -80,22 +92,76 @@ public class EventLogger {
         }
     }
 
+    /**
+     * Logs an error into the analytics database.
+     *
+     * @param errorId       An application-defined error ID that can be used to collate these exceptions in the
+     *                      error database.
+     * @param errorMessage  An application-define error message that can be used to provide context or meaning to
+     *                      this exception in the error database.
+     */
+    public void logError(String errorId, String errorMessage) {
+        final HashMap<String, Object> data = getErrorData(errorId, errorMessage);
+        logEvent(EVENT_TYPE_ERROR, data);
+    }
+
+    /**
+     * Logs an exception into the analytics database.
+     *
+     * @param errorId       An application-defined error ID that can be used to collate these exceptions in the
+     *                      error database.
+     * @param errorMessage  An application-define error message that can be used to provide context or meaning to
+     *                      this exception in the error database.
+     * @param throwable     The exception object to be logged.
+     */
+    public void logException(String errorId, String errorMessage, Throwable throwable) {
+        final HashMap<String, Object> data = getErrorData(errorId, errorMessage);
+        final HashMap<String, Object> exceptionData = new HashMap<String, Object>();
+        data.put(EXCEPTION_DATA, exceptionData);
+        exceptionData.put(EXCEPTION_NAME, throwable.getClass().getCanonicalName());
+        exceptionData.put(EXCEPTION_REASON, throwable.getMessage());
+        exceptionData.put(EXCEPTION_STACK_TRACE, getStackTrace(throwable));
+        logEvent(EVENT_TYPE_ERROR, data);
+    }
+
+    private HashMap<String, Object> getErrorData(String errorId, String errorMessage) {
+        final HashMap<String, Object> data = new HashMap<String, Object>();
+        if (errorId != null) {
+            data.put(ERROR_ID, errorId);
+        }
+        if (errorMessage != null) {
+            data.put(ERROR_MESSAGE, errorMessage);
+        }
+        return data;
+    }
+
     private Event getEvent(String eventType, HashMap<String, Object> data) {
         final Event event = new Event();
         event.setEventType(eventType);
         event.setEventId(getEventId());
         event.setTime(new Date());
-        event.setStatus(Event.Status.NOT_POSTED);
         event.setData(data);
+        event.setStatus(Event.Status.NOT_POSTED);
         return event;
     }
 
     private String getEventId() {
-        final String eventId = UUID.randomUUID().toString();
-        return eventId;
+        return UUID.randomUUID().toString();
     }
 
     private boolean isAnalyticsEnabled() {
         return preferencesProvider.isAnalyticsEnabled();
+    }
+
+    private String getStackTrace(Throwable throwable) {
+        final StringWriter writer = new StringWriter();
+        final PrintWriter printWriter = new PrintWriter(writer);
+        throwable.printStackTrace(printWriter);
+        printWriter.close();
+        final String stackTrace = writer.toString();
+        if (stackTrace.length() > MAX_STACK_TRACE_SIZE) {
+            return stackTrace.substring(0, MAX_STACK_TRACE_SIZE);
+        }
+        return stackTrace;
     }
 }
