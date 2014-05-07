@@ -10,8 +10,9 @@ import android.os.Handler;
 import android.os.ResultReceiver;
 import android.test.ServiceTestCase;
 
+import com.pivotal.cf.mobile.common.test.prefs.FakeAnalyticsPreferencesProvider;
 import com.pivotal.cf.mobile.analyticssdk.service.EventService;
-import com.pivotal.cf.mobile.pushsdk.prefs.FakePreferencesProvider;
+import com.pivotal.cf.mobile.pushsdk.prefs.FakePushPreferencesProvider;
 import com.pivotal.cf.mobile.pushsdk.util.FakeServiceStarter;
 
 import java.util.concurrent.Semaphore;
@@ -30,7 +31,8 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
     private TestResultReceiver testResultReceiver;
     private TestBroadcastReceiver testBroadcastReceiver;
     private Intent receivedIntent;
-    private FakePreferencesProvider preferencesProvider;
+    private FakePushPreferencesProvider pushPreferencesProvider;
+    private FakeAnalyticsPreferencesProvider analyticsPreferencesProvider;
     private FakeServiceStarter serviceStarter;
 
     // Captures result codes from the service itself
@@ -64,11 +66,13 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        preferencesProvider = new FakePreferencesProvider(null, null, 0, null, TEST_VARIANT_UUID, null, null, null, null);
         serviceStarter = new FakeServiceStarter();
+        analyticsPreferencesProvider = new FakeAnalyticsPreferencesProvider(false, null);
+        pushPreferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, TEST_VARIANT_UUID, null, null, null, null);
         GcmService.semaphore = new Semaphore(0);
-        GcmService.preferencesProvider = preferencesProvider;
         GcmService.serviceStarter = serviceStarter;
+        GcmService.pushPreferencesProvider = pushPreferencesProvider;
+        GcmService.analyticsPreferencesProvider = analyticsPreferencesProvider;
         testResultReceiver = new TestResultReceiver(null);
         testBroadcastReceiver = new TestBroadcastReceiver();
         final IntentFilter intentFilter = new IntentFilter(TEST_PACKAGE_NAME + GcmService.BROADCAST_NAME_SUFFIX);
@@ -79,8 +83,9 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
     @Override
     protected void tearDown() throws Exception {
         GcmService.semaphore = null;
-        GcmService.preferencesProvider = null;
         GcmService.serviceStarter = null;
+        GcmService.pushPreferencesProvider = null;
+        GcmService.analyticsPreferencesProvider = null;
         getContext().unregisterReceiver(testBroadcastReceiver);
         super.tearDown();
     }
@@ -107,10 +112,32 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         assertFalse(serviceStarter.wasStarted());
     }
 
-    public void testSendNotification() throws InterruptedException {
+    public void testSendNotificationWithAnalyticsDisabled() throws InterruptedException {
+        intent.putExtra(KEY_MESSAGE, TEST_MESSAGE);
+        startService(intent);
+        GcmService.semaphore.acquire(2);
+
+        assertEquals(GcmService.RESULT_NOTIFIED_APPLICATION, testResultCode);
+        assertTrue(didReceiveBroadcast);
+        assertNotNull(receivedIntent);
+        assertTrue(receivedIntent.hasExtra(GcmService.KEY_GCM_INTENT));
+
+        final Intent gcmIntent = receivedIntent.getParcelableExtra(GcmService.KEY_GCM_INTENT);
+        assertNotNull(gcmIntent);
+
+        final Bundle extras = gcmIntent.getExtras();
+        assertNotNull(extras);
+        assertTrue(extras.containsKey(KEY_MESSAGE));
+        assertEquals(TEST_MESSAGE, extras.getString(KEY_MESSAGE));
+
+        assertFalse(serviceStarter.wasStarted());
+    }
+
+    public void testSendNotificationWithAnalyticsEnabled() throws InterruptedException {
+        analyticsPreferencesProvider.setIsAnalyticsEnabled(true);
         serviceStarter.setReturnedComponentName(new ComponentName(getContext(), EventService.class));
         intent.putExtra(KEY_MESSAGE, TEST_MESSAGE);
-        GcmService.preferencesProvider.setPackageName(TEST_PACKAGE_NAME);
+        GcmService.pushPreferencesProvider.setPackageName(TEST_PACKAGE_NAME);
         startService(intent);
         GcmService.semaphore.acquire(2);
 
@@ -131,10 +158,25 @@ public class GcmServiceTest extends ServiceTestCase<GcmService> {
         assertEquals(EventService.class.getCanonicalName(), serviceStarter.getStartedIntent().getComponent().getClassName());
     }
 
-    public void testQueuesReceiptNotificationWithMessageUuid() throws InterruptedException {
+    public void testQueuesReceiptNotificationWithMessageUuidWithAnalyticsDisabled() throws InterruptedException {
+        intent.putExtra(GcmService.KEY_MESSAGE_UUID, TEST_MESSAGE_UUID);
+        GcmService.pushPreferencesProvider.setPackageName(TEST_PACKAGE_NAME);
+        startService(intent);
+        GcmService.semaphore.acquire(2);
+
+        assertEquals(GcmService.RESULT_NOTIFIED_APPLICATION, testResultCode);
+        assertTrue(didReceiveBroadcast);
+        assertNotNull(receivedIntent);
+        assertTrue(receivedIntent.hasExtra(GcmService.KEY_GCM_INTENT));
+
+        assertFalse(serviceStarter.wasStarted());
+    }
+
+    public void testQueuesReceiptNotificationWithMessageUuidWithAnalyticsEnabled() throws InterruptedException {
+        analyticsPreferencesProvider.setIsAnalyticsEnabled(true);
         serviceStarter.setReturnedComponentName(new ComponentName(getContext(), EventService.class));
         intent.putExtra(GcmService.KEY_MESSAGE_UUID, TEST_MESSAGE_UUID);
-        GcmService.preferencesProvider.setPackageName(TEST_PACKAGE_NAME);
+        GcmService.pushPreferencesProvider.setPackageName(TEST_PACKAGE_NAME);
         startService(intent);
         GcmService.semaphore.acquire(2);
 

@@ -22,9 +22,11 @@ import android.os.ResultReceiver;
 
 import com.pivotal.cf.mobile.analyticssdk.jobs.EnqueueEventJob;
 import com.pivotal.cf.mobile.analyticssdk.model.events.Event;
+import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProvider;
+import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProviderImpl;
 import com.pivotal.cf.mobile.analyticssdk.service.EventService;
-import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProvider;
-import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProviderImpl;
+import com.pivotal.cf.mobile.pushsdk.prefs.PushPreferencesProvider;
+import com.pivotal.cf.mobile.pushsdk.prefs.PushPreferencesProviderImpl;
 import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.pushsdk.broadcastreceiver.GcmBroadcastReceiver;
 import com.pivotal.cf.mobile.pushsdk.model.events.EventPushReceived;
@@ -47,8 +49,9 @@ public class GcmService extends IntentService {
 
     // Used by unit tests
     /* package */ static Semaphore semaphore = null;
-    /* package */ static PreferencesProvider preferencesProvider = null;
     /* package */ static ServiceStarter serviceStarter = null;
+    /* package */ static PushPreferencesProvider pushPreferencesProvider = null;
+    /* package */ static AnalyticsPreferencesProvider analyticsPreferencesProvider = null;
 
     private ResultReceiver resultReceiver = null;
 
@@ -87,17 +90,21 @@ public class GcmService extends IntentService {
     }
 
     private void setupStatics() {
-        if (GcmService.preferencesProvider == null) {
-            GcmService.preferencesProvider = new PreferencesProviderImpl(this);
-        }
         if (GcmService.serviceStarter == null) {
             GcmService.serviceStarter = new ServiceStarterImpl();
+        }
+        if (GcmService.pushPreferencesProvider == null) {
+            GcmService.pushPreferencesProvider = new PushPreferencesProviderImpl(this);
+        }
+        if (GcmService.analyticsPreferencesProvider == null) {
+            GcmService.analyticsPreferencesProvider = new AnalyticsPreferencesProviderImpl(this);
         }
     }
 
     private void cleanupStatics() {
-        GcmService.preferencesProvider = null;
         GcmService.serviceStarter = null;
+        GcmService.pushPreferencesProvider = null;
+        GcmService.analyticsPreferencesProvider = null;
     }
 
     private void doHandleIntent(Intent intent) {
@@ -119,9 +126,15 @@ public class GcmService extends IntentService {
                 return;
             }
 
-            enqueueMessageReceivedEvent(intent);
+            if (isAnalyticsEnabled()) {
+                enqueueMessageReceivedEvent(intent);
+            }
             notifyApplication(intent);
         }
+    }
+
+    private boolean isAnalyticsEnabled() {
+        return GcmService.analyticsPreferencesProvider.isAnalyticsEnabled();
     }
 
     private void enqueueMessageReceivedEvent(Intent intent) {
@@ -135,8 +148,8 @@ public class GcmService extends IntentService {
 
     private Event getMessageReceivedEvent(Intent intent) {
         final String messageUuid = intent.getStringExtra(KEY_MESSAGE_UUID);
-        final String variantUuid = GcmService.preferencesProvider.getVariantUuid();
-        final String deviceId = GcmService.preferencesProvider.getBackEndDeviceRegistrationId();
+        final String variantUuid = GcmService.pushPreferencesProvider.getVariantUuid();
+        final String deviceId = GcmService.pushPreferencesProvider.getBackEndDeviceRegistrationId();
         final Event event = EventPushReceived.getEvent(variantUuid, messageUuid, deviceId);
         return event;
     }
@@ -159,7 +172,7 @@ public class GcmService extends IntentService {
     }
 
     private String getBroadcastName() {
-        final String packageName = preferencesProvider.getPackageName();
+        final String packageName = pushPreferencesProvider.getPackageName();
         if (packageName == null) {
             return null;
         } else {

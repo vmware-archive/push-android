@@ -17,8 +17,8 @@ package com.pivotal.cf.mobile.pushsdk.registration;
 
 import android.test.AndroidTestCase;
 
-import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProvider;
-import com.pivotal.cf.mobile.pushsdk.prefs.FakePreferencesProvider;
+import com.pivotal.cf.mobile.pushsdk.prefs.FakePushPreferencesProvider;
+import com.pivotal.cf.mobile.pushsdk.prefs.PushPreferencesProvider;
 import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndRegistrationApiRequestProvider;
@@ -52,7 +52,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     private static URL TEST_BASE_SERVER_URL_2;
     private static final String TEST_PACKAGE_NAME = "TEST.PACKAGE.NAME";
 
-    private FakePreferencesProvider preferencesProvider;
+    private FakePushPreferencesProvider preferencesProvider;
     private GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider;
     private GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider;
     private BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider;
@@ -68,7 +68,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
         gcmProvider = new FakeGcmProvider(TEST_GCM_DEVICE_REGISTRATION_ID_1);
         gcmRegistrationApiRequestProvider = new GcmRegistrationApiRequestProvider(new FakeGcmRegistrationApiRequest(gcmProvider));
         gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(new FakeGcmUnregistrationApiRequest(gcmProvider));
-        preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null, null);
+        preferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null);
         versionProvider = new FakeVersionProvider(10);
         backEndRegistrationApiRequestProvider = new BackEndRegistrationApiRequestProvider(new FakeBackEndRegistrationApiRequest(TEST_BACK_END_DEVICE_REGISTRATION_ID_1));
     }
@@ -935,7 +935,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, false)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(true, true)
-                .setupAppVersion(1, 1, PreferencesProvider.NO_SAVED_VERSION)
+                .setupAppVersion(1, 1, PushPreferencesProvider.NO_SAVED_VERSION)
                 .setShouldAppVersionHaveBeenSaved(true)
                 .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
                 .setShouldGcmProviderRegisterHaveBeenCalled(true)

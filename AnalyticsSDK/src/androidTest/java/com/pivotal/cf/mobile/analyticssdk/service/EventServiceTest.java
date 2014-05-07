@@ -14,7 +14,7 @@ import com.pivotal.cf.mobile.analyticssdk.database.FakeEventsStorage;
 import com.pivotal.cf.mobile.analyticssdk.jobs.DummyJob;
 import com.pivotal.cf.mobile.analyticssdk.jobs.PrepareDatabaseJob;
 import com.pivotal.cf.mobile.analyticssdk.model.events.EventTest;
-import com.pivotal.cf.mobile.analyticssdk.prefs.FakePreferencesProvider;
+import com.pivotal.cf.mobile.common.test.prefs.FakeAnalyticsPreferencesProvider;
 import com.pivotal.cf.mobile.common.test.network.FakeNetworkWrapper;
 
 import junit.framework.Assert;
@@ -29,7 +29,7 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
 
     private FakeNetworkWrapper networkWrapper;
     private FakeEventsStorage eventsStorage;
-    private FakePreferencesProvider preferencesProvider;
+    private FakeAnalyticsPreferencesProvider analyticsPreferencesProvider;
     private FakeEventsSenderAlarmProvider alarmProvider;
     private FakeBackEndSendEventsApiRequest backEndMessageReceiptApiRequest;
     private List<String> listOfCompletedJobs;
@@ -59,7 +59,7 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
 
         networkWrapper = new FakeNetworkWrapper();
         eventsStorage = new FakeEventsStorage();
-        preferencesProvider = new FakePreferencesProvider(null);
+        analyticsPreferencesProvider = new FakeAnalyticsPreferencesProvider(true, null);
         backEndMessageReceiptApiRequest = new FakeBackEndSendEventsApiRequest();
         testResultReceiver = new TestResultReceiver(null);
         listOfCompletedJobs = new LinkedList<String>();
@@ -70,7 +70,7 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
         EventService.semaphore = new Semaphore(0);
         EventService.networkWrapper = networkWrapper;
         EventService.eventsStorage = eventsStorage;
-        EventService.preferencesProvider = preferencesProvider;
+        EventService.analyticsPreferencesProvider = analyticsPreferencesProvider;
         EventService.backEndSendEventsApiRequestProvider = new BackEndSendEventsApiRequestProvider(backEndMessageReceiptApiRequest);
         EventService.alarmProvider = alarmProvider;
         EventService.listOfCompletedJobs = listOfCompletedJobs;
@@ -81,17 +81,10 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
         EventService.semaphore = null;
         EventService.networkWrapper = null;
         EventService.eventsStorage = null;
-        EventService.preferencesProvider = null;
+        EventService.analyticsPreferencesProvider = null;
         EventService.alarmProvider = null;
         EventService.backEndSendEventsApiRequestProvider = null;
         super.tearDown();
-    }
-
-    public void testReceiveNullIntent() throws InterruptedException {
-        startService(null);
-        EventService.semaphore.acquire();
-        assertEquals(EventService.NO_RESULT, testResultCode);
-        assertEquals(0, listOfCompletedJobs.size());
     }
 
     public void testGetIntentToRunJob() {
@@ -101,6 +94,13 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
         assertTrue(intent.hasExtra(EventService.KEY_JOB));
         final DummyJob outputJob = intent.getParcelableExtra(EventService.KEY_JOB);
         Assert.assertEquals(inputJob, outputJob);
+    }
+
+    public void testReceiveNullIntent() throws InterruptedException {
+        startService(null);
+        EventService.semaphore.acquire();
+        assertEquals(EventService.NO_RESULT, testResultCode);
+        assertEquals(0, listOfCompletedJobs.size());
     }
 
     public void testRunNoJob() throws InterruptedException {
@@ -132,6 +132,18 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
         assertEquals(0, listOfCompletedJobs.size());
     }
 
+    public void testAnalyticsDisabled() throws InterruptedException {
+        analyticsPreferencesProvider.setIsAnalyticsEnabled(false);
+        final DummyJob inputJob = new DummyJob();
+        inputJob.setResultCode(DUMMY_RESULT_CODE);
+        final Intent intent = EventService.getIntentToRunJob(getContext(), inputJob);
+        addResultReceiverToIntent(intent);
+        startService(intent);
+        EventService.semaphore.acquire();
+        assertEquals(EventService.ANALYTICS_DISABLED, testResultCode);
+        assertEquals(0, listOfCompletedJobs.size());
+    }
+
     public void testRunDummyJob() throws InterruptedException {
         final DummyJob inputJob = new DummyJob();
         inputJob.setResultCode(DUMMY_RESULT_CODE);
@@ -155,7 +167,7 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
         assertEquals(0, listOfCompletedJobs.size());
     }
 
-    public void testRunsPrepareDatabaseJobIfReceivingAFreshDatabaseInstance() throws InterruptedException {
+    public void testRunsPrepareDatabaseJobIfReceivingAFreshDatabaseInstanceAndAnalyticsAreEnabled() throws InterruptedException {
         EventService.eventsStorage = null;
         DatabaseWrapper.removeDatabaseInstance();
         final DummyJob inputJob = new DummyJob();
@@ -166,6 +178,18 @@ public class EventServiceTest extends ServiceTestCase<EventService> {
         assertEquals(2, listOfCompletedJobs.size());
         Assert.assertEquals(new PrepareDatabaseJob().toString(), listOfCompletedJobs.get(0));
         Assert.assertEquals(inputJob.toString(), listOfCompletedJobs.get(1));
+    }
+
+    public void testDoesNotRunPrepareDatabaseJobIfReceivingAFreshDatabaseInstanceAndAnalyticsAreDisabled() throws InterruptedException {
+        analyticsPreferencesProvider.setIsAnalyticsEnabled(false);
+        EventService.eventsStorage = null;
+        DatabaseWrapper.removeDatabaseInstance();
+        final DummyJob inputJob = new DummyJob();
+        final Intent intent = EventService.getIntentToRunJob(getContext(), inputJob);
+        addResultReceiverToIntent(intent);
+        startService(intent);
+        EventService.semaphore.acquire();
+        assertEquals(0, listOfCompletedJobs.size());
     }
 
     private void addResultReceiverToIntent(Intent intent) {

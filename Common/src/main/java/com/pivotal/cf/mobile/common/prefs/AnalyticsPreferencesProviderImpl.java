@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package com.pivotal.cf.mobile.analyticssdk.prefs;
+package com.pivotal.cf.mobile.common.prefs;
 
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -26,17 +26,18 @@ import java.net.URL;
 /**
  * Saves preferences to the SharedPreferences on the filesystem.
  */
-public class PreferencesProviderImpl implements PreferencesProvider {
+public class AnalyticsPreferencesProviderImpl implements AnalyticsPreferencesProvider {
 
     public static final String TAG_NAME = "PivotalCFMSAnalyticsSDK";
 
     // If you add or change any of these strings, then please also update their copies in the
     // sample app's MainActivity::clearRegistration method.
     private static final String PROPERTY_BASE_SERVER_URL = "base_server_url";
+    private static final String PROPERTY_IS_ANALYTICS_ENABLED = "is_analytics_enabled";
 
     private final Context context;
 
-    public PreferencesProviderImpl(Context context) {
+    public AnalyticsPreferencesProviderImpl(Context context) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
@@ -66,6 +67,19 @@ public class PreferencesProviderImpl implements PreferencesProvider {
         } else {
             editor.putString(PROPERTY_BASE_SERVER_URL, null);
         }
+        editor.commit();
+    }
+
+    @Override
+    public boolean isAnalyticsEnabled() {
+        return getSharedPreferences().getBoolean(PROPERTY_IS_ANALYTICS_ENABLED, false);
+    }
+
+    @Override
+    public void setIsAnalyticsEnabled(boolean isAnalyticsEnabled) {
+        final SharedPreferences prefs = getSharedPreferences();
+        final SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(PROPERTY_IS_ANALYTICS_ENABLED, isAnalyticsEnabled);
         editor.commit();
     }
 

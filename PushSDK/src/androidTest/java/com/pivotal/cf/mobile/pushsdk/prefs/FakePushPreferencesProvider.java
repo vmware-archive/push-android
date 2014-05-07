@@ -17,7 +17,7 @@ package com.pivotal.cf.mobile.pushsdk.prefs;
 
 import java.net.URL;
 
-public class FakePreferencesProvider implements PreferencesProvider {
+public class FakePushPreferencesProvider implements PushPreferencesProvider {
 
     private String gcmDeviceRegistrationId;
     private String backEndDeviceRegistrationId;
@@ -38,15 +38,15 @@ public class FakePreferencesProvider implements PreferencesProvider {
     private boolean wasPackageNameSaved = false;
     private boolean wasBaseServerUrlSaved = false;
 
-    public FakePreferencesProvider(String gcmDeviceRegistrationIdToLoad,
-                                   String backEndDeviceRegistrationIdToLoad,
-                                   int appVersionToLoad,
-                                   String gcmSenderIdToLoad,
-                                   String variantUuidToLoad,
-                                   String variantSecretToLoad,
-                                   String deviceAliasToLoad,
-                                   String packageNameToLoad,
-                                   URL baseServerUrlToLoad) {
+    public FakePushPreferencesProvider(String gcmDeviceRegistrationIdToLoad,
+                                       String backEndDeviceRegistrationIdToLoad,
+                                       int appVersionToLoad,
+                                       String gcmSenderIdToLoad,
+                                       String variantUuidToLoad,
+                                       String variantSecretToLoad,
+                                       String deviceAliasToLoad,
+                                       String packageNameToLoad,
+                                       URL baseServerUrlToLoad) {
         this.gcmDeviceRegistrationId = gcmDeviceRegistrationIdToLoad;
         this.backEndDeviceRegistrationId = backEndDeviceRegistrationIdToLoad;
         this.appVersion = appVersionToLoad;

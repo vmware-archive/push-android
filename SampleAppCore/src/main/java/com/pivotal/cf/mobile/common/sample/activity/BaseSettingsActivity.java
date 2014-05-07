@@ -20,7 +20,9 @@ import android.app.ActionBar;
 import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
+import android.preference.CheckBoxPreference;
 import android.preference.EditTextPreference;
+import android.preference.Preference;
 import android.preference.PreferenceActivity;
 import android.preference.PreferenceManager;
 import android.support.v4.app.NavUtils;
@@ -36,7 +38,7 @@ import java.util.Map;
 public abstract class BaseSettingsActivity extends PreferenceActivity {
 
     private SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener;
-    private Map<String, EditTextPreference> preferenceMap;
+    private Map<String, Preference> preferenceMap;
 
     protected abstract int getPreferencesXmlResourceId();
     protected abstract String[] getPreferenceNames();
@@ -64,14 +66,14 @@ public abstract class BaseSettingsActivity extends PreferenceActivity {
     }
 
     private void addPreferences(String[] preferenceNames) {
-        preferenceMap = new HashMap<String, EditTextPreference>();
+        preferenceMap = new HashMap<String, Preference>();
         for (final String preferenceName: preferenceNames) {
             addPreference(preferenceName);
         }
     }
 
     private void addPreference(String preferenceName) {
-        final EditTextPreference item = (EditTextPreference) getPreferenceScreen().findPreference(preferenceName);
+        final Preference item = getPreferenceScreen().findPreference(preferenceName);
         preferenceMap.put(preferenceName, item);
     }
 
@@ -101,14 +103,22 @@ public abstract class BaseSettingsActivity extends PreferenceActivity {
     private void showCurrentPreferences() {
         final SharedPreferences prefs = getPreferenceScreen().getSharedPreferences();
         for (final String settingName : preferenceMap.keySet()) {
-            final EditTextPreference item = preferenceMap.get(settingName);
-            setupPreferenceField(item, prefs.getString(settingName, null));
+            final Preference item = preferenceMap.get(settingName);
+            if (item instanceof EditTextPreference) {
+                setupEditTextPreferenceField((EditTextPreference) item, prefs.getString(settingName, null));
+            } else if (item instanceof CheckBoxPreference) {
+                setupCheckBoxPreference((CheckBoxPreference) item, prefs.getBoolean(settingName, false));
+            }
         }
     }
 
-    protected void setupPreferenceField(EditTextPreference preference, String value) {
+    protected void setupEditTextPreferenceField(EditTextPreference preference, String value) {
         preference.setText(value);
         preference.setSummary(value);
+    }
+
+    private void setupCheckBoxPreference(CheckBoxPreference preference, boolean value) {
+        preference.setChecked(value);
     }
 
     @Override

@@ -11,7 +11,7 @@ import com.pivotal.cf.mobile.analyticssdk.broadcastreceiver.FakeEventsSenderAlar
 import com.pivotal.cf.mobile.analyticssdk.database.FakeEventsStorage;
 import com.pivotal.cf.mobile.analyticssdk.model.events.Event;
 import com.pivotal.cf.mobile.analyticssdk.model.events.EventTest;
-import com.pivotal.cf.mobile.analyticssdk.prefs.FakePreferencesProvider;
+import com.pivotal.cf.mobile.common.test.prefs.FakeAnalyticsPreferencesProvider;
 import com.pivotal.cf.mobile.common.test.network.FakeNetworkWrapper;
 
 import junit.framework.Assert;
@@ -25,7 +25,7 @@ public abstract class JobTest extends AndroidTestCase {
     protected Event event2;
     protected FakeEventsStorage eventsStorage;
     protected FakeNetworkWrapper networkWrapper;
-    protected FakePreferencesProvider preferencesProvider;
+    protected FakeAnalyticsPreferencesProvider preferencesProvider;
     protected FakeEventsSenderAlarmProvider alarmProvider;
     protected FakeBackEndSendEventsApiRequest backEndMessageReceiptApiRequest;
     protected BackEndSendEventsApiRequestProvider backEndSendEventsApiRequestProvider;
@@ -39,7 +39,7 @@ public abstract class JobTest extends AndroidTestCase {
         eventsStorage = new FakeEventsStorage();
         networkWrapper = new FakeNetworkWrapper();
         alarmProvider = new FakeEventsSenderAlarmProvider();
-        preferencesProvider = new FakePreferencesProvider(null);
+        preferencesProvider = new FakeAnalyticsPreferencesProvider(false, null);
         backEndMessageReceiptApiRequest = new FakeBackEndSendEventsApiRequest();
         backEndSendEventsApiRequestProvider = new BackEndSendEventsApiRequestProvider(backEndMessageReceiptApiRequest);
     }

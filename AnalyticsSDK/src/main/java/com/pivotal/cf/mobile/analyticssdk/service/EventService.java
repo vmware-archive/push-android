@@ -17,8 +17,8 @@ import com.pivotal.cf.mobile.analyticssdk.jobs.BaseJob;
 import com.pivotal.cf.mobile.analyticssdk.jobs.JobParams;
 import com.pivotal.cf.mobile.analyticssdk.jobs.JobResultListener;
 import com.pivotal.cf.mobile.analyticssdk.jobs.PrepareDatabaseJob;
-import com.pivotal.cf.mobile.analyticssdk.prefs.PreferencesProvider;
-import com.pivotal.cf.mobile.analyticssdk.prefs.PreferencesProviderImpl;
+import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProvider;
+import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProviderImpl;
 import com.pivotal.cf.mobile.common.network.NetworkWrapper;
 import com.pivotal.cf.mobile.common.network.NetworkWrapperImpl;
 import com.pivotal.cf.mobile.common.util.Logger;
@@ -33,13 +33,14 @@ public class EventService extends IntentService {
 
     public static final int NO_RESULT = -1;
     public static final int JOB_INTERRUPTED = 1;
+    public static final int ANALYTICS_DISABLED = 2;
 
     // Used by unit tests
     /* package */ static Semaphore semaphore = null;
-    /* package */ static NetworkWrapper networkWrapper = null;
     /* package */ static EventsStorage eventsStorage = null;
-    /* package */ static PreferencesProvider preferencesProvider = null;
+    /* package */ static NetworkWrapper networkWrapper = null;
     /* package */ static EventsSenderAlarmProvider alarmProvider = null;
+    /* package */ static AnalyticsPreferencesProvider analyticsPreferencesProvider = null;
     /* package */ static BackEndSendEventsApiRequestProvider backEndSendEventsApiRequestProvider = null;
     /* package */ static List<String> listOfCompletedJobs = null;
 
@@ -58,39 +59,52 @@ public class EventService extends IntentService {
     @Override
     protected void onHandleIntent(Intent intent) {
 
-        setupStatics(intent);
+        setupLogger();
 
-        if (intent != null) {
-            if (hasJob(intent)) {
-                final BaseJob job = getJobFromIntent(intent);
+        try {
+
+            if (intent != null) {
+
                 final ResultReceiver resultReceiver = getResultReceiver(intent);
-                runJob(job, resultReceiver);
-            }
-        }
+                setupPreferences();
 
-        postProcessAfterService(intent);
+                if (isAnalyticsEnabled()) {
+                    if (hasJob(intent)) {
+                        final BaseJob job = getJobFromIntent(intent);
+                        setupStatics(intent);
+                        runJob(job, resultReceiver);
+                    }
+                } else {
+                    sendResult(ANALYTICS_DISABLED, resultReceiver);
+                }
+            }
+
+        } finally {
+            postProcessAfterService(intent);
+        }
+    }
+
+    private void setupPreferences() {
+        if (EventService.analyticsPreferencesProvider == null) {
+            EventService.analyticsPreferencesProvider = new AnalyticsPreferencesProviderImpl(this);
+        }
     }
 
     private void setupStatics(Intent intent) {
 
-        setupLogger();
-
         boolean needToCleanDatabase = false;
 
-        if (EventService.networkWrapper == null) {
-            EventService.networkWrapper = new NetworkWrapperImpl();
-        }
-        if (EventService.preferencesProvider == null) {
-            EventService.preferencesProvider = new PreferencesProviderImpl(this);
+        if (EventService.eventsStorage == null) {
+            needToCleanDatabase = setupDatabase();
         }
         if (EventService.alarmProvider == null) {
             EventService.alarmProvider = new EventsSenderAlarmProviderImpl(this);
         }
-        if (EventService.eventsStorage == null) {
-            needToCleanDatabase = setupDatabase();
+        if (EventService.networkWrapper == null) {
+            EventService.networkWrapper = new NetworkWrapperImpl();
         }
         if (EventService.backEndSendEventsApiRequestProvider == null) {
-            final BackEndSendEventsApiRequestImpl backEndMessageReceiptApiRequest = new BackEndSendEventsApiRequestImpl(this, EventService.eventsStorage, preferencesProvider, EventService.networkWrapper);
+            final BackEndSendEventsApiRequestImpl backEndMessageReceiptApiRequest = new BackEndSendEventsApiRequestImpl(this, EventService.eventsStorage, analyticsPreferencesProvider, EventService.networkWrapper);
             EventService.backEndSendEventsApiRequestProvider = new BackEndSendEventsApiRequestProvider(backEndMessageReceiptApiRequest);
         }
 
@@ -141,6 +155,10 @@ public class EventService extends IntentService {
         return (job instanceof PrepareDatabaseJob);
     }
 
+    private boolean isAnalyticsEnabled() {
+        return EventService.analyticsPreferencesProvider.isAnalyticsEnabled();
+    }
+
     private boolean hasJob(Intent intent) {
         return (getJobFromIntent(intent) != null);
     }
@@ -184,7 +202,7 @@ public class EventService extends IntentService {
                 listener,
                 EventService.networkWrapper,
                 EventService.eventsStorage,
-                EventService.preferencesProvider,
+                EventService.analyticsPreferencesProvider,
                 EventService.alarmProvider,
                 EventService.backEndSendEventsApiRequestProvider);
     }
@@ -226,10 +244,10 @@ public class EventService extends IntentService {
     }
 
     private void cleanupStatics() {
-        EventService.networkWrapper = null;
         EventService.eventsStorage = null;
-        EventService.preferencesProvider = null;
         EventService.alarmProvider = null;
+        EventService.networkWrapper = null;
+        EventService.analyticsPreferencesProvider = null;
         EventService.backEndSendEventsApiRequestProvider = null;
         EventService.listOfCompletedJobs = null;
     }

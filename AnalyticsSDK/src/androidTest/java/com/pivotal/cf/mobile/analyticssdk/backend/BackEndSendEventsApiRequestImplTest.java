@@ -5,7 +5,7 @@ import android.test.AndroidTestCase;
 
 import com.pivotal.cf.mobile.analyticssdk.database.FakeEventsStorage;
 import com.pivotal.cf.mobile.analyticssdk.model.events.EventTest;
-import com.pivotal.cf.mobile.analyticssdk.prefs.FakePreferencesProvider;
+import com.pivotal.cf.mobile.common.test.prefs.FakeAnalyticsPreferencesProvider;
 import com.pivotal.cf.mobile.common.network.NetworkWrapper;
 import com.pivotal.cf.mobile.common.test.network.FakeHttpURLConnection;
 import com.pivotal.cf.mobile.common.test.network.FakeNetworkWrapper;
@@ -22,7 +22,7 @@ public class BackEndSendEventsApiRequestImplTest extends AndroidTestCase {
     private BackEndSendEventsListener backEndSendEventsListener;
     private DelayedLoop delayedLoop;
     private FakeEventsStorage eventsStorage;
-    private FakePreferencesProvider preferencesProvider;
+    private FakeAnalyticsPreferencesProvider preferencesProvider;
     private static final long TEN_SECOND_TIMEOUT = 10000L;
 
     private List<Uri> emptyList;
@@ -32,7 +32,7 @@ public class BackEndSendEventsApiRequestImplTest extends AndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         eventsStorage = new FakeEventsStorage();
-        preferencesProvider = new FakePreferencesProvider(new URL("http://some/fake/host"));
+        preferencesProvider = new FakeAnalyticsPreferencesProvider(false, new URL("http://some/fake/host"));
         networkWrapper = new FakeNetworkWrapper();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
         FakeHttpURLConnection.reset();
@@ -41,6 +41,8 @@ public class BackEndSendEventsApiRequestImplTest extends AndroidTestCase {
         final Uri uri = eventsStorage.saveEvent(EventTest.getEvent1());
         listWithOneItem.add(uri);
     }
+
+    // TODO - add test with analytics disabled?  is it correct to send events when analytics are disabled?
 
     public void testRequiresContext() {
         try {

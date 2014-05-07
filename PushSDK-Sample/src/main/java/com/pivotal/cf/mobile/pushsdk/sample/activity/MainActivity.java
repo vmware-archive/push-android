@@ -29,7 +29,6 @@ import android.widget.Toast;
 
 import com.google.gson.Gson;
 import com.pivotal.cf.mobile.analyticssdk.AnalyticsParameters;
-import com.pivotal.cf.mobile.analyticssdk.AnalyticsSDK;
 import com.pivotal.cf.mobile.analyticssdk.database.DatabaseEventsStorage;
 import com.pivotal.cf.mobile.common.sample.activity.BaseMainActivity;
 import com.pivotal.cf.mobile.common.sample.activity.BaseSettingsActivity;
@@ -63,7 +62,6 @@ public class MainActivity extends BaseMainActivity {
     private static final String BACK_END_SEND_MESSAGE_URL = "v1/push";
 
     private PushSDK pushSDK;
-    private AnalyticsSDK analyticsSDK;
 
     protected Class<? extends BaseSettingsActivity> getSettingsActivity() {
         return SettingsActivity.class;
@@ -82,16 +80,23 @@ public class MainActivity extends BaseMainActivity {
     protected void onResume() {
         super.onResume();
         updateCurrentBaseRowColour();
-        setupAnalyticsSDK();
         setupPushSDK();
+        setupAnalyticsSDK();
         clearNotifications();
+    }
+
+    private void setupPushSDK() {
+        try {
+            pushSDK = PushSDK.getInstance(this);
+        } catch (IllegalArgumentException e) {
+            addLogMessage("Not able to initialize Push SDK: " + e.getMessage());
+        }
     }
 
     private void setupAnalyticsSDK() {
         try {
             final AnalyticsParameters analyticsParameters = getAnalyticsParameters();
-            analyticsSDK = AnalyticsSDK.getInstance(this);
-            analyticsSDK.setParameters(analyticsParameters);
+            pushSDK.setupAnalytics(analyticsParameters);
         } catch (IllegalArgumentException e) {
             addLogMessage("Not able to initialize Analytics SDK: " + e.getMessage());
         }
@@ -99,16 +104,9 @@ public class MainActivity extends BaseMainActivity {
 
     private AnalyticsParameters getAnalyticsParameters() {
         final URL baseServerUrl = getAnalyticsBaseServerUrl();
-        final AnalyticsParameters parameters = new AnalyticsParameters(baseServerUrl);
+        final boolean isAnalyticsEnabled = Settings.isAnalyticsEnabled(this);
+        final AnalyticsParameters parameters = new AnalyticsParameters(isAnalyticsEnabled, baseServerUrl);
         return parameters;
-    }
-
-    private void setupPushSDK() {
-        try {
-            pushSDK = PushSDK.getInstance(analyticsSDK, this);
-        } catch (IllegalArgumentException e) {
-            addLogMessage("Not able to initialize Push SDK: " + e.getMessage());
-        }
     }
 
     private void clearNotifications() {
@@ -159,7 +157,7 @@ public class MainActivity extends BaseMainActivity {
         try {
             return new URL(baseServerUrl);
         } catch (MalformedURLException e) {
-            addLogMessage("Invalid push base server URL: '" + baseServerUrl + "'");
+            addLogMessage("Invalid push base server URL: '" + baseServerUrl + "'.");
             return null;
         }
     }
@@ -169,7 +167,7 @@ public class MainActivity extends BaseMainActivity {
         try {
             return new URL(baseServerUrl);
         } catch (MalformedURLException e) {
-            addLogMessage("Invalid analytics base server URL: '" + baseServerUrl + "'");
+            addLogMessage("Invalid analytics base server URL: '" + baseServerUrl + "'.");
             return null;
         }
     }
@@ -431,9 +429,13 @@ public class MainActivity extends BaseMainActivity {
     }
 
     private void clearEvents() {
-        addLogMessage("Clearing all events.");
-        final DatabaseEventsStorage eventsStorage = new DatabaseEventsStorage();
-        eventsStorage.reset();
+        if (Settings.isAnalyticsEnabled(this)) {
+            addLogMessage("Clearing all events.");
+            final DatabaseEventsStorage eventsStorage = new DatabaseEventsStorage();
+            eventsStorage.reset();
+        } else {
+            addLogMessage("Cannot clear events if analytics are disabled.");
+        }
     }
 
     private void clearRegistration() {

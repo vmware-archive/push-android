@@ -17,7 +17,7 @@ package com.pivotal.cf.mobile.pushsdk.prefs;
 
 import java.net.URL;
 
-public interface PreferencesProvider {
+public interface PushPreferencesProvider {
 
     public static int NO_SAVED_VERSION = -1;
 

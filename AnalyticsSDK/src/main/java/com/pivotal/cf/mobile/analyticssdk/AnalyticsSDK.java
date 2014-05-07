@@ -4,11 +4,13 @@ import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
 
+import com.pivotal.cf.mobile.analyticssdk.broadcastreceiver.EventsSenderAlarmProvider;
+import com.pivotal.cf.mobile.analyticssdk.broadcastreceiver.EventsSenderAlarmProviderImpl;
 import com.pivotal.cf.mobile.analyticssdk.jobs.EnqueueEventJob;
 import com.pivotal.cf.mobile.analyticssdk.jobs.PrepareDatabaseJob;
 import com.pivotal.cf.mobile.analyticssdk.model.events.Event;
-import com.pivotal.cf.mobile.analyticssdk.prefs.PreferencesProvider;
-import com.pivotal.cf.mobile.analyticssdk.prefs.PreferencesProviderImpl;
+import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProvider;
+import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProviderImpl;
 import com.pivotal.cf.mobile.analyticssdk.service.EventService;
 import com.pivotal.cf.mobile.common.util.Logger;
 
@@ -18,7 +20,9 @@ import java.util.UUID;
 public class AnalyticsSDK {
 
     private static AnalyticsSDK instance;
-    private String eventId;
+
+    private Context context;
+    private boolean wasDatabaseCleanupJobRun = false;
 
     /**
      * Gets an instance of the Analytics SDK singleton object.
@@ -33,8 +37,6 @@ public class AnalyticsSDK {
         return instance;
     }
 
-    private Context context;
-
     private AnalyticsSDK(Context context) {
         verifyArguments(context);
         saveArguments(context);
@@ -42,9 +44,6 @@ public class AnalyticsSDK {
         if (!Logger.isSetup()) {
             Logger.setup(context);
         }
-
-        // TODO - don't set up the database until after arguments have been provided
-        cleanupDatabase();
     }
 
     private void verifyArguments(Context context) {
@@ -61,12 +60,6 @@ public class AnalyticsSDK {
         }
     }
 
-    private void cleanupDatabase() {
-        final PrepareDatabaseJob job = new PrepareDatabaseJob();
-        final Intent intent = EventService.getIntentToRunJob(context, job);
-        context.startService(intent);
-    }
-
     /**
      * Update the Analytics engine parameters.  You MUST set the Analytics Parameters before any analytics data
      * can be captured.
@@ -76,21 +69,47 @@ public class AnalyticsSDK {
     public void setParameters(AnalyticsParameters parameters) {
         verifyParameters(parameters);
         saveParameters(parameters);
-        Logger.i("AnalyticsSDK parameters: baseServerUrl:" + parameters.getBaseServerUrl());
+
+        if (parameters.isAnalyticsEnabled()) {
+            cleanupDatabase();
+            Logger.i("AnalyticsSDK parameters: baseServerUrl:" + parameters.getBaseServerUrl());
+        } else {
+            Logger.i("AnalyticsSDK is disabled.");
+            final EventsSenderAlarmProvider alarmProvider = new EventsSenderAlarmProviderImpl(context);
+            alarmProvider.disableAlarm();
+        }
     }
 
     private void verifyParameters(AnalyticsParameters parameters) {
         if (parameters == null) {
             throw new IllegalArgumentException("parameters may not be null");
         }
-        if (parameters.getBaseServerUrl() == null) {
-            throw new IllegalArgumentException("parameters.baseServerUrl may not be null");
+        if (parameters.isAnalyticsEnabled() && parameters.getBaseServerUrl() == null) {
+            throw new IllegalArgumentException("parameters.baseServerUrl may not be null if parameters.isAnalyticsIsEnabled is true");
         }
     }
 
     private void saveParameters(AnalyticsParameters parameters) {
-        final PreferencesProvider prefs = new PreferencesProviderImpl(context);
+        final AnalyticsPreferencesProvider prefs = new AnalyticsPreferencesProviderImpl(context);
         prefs.setBaseServerUrl(parameters.getBaseServerUrl());
+        prefs.setIsAnalyticsEnabled(parameters.isAnalyticsEnabled());
+    }
+
+    private void cleanupDatabase() {
+        if (!wasDatabaseCleanupJobRun) {
+
+            // If the process has just been initialized, then run the PrepareDatabaseJob in order to prepare the database
+            final PrepareDatabaseJob job = new PrepareDatabaseJob();
+            final Intent intent = EventService.getIntentToRunJob(context, job);
+            context.startService(intent);
+
+        } else {
+
+            // Otherwise, simply make sure that the timer for posting events to the server is enabled.
+            final EventsSenderAlarmProvider alarmProvider = new EventsSenderAlarmProviderImpl(context);
+            alarmProvider.enableAlarmIfDisabled();
+        }
+        wasDatabaseCleanupJobRun = true;
     }
 
     /**
@@ -100,10 +119,14 @@ public class AnalyticsSDK {
      * @param eventType The type of the event being logged.
      */
     public void logEvent(String eventType) {
-        final Event event = getEvent(eventType);
-        final EnqueueEventJob job = new EnqueueEventJob(event);
-        final Intent intent = EventService.getIntentToRunJob(context, job);
-        context.startService(intent);
+        if (isAnalyticsEnabled()) {
+            final Event event = getEvent(eventType);
+            final EnqueueEventJob job = new EnqueueEventJob(event);
+            final Intent intent = EventService.getIntentToRunJob(context, job);
+            context.startService(intent);
+        } else {
+            Logger.w("Event not logged. Analytics is either not set up or disabled.");
+        }
     }
 
     private Event getEvent(String eventType) {
@@ -118,5 +141,14 @@ public class AnalyticsSDK {
     public String getEventId() {
         final String eventId = UUID.randomUUID().toString();
         return eventId;
+    }
+
+    private boolean isAnalyticsEnabled() {
+        if (context != null) {
+            final AnalyticsPreferencesProvider preferencesProvider = new AnalyticsPreferencesProviderImpl(context);
+            return preferencesProvider.isAnalyticsEnabled();
+        } else {
+            return false;
+        }
     }
 }

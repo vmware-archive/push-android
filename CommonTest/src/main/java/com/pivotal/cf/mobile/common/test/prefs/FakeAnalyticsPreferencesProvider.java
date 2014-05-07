@@ -13,16 +13,20 @@
  * limitations under the License.
  */
 
-package com.pivotal.cf.mobile.analyticssdk.prefs;
+package com.pivotal.cf.mobile.common.test.prefs;
+
+import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProvider;
 
 import java.net.URL;
 
-public class FakePreferencesProvider implements PreferencesProvider {
+public class FakeAnalyticsPreferencesProvider implements AnalyticsPreferencesProvider {
 
     private URL baseServerUrl;
+    private boolean isAnalyticsEnabled;
     private boolean wasBaseServerUrlSaved = false;
 
-    public FakePreferencesProvider(URL baseServerUrlToLoad) {
+    public FakeAnalyticsPreferencesProvider(boolean isAnalyticsEnabled, URL baseServerUrlToLoad) {
+        this.isAnalyticsEnabled = isAnalyticsEnabled;
         this.baseServerUrl = baseServerUrlToLoad;
     }
 
@@ -35,6 +39,16 @@ public class FakePreferencesProvider implements PreferencesProvider {
     public void setBaseServerUrl(URL baseServerUrl) {
         this.baseServerUrl = baseServerUrl;
         wasBaseServerUrlSaved = true;
+    }
+
+    @Override
+    public boolean isAnalyticsEnabled() {
+        return isAnalyticsEnabled;
+    }
+
+    @Override
+    public void setIsAnalyticsEnabled(boolean isAnalyticsEnabled) {
+        this.isAnalyticsEnabled = isAnalyticsEnabled;
     }
 
     public boolean wasBaseServerUrlSaved() {

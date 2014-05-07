@@ -10,7 +10,7 @@ import com.pivotal.cf.mobile.pushsdk.backend.FakeBackEndUnregisterDeviceApiReque
 import com.pivotal.cf.mobile.pushsdk.gcm.FakeGcmProvider;
 import com.pivotal.cf.mobile.pushsdk.gcm.FakeGcmUnregistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
-import com.pivotal.cf.mobile.pushsdk.prefs.FakePreferencesProvider;
+import com.pivotal.cf.mobile.pushsdk.prefs.FakePushPreferencesProvider;
 import com.pivotal.cf.mobile.common.test.util.DelayedLoop;
 
 import java.net.URL;
@@ -45,13 +45,13 @@ public class UnregistrationEngineTestParameters {
     public void run() throws Exception {
 
         final FakeGcmProvider gcmProvider = new FakeGcmProvider(null, true, !shouldGcmDeviceUnregistrationBeSuccessful);
-        final FakePreferencesProvider prefsProvider;
+        final FakePushPreferencesProvider prefsProvider;
 
         if (backEndDeviceRegistrationIdInPrefs == null) {
-            prefsProvider = new FakePreferencesProvider(null, backEndDeviceRegistrationIdInPrefs, -1, null, null, null, null, null, null);
+            prefsProvider = new FakePushPreferencesProvider(null, backEndDeviceRegistrationIdInPrefs, -1, null, null, null, null, null, null);
         } else {
             final URL baseServerUrlInPrefs = new URL(BASE_SERVER_URL_IN_PREFS);
-            prefsProvider = new FakePreferencesProvider(GCM_DEVICE_ID_IN_PREFS, backEndDeviceRegistrationIdInPrefs, APP_VERSION_IN_PREFS, GCM_SENDER_ID_IN_PREFS, VARIANT_UUID_IN_PREFS, VARIANT_SECRET_IN_PREFS, DEVICE_ALIAS_IN_PREFS, PACKAGE_NAME_IN_PREFS, baseServerUrlInPrefs);
+            prefsProvider = new FakePushPreferencesProvider(GCM_DEVICE_ID_IN_PREFS, backEndDeviceRegistrationIdInPrefs, APP_VERSION_IN_PREFS, GCM_SENDER_ID_IN_PREFS, VARIANT_UUID_IN_PREFS, VARIANT_SECRET_IN_PREFS, DEVICE_ALIAS_IN_PREFS, PACKAGE_NAME_IN_PREFS, baseServerUrlInPrefs);
         }
 
         final FakeGcmUnregistrationApiRequest gcmUnregistrationApiRequest = new FakeGcmUnregistrationApiRequest(gcmProvider);

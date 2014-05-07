@@ -26,8 +26,7 @@ import java.net.URL;
 /**
  * Saves preferences to the SharedPreferences on the filesystem.
  */
-// TODO - split this class out into individual preferences provides for each module
-public class PreferencesProviderImpl implements PreferencesProvider {
+public class PushPreferencesProviderImpl implements PushPreferencesProvider {
 
     public static final String TAG_NAME = "PivotalCFMSCommon";
 
@@ -45,7 +44,7 @@ public class PreferencesProviderImpl implements PreferencesProvider {
 
     private final Context context;
 
-    public PreferencesProviderImpl(Context context) {
+    public PushPreferencesProviderImpl(Context context) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }

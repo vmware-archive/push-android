@@ -3,6 +3,12 @@
     <PreferenceCategory
         android:title="@string/pref_title_back_end_analytics_settings">
 
+        <CheckBoxPreference
+            android:key="test_is_analytics_enabled"
+            android:title="@string/pref_title_is_analytics_enabled"
+            android:defaultValue="@bool/pref_default_is_analytics_enabled"
+            android:persistent="true"/>
+
         <EditTextPreference
             android:key="test_analytics_base_server_url"
             android:title="@string/pref_title_analytics_base_server_url"

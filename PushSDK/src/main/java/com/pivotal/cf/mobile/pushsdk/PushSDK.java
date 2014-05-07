@@ -18,11 +18,10 @@ package com.pivotal.cf.mobile.pushsdk;
 import android.app.Application;
 import android.content.Context;
 
+import com.pivotal.cf.mobile.analyticssdk.AnalyticsParameters;
 import com.pivotal.cf.mobile.analyticssdk.AnalyticsSDK;
 import com.pivotal.cf.mobile.common.network.NetworkWrapper;
 import com.pivotal.cf.mobile.common.network.NetworkWrapperImpl;
-import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProvider;
-import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProviderImpl;
 import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndRegistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndRegistrationApiRequestImpl;
@@ -38,6 +37,8 @@ import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequestImpl;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
 import com.pivotal.cf.mobile.pushsdk.gcm.RealGcmProvider;
+import com.pivotal.cf.mobile.pushsdk.prefs.PushPreferencesProvider;
+import com.pivotal.cf.mobile.pushsdk.prefs.PushPreferencesProviderImpl;
 import com.pivotal.cf.mobile.pushsdk.registration.RegistrationEngine;
 import com.pivotal.cf.mobile.pushsdk.registration.RegistrationListener;
 import com.pivotal.cf.mobile.pushsdk.registration.UnregistrationEngine;
@@ -69,24 +70,21 @@ public class PushSDK {
     /**
      * Retrieves an instance of the Pivotal CF Mobile Services Push SDK singleton object.
      *
-     * @param analyticsSDK  An instance of the Pivotal CF Mobile Services Analytics SDK. Use `null` if you don't
-     *                      want analytics.
      * @param context       A context object.  May not be null.
      * @return  A reference to the singleton PushSDK object.
      */
-    public static PushSDK getInstance(AnalyticsSDK analyticsSDK, Context context) {
+    public static PushSDK getInstance(Context context) {
         if (instance == null) {
-            instance = new PushSDK(analyticsSDK, context);
+            instance = new PushSDK(context);
         }
         return instance;
     }
 
     private Context context;
-    private AnalyticsSDK analyticsSDK;
 
-    private PushSDK(AnalyticsSDK analyticsSDK, Context context) {
+    private PushSDK(Context context) {
         verifyArguments(context);
-        saveArguments(analyticsSDK, context);
+        saveArguments(context);
 
         if (!Logger.isSetup()) {
             Logger.setup(context);
@@ -95,19 +93,28 @@ public class PushSDK {
     }
 
     private void verifyArguments(Context context) {
-        // NOTE - analyticsSDK is considered optional
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
     }
 
-    private void saveArguments(AnalyticsSDK analyticsSDK, Context context) {
+    private void saveArguments(Context context) {
         if (!(context instanceof Application)) {
             this.context = context.getApplicationContext();
         } else {
             this.context = context;
         }
-        this.analyticsSDK = analyticsSDK;
+    }
+
+    /**
+     * Sets up the Analytics SDK.  There can be no analytics events generated until this method
+     * is called at least once with the `analyticsEnabled` parameter set to `true`.
+     *
+     * @param analyticsParameters  the parameterization for the Analytics SDK.
+     */
+    public void setupAnalytics(AnalyticsParameters analyticsParameters) {
+        final AnalyticsSDK analyticsSDK = AnalyticsSDK.getInstance(context);
+        analyticsSDK.setParameters(analyticsParameters);
     }
 
     /**
@@ -124,7 +131,7 @@ public class PushSDK {
     public void startRegistration(final RegistrationParameters parameters, final RegistrationListener listener) {
         verifyRegistrationArguments(parameters);
         final GcmProvider gcmProvider = new RealGcmProvider(context);
-        final PreferencesProvider preferencesProvider = new PreferencesProviderImpl(context);
+        final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
         final GcmRegistrationApiRequest dummyGcmRegistrationApiRequest = new GcmRegistrationApiRequestImpl(context, gcmProvider);
         final GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider = new GcmRegistrationApiRequestProvider(dummyGcmRegistrationApiRequest);
         final GcmUnregistrationApiRequest dummyGcmUnregistrationApiRequest = new GcmUnregistrationApiRequestImpl(context, gcmProvider);
@@ -138,7 +145,7 @@ public class PushSDK {
             @Override
             public void run() {
                 try {
-                    final RegistrationEngine registrationEngine = new RegistrationEngine(context, context.getPackageName(), gcmProvider, preferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
+                    final RegistrationEngine registrationEngine = new RegistrationEngine(context, context.getPackageName(), gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider);
                     registrationEngine.registerDevice(parameters, listener);
                 } catch (Exception e) {
                     Logger.ex("PushSDK registration failed", e);
@@ -175,7 +182,7 @@ public class PushSDK {
     public void startUnregistration(final RegistrationParameters parameters, final UnregistrationListener listener) {
         verifyUnregistrationArguments(parameters);
         final GcmProvider gcmProvider = new RealGcmProvider(context);
-        final PreferencesProvider preferencesProvider = new PreferencesProviderImpl(context);
+        final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
         final GcmUnregistrationApiRequest dummyGcmUnregistrationApiRequest = new GcmUnregistrationApiRequestImpl(context, gcmProvider);
         final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(dummyGcmUnregistrationApiRequest);
         final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
@@ -186,7 +193,7 @@ public class PushSDK {
             @Override
             public void run() {
                 try {
-                    final UnregistrationEngine unregistrationEngine = new UnregistrationEngine(context, gcmProvider, preferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
+                    final UnregistrationEngine unregistrationEngine = new UnregistrationEngine(context, gcmProvider, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
                     unregistrationEngine.unregisterDevice(parameters, listener);
                 } catch (Exception e) {
                     Logger.ex("PushSDK unregistration failed", e);

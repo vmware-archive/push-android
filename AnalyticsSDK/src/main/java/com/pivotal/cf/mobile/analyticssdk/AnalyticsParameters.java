@@ -7,14 +7,20 @@ import java.net.URL;
  */
 public class AnalyticsParameters {
 
+    private final boolean isAnalyticsEnabled;
     private final URL baseServerUrl;
 
-    public AnalyticsParameters(URL baseServerUrl) {
+    public AnalyticsParameters(boolean isAnalyticsEnabled, URL baseServerUrl) {
+        this.isAnalyticsEnabled = isAnalyticsEnabled;
         this.baseServerUrl = baseServerUrl;
     }
 
     public URL getBaseServerUrl() {
         return baseServerUrl;
+    }
+
+    public boolean isAnalyticsEnabled() {
+        return isAnalyticsEnabled;
     }
 
     @Override
@@ -29,6 +35,10 @@ public class AnalyticsParameters {
         }
 
         AnalyticsParameters other = (AnalyticsParameters)o;
+
+        if (isAnalyticsEnabled != other.isAnalyticsEnabled) {
+            return false;
+        }
 
         if (baseServerUrl == null && other.baseServerUrl != null) {
             return false;
@@ -46,6 +56,7 @@ public class AnalyticsParameters {
     @Override
     public int hashCode() {
         int result = 17;
+        result = (result * 31) + (isAnalyticsEnabled ? 1 : 0);
         result = (result * 31) + (baseServerUrl == null ? 0 : baseServerUrl.hashCode());
         return result;
     }

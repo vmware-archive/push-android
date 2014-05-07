@@ -2,7 +2,7 @@ package com.pivotal.cf.mobile.pushsdk.registration;
 
 import android.test.AndroidTestCase;
 
-import com.pivotal.cf.mobile.pushsdk.prefs.FakePreferencesProvider;
+import com.pivotal.cf.mobile.pushsdk.prefs.FakePushPreferencesProvider;
 import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndUnregisterDeviceApiRequestProvider;
@@ -26,7 +26,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
 
     private FakeGcmProvider gcmProvider;
     private GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider;
-    private FakePreferencesProvider preferencesProvider;
+    private FakePushPreferencesProvider preferencesProvider;
     private BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider;
     private RegistrationParameters parameters;
     private Semaphore semaphore = new Semaphore(0);
@@ -38,7 +38,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
         parameters = new RegistrationParameters(TEST_GCM_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_DEVICE_ALIAS, url);
         gcmProvider = new FakeGcmProvider(TEST_GCM_DEVICE_REGISTRATION_ID_1);
         gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(new FakeGcmUnregistrationApiRequest(gcmProvider));
-        preferencesProvider = new FakePreferencesProvider(null, null, 0, null, null, null, null, null, null);
+        preferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null);
         backEndUnregisterDeviceApiRequestProvider = new BackEndUnregisterDeviceApiRequestProvider(new FakeBackEndUnregisterDeviceApiRequest());
     }
 

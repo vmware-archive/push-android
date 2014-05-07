@@ -52,8 +52,9 @@ public class MainActivity extends BaseMainActivity {
     }
 
     private AnalyticsParameters getAnalyticsParameters() {
+        final boolean isAnalyticsEnabled = Settings.isAnalyticsEnabled(this);
         final URL baseServerUrl = getAnalyticsBaseServerUrl();
-        final AnalyticsParameters parameters = new AnalyticsParameters(baseServerUrl);
+        final AnalyticsParameters parameters = new AnalyticsParameters(isAnalyticsEnabled, baseServerUrl);
         return parameters;
     }
 
@@ -62,7 +63,7 @@ public class MainActivity extends BaseMainActivity {
         try {
             return new URL(baseServerUrl);
         } catch (MalformedURLException e) {
-            addLogMessage("Invalid base server URL: '" + baseServerUrl + "'");
+            addLogMessage("Invalid analytics base server URL: '" + baseServerUrl + "'.");
             return null;
         }
     }
@@ -93,12 +94,17 @@ public class MainActivity extends BaseMainActivity {
     }
 
     private void clearEvents() {
-        addLogMessage("Clearing all events.");
-        final DatabaseEventsStorage eventsStorage = new DatabaseEventsStorage();
-        eventsStorage.reset();
+        if (Settings.isAnalyticsEnabled(this)) {
+            addLogMessage("Clearing all events.");
+            final DatabaseEventsStorage eventsStorage = new DatabaseEventsStorage();
+            eventsStorage.reset();
+        } else {
+            addLogMessage("Cannot clear events if analytics are disabled.");
+        }
     }
 
     private void logEvent() {
+        updateCurrentBaseRowColour();
         analyticsSDK.logEvent("user_event");
     }
 }

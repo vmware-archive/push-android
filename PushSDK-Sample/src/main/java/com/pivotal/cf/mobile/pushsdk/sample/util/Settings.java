@@ -27,6 +27,7 @@ public class Settings {
     public static final String DEVICE_ALIAS = "test_device_alias";
     public static final String GCM_BROWSER_API_KEY = "test_gcm_browser_api_key";
     public static final String PUSH_BASE_SERVER_URL = "test_push_base_server_url";
+    public static final String IS_ANALYTICS_ENABLED = "test_is_analytics_enabled";
     public static final String ANALYTICS_BASE_SERVER_URL = "test_analytics_base_server_url";
     public static final String BACK_END_ENVIRONMENT_UUID = "test_back_end_environment_uuid";
     public static final String BACK_END_ENVIRONMENT_KEY = "test_back_end_environment_key";
@@ -38,6 +39,7 @@ public class Settings {
             DEVICE_ALIAS,
             GCM_BROWSER_API_KEY,
             PUSH_BASE_SERVER_URL,
+            IS_ANALYTICS_ENABLED,
             ANALYTICS_BASE_SERVER_URL,
             BACK_END_ENVIRONMENT_UUID,
             BACK_END_ENVIRONMENT_KEY
@@ -65,6 +67,10 @@ public class Settings {
 
     public static String getPushBaseServerUrl(Context context) {
         return getSharedPreferences(context).getString(PUSH_BASE_SERVER_URL, null);
+    }
+
+    public static boolean isAnalyticsEnabled(Context context) {
+        return getSharedPreferences(context).getBoolean(IS_ANALYTICS_ENABLED, true);
     }
 
     public static String getAnalyticsBaseServerUrl(Context context) {

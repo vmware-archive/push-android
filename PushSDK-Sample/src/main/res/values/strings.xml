@@ -21,6 +21,7 @@
     <string name="pref_title_back_end_environment_uuid">Environment UUID</string>
     <string name="pref_title_back_end_environment_key">Environment Key</string>
     <string name="pref_title_push_base_server_url">Push Base Server URL</string>
+    <string name="pref_title_is_analytics_enabled">Is Analytics Enabled?</string>
     <string name="pref_title_analytics_base_server_url">Analytics Base Server URL</string>
     <string name="pref_title_back_end_analytics_settings">Pivotal CF MS Analytics Settings</string>
 

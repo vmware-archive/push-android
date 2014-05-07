@@ -2,7 +2,7 @@ package com.pivotal.cf.mobile.pushsdk.registration;
 
 import android.content.Context;
 
-import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProvider;
+import com.pivotal.cf.mobile.pushsdk.prefs.PushPreferencesProvider;
 import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndUnregisterDeviceApiRequest;
@@ -17,7 +17,7 @@ public class UnregistrationEngine {
 
     private Context context;
     private GcmProvider gcmProvider;
-    private PreferencesProvider preferencesProvider;
+    private PushPreferencesProvider pushPreferencesProvider;
     private GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider;
     private BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider;
     private String previousBackEndDeviceRegistrationId;
@@ -29,32 +29,32 @@ public class UnregistrationEngine {
      *
      * @param context  A context
      * @param gcmProvider  Some object that can provide the GCM services.
-     * @param preferencesProvider  Some object that can provide persistent storage of preferences.
+     * @param pushPreferencesProvider  Some object that can provide persistent storage of preferences.
      * @param gcmUnregistrationApiRequestProvider  Some object that can provide GCMUnregistrationApiRequest objects.
      * @param backEndUnregisterDeviceApiRequestProvider  Some object that can provide BackEndUnregisterDeviceApiRequest objects.
      */
     public UnregistrationEngine(Context context,
                                 GcmProvider gcmProvider,
-                                PreferencesProvider preferencesProvider,
+                                PushPreferencesProvider pushPreferencesProvider,
                                 GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                 BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
 
         verifyArguments(context,
                 gcmProvider,
-                preferencesProvider,
+                pushPreferencesProvider,
                 gcmUnregistrationApiRequestProvider,
                 backEndUnregisterDeviceApiRequestProvider);
 
         saveArguments(context,
                 gcmProvider,
-                preferencesProvider,
+                pushPreferencesProvider,
                 gcmUnregistrationApiRequestProvider,
                 backEndUnregisterDeviceApiRequestProvider);
     }
 
     private void verifyArguments(Context context,
                                  GcmProvider gcmProvider,
-                                 PreferencesProvider preferencesProvider,
+                                 PushPreferencesProvider pushPreferencesProvider,
                                  GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                  BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
 
@@ -64,7 +64,7 @@ public class UnregistrationEngine {
         if (gcmProvider == null) {
             throw new IllegalArgumentException("gcmProvider may not be null");
         }
-        if (preferencesProvider == null) {
+        if (pushPreferencesProvider == null) {
             throw new IllegalArgumentException("preferencesProvider may not be null");
         }
         if (gcmUnregistrationApiRequestProvider == null) {
@@ -77,16 +77,16 @@ public class UnregistrationEngine {
 
     private void saveArguments(Context context,
                                GcmProvider gcmProvider,
-                               PreferencesProvider preferencesProvider,
+                               PushPreferencesProvider pushPreferencesProvider,
                                GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
 
         this.context = context;
         this.gcmProvider = gcmProvider;
-        this.preferencesProvider = preferencesProvider;
+        this.pushPreferencesProvider = pushPreferencesProvider;
         this.gcmUnregistrationApiRequestProvider = gcmUnregistrationApiRequestProvider;
         this.backEndUnregisterDeviceApiRequestProvider = backEndUnregisterDeviceApiRequestProvider;
-        this.previousBackEndDeviceRegistrationId = preferencesProvider.getBackEndDeviceRegistrationId();
+        this.previousBackEndDeviceRegistrationId = pushPreferencesProvider.getBackEndDeviceRegistrationId();
     }
 
     public void unregisterDevice(RegistrationParameters parameters, UnregistrationListener listener) {
@@ -95,7 +95,7 @@ public class UnregistrationEngine {
 
         // Clear the saved package name so that the message receiver service won't be able to send
         // the application any more broadcasts
-        preferencesProvider.setPackageName(null);
+        pushPreferencesProvider.setPackageName(null);
 
         if (gcmProvider.isGooglePlayServicesInstalled(context)) {
             unregisterDeviceWithGcm(parameters, listener);
@@ -126,9 +126,9 @@ public class UnregistrationEngine {
         return new GcmUnregistrationListener() {
             @Override
             public void onGcmUnregistrationComplete() {
-                preferencesProvider.setGcmDeviceRegistrationId(null);
-                preferencesProvider.setGcmSenderId(null);
-                preferencesProvider.setAppVersion(-1);
+                pushPreferencesProvider.setGcmDeviceRegistrationId(null);
+                pushPreferencesProvider.setGcmSenderId(null);
+                pushPreferencesProvider.setAppVersion(-1);
                 unregisterDeviceWithBackEnd(previousBackEndDeviceRegistrationId, parameters, listener);
             }
 
@@ -156,11 +156,11 @@ public class UnregistrationEngine {
 
             @Override
             public void onBackEndUnregisterDeviceSuccess() {
-                preferencesProvider.setBackEndDeviceRegistrationId(null);
-                preferencesProvider.setVariantUuid(null);
-                preferencesProvider.setVariantSecret(null);
-                preferencesProvider.setDeviceAlias(null);
-                preferencesProvider.setBaseServerUrl(null);
+                pushPreferencesProvider.setBackEndDeviceRegistrationId(null);
+                pushPreferencesProvider.setVariantUuid(null);
+                pushPreferencesProvider.setVariantSecret(null);
+                pushPreferencesProvider.setDeviceAlias(null);
+                pushPreferencesProvider.setBaseServerUrl(null);
                 listener.onUnregistrationComplete();
             }
 

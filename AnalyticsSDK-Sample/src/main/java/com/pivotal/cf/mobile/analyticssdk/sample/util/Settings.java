@@ -21,11 +21,17 @@ import android.preference.PreferenceManager;
 
 public class Settings {
 
+    public static final String IS_ANALYTICS_ENABLED = "test_is_analytics_enabled";
     public static final String ANALYTICS_BASE_SERVER_URL = "test_analytics_base_server_url";
 
     public static final String[] PREFERENCE_NAMES = {
+            IS_ANALYTICS_ENABLED,
             ANALYTICS_BASE_SERVER_URL
     };
+
+    public static boolean isAnalyticsEnabled(Context context) {
+        return getSharedPreferences(context).getBoolean(IS_ANALYTICS_ENABLED, true);
+    }
 
     public static String getAnalyticsBaseServerUrl(Context context) {
         return getSharedPreferences(context).getString(ANALYTICS_BASE_SERVER_URL, null);

@@ -26,8 +26,8 @@ import com.pivotal.cf.mobile.pushsdk.gcm.FakeGcmRegistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.gcm.FakeGcmUnregistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmRegistrationApiRequestProvider;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
-import com.pivotal.cf.mobile.pushsdk.prefs.FakePreferencesProvider;
-import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProvider;
+import com.pivotal.cf.mobile.pushsdk.prefs.FakePushPreferencesProvider;
+import com.pivotal.cf.mobile.pushsdk.prefs.PushPreferencesProvider;
 import com.pivotal.cf.mobile.common.test.util.DelayedLoop;
 import com.pivotal.cf.mobile.pushsdk.version.FakeVersionProvider;
 
@@ -83,9 +83,9 @@ public class RegistrationEngineTestParameters {
     private boolean shouldBaseServerUrlHaveBeenSaved = false;
     private boolean shouldRegistrationHaveSucceeded = true;
 
-    private int appVersionInPrefs = PreferencesProvider.NO_SAVED_VERSION;
-    private int currentAppVersion = PreferencesProvider.NO_SAVED_VERSION;
-    private int finalAppVersionInPrefs = PreferencesProvider.NO_SAVED_VERSION;
+    private int appVersionInPrefs = PushPreferencesProvider.NO_SAVED_VERSION;
+    private int currentAppVersion = PushPreferencesProvider.NO_SAVED_VERSION;
+    private int finalAppVersionInPrefs = PushPreferencesProvider.NO_SAVED_VERSION;
 
     public RegistrationEngineTestParameters(Context context) {
         this.context = context;
@@ -95,7 +95,7 @@ public class RegistrationEngineTestParameters {
     public void run() {
 
         final FakeGcmProvider gcmProvider = new FakeGcmProvider(gcmDeviceRegistrationIdFromServer, !shouldGcmDeviceRegistrationBeSuccessful, !shouldGcmDeviceUnregistrationBeSuccessful);
-        final FakePreferencesProvider prefsProvider = new FakePreferencesProvider(gcmDeviceRegistrationIdInPrefs, backEndDeviceRegistrationIdInPrefs, appVersionInPrefs, gcmSenderIdInPrefs, variantUuidInPrefs, variantSecretInPrefs, deviceAliasInPrefs, packageNameInPrefs, baseServerUrlInPrefs);
+        final FakePushPreferencesProvider prefsProvider = new FakePushPreferencesProvider(gcmDeviceRegistrationIdInPrefs, backEndDeviceRegistrationIdInPrefs, appVersionInPrefs, gcmSenderIdInPrefs, variantUuidInPrefs, variantSecretInPrefs, deviceAliasInPrefs, packageNameInPrefs, baseServerUrlInPrefs);
         final FakeGcmRegistrationApiRequest gcmRegistrationApiRequest = new FakeGcmRegistrationApiRequest(gcmProvider);
         final GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider = new GcmRegistrationApiRequestProvider(gcmRegistrationApiRequest);
         final FakeGcmUnregistrationApiRequest gcmUnregistrationApiRequest = new FakeGcmUnregistrationApiRequest(gcmProvider);

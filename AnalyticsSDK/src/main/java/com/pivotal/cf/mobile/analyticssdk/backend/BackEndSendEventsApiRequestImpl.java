@@ -6,7 +6,7 @@ import android.net.Uri;
 import com.google.gson.Gson;
 import com.pivotal.cf.mobile.analyticssdk.database.EventsStorage;
 import com.pivotal.cf.mobile.analyticssdk.model.events.Event;
-import com.pivotal.cf.mobile.analyticssdk.prefs.PreferencesProvider;
+import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProvider;
 import com.pivotal.cf.mobile.analyticssdk.util.Const;
 import com.pivotal.cf.mobile.common.backend.ApiRequestImpl;
 import com.pivotal.cf.mobile.common.network.NetworkWrapper;
@@ -26,30 +26,30 @@ public class BackEndSendEventsApiRequestImpl extends ApiRequestImpl implements B
     private static final boolean POST_TO_BACK_END = false;
     private Context context;
     private EventsStorage eventsStorage;
-    private PreferencesProvider preferencesProvider;
+    private AnalyticsPreferencesProvider analyticsPreferencesProvider;
 
-    public BackEndSendEventsApiRequestImpl(Context context, EventsStorage eventsStorage, PreferencesProvider preferencesProvider, NetworkWrapper networkWrapper) {
+    public BackEndSendEventsApiRequestImpl(Context context, EventsStorage eventsStorage, AnalyticsPreferencesProvider analyticsPreferencesProvider, NetworkWrapper networkWrapper) {
         super(networkWrapper);
-        verifyArguments(context, eventsStorage, preferencesProvider);
-        saveArguments(context, eventsStorage, preferencesProvider);
+        verifyArguments(context, eventsStorage, analyticsPreferencesProvider);
+        saveArguments(context, eventsStorage, analyticsPreferencesProvider);
     }
 
-    private void verifyArguments(Context context, EventsStorage eventsStorage, PreferencesProvider preferencesProvider) {
+    private void verifyArguments(Context context, EventsStorage eventsStorage, AnalyticsPreferencesProvider analyticsPreferencesProvider) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
         if (eventsStorage == null) {
             throw new IllegalArgumentException("eventsStorage may not be null");
         }
-        if (preferencesProvider == null) {
+        if (analyticsPreferencesProvider == null) {
             throw new IllegalArgumentException("preferencesProvider may not be null");
         }
     }
 
-    private void saveArguments(Context context, EventsStorage eventsStorage, PreferencesProvider preferencesProvider) {
+    private void saveArguments(Context context, EventsStorage eventsStorage, AnalyticsPreferencesProvider analyticsPreferencesProvider) {
         this.context = context;
         this.eventsStorage = eventsStorage;
-        this.preferencesProvider = preferencesProvider;
+        this.analyticsPreferencesProvider = analyticsPreferencesProvider;
     }
 
     public void startSendEvents(List<Uri> eventUris, BackEndSendEventsListener listener) {
@@ -72,7 +72,7 @@ public class BackEndSendEventsApiRequestImpl extends ApiRequestImpl implements B
 
         try {
 
-            final URL baseServerUrl = preferencesProvider.getBaseServerUrl();
+            final URL baseServerUrl = analyticsPreferencesProvider.getBaseServerUrl();
             if (baseServerUrl == null) {
                 Logger.w("No baseServerUrl saved in preferences. Cannot send events to server.");
                 return;
@@ -160,6 +160,6 @@ public class BackEndSendEventsApiRequestImpl extends ApiRequestImpl implements B
 
     @Override
     public BackEndSendEventsApiRequest copy() {
-        return new BackEndSendEventsApiRequestImpl(context, eventsStorage, preferencesProvider, networkWrapper);
+        return new BackEndSendEventsApiRequestImpl(context, eventsStorage, analyticsPreferencesProvider, networkWrapper);
     }
 }

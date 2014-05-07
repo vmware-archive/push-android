@@ -17,7 +17,7 @@ package com.pivotal.cf.mobile.pushsdk.registration;
 
 import android.content.Context;
 
-import com.pivotal.cf.mobile.pushsdk.prefs.PreferencesProvider;
+import com.pivotal.cf.mobile.pushsdk.prefs.PushPreferencesProvider;
 import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndRegistrationApiRequest;
@@ -71,7 +71,7 @@ public class RegistrationEngine {
 
     private Context context;
     private GcmProvider gcmProvider;
-    private PreferencesProvider preferencesProvider;
+    private PushPreferencesProvider pushPreferencesProvider;
     private GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider;
     private GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider;
     private BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider;
@@ -92,7 +92,7 @@ public class RegistrationEngine {
      * @param context  A context
      * @param packageName
      * @param gcmProvider  Some object that can provide the GCM services.
-     * @param preferencesProvider  Some object that can provide persistent storage of preferences.
+     * @param pushPreferencesProvider  Some object that can provide persistent storage of preferences.
      * @param gcmRegistrationApiRequestProvider  Some object that can provide GCMRegistrationApiRequest objects.
      * @param gcmUnregistrationApiRequestProvider  Some object that can provide GCMUnregistrationApiRequest objects.
      * @param backEndRegistrationApiRequestProvider  Some object that can provide BackEndRegistrationApiRequest objects.
@@ -101,7 +101,7 @@ public class RegistrationEngine {
     public RegistrationEngine(Context context,
                               String packageName,
                               GcmProvider gcmProvider,
-                              PreferencesProvider preferencesProvider,
+                              PushPreferencesProvider pushPreferencesProvider,
                               GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
                               GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                               BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider,
@@ -110,7 +110,7 @@ public class RegistrationEngine {
         verifyArguments(context,
                 packageName,
                 gcmProvider,
-                preferencesProvider,
+                pushPreferencesProvider,
                 gcmRegistrationApiRequestProvider,
                 gcmUnregistrationApiRequestProvider,
                 backEndRegistrationApiRequestProvider,
@@ -119,7 +119,7 @@ public class RegistrationEngine {
         saveArguments(context,
                 packageName,
                 gcmProvider,
-                preferencesProvider,
+                pushPreferencesProvider,
                 gcmRegistrationApiRequestProvider,
                 gcmUnregistrationApiRequestProvider,
                 backEndRegistrationApiRequestProvider,
@@ -129,7 +129,7 @@ public class RegistrationEngine {
     private void verifyArguments(Context context,
                                  String packageName,
                                  GcmProvider gcmProvider,
-                                 PreferencesProvider preferencesProvider,
+                                 PushPreferencesProvider pushPreferencesProvider,
                                  GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
                                  GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                  BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider,
@@ -144,7 +144,7 @@ public class RegistrationEngine {
         if (gcmProvider == null) {
             throw new IllegalArgumentException("gcmProvider may not be null");
         }
-        if (preferencesProvider == null) {
+        if (pushPreferencesProvider == null) {
             throw new IllegalArgumentException("preferencesProvider may not be null");
         }
         if (gcmRegistrationApiRequestProvider == null) {
@@ -164,7 +164,7 @@ public class RegistrationEngine {
     private void saveArguments(Context context,
                                String packageName,
                                GcmProvider gcmProvider,
-                               PreferencesProvider preferencesProvider,
+                               PushPreferencesProvider pushPreferencesProvider,
                                GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
                                GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider,
@@ -173,18 +173,18 @@ public class RegistrationEngine {
         this.context = context;
         this.packageName = packageName;
         this.gcmProvider = gcmProvider;
-        this.preferencesProvider = preferencesProvider;
+        this.pushPreferencesProvider = pushPreferencesProvider;
         this.gcmRegistrationApiRequestProvider = gcmRegistrationApiRequestProvider;
         this.gcmUnregistrationApiRequestProvider = gcmUnregistrationApiRequestProvider;
         this.backEndRegistrationApiRequestProvider = backEndRegistrationApiRequestProvider;
         this.versionProvider = versionProvider;
-        this.previousGcmDeviceRegistrationId = preferencesProvider.getGcmDeviceRegistrationId();
-        this.previousBackEndDeviceRegistrationId = preferencesProvider.getBackEndDeviceRegistrationId();
-        this.previousGcmSenderId = preferencesProvider.getGcmSenderId();
-        this.previousVariantUuid = preferencesProvider.getVariantUuid();
-        this.previousVariantSecret = preferencesProvider.getVariantSecret();
-        this.previousDeviceAlias = preferencesProvider.getDeviceAlias();
-        this.previousBackEndServerUrl = preferencesProvider.getBaseServerUrl();
+        this.previousGcmDeviceRegistrationId = pushPreferencesProvider.getGcmDeviceRegistrationId();
+        this.previousBackEndDeviceRegistrationId = pushPreferencesProvider.getBackEndDeviceRegistrationId();
+        this.previousGcmSenderId = pushPreferencesProvider.getGcmSenderId();
+        this.previousVariantUuid = pushPreferencesProvider.getVariantUuid();
+        this.previousVariantSecret = pushPreferencesProvider.getVariantSecret();
+        this.previousDeviceAlias = pushPreferencesProvider.getDeviceAlias();
+        this.previousBackEndServerUrl = pushPreferencesProvider.getBaseServerUrl();
     }
 
     /**
@@ -205,7 +205,7 @@ public class RegistrationEngine {
         verifyRegistrationArguments(parameters);
 
         // Save the given package name so that the message receiver service can see it
-        preferencesProvider.setPackageName(packageName);
+        pushPreferencesProvider.setPackageName(packageName);
 
         if (!isEmptyPreviousGcmSenderId() && isUpdatedGcmSenderId(parameters)) {
           unregisterDeviceWithGcm(parameters, listener);
@@ -289,7 +289,7 @@ public class RegistrationEngine {
 
     private boolean hasAppBeenUpdated() {
         final int currentAppVersion = versionProvider.getAppVersion();
-        final int savedAppVersion = preferencesProvider.getAppVersion();
+        final int savedAppVersion = pushPreferencesProvider.getAppVersion();
         return currentAppVersion != savedAppVersion;
     }
 
@@ -351,9 +351,9 @@ public class RegistrationEngine {
         gcmUnregistrationApiRequest.startUnregistration(new GcmUnregistrationListener() {
             @Override
             public void onGcmUnregistrationComplete() {
-                preferencesProvider.setGcmDeviceRegistrationId(null);
-                preferencesProvider.setGcmSenderId(null);
-                preferencesProvider.setAppVersion(PreferencesProvider.NO_SAVED_VERSION);
+                pushPreferencesProvider.setGcmDeviceRegistrationId(null);
+                pushPreferencesProvider.setGcmSenderId(null);
+                pushPreferencesProvider.setAppVersion(PushPreferencesProvider.NO_SAVED_VERSION);
                 registerDeviceWithGcm(parameters, listener);
             }
 
@@ -381,9 +381,9 @@ public class RegistrationEngine {
                     return;
                 }
 
-                preferencesProvider.setGcmDeviceRegistrationId(gcmDeviceRegistrationId);
-                preferencesProvider.setGcmSenderId(parameters.getGcmSenderId());
-                preferencesProvider.setAppVersion(versionProvider.getAppVersion());
+                pushPreferencesProvider.setGcmDeviceRegistrationId(gcmDeviceRegistrationId);
+                pushPreferencesProvider.setGcmSenderId(parameters.getGcmSenderId());
+                pushPreferencesProvider.setAppVersion(versionProvider.getAppVersion());
 
                 final boolean isNewGcmDeviceRegistrationId;
                 if (previousGcmDeviceRegistrationId != null && previousGcmDeviceRegistrationId.equals(gcmDeviceRegistrationId)) {
@@ -447,13 +447,13 @@ public class RegistrationEngine {
                 }
 
                 Logger.i("Saving back-end device registration ID: " + backEndDeviceRegistrationId);
-                preferencesProvider.setBackEndDeviceRegistrationId(backEndDeviceRegistrationId);
+                pushPreferencesProvider.setBackEndDeviceRegistrationId(backEndDeviceRegistrationId);
 
                 Logger.v("Saving updated variantUuid, variantSecret, deviceAlias, and baseServerUrl");
-                preferencesProvider.setVariantUuid(parameters.getVariantUuid());
-                preferencesProvider.setVariantSecret(parameters.getVariantSecret());
-                preferencesProvider.setDeviceAlias(parameters.getDeviceAlias());
-                preferencesProvider.setBaseServerUrl(parameters.getBaseServerUrl());
+                pushPreferencesProvider.setVariantUuid(parameters.getVariantUuid());
+                pushPreferencesProvider.setVariantSecret(parameters.getVariantSecret());
+                pushPreferencesProvider.setDeviceAlias(parameters.getDeviceAlias());
+                pushPreferencesProvider.setBaseServerUrl(parameters.getBaseServerUrl());
 
                 if (listener != null) {
                     listener.onRegistrationComplete();
@@ -499,13 +499,13 @@ public class RegistrationEngine {
                 }
 
                 Logger.i("Saving back-end device registration ID: " + backEndDeviceRegistrationId);
-                preferencesProvider.setBackEndDeviceRegistrationId(backEndDeviceRegistrationId);
+                pushPreferencesProvider.setBackEndDeviceRegistrationId(backEndDeviceRegistrationId);
 
                 Logger.v("Saving updated variantUuid, variantSecret, deviceAlias, and baseServerUrl");
-                preferencesProvider.setVariantUuid(parameters.getVariantUuid());
-                preferencesProvider.setVariantSecret(parameters.getVariantSecret());
-                preferencesProvider.setDeviceAlias(parameters.getDeviceAlias());
-                preferencesProvider.setBaseServerUrl(parameters.getBaseServerUrl());
+                pushPreferencesProvider.setVariantUuid(parameters.getVariantUuid());
+                pushPreferencesProvider.setVariantSecret(parameters.getVariantSecret());
+                pushPreferencesProvider.setDeviceAlias(parameters.getDeviceAlias());
+                pushPreferencesProvider.setBaseServerUrl(parameters.getBaseServerUrl());
 
                 if (listener != null) {
                     listener.onRegistrationComplete();
@@ -525,10 +525,10 @@ public class RegistrationEngine {
     }
 
     private void clearBackEndRegistrationPreferences() {
-        preferencesProvider.setBackEndDeviceRegistrationId(null);
-        preferencesProvider.setVariantUuid(null);
-        preferencesProvider.setVariantSecret(null);
-        preferencesProvider.setDeviceAlias(null);
-        preferencesProvider.setBaseServerUrl(null);
+        pushPreferencesProvider.setBackEndDeviceRegistrationId(null);
+        pushPreferencesProvider.setVariantUuid(null);
+        pushPreferencesProvider.setVariantSecret(null);
+        pushPreferencesProvider.setDeviceAlias(null);
+        pushPreferencesProvider.setBaseServerUrl(null);
     }
 }
