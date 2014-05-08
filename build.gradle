@@ -51,8 +51,8 @@ configure ([
         buildToolsVersion "19.0.3"
 
         defaultConfig {
-            versionCode 66
-            versionName "6.6.6"
+            versionCode 5
+            versionName "0.5"
             minSdkVersion 10
             targetSdkVersion 19
         }
