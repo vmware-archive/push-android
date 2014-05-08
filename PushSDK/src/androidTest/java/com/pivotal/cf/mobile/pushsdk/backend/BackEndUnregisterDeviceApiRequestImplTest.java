@@ -125,7 +125,7 @@ public class BackEndUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
     }
 
     public void testCouldNotConnect() {
-        makeListenersFromFailedRequestFromNetwork("Your server is busted", 0);
+        makeListenersFromFailedRequestFromNetwork("Your server is busted");
         final BackEndUnregisterDeviceApiRequestImpl registrar = new BackEndUnregisterDeviceApiRequestImpl(networkWrapper);
         registrar.startUnregisterDevice(TEST_BACK_END_DEVICE_REGISTRATION_ID, parameters, backEndUnregisterDeviceListener);
         delayedLoop.startLoop();
@@ -137,7 +137,7 @@ public class BackEndUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
         makeBackEndUnegisterDeviceApiRequestListener(isSuccessfulResult);
     }
 
-    private void makeListenersFromFailedRequestFromNetwork(String exceptionText, int expectedHttpStatusCode) {
+    private void makeListenersFromFailedRequestFromNetwork(String exceptionText) {
         IOException exception = null;
         if (exceptionText != null) {
             exception = new IOException(exceptionText);
@@ -153,7 +153,10 @@ public class BackEndUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
             @Override
             public void onBackEndUnregisterDeviceSuccess() {
                 assertTrue(isSuccessfulRequest);
+                assertEquals("DELETE", FakeHttpURLConnection.getReceivedHttpMethod());
+                assertTrue(FakeHttpURLConnection.getRequestPropertiesMap().containsKey("Authorization"));
                 if (isSuccessfulRequest) {
+                    assertTrue(FakeHttpURLConnection.getReceivedURL().toString().endsWith(TEST_BACK_END_DEVICE_REGISTRATION_ID));
                     delayedLoop.flagSuccess();
                 } else {
                     delayedLoop.flagFailure();

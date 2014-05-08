@@ -43,6 +43,7 @@ public class BackEndUnregisterDeviceApiRequestImpl extends ApiRequestImpl implem
             final URL url = new URL(parameters.getBaseServerUrl(), Const.BACKEND_REGISTRATION_REQUEST_ENDPOINT + "/" + backEndDeviceRegistrationId);
             final HttpURLConnection urlConnection = getHttpURLConnection(url);
             urlConnection.setRequestMethod("DELETE");
+            urlConnection.addRequestProperty("Authorization", BackEndRegistrationApiRequestImpl.getBasicAuthorizationValue(parameters));
             urlConnection.connect();
 
             final int statusCode = urlConnection.getResponseCode();
