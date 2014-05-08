@@ -2,6 +2,8 @@ package com.pivotal.cf.mobile.pushsdk.registration;
 
 import android.test.AndroidTestCase;
 
+import com.pivotal.cf.mobile.common.test.prefs.FakeAnalyticsPreferencesProvider;
+import com.pivotal.cf.mobile.common.test.util.FakeServiceStarter;
 import com.pivotal.cf.mobile.pushsdk.prefs.FakePushPreferencesProvider;
 import com.pivotal.cf.mobile.common.util.Logger;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
@@ -26,8 +28,10 @@ public class UnregistrationEngineTest extends AndroidTestCase {
 
     private FakeGcmProvider gcmProvider;
     private GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider;
-    private FakePushPreferencesProvider preferencesProvider;
+    private FakePushPreferencesProvider pushPreferencesProvider;
+    private FakeAnalyticsPreferencesProvider analyticsPreferencesProvider;
     private BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider;
+    private FakeServiceStarter serviceStarter;
     private RegistrationParameters parameters;
     private Semaphore semaphore = new Semaphore(0);
 
@@ -36,15 +40,17 @@ public class UnregistrationEngineTest extends AndroidTestCase {
         super.setUp();
         final URL url = new URL(TEST_BASE_SERVER_URL);
         parameters = new RegistrationParameters(TEST_GCM_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_DEVICE_ALIAS, url);
+        serviceStarter = new FakeServiceStarter();
+        pushPreferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null);
+        analyticsPreferencesProvider = new FakeAnalyticsPreferencesProvider(true, null);
         gcmProvider = new FakeGcmProvider(TEST_GCM_DEVICE_REGISTRATION_ID_1);
         gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(new FakeGcmUnregistrationApiRequest(gcmProvider));
-        preferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null);
         backEndUnregisterDeviceApiRequestProvider = new BackEndUnregisterDeviceApiRequestProvider(new FakeBackEndUnregisterDeviceApiRequest());
     }
 
     public void testNullContext() {
         try {
-            new UnregistrationEngine(null, gcmProvider, preferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
+            new UnregistrationEngine(null, gcmProvider, serviceStarter, pushPreferencesProvider, analyticsPreferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -53,16 +59,34 @@ public class UnregistrationEngineTest extends AndroidTestCase {
 
     public void testNullGcmProvider() {
         try {
-            new UnregistrationEngine(getContext(), null, preferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
+            new UnregistrationEngine(getContext(), null, serviceStarter, pushPreferencesProvider, analyticsPreferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
         }
     }
 
-    public void testNullPreferencesProvider() {
+    public void testNullPushPreferencesProvider() {
         try {
-            new UnregistrationEngine(getContext(), gcmProvider, null, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
+            new UnregistrationEngine(getContext(), gcmProvider, serviceStarter, null, analyticsPreferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
+            fail("should not have succeeded");
+        } catch (IllegalArgumentException e) {
+            // success
+        }
+    }
+
+    public void testNullAnalyticsPreferencesProvider() {
+        try {
+            new UnregistrationEngine(getContext(), gcmProvider, serviceStarter, pushPreferencesProvider, null, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
+            fail("should not have succeeded");
+        } catch (IllegalArgumentException e) {
+            // success
+        }
+    }
+
+    public void testNullServiceStarter() {
+        try {
+            new UnregistrationEngine(getContext(), gcmProvider, null, pushPreferencesProvider, analyticsPreferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -71,7 +95,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
 
     public void testNullGcmUnregistrationApiRequestProvider() {
         try {
-            new UnregistrationEngine(getContext(), gcmProvider, preferencesProvider, null, backEndUnregisterDeviceApiRequestProvider);
+            new UnregistrationEngine(getContext(), gcmProvider, serviceStarter, pushPreferencesProvider, analyticsPreferencesProvider, null, backEndUnregisterDeviceApiRequestProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -80,7 +104,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
 
     public void testNullBackEndApiUnregisterDeviceRequestProvider() {
         try {
-            new UnregistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmUnregistrationApiRequestProvider, null);
+            new UnregistrationEngine(getContext(), gcmProvider, serviceStarter, pushPreferencesProvider, analyticsPreferencesProvider, gcmUnregistrationApiRequestProvider, null);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -89,7 +113,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
 
     public void testNullParameters() {
         try {
-            final UnregistrationEngine engine = new UnregistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
+            final UnregistrationEngine engine = new UnregistrationEngine(getContext(), gcmProvider, serviceStarter, pushPreferencesProvider, analyticsPreferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
             engine.unregisterDevice(null, getListenerForUnregistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -99,7 +123,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
 
     public void testNullBaseServerUrl() {
         try {
-            final UnregistrationEngine engine = new UnregistrationEngine(getContext(),gcmProvider, preferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
+            final UnregistrationEngine engine = new UnregistrationEngine(getContext(),gcmProvider, serviceStarter, pushPreferencesProvider, analyticsPreferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
             parameters = new RegistrationParameters(TEST_GCM_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_DEVICE_ALIAS, null);
             engine.unregisterDevice(parameters, getListenerForUnregistration(false));
             fail("should not have succeeded");
@@ -110,7 +134,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
 
     public void testGooglePlayServicesNotAvailable() throws InterruptedException {
         gcmProvider.setIsGooglePlayServicesInstalled(false);
-        final UnregistrationEngine engine = new UnregistrationEngine(getContext(), gcmProvider, preferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
+        final UnregistrationEngine engine = new UnregistrationEngine(getContext(), gcmProvider, serviceStarter, pushPreferencesProvider, analyticsPreferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
         engine.unregisterDevice(parameters, getListenerForUnregistration(false));
         semaphore.acquire();
     }

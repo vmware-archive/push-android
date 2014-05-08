@@ -187,17 +187,19 @@ public class PushSDK {
         verifyUnregistrationArguments(parameters);
         final GcmProvider gcmProvider = new RealGcmProvider(context);
         final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
+        final AnalyticsPreferencesProvider analyticsPreferencesProvider = new AnalyticsPreferencesProviderImpl(context);
         final GcmUnregistrationApiRequest dummyGcmUnregistrationApiRequest = new GcmUnregistrationApiRequestImpl(context, gcmProvider);
         final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(dummyGcmUnregistrationApiRequest);
         final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
         final BackEndUnregisterDeviceApiRequest dummyBackEndUnregisterDeviceApiRequest = new BackEndUnregisterDeviceApiRequestImpl(networkWrapper);
         final BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider = new BackEndUnregisterDeviceApiRequestProvider(dummyBackEndUnregisterDeviceApiRequest);
+        final ServiceStarter serviceStarter = new ServiceStarterImpl();
         final Runnable runnable = new Runnable() {
 
             @Override
             public void run() {
                 try {
-                    final UnregistrationEngine unregistrationEngine = new UnregistrationEngine(context, gcmProvider, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
+                    final UnregistrationEngine unregistrationEngine = new UnregistrationEngine(context, gcmProvider, serviceStarter, pushPreferencesProvider, analyticsPreferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
                     unregistrationEngine.unregisterDevice(parameters, listener);
                 } catch (Exception e) {
                     Logger.ex("PushSDK unregistration failed", e);

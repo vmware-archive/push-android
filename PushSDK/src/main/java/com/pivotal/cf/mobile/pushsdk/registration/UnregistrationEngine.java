@@ -1,9 +1,14 @@
 package com.pivotal.cf.mobile.pushsdk.registration;
 
 import android.content.Context;
+import android.content.Intent;
 
-import com.pivotal.cf.mobile.pushsdk.prefs.PushPreferencesProvider;
+import com.pivotal.cf.mobile.analyticssdk.jobs.EnqueueEventJob;
+import com.pivotal.cf.mobile.analyticssdk.model.events.Event;
+import com.pivotal.cf.mobile.analyticssdk.service.EventService;
+import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProvider;
 import com.pivotal.cf.mobile.common.util.Logger;
+import com.pivotal.cf.mobile.common.util.ServiceStarter;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndUnregisterDeviceApiRequest;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndUnregisterDeviceApiRequestProvider;
@@ -12,49 +17,65 @@ import com.pivotal.cf.mobile.pushsdk.gcm.GcmProvider;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationListener;
+import com.pivotal.cf.mobile.pushsdk.model.events.EventPushUnregistered;
+import com.pivotal.cf.mobile.pushsdk.prefs.PushPreferencesProvider;
 
 public class UnregistrationEngine {
 
     private Context context;
     private GcmProvider gcmProvider;
+    private ServiceStarter serviceStarter;
     private PushPreferencesProvider pushPreferencesProvider;
+    private AnalyticsPreferencesProvider analyticsPreferencesProvider;
     private GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider;
     private BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider;
     private String previousBackEndDeviceRegistrationId;
+    private String previousVariantUuid;
 
     /**
      * Instantiate an instance of the UnregistrationEngine.
      *
      * All the parameters are required.  None may be null.
-     *
      * @param context  A context
      * @param gcmProvider  Some object that can provide the GCM services.
-     * @param pushPreferencesProvider  Some object that can provide persistent storage of preferences.
+     * @param serviceStarter  Some object that can be used to start services.
+     * @param pushPreferencesProvider  Some object that can provide persistent storage of push preferences.
+     * @param analyticsPreferencesProvider  Some object that can provide persistent storage of analytics preferences.
      * @param gcmUnregistrationApiRequestProvider  Some object that can provide GCMUnregistrationApiRequest objects.
      * @param backEndUnregisterDeviceApiRequestProvider  Some object that can provide BackEndUnregisterDeviceApiRequest objects.
      */
     public UnregistrationEngine(Context context,
                                 GcmProvider gcmProvider,
+                                ServiceStarter serviceStarter,
                                 PushPreferencesProvider pushPreferencesProvider,
+                                AnalyticsPreferencesProvider analyticsPreferencesProvider,
                                 GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                 BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
 
         verifyArguments(context,
                 gcmProvider,
+                serviceStarter,
                 pushPreferencesProvider,
+                analyticsPreferencesProvider,
                 gcmUnregistrationApiRequestProvider,
-                backEndUnregisterDeviceApiRequestProvider);
+                backEndUnregisterDeviceApiRequestProvider
+        );
 
         saveArguments(context,
                 gcmProvider,
+                serviceStarter,
                 pushPreferencesProvider,
+                analyticsPreferencesProvider,
                 gcmUnregistrationApiRequestProvider,
-                backEndUnregisterDeviceApiRequestProvider);
+                backEndUnregisterDeviceApiRequestProvider
+        );
     }
 
     private void verifyArguments(Context context,
                                  GcmProvider gcmProvider,
+                                 ServiceStarter serviceStarter,
                                  PushPreferencesProvider pushPreferencesProvider,
+                                 AnalyticsPreferencesProvider analyticsPreferencesProvider,
                                  GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                  BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
 
@@ -64,8 +85,14 @@ public class UnregistrationEngine {
         if (gcmProvider == null) {
             throw new IllegalArgumentException("gcmProvider may not be null");
         }
+        if (serviceStarter == null) {
+            throw new IllegalArgumentException("serviceStarter may not be null");
+        }
         if (pushPreferencesProvider == null) {
-            throw new IllegalArgumentException("preferencesProvider may not be null");
+            throw new IllegalArgumentException("pushPreferencesProvider may not be null");
+        }
+        if (analyticsPreferencesProvider == null) {
+            throw new IllegalArgumentException("analyticsPreferencesProvider may not be null");
         }
         if (gcmUnregistrationApiRequestProvider == null) {
             throw new IllegalArgumentException("gcmUnregistrationApiRequestProvider may not be null");
@@ -77,16 +104,21 @@ public class UnregistrationEngine {
 
     private void saveArguments(Context context,
                                GcmProvider gcmProvider,
+                               ServiceStarter serviceStarter,
                                PushPreferencesProvider pushPreferencesProvider,
+                               AnalyticsPreferencesProvider analyticsPreferencesProvider,
                                GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider) {
 
         this.context = context;
         this.gcmProvider = gcmProvider;
+        this.serviceStarter = serviceStarter;
         this.pushPreferencesProvider = pushPreferencesProvider;
+        this.analyticsPreferencesProvider = analyticsPreferencesProvider;
         this.gcmUnregistrationApiRequestProvider = gcmUnregistrationApiRequestProvider;
         this.backEndUnregisterDeviceApiRequestProvider = backEndUnregisterDeviceApiRequestProvider;
         this.previousBackEndDeviceRegistrationId = pushPreferencesProvider.getBackEndDeviceRegistrationId();
+        this.previousVariantUuid = pushPreferencesProvider.getVariantUuid();
     }
 
     public void unregisterDevice(RegistrationParameters parameters, UnregistrationListener listener) {
@@ -126,9 +158,7 @@ public class UnregistrationEngine {
         return new GcmUnregistrationListener() {
             @Override
             public void onGcmUnregistrationComplete() {
-                pushPreferencesProvider.setGcmDeviceRegistrationId(null);
-                pushPreferencesProvider.setGcmSenderId(null);
-                pushPreferencesProvider.setAppVersion(-1);
+                clearGcmRegistrationPreferences();
                 unregisterDeviceWithBackEnd(previousBackEndDeviceRegistrationId, parameters, listener);
             }
 
@@ -138,6 +168,12 @@ public class UnregistrationEngine {
                 unregisterDeviceWithBackEnd(previousBackEndDeviceRegistrationId, parameters, listener);
             }
         };
+    }
+
+    private void clearGcmRegistrationPreferences() {
+        pushPreferencesProvider.setGcmDeviceRegistrationId(null);
+        pushPreferencesProvider.setGcmSenderId(null);
+        pushPreferencesProvider.setAppVersion(-1);
     }
 
     private void unregisterDeviceWithBackEnd(final String backEndDeviceRegistrationId, RegistrationParameters parameters, final UnregistrationListener listener) {
@@ -156,11 +192,8 @@ public class UnregistrationEngine {
 
             @Override
             public void onBackEndUnregisterDeviceSuccess() {
-                pushPreferencesProvider.setBackEndDeviceRegistrationId(null);
-                pushPreferencesProvider.setVariantUuid(null);
-                pushPreferencesProvider.setVariantSecret(null);
-                pushPreferencesProvider.setDeviceAlias(null);
-                pushPreferencesProvider.setBaseServerUrl(null);
+                logPushUnregisteredEvent(previousVariantUuid, previousBackEndDeviceRegistrationId);
+                clearBackEndRegistrationPreferences();
                 listener.onUnregistrationComplete();
             }
 
@@ -169,5 +202,24 @@ public class UnregistrationEngine {
                 listener.onUnregistrationFailed(reason);
             }
         };
+    }
+
+    private void clearBackEndRegistrationPreferences() {
+        pushPreferencesProvider.setBackEndDeviceRegistrationId(null);
+        pushPreferencesProvider.setVariantUuid(null);
+        pushPreferencesProvider.setVariantSecret(null);
+        pushPreferencesProvider.setDeviceAlias(null);
+        pushPreferencesProvider.setBaseServerUrl(null);
+    }
+
+    private void logPushUnregisteredEvent(String variantUuid, String deviceId) {
+        if (analyticsPreferencesProvider.isAnalyticsEnabled()) {
+            final Event event = EventPushUnregistered.getEvent(variantUuid, deviceId);
+            final EnqueueEventJob enqueueEventJob = new EnqueueEventJob(event);
+            final Intent enqueueEventJobIntent = EventService.getIntentToRunJob(context, enqueueEventJob);
+            if (serviceStarter.startService(context, enqueueEventJobIntent) == null) {
+                Logger.e("ERROR: could not start service '" + enqueueEventJobIntent + ". A 'push unregistered' event for this message will not be sent.");
+            }
+        }
     }
 }

@@ -1,19 +1,28 @@
 package com.pivotal.cf.mobile.pushsdk.registration;
 
 import android.content.Context;
+import android.content.Intent;
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
 
+import com.pivotal.cf.mobile.analyticssdk.jobs.EnqueueEventJob;
+import com.pivotal.cf.mobile.analyticssdk.model.events.Event;
+import com.pivotal.cf.mobile.analyticssdk.service.EventService;
+import com.pivotal.cf.mobile.common.test.prefs.FakeAnalyticsPreferencesProvider;
+import com.pivotal.cf.mobile.common.test.util.DelayedLoop;
+import com.pivotal.cf.mobile.common.test.util.FakeServiceStarter;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
 import com.pivotal.cf.mobile.pushsdk.backend.BackEndUnregisterDeviceApiRequestProvider;
 import com.pivotal.cf.mobile.pushsdk.backend.FakeBackEndUnregisterDeviceApiRequest;
 import com.pivotal.cf.mobile.pushsdk.gcm.FakeGcmProvider;
 import com.pivotal.cf.mobile.pushsdk.gcm.FakeGcmUnregistrationApiRequest;
 import com.pivotal.cf.mobile.pushsdk.gcm.GcmUnregistrationApiRequestProvider;
+import com.pivotal.cf.mobile.pushsdk.model.events.EventPushUnregistered;
+import com.pivotal.cf.mobile.pushsdk.model.events.PushEventHelper;
 import com.pivotal.cf.mobile.pushsdk.prefs.FakePushPreferencesProvider;
-import com.pivotal.cf.mobile.common.test.util.DelayedLoop;
 
 import java.net.URL;
+import java.util.HashMap;
 
 public class UnregistrationEngineTestParameters {
 
@@ -32,10 +41,11 @@ public class UnregistrationEngineTestParameters {
     private boolean shouldGcmDeviceUnregistrationBeSuccessful;
     private boolean shouldUnregistrationHaveSucceeded;
     private boolean shouldBackEndDeviceUnregistrationBeSuccessful;
-    private String backEndDeviceRegistrationIdInPrefs;
+    private String startingBackEndDeviceRegistrationIdInPrefs;
     private String backEndDeviceRegistrationIdResultant;
     private boolean shouldBackEndUnregisterHaveBeenCalled;
     private RegistrationParameters parametersFromUser;
+    private String startingVariantUuidInPrefs;
 
     public UnregistrationEngineTestParameters(Context context) {
         this.context = context;
@@ -44,21 +54,36 @@ public class UnregistrationEngineTestParameters {
 
     public void run() throws Exception {
 
-        final FakeGcmProvider gcmProvider = new FakeGcmProvider(null, true, !shouldGcmDeviceUnregistrationBeSuccessful);
-        final FakePushPreferencesProvider prefsProvider;
+        final boolean shouldPushUnregisteredEventHaveBeenLogged =
+                shouldBackEndUnregisterHaveBeenCalled &&
+                        (backEndDeviceRegistrationIdResultant == null);
 
-        if (backEndDeviceRegistrationIdInPrefs == null) {
-            prefsProvider = new FakePushPreferencesProvider(null, backEndDeviceRegistrationIdInPrefs, -1, null, null, null, null, null, null);
+        runWithAnalyticsEnabled(false, shouldPushUnregisteredEventHaveBeenLogged);
+        runWithAnalyticsEnabled(true, shouldPushUnregisteredEventHaveBeenLogged);
+    }
+
+    private void runWithAnalyticsEnabled(boolean isAnalyticsEnabled, boolean shouldPushUnregisteredEventHaveBeenLogged) throws Exception {
+
+        final FakeGcmProvider gcmProvider = new FakeGcmProvider(null, true, !shouldGcmDeviceUnregistrationBeSuccessful);
+        final FakePushPreferencesProvider pushPreferencesProvider;
+
+        if (startingBackEndDeviceRegistrationIdInPrefs == null) {
+            startingVariantUuidInPrefs = null;
+            pushPreferencesProvider = new FakePushPreferencesProvider(null, startingBackEndDeviceRegistrationIdInPrefs, -1, null, startingVariantUuidInPrefs, null, null, null, null);
         } else {
             final URL baseServerUrlInPrefs = new URL(BASE_SERVER_URL_IN_PREFS);
-            prefsProvider = new FakePushPreferencesProvider(GCM_DEVICE_ID_IN_PREFS, backEndDeviceRegistrationIdInPrefs, APP_VERSION_IN_PREFS, GCM_SENDER_ID_IN_PREFS, VARIANT_UUID_IN_PREFS, VARIANT_SECRET_IN_PREFS, DEVICE_ALIAS_IN_PREFS, PACKAGE_NAME_IN_PREFS, baseServerUrlInPrefs);
+            startingVariantUuidInPrefs = VARIANT_UUID_IN_PREFS;
+            pushPreferencesProvider = new FakePushPreferencesProvider(GCM_DEVICE_ID_IN_PREFS, startingBackEndDeviceRegistrationIdInPrefs, APP_VERSION_IN_PREFS, GCM_SENDER_ID_IN_PREFS, startingVariantUuidInPrefs, VARIANT_SECRET_IN_PREFS, DEVICE_ALIAS_IN_PREFS, PACKAGE_NAME_IN_PREFS, baseServerUrlInPrefs);
         }
+
+        final FakeAnalyticsPreferencesProvider analyticsPreferencesProvider = new FakeAnalyticsPreferencesProvider(isAnalyticsEnabled, null);
 
         final FakeGcmUnregistrationApiRequest gcmUnregistrationApiRequest = new FakeGcmUnregistrationApiRequest(gcmProvider);
         final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(gcmUnregistrationApiRequest);
         final FakeBackEndUnregisterDeviceApiRequest dummyBackEndUnregisterDeviceApiRequest = new FakeBackEndUnregisterDeviceApiRequest(shouldBackEndDeviceUnregistrationBeSuccessful);
         final BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider = new BackEndUnregisterDeviceApiRequestProvider(dummyBackEndUnregisterDeviceApiRequest);
-        final UnregistrationEngine engine = new UnregistrationEngine(context, gcmProvider, prefsProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
+        final FakeServiceStarter serviceStarter = new FakeServiceStarter();
+        final UnregistrationEngine engine = new UnregistrationEngine(context, gcmProvider, serviceStarter, pushPreferencesProvider, analyticsPreferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
 
         engine.unregisterDevice(parametersFromUser, new UnregistrationListener() {
 
@@ -85,33 +110,48 @@ public class UnregistrationEngineTestParameters {
         AndroidTestCase.assertTrue(delayedLoop.isSuccess());
 
         if (shouldGcmDeviceUnregistrationBeSuccessful) {
-            AndroidTestCase.assertNull(prefsProvider.getGcmDeviceRegistrationId());
-            AndroidTestCase.assertNull(prefsProvider.getGcmSenderId());
-            AndroidTestCase.assertEquals(-1, prefsProvider.getAppVersion());
+            AndroidTestCase.assertNull(pushPreferencesProvider.getGcmDeviceRegistrationId());
+            AndroidTestCase.assertNull(pushPreferencesProvider.getGcmSenderId());
+            AndroidTestCase.assertEquals(-1, pushPreferencesProvider.getAppVersion());
         } else {
-            AndroidTestCase.assertNotNull(prefsProvider.getGcmDeviceRegistrationId());
-            AndroidTestCase.assertNotNull(prefsProvider.getGcmSenderId());
-            MoreAsserts.assertNotEqual(-1, prefsProvider.getAppVersion());
+            AndroidTestCase.assertNotNull(pushPreferencesProvider.getGcmDeviceRegistrationId());
+            AndroidTestCase.assertNotNull(pushPreferencesProvider.getGcmSenderId());
+            MoreAsserts.assertNotEqual(-1, pushPreferencesProvider.getAppVersion());
         }
 
         if (backEndDeviceRegistrationIdResultant == null) {
-            AndroidTestCase.assertNull(prefsProvider.getBackEndDeviceRegistrationId());
-            AndroidTestCase.assertNull(prefsProvider.getDeviceAlias());
-            AndroidTestCase.assertNull(prefsProvider.getVariantSecret());
-            AndroidTestCase.assertNull(prefsProvider.getVariantSecret());
-            AndroidTestCase.assertNull(prefsProvider.getBaseServerUrl());
+            AndroidTestCase.assertNull(pushPreferencesProvider.getBackEndDeviceRegistrationId());
+            AndroidTestCase.assertNull(pushPreferencesProvider.getDeviceAlias());
+            AndroidTestCase.assertNull(pushPreferencesProvider.getVariantSecret());
+            AndroidTestCase.assertNull(pushPreferencesProvider.getVariantSecret());
+            AndroidTestCase.assertNull(pushPreferencesProvider.getBaseServerUrl());
         } else {
-            AndroidTestCase.assertNotNull(prefsProvider.getBackEndDeviceRegistrationId());
-            AndroidTestCase.assertNotNull(prefsProvider.getDeviceAlias());
-            AndroidTestCase.assertNotNull(prefsProvider.getVariantSecret());
-            AndroidTestCase.assertNotNull(prefsProvider.getVariantSecret());
-            AndroidTestCase.assertNotNull(prefsProvider.getBaseServerUrl());
+            AndroidTestCase.assertNotNull(pushPreferencesProvider.getBackEndDeviceRegistrationId());
+            AndroidTestCase.assertNotNull(pushPreferencesProvider.getDeviceAlias());
+            AndroidTestCase.assertNotNull(pushPreferencesProvider.getVariantSecret());
+            AndroidTestCase.assertNotNull(pushPreferencesProvider.getVariantSecret());
+            AndroidTestCase.assertNotNull(pushPreferencesProvider.getBaseServerUrl());
         }
 
-        AndroidTestCase.assertNull(prefsProvider.getPackageName());
+        AndroidTestCase.assertNull(pushPreferencesProvider.getPackageName());
         AndroidTestCase.assertEquals(shouldBackEndUnregisterHaveBeenCalled, dummyBackEndUnregisterDeviceApiRequest.wasUnregisterCalled());
         AndroidTestCase.assertFalse(gcmProvider.wasRegisterCalled());
         AndroidTestCase.assertTrue(gcmProvider.wasUnregisterCalled());
+
+        if (isAnalyticsEnabled && shouldPushUnregisteredEventHaveBeenLogged) {
+
+            AndroidTestCase.assertTrue(serviceStarter.wasStarted());
+            final Intent intent = serviceStarter.getStartedIntent();
+            final EnqueueEventJob job = intent.getParcelableExtra(EventService.KEY_JOB);
+            final Event event = job.getEvent();
+            AndroidTestCase.assertEquals(EventPushUnregistered.EVENT_TYPE, event.getEventType());
+            final HashMap<String, Object> data = event.getData();
+            AndroidTestCase.assertEquals(startingVariantUuidInPrefs, data.get(PushEventHelper.VARIANT_UUID));
+            AndroidTestCase.assertEquals(startingBackEndDeviceRegistrationIdInPrefs, data.get(PushEventHelper.DEVICE_ID));
+
+        } else {
+            AndroidTestCase.assertFalse(serviceStarter.wasStarted());
+        }
     }
 
     public UnregistrationEngineTestParameters setShouldUnregistrationHaveSucceeded(boolean b) {
@@ -125,7 +165,7 @@ public class UnregistrationEngineTestParameters {
     }
 
     public UnregistrationEngineTestParameters setupBackEndDeviceRegistrationId(String inPrefs, String resultantValue) {
-        backEndDeviceRegistrationIdInPrefs = inPrefs;
+        startingBackEndDeviceRegistrationIdInPrefs = inPrefs;
         backEndDeviceRegistrationIdResultant = resultantValue;
         shouldBackEndDeviceUnregistrationBeSuccessful = (resultantValue == null);
         shouldBackEndUnregisterHaveBeenCalled = (inPrefs != null);
