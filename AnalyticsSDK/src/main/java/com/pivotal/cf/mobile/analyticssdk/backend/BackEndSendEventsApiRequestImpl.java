@@ -5,11 +5,14 @@ import android.net.Uri;
 
 import com.google.gson.Gson;
 import com.pivotal.cf.mobile.analyticssdk.database.EventsStorage;
+import com.pivotal.cf.mobile.analyticssdk.deviceid.DeviceId;
+import com.pivotal.cf.mobile.analyticssdk.deviceid.DeviceInspectorImpl;
 import com.pivotal.cf.mobile.analyticssdk.model.events.Event;
-import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProvider;
+import com.pivotal.cf.mobile.analyticssdk.model.events.EventList;
 import com.pivotal.cf.mobile.analyticssdk.util.Const;
 import com.pivotal.cf.mobile.common.backend.ApiRequestImpl;
 import com.pivotal.cf.mobile.common.network.NetworkWrapper;
+import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProvider;
 import com.pivotal.cf.mobile.common.util.Logger;
 
 import java.io.BufferedOutputStream;
@@ -52,6 +55,7 @@ public class BackEndSendEventsApiRequestImpl extends ApiRequestImpl implements B
         this.analyticsPreferencesProvider = analyticsPreferencesProvider;
     }
 
+    @Override
     public void startSendEvents(List<Uri> eventUris, BackEndSendEventsListener listener) {
         verifyRequestArguments(eventUris, listener);
         processRequest(eventUris, listener);
@@ -132,8 +136,11 @@ public class BackEndSendEventsApiRequestImpl extends ApiRequestImpl implements B
 
     private String getRequestBodyData(List<Uri> uris) {
         final List<Event> events = getEvents(uris);
+        final EventList eventList = new EventList();
+        eventList.setEvents(events);
+        eventList.setDeviceId(getDeviceId());
         final Gson gson = new Gson();
-        final String requestBodyData = gson.toJson(events);
+        final String requestBodyData = gson.toJson(eventList);
         return requestBodyData;
     }
 
@@ -144,6 +151,10 @@ public class BackEndSendEventsApiRequestImpl extends ApiRequestImpl implements B
             events.add(event);
         }
         return events;
+    }
+
+    private String getDeviceId() {
+        return DeviceId.getDeviceId(context, new DeviceInspectorImpl());
     }
 
     private void onSuccessfulNetworkRequest(int statusCode, BackEndSendEventsListener listener) {

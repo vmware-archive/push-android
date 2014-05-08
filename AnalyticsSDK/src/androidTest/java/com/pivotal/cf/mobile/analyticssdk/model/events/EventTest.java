@@ -44,6 +44,9 @@ public class EventTest extends AndroidTestCase {
     private static final int TEST_SECOND_2 = 34;
     private static final String SOME_OTHER_EVENT_TYPE = "SOME_OTHER_EVENT_TYPE";
 
+    private static final String TEST_EVENT_ID_3 = "EVENT-ID-3";
+    private static final String TEST_EVENT_TYPE_3 = "EVENT_OF_AWESOME";
+
     public void testEquals1() {
         final Event model1 = getEvent1();
         final Event model2 = getEvent1();
@@ -384,6 +387,15 @@ public class EventTest extends AndroidTestCase {
         event.setTime(getTestDate1());
         event.setData(getEventData2());
         event.setEventType(SOME_OTHER_EVENT_TYPE);
+        return event;
+    }
+
+    public static Event getEvent3() {
+        final Event event = new Event();
+        event.setEventId(TEST_EVENT_ID_3);
+        event.setTime(getTestDate2());
+        event.setData(null);
+        event.setEventType(TEST_EVENT_TYPE_3);
         return event;
     }
 

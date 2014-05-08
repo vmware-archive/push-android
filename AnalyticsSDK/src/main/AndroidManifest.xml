@@ -1,6 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.pivotal.cf.mobile.analyticssdk">
 
+    <!-- This permission is used to read the device hardware IMEI in order to report with -->
+    <!-- analytics events to the server.  If this permission is not present, then the     -->
+    <!-- Analytics SDK will generate a device ID instead.                                 -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE"/>
+
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WAKE_LOCK"/>
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED"/>

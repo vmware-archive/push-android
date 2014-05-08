@@ -13,14 +13,16 @@ import com.pivotal.cf.mobile.analyticssdk.broadcastreceiver.EventsSenderAlarmRec
 import com.pivotal.cf.mobile.analyticssdk.database.DatabaseEventsStorage;
 import com.pivotal.cf.mobile.analyticssdk.database.DatabaseWrapper;
 import com.pivotal.cf.mobile.analyticssdk.database.EventsStorage;
+import com.pivotal.cf.mobile.analyticssdk.deviceid.DeviceInspector;
+import com.pivotal.cf.mobile.analyticssdk.deviceid.DeviceInspectorImpl;
 import com.pivotal.cf.mobile.analyticssdk.jobs.BaseJob;
 import com.pivotal.cf.mobile.analyticssdk.jobs.JobParams;
 import com.pivotal.cf.mobile.analyticssdk.jobs.JobResultListener;
 import com.pivotal.cf.mobile.analyticssdk.jobs.PrepareDatabaseJob;
-import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProvider;
-import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProviderImpl;
 import com.pivotal.cf.mobile.common.network.NetworkWrapper;
 import com.pivotal.cf.mobile.common.network.NetworkWrapperImpl;
+import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProvider;
+import com.pivotal.cf.mobile.common.prefs.AnalyticsPreferencesProviderImpl;
 import com.pivotal.cf.mobile.common.util.Logger;
 
 import java.util.List;
@@ -104,6 +106,7 @@ public class EventService extends IntentService {
             EventService.networkWrapper = new NetworkWrapperImpl();
         }
         if (EventService.backEndSendEventsApiRequestProvider == null) {
+            final DeviceInspector deviceInspector = new DeviceInspectorImpl(); // It is safe to use the real device inspector during unit tests.
             final BackEndSendEventsApiRequestImpl backEndMessageReceiptApiRequest = new BackEndSendEventsApiRequestImpl(this, EventService.eventsStorage, analyticsPreferencesProvider, EventService.networkWrapper);
             EventService.backEndSendEventsApiRequestProvider = new BackEndSendEventsApiRequestProvider(backEndMessageReceiptApiRequest);
         }
