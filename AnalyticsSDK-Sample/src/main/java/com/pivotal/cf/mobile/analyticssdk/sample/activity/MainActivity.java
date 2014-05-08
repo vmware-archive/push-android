@@ -100,6 +100,10 @@ public class MainActivity extends BaseMainActivity {
                 logAppForegrounded();
                 break;
 
+            case R.id.action_log_app_backgrounded:
+                logAppBackgrounded();
+                break;
+
             case R.id.action_log_exception:
                 logException();
                 break;
@@ -145,5 +149,10 @@ public class MainActivity extends BaseMainActivity {
     private void logAppForegrounded() {
         updateCurrentBaseRowColour();
         analyticsSDK.getEventLogger().logApplicationForegrounded();
+    }
+
+    private void logAppBackgrounded() {
+        updateCurrentBaseRowColour();
+        analyticsSDK.getEventLogger().logApplicationBackgrounded();
     }
 }

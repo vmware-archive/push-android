@@ -29,6 +29,8 @@ public class EventLogger {
     public static final String EXCEPTION_REASON = "reason";
     public static final String EXCEPTION_STACK_TRACE = "stack_trace";
 
+    public static final String EVENT_TYPE_BACKGROUNDED = "event_backgrounded";
+
     public static final String EVENT_TYPE_FOREGROUNDED = "event_foregrounded";
     public static final String APPLICATION_VERSION = "application_version";
     public static final String DEVICE_OS_NAME = "os";
@@ -110,6 +112,11 @@ public class EventLogger {
      * method with the `isAnalyticsEnabled` field set to `true`.
      */
     public void logApplicationForegrounded() {
+        final HashMap<String, Object> data = getApplicationData();
+        logEvent(EVENT_TYPE_FOREGROUNDED, data);
+    }
+
+    private HashMap<String, Object> getApplicationData() {
         final HashMap<String, Object> data = new HashMap<String, Object>();
         final String applicationVersion = getApplicationVersion();
         if (applicationVersion != null) {
@@ -119,7 +126,7 @@ public class EventLogger {
         data.put(DEVICE_OS_VERSION, Build.VERSION.RELEASE);
         data.put(DEVICE_MANUFACTURER, Build.MANUFACTURER);
         data.put(DEVICE_MODEL, Build.MODEL);
-        logEvent(EVENT_TYPE_FOREGROUNDED, data);
+        return data;
     }
 
     private String getApplicationVersion() {
@@ -130,6 +137,17 @@ public class EventLogger {
             Logger.ex(e);
             return null;
         }
+    }
+
+    /**
+     * Logs an "application backgrounded" event into the analytics database.  This event will be posted to the
+     * analytics server sometime in the near future.
+     *
+     * Does nothing if analytics is disabled.  You can enable analytics by calling the `AnalyticsSDK.setParameters`
+     * method with the `isAnalyticsEnabled` field set to `true`.
+     */
+    public void logApplicationBackgrounded() {
+        logEvent(EVENT_TYPE_BACKGROUNDED, null);
     }
 
     /**

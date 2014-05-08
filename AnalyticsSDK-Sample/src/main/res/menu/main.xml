@@ -30,6 +30,11 @@
         app:showAsAction="withText"/>
 
     <item
+        android:id="@+id/action_log_app_backgrounded"
+        android:title="@string/action_log_app_backgrounded"
+        app:showAsAction="withText"/>
+
+    <item
         android:id="@+id/action_clear_events"
         android:icon="@drawable/ic_menu_delete"
         android:title="@string/action_clear_events"

@@ -130,6 +130,14 @@ public class EventLoggerTest extends AndroidTestCase {
         assertNotNull(data.get(EventLogger.DEVICE_MODEL));
     }
 
+    public void testLogBackgrounded() {
+        final EventLogger eventLogger = getEventLoggerWithAnalyticsEnabled();
+        eventLogger.logApplicationBackgrounded();
+        assertTrue(serviceStarter.wasStarted());
+        assertEquals(EventLogger.EVENT_TYPE_BACKGROUNDED, getLoggedEvent().getEventType());
+        assertNull(getLoggedEvent().getData());
+    }
+
     private EventLogger getEventLoggerWithAnalyticsDisabled() {
         preferencesProvider.setIsAnalyticsEnabled(false);
         return new EventLogger(serviceStarter, preferencesProvider, getContext());

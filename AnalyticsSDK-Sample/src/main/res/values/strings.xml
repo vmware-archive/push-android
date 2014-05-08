@@ -10,4 +10,5 @@
     <string name="action_log_error_with_data">Log Event (with data)</string>
     <string name="action_log_exception">Log Exception</string>
     <string name="action_log_app_foregrounded">Log App Foregrounded</string>
+    <string name="action_log_app_backgrounded">Log App Backgrounded</string>
 </resources>
