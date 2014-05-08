@@ -118,6 +118,18 @@ public class EventLoggerTest extends AndroidTestCase {
         assertTrue(((String)exceptionData.get(EventLogger.EXCEPTION_STACK_TRACE)).contains("testLogException")); // put method name here
     }
 
+    public void testLogForegrounded() {
+        final EventLogger eventLogger = getEventLoggerWithAnalyticsEnabled();
+        eventLogger.logApplicationForegrounded();
+        assertTrue(serviceStarter.wasStarted());
+        assertEquals(EventLogger.EVENT_TYPE_FOREGROUNDED, getLoggedEvent().getEventType());
+        final HashMap<String, Object> data = getLoggedEvent().getData();
+        assertEquals("Android", data.get(EventLogger.DEVICE_OS_NAME));
+        assertNotNull(data.get(EventLogger.DEVICE_OS_VERSION));
+        assertNotNull(data.get(EventLogger.DEVICE_MANUFACTURER));
+        assertNotNull(data.get(EventLogger.DEVICE_MODEL));
+    }
+
     private EventLogger getEventLoggerWithAnalyticsDisabled() {
         preferencesProvider.setIsAnalyticsEnabled(false);
         return new EventLogger(serviceStarter, preferencesProvider, getContext());

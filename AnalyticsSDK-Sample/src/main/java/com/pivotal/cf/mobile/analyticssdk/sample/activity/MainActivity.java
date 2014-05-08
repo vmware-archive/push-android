@@ -96,6 +96,10 @@ public class MainActivity extends BaseMainActivity {
                 logError();
                 break;
 
+            case R.id.action_log_app_foregrounded:
+                logAppForegrounded();
+                break;
+
             case R.id.action_log_exception:
                 logException();
                 break;
@@ -136,5 +140,10 @@ public class MainActivity extends BaseMainActivity {
     private void logException() {
         updateCurrentBaseRowColour();
         analyticsSDK.getEventLogger().logException("TEST_ERROR_ID", "TEST_ERROR_MESSAGE", new Exception("TEST_EXCEPTION_MESSAGE"));
+    }
+
+    private void logAppForegrounded() {
+        updateCurrentBaseRowColour();
+        analyticsSDK.getEventLogger().logApplicationForegrounded();
     }
 }

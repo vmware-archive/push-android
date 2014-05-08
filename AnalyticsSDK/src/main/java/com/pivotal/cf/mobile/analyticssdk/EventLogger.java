@@ -2,6 +2,9 @@ package com.pivotal.cf.mobile.analyticssdk;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager;
+import android.os.Build;
 
 import com.pivotal.cf.mobile.analyticssdk.jobs.EnqueueEventJob;
 import com.pivotal.cf.mobile.analyticssdk.model.events.Event;
@@ -25,6 +28,13 @@ public class EventLogger {
     public static final String EXCEPTION_NAME = "name";
     public static final String EXCEPTION_REASON = "reason";
     public static final String EXCEPTION_STACK_TRACE = "stack_trace";
+
+    public static final String EVENT_TYPE_FOREGROUNDED = "event_foregrounded";
+    public static final String APPLICATION_VERSION = "application_version";
+    public static final String DEVICE_OS_NAME = "os";
+    public static final String DEVICE_OS_VERSION = "os_version";
+    public static final String DEVICE_MANUFACTURER = "device_manufacturer";
+    public static final String DEVICE_MODEL = "device_model";
 
     private static final int MAX_STACK_TRACE_SIZE = 2048;
 
@@ -89,6 +99,36 @@ public class EventLogger {
             serviceStarter.startService(context, intent);
         } else {
             Logger.w("Event not logged. Analytics is either not set up or disabled.");
+        }
+    }
+
+    /**
+     * Logs an "application foregrounded" event into the analytics database.  This event will be posted to the
+     * analytics server sometime in the near future.
+     *
+     * Does nothing if analytics is disabled.  You can enable analytics by calling the `AnalyticsSDK.setParameters`
+     * method with the `isAnalyticsEnabled` field set to `true`.
+     */
+    public void logApplicationForegrounded() {
+        final HashMap<String, Object> data = new HashMap<String, Object>();
+        final String applicationVersion = getApplicationVersion();
+        if (applicationVersion != null) {
+            data.put(APPLICATION_VERSION, applicationVersion);
+        }
+        data.put(DEVICE_OS_NAME, "Android");
+        data.put(DEVICE_OS_VERSION, Build.VERSION.RELEASE);
+        data.put(DEVICE_MANUFACTURER, Build.MANUFACTURER);
+        data.put(DEVICE_MODEL, Build.MODEL);
+        logEvent(EVENT_TYPE_FOREGROUNDED, data);
+    }
+
+    private String getApplicationVersion() {
+        try {
+            final PackageInfo packageInfo = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+            return packageInfo.versionName;
+        } catch (PackageManager.NameNotFoundException e) {
+            Logger.ex(e);
+            return null;
         }
     }
 
