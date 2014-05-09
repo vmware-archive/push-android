@@ -19,7 +19,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-public class Settings {
+public class Preferences {
 
     public static final String IS_ANALYTICS_ENABLED = "test_is_analytics_enabled";
     public static final String ANALYTICS_BASE_SERVER_URL = "test_analytics_base_server_url";

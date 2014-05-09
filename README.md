@@ -231,11 +231,11 @@ part or all of the registration data will cause a partial or complete re-registr
 "Register" button.
 
 You can change the registration preferences at run-time by selecting the "Edit Registration Parameters" action bar item.
-Selecting this item will load the Settings screen.  There's no space to describe the options on the Settings screen
+Selecting this item will load the Preferences screen.  There's no space to describe the options on the Preferences screen
 itself, but you can look in the `push_default_preferences.xml` file for more details.
 
 You can reset the registration preferences to the default values by selecting the "Reset to Defaults" action bar item in
-the Settings screen.
+the Preferences screen.
 
 The sample application (not the library) is also set up to receive push messages once the device has been registered
 with GCM and Pivotal CF.  You can choose to push messages directly through GCM or via Pivotal CF.  Although the library does not

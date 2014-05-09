@@ -31,7 +31,7 @@ import com.google.gson.Gson;
 import com.pivotal.cf.mobile.analyticssdk.AnalyticsParameters;
 import com.pivotal.cf.mobile.analyticssdk.database.DatabaseEventsStorage;
 import com.pivotal.cf.mobile.common.sample.activity.BaseMainActivity;
-import com.pivotal.cf.mobile.common.sample.activity.BaseSettingsActivity;
+import com.pivotal.cf.mobile.common.sample.activity.BasePreferencesActivity;
 import com.pivotal.cf.mobile.common.util.DebugUtil;
 import com.pivotal.cf.mobile.pushsdk.PushSDK;
 import com.pivotal.cf.mobile.pushsdk.RegistrationParameters;
@@ -44,7 +44,7 @@ import com.pivotal.cf.mobile.pushsdk.sample.dialogfragment.ClearRegistrationDial
 import com.pivotal.cf.mobile.pushsdk.sample.dialogfragment.SendMessageDialogFragment;
 import com.pivotal.cf.mobile.pushsdk.sample.model.BackEndMessageRequest;
 import com.pivotal.cf.mobile.pushsdk.sample.model.GcmMessageRequest;
-import com.pivotal.cf.mobile.pushsdk.sample.util.Settings;
+import com.pivotal.cf.mobile.pushsdk.sample.util.Preferences;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
@@ -63,8 +63,8 @@ public class MainActivity extends BaseMainActivity {
 
     private PushSDK pushSDK;
 
-    protected Class<? extends BaseSettingsActivity> getSettingsActivity() {
-        return SettingsActivity.class;
+    protected Class<? extends BasePreferencesActivity> getPreferencesActivity() {
+        return PreferencesActivity.class;
     }
 
     @Override
@@ -104,7 +104,7 @@ public class MainActivity extends BaseMainActivity {
 
     private AnalyticsParameters getAnalyticsParameters() {
         final URL baseServerUrl = getAnalyticsBaseServerUrl();
-        final boolean isAnalyticsEnabled = Settings.isAnalyticsEnabled(this);
+        final boolean isAnalyticsEnabled = Preferences.isAnalyticsEnabled(this);
         final AnalyticsParameters parameters = new AnalyticsParameters(isAnalyticsEnabled, baseServerUrl);
         return parameters;
     }
@@ -142,10 +142,10 @@ public class MainActivity extends BaseMainActivity {
     }
 
     private RegistrationParameters getRegistrationParameters() {
-        final String gcmSenderId = Settings.getGcmSenderId(this);
-        final String variantUuid = Settings.getVariantUuid(this);
-        final String variantSecret = Settings.getVariantSecret(this);
-        final String deviceAlias = Settings.getDeviceAlias(this);
+        final String gcmSenderId = Preferences.getGcmSenderId(this);
+        final String variantUuid = Preferences.getVariantUuid(this);
+        final String variantSecret = Preferences.getVariantSecret(this);
+        final String deviceAlias = Preferences.getDeviceAlias(this);
         final URL baseServerUrl = getPushBaseServerUrl();
         addLogMessage("GCM Sender ID: '" + gcmSenderId + "'\nVariant UUID: '" + variantUuid + "\nVariant Secret: '" + variantSecret + "'\nDevice Alias: '" + deviceAlias + "'\nBase Server URL: '" + baseServerUrl + "'.");
         final RegistrationParameters parameters = new RegistrationParameters(gcmSenderId, variantUuid, variantSecret, deviceAlias, baseServerUrl);
@@ -153,7 +153,7 @@ public class MainActivity extends BaseMainActivity {
     }
 
     private URL getPushBaseServerUrl() {
-        final String baseServerUrl = Settings.getPushBaseServerUrl(this);
+        final String baseServerUrl = Preferences.getPushBaseServerUrl(this);
         try {
             return new URL(baseServerUrl);
         } catch (MalformedURLException e) {
@@ -163,7 +163,7 @@ public class MainActivity extends BaseMainActivity {
     }
 
     private URL getAnalyticsBaseServerUrl() {
-        final String baseServerUrl = Settings.getAnalyticsBaseServerUrl(this);
+        final String baseServerUrl = Preferences.getAnalyticsBaseServerUrl(this);
         try {
             return new URL(baseServerUrl);
         } catch (MalformedURLException e) {
@@ -252,7 +252,7 @@ public class MainActivity extends BaseMainActivity {
                 OutputStream outputStream = null;
 
                 try {
-                    final URL url = new URL(Settings.getPushBaseServerUrl(MainActivity.this) + "/" + BACK_END_SEND_MESSAGE_URL);
+                    final URL url = new URL(Preferences.getPushBaseServerUrl(MainActivity.this) + "/" + BACK_END_SEND_MESSAGE_URL);
                     final HttpURLConnection urlConnection = getUrlConnection(url);
                     urlConnection.setDoOutput(true);
                     urlConnection.addRequestProperty("Authorization", getBasicAuthorizationValue());
@@ -288,8 +288,8 @@ public class MainActivity extends BaseMainActivity {
     }
 
     private String getBasicAuthorizationValue() {
-        final String environmentUuid = Settings.getBackEndEnvironmentUuid(this);
-        final String environmentKey = Settings.getBackEndEnvironmentKey(this);
+        final String environmentUuid = Preferences.getBackEndEnvironmentUuid(this);
+        final String environmentKey = Preferences.getBackEndEnvironmentKey(this);
         final String stringToEncode = environmentUuid + ":" + environmentKey;
         return "Basic  " + Base64.encodeToString(stringToEncode.getBytes(), Base64.DEFAULT | Base64.NO_WRAP);
     }
@@ -333,7 +333,7 @@ public class MainActivity extends BaseMainActivity {
                 try {
                     final URL url = new URL(GCM_SEND_MESSAGE_URL);
                     final HttpURLConnection urlConnection = getUrlConnection(url);
-                    urlConnection.addRequestProperty("Authorization", "key=" + Settings.getGcmBrowserApiKey(MainActivity.this));
+                    urlConnection.addRequestProperty("Authorization", "key=" + Preferences.getGcmBrowserApiKey(MainActivity.this));
                     urlConnection.setDoOutput(true);
                     urlConnection.connect();
 
@@ -429,7 +429,7 @@ public class MainActivity extends BaseMainActivity {
     }
 
     private void clearEvents() {
-        if (Settings.isAnalyticsEnabled(this)) {
+        if (Preferences.isAnalyticsEnabled(this)) {
             addLogMessage("Clearing all events.");
             final DatabaseEventsStorage eventsStorage = new DatabaseEventsStorage();
             eventsStorage.reset();

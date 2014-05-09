@@ -19,7 +19,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 
-public class Settings {
+public class Preferences {
 
     public static final String GCM_SENDER_ID = "test_gcm_sender_id";
     public static final String VARIANT_UUID = "test_variant_uuid";

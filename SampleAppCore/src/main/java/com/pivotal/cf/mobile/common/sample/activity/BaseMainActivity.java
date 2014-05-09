@@ -54,7 +54,7 @@ public abstract class BaseMainActivity extends ActionBarActivity {
     private ListView listView;
     private LogAdapter adapter;
 
-    protected abstract Class<? extends BaseSettingsActivity> getSettingsActivity();
+    protected abstract Class<? extends BasePreferencesActivity> getPreferencesActivity();
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -190,7 +190,7 @@ public abstract class BaseMainActivity extends ActionBarActivity {
     }
 
     private void editPreferences() {
-        final Class<? extends BaseSettingsActivity> activityClass = getSettingsActivity();
+        final Class<? extends BasePreferencesActivity> activityClass = getPreferencesActivity();
         final Intent intent = new Intent(this, activityClass);
         startActivity(intent);
     }

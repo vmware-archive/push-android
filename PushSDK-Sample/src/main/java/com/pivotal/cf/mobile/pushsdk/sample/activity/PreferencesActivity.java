@@ -15,14 +15,14 @@
 
 package com.pivotal.cf.mobile.pushsdk.sample.activity;
 
-import com.pivotal.cf.mobile.common.sample.activity.BaseSettingsActivity;
+import com.pivotal.cf.mobile.common.sample.activity.BasePreferencesActivity;
 import com.pivotal.cf.mobile.pushsdk.sample.R;
-import com.pivotal.cf.mobile.pushsdk.sample.util.Settings;
+import com.pivotal.cf.mobile.pushsdk.sample.util.Preferences;
 
-public class SettingsActivity extends BaseSettingsActivity {
+public class PreferencesActivity extends BasePreferencesActivity {
 
     protected String[] getPreferenceNames() {
-        return Settings.PREFERENCE_NAMES;
+        return Preferences.PREFERENCE_NAMES;
     }
 
     protected int getPreferencesXmlResourceId() {

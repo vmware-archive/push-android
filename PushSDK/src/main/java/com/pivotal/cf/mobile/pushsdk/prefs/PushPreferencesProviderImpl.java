@@ -157,14 +157,14 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
 
     @Override
     public URL getBaseServerUrl() {
-        final String setting = getSharedPreferences().getString(PROPERTY_BASE_SERVER_URL, null);
-        if (setting == null) {
+        final String preference = getSharedPreferences().getString(PROPERTY_BASE_SERVER_URL, null);
+        if (preference == null) {
             return null;
         }
         try {
-            return new URL(setting);
+            return new URL(preference);
         } catch (MalformedURLException e) {
-            Logger.w("Invalid base server URL stored in settings: " + setting);
+            Logger.w("Invalid base server URL stored in preferences: " + preference);
             return null;
         }
     }

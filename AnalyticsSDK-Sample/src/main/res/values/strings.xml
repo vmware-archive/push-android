@@ -1,10 +1,10 @@
 <resources>
-    <string name="app_name">Analytics Sample App</string>
+    <string name="app_name">Analytics Sample</string>
     <string name="action_log_event">Log Event</string>
     <string name="action_clear_events">Clear Unsent Events</string>
-    <string name="pref_title_back_end_analytics_settings">Pivotal CF MS Analytics Settings</string>
+    <string name="pref_title_back_end_analytics_preferences">Pivotal CF MS Analytics Preferences</string>
     <string name="pref_title_analytics_base_server_url">Analytics Base Server URL</string>
-    <string name="title_activity_settings">Settings</string>
+    <string name="title_activity_preferences">Preferences</string>
     <string name="pref_title_is_analytics_enabled">Is Analytics Enabled?</string>
     <string name="action_log_error">Log Error</string>
     <string name="action_log_error_with_data">Log Event (with data)</string>

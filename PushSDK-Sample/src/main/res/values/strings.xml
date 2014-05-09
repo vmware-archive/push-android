@@ -1,28 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="app_name">PushSDK Sample</string>
+    <string name="app_name">Push Sample</string>
     <string name="action_register">Register</string>
     <string name="action_clear_registration">Clear Registration</string>
     <string name="action_send_message">Send Message</string>
     <string name="action_unregister">Unregister</string>
     <string name="action_clear_events">Clear Unsent Events</string>
-    <string name="title_activity_settings">Settings</string>
-    <string name="pref_title_gcm_registration_settings">GCM Registration Settings</string>
+    <string name="title_activity_preferences">Preferences</string>
+    <string name="pref_title_gcm_registration_preferences">GCM Registration Preferences</string>
     <string name="pref_title_gcm_sender_id">GCM Sender ID</string>
-    <string name="pref_title_backend_registration_settings">Pivotal CF MS Registration Settings</string>
+    <string name="pref_title_backend_registration_preferences">Pivotal CF MS Registration Preferences</string>
     <string name="pref_title_variant_uuid">Variant UUID</string>
     <string name="pref_title_variant_secret">Variant Secret</string>
     <string name="pref_title_device_alias">Device Alias</string>
     <string name="pref_title_registration_preferences">Registration Preferences</string>
-    <string name="pref_title_gcm_push_settings">GCM Push Settings</string>
+    <string name="pref_title_gcm_push_preferences">GCM Push Preferences</string>
     <string name="pref_title_gcm_browser_api_key">GCM Browser API Key</string>
-    <string name="pref_title_back_end_push_settings">Pivotal CF MS Push Settings</string>
+    <string name="pref_title_back_end_push_preferences">Pivotal CF MS Push Preferences</string>
     <string name="pref_title_back_end_environment_uuid">Environment UUID</string>
     <string name="pref_title_back_end_environment_key">Environment Key</string>
     <string name="pref_title_push_base_server_url">Push Base Server URL</string>
     <string name="pref_title_is_analytics_enabled">Is Analytics Enabled?</string>
     <string name="pref_title_analytics_base_server_url">Analytics Base Server URL</string>
-    <string name="pref_title_back_end_analytics_settings">Pivotal CF MS Analytics Settings</string>
+    <string name="pref_title_back_end_analytics_preferences">Pivotal CF MS Analytics Preferences</string>
 
 </resources>

@@ -35,7 +35,7 @@ import com.pivotal.cf.mobile.common.sample.R;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class BaseSettingsActivity extends PreferenceActivity {
+public abstract class BasePreferencesActivity extends PreferenceActivity {
 
     private SharedPreferences.OnSharedPreferenceChangeListener preferenceChangeListener;
     private Map<String, Preference> preferenceMap;
@@ -102,12 +102,12 @@ public abstract class BaseSettingsActivity extends PreferenceActivity {
 
     private void showCurrentPreferences() {
         final SharedPreferences prefs = getPreferenceScreen().getSharedPreferences();
-        for (final String settingName : preferenceMap.keySet()) {
-            final Preference item = preferenceMap.get(settingName);
+        for (final String preferenceName : preferenceMap.keySet()) {
+            final Preference item = preferenceMap.get(preferenceName);
             if (item instanceof EditTextPreference) {
-                setupEditTextPreferenceField((EditTextPreference) item, prefs.getString(settingName, null));
+                setupEditTextPreferenceField((EditTextPreference) item, prefs.getString(preferenceName, null));
             } else if (item instanceof CheckBoxPreference) {
-                setupCheckBoxPreference((CheckBoxPreference) item, prefs.getBoolean(settingName, false));
+                setupCheckBoxPreference((CheckBoxPreference) item, prefs.getBoolean(preferenceName, false));
             }
         }
     }
@@ -124,7 +124,7 @@ public abstract class BaseSettingsActivity extends PreferenceActivity {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         final MenuInflater menuInflater = getMenuInflater();
-        menuInflater.inflate(R.menu.settings, menu);
+        menuInflater.inflate(R.menu.preferences, menu);
         return true;
     }
 

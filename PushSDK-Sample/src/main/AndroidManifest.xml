@@ -57,8 +57,8 @@
         </activity>
 
         <activity
-            android:name="com.pivotal.cf.mobile.pushsdk.sample.activity.SettingsActivity"
-            android:label="@string/title_activity_settings"
+            android:name=".activity.PreferencesActivity"
+            android:label="@string/title_activity_preferences"
             android:parentActivityName="com.pivotal.cf.mobile.pushsdk.sample.activity.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

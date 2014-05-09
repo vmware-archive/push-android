@@ -10,9 +10,9 @@ import com.pivotal.cf.mobile.analyticssdk.AnalyticsParameters;
 import com.pivotal.cf.mobile.analyticssdk.AnalyticsSDK;
 import com.pivotal.cf.mobile.analyticssdk.database.DatabaseEventsStorage;
 import com.pivotal.cf.mobile.analyticssdk.sample.R;
-import com.pivotal.cf.mobile.analyticssdk.sample.util.Settings;
+import com.pivotal.cf.mobile.analyticssdk.sample.util.Preferences;
 import com.pivotal.cf.mobile.common.sample.activity.BaseMainActivity;
-import com.pivotal.cf.mobile.common.sample.activity.BaseSettingsActivity;
+import com.pivotal.cf.mobile.common.sample.activity.BasePreferencesActivity;
 
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -22,8 +22,8 @@ public class MainActivity extends BaseMainActivity {
 
     private AnalyticsSDK analyticsSDK;
 
-    protected Class<? extends BaseSettingsActivity> getSettingsActivity() {
-        return SettingsActivity.class;
+    protected Class<? extends BasePreferencesActivity> getPreferencesActivity() {
+        return PreferencesActivity.class;
     }
 
     @Override
@@ -53,14 +53,14 @@ public class MainActivity extends BaseMainActivity {
     }
 
     private AnalyticsParameters getAnalyticsParameters() {
-        final boolean isAnalyticsEnabled = Settings.isAnalyticsEnabled(this);
+        final boolean isAnalyticsEnabled = Preferences.isAnalyticsEnabled(this);
         final URL baseServerUrl = getAnalyticsBaseServerUrl();
         final AnalyticsParameters parameters = new AnalyticsParameters(isAnalyticsEnabled, baseServerUrl);
         return parameters;
     }
 
     private URL getAnalyticsBaseServerUrl() {
-        final String baseServerUrl = Settings.getAnalyticsBaseServerUrl(this);
+        final String baseServerUrl = Preferences.getAnalyticsBaseServerUrl(this);
         try {
             return new URL(baseServerUrl);
         } catch (MalformedURLException e) {
@@ -115,7 +115,7 @@ public class MainActivity extends BaseMainActivity {
     }
 
     private void clearEvents() {
-        if (Settings.isAnalyticsEnabled(this)) {
+        if (Preferences.isAnalyticsEnabled(this)) {
             addLogMessage("Clearing all events.");
             final DatabaseEventsStorage eventsStorage = new DatabaseEventsStorage();
             eventsStorage.reset();
