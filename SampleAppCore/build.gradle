@@ -2,3 +2,13 @@ dependencies {
     compile 'com.android.support:appcompat-v7:19.+'
     compile project(":Common")
 }
+
+uploadArchives {
+    repositories.mavenDeployer {
+        pom.project pomInfo
+        pom.project {
+            name 'Sample Application Core'
+            description 'Simple framework for building a sample application. Includes an activity with a log viewer and preferences screen.'
+        }
+    }
+}

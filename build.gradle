@@ -1,5 +1,11 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
+//// Set your application versionName and versionCode here. ////
+ext.versionName = "0.5"
+ext.versionCode = 5
+ext.isSnapshot = false
+////////////////////////////////////////////////////////////////
+
 buildscript {
     repositories {
         mavenCentral()
@@ -13,6 +19,13 @@ allprojects {
     repositories {
         mavenCentral()
     }
+
+    group = "com.pivotal.cf.mobile"
+    if (isSnapshot) {
+        version = versionName + "-SNAPSHOT"
+    } else {
+        version = versionName + "-RELEASE"
+    }
 }
 
 // LIBRARIES
@@ -25,6 +38,7 @@ configure ([
 ]) {
 
     apply plugin: 'android-library'
+    apply plugin: 'maven'
 
     android {
         compileSdkVersion 19
@@ -33,6 +47,59 @@ configure ([
         defaultConfig {
             minSdkVersion 10
             targetSdkVersion 19
+        }
+    }
+
+    uploadArchives {
+        configuration = configurations.archives
+        repositories.mavenDeployer {
+
+            def userName = System.getenv('MAVEN_USER')
+            def password = System.getenv('MAVEN_PASS')
+            def repositoryUrl
+
+            if (isSnapshot) {
+                repositoryUrl = 'https://maven.xtremelabs.com/artifactory/libs-snapshot-local'
+            } else {
+                repositoryUrl = 'https://maven.xtremelabs.com/artifactory/libs-release-local'
+            }
+
+            repository(url: repositoryUrl) {
+                authentication(userName: userName, password: password)
+            }
+        }
+    }
+
+    configurations {
+        archives {
+            extendsFrom configurations.default
+        }
+    }
+
+    ext.pomInfo = {
+        packaging 'aar'
+        url 'https://github.com/xtremelabs/pivotalcf-pushsdk-android'
+
+        scm {
+            url 'git@github.com:xtremelabs/pivotalcf-pushsdk-android.git'
+            connection 'scm:git:git@github.com:xtremelabs/pivotalcf-pushsdk-android.git'
+            developerConnection 'scm:git:git@github.com:xtremelabs/pivotalcf-pushsdk-android.git'
+        }
+
+        licenses {
+            license {
+                name 'The Apache Software License, Version 2.0'
+                url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                distribution 'repo'
+            }
+        }
+
+        developers {
+            developer {
+                id 'rszumlakowski'
+                name 'Robert Szumlakowski'
+                email 'robsz@pivotallabs.com'
+            }
         }
     }
 }
@@ -51,8 +118,8 @@ configure ([
         buildToolsVersion "19.0.3"
 
         defaultConfig {
-            versionCode 5
-            versionName "0.5"
+            versionCode versionCode
+            versionName versionName
             minSdkVersion 10
             targetSdkVersion 19
         }

@@ -1,1 +1,9 @@
-// No extra requirements in this build script.
+uploadArchives {
+    repositories.mavenDeployer {
+        pom.project pomInfo
+        pom.project {
+            name 'Pivotal CF Mobile Services Common Library for Android'
+            description 'Common tools and classes used for various Pivotal CF Mobile Services projects for Android.'
+        }
+    }
+}
