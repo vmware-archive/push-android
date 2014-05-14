@@ -6,6 +6,13 @@ branches:
       - master
       - travis-test
 
+env:
+    global:
+        # Sets the ORG_GRADLE_PROPERTY_MAVEN_USER environment variable
+        - secure: "Hkd+KItH6fePUEuUsZmsnqrcEYj/Pumf+QwQIC3n2Kkvflbmx9dvZpzldfa4cRONcLA6vIFyEMepTjK03FUzOThElZEJjBwDbvbmJWDgtGGLkfHGqUIJ+QgV5Jg1/dZUa2+CBzkkXMtZ14ZQB48ICays9zpigsnZqBGicu88Hdo="
+        # Sets the ORG_GRADLE_PROPERTY_MAVEN_PASS environment variable
+        - secure: "DP0nRAmwhw9IYEF4uE1jY2GxY3cZtDimNUQ6lwLvDJGlQoyJOdDEFjB0/8wEXVr/DCqZrr4e6nQ+UaSd/lhyEpRx9Rjc/ww/V//L4TIvz7GEVI6P1gEbxkMmYOBFpZSX+J6d3sZ5jFKW+kgWlVy2p5WNK02DEO/1Bp0awXaABC8="
+
 before_install:
     # Install base Android SDK
     - sudo apt-get update -qq

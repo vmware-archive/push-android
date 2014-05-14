@@ -2,8 +2,8 @@
 
 ////////////////////////////////////////////////////////////////
 //// Ensure your ~/.gradle/gradle.properties file or environment defines the following properties:
-// pivotalMavenUser = your user name on the above Artifactory.
-// pivotalMavenPassword = your password on the above Artifactory.  It is encourage to use the encrypted form of your password
+// MAVEN_USER = your user name on the above Artifactory.
+// MAVEN_PASS = your password on the above Artifactory.  It is encourage to use the encrypted form of your password
 ////////////////////////////////////////////////////////////////
 
 //// Set your application versionName and versionCode here. ////
@@ -29,8 +29,8 @@ allprojects {
         maven {
             url 'https://maven.xtremelabs.com/artifactory/xl-libs'
             credentials {
-                username pivotalMavenUser
-                password pivotalMavenPassword
+                username MAVEN_USER
+                password MAVEN_PASS
             }
         }
     }
@@ -67,10 +67,10 @@ configure ([
         configuration = configurations.archives
         repositories.mavenDeployer {
             repository(url: 'https://maven.xtremelabs.com/artifactory/libs-release-local') {
-                authentication(userName: pivotalMavenUser, password: pivotalMavenPassword)
+                authentication(userName: MAVEN_USER, password: MAVEN_PASS)
             }
             snapshotRepository(url: 'https://maven.xtremelabs.com/artifactory/libs-snapshot-local') {
-                authentication(userName: pivotalMavenUser, password: pivotalMavenPassword)
+                authentication(userName: MAVEN_USER, password: MAVEN_PASS)
             }
         }
     }
