@@ -1,4 +1,0 @@
-dependencies {
-    compile project(':AnalyticsSDK')
-    compile project(':SampleAppCore')
-}

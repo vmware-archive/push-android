@@ -1,9 +1,9 @@
 dependencies {
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'com.google.android.gms:play-services:4.2.42'
-    compile project(":Common")
-    compile project(":AnalyticsSDK")
-    androidTestCompile project(":CommonTest")
+    compile 'com.pivotal.cf.mobile:Common:0.5-RELEASE'
+    compile 'com.pivotal.cf.mobile:AnalyticsSDK:0.5-RELEASE'
+    androidTestCompile 'com.pivotal.cf.mobile:CommonTest:0.5-RELEASE'
 }
 
 uploadArchives {

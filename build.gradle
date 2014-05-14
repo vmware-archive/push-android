@@ -11,7 +11,7 @@
 ext {
     versionName = "0.5"
     versionCode = 5
-    isSnapshot = true
+    isSnapshot = false
 }
 ////////////////////////////////////////////////////////////////
 
@@ -27,6 +27,13 @@ buildscript {
 allprojects {
     repositories {
         mavenCentral()
+        maven {
+            url 'https://maven.xtremelabs.com/artifactory/xl-libs'
+            credentials {
+                username "rob.szumlakowski"
+                password pivotalMavenPassword
+            }
+        }
     }
 
     group = "com.pivotal.cf.mobile"
@@ -39,11 +46,7 @@ allprojects {
 
 // LIBRARIES
 configure ([
-    project(":Common"),
-    project(":CommonTest"),
-    project(":AnalyticsSDK"),
-    project(":PushSDK"),
-    project(':SampleAppCore')
+    project(":PushSDK")
 ]) {
 
     apply plugin: 'android-library'
@@ -114,7 +117,6 @@ configure ([
 
 // APPLICATIONS
 configure ([
-    project(":AnalyticsSDK-Sample"),
     project(":PushSDK-Sample"),
     project(":PushSDK-SimpleDemoApp")
 ]) {

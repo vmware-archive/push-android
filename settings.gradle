@@ -1,8 +1,3 @@
-include ':Common'
-include ':AnalyticsSDK'
 include ':PushSDK'
-include ':CommonTest'
-include ':SampleAppCore'
-include ':AnalyticsSDK-Sample'
 include ':PushSDK-Sample'
 include ':PushSDK-SimpleDemoApp'
