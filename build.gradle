@@ -1,9 +1,18 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
 
+////////////////////////////////////////////////////////////////
+//// Ensure your ~/.gradle/gradle.properties file or environment defines the following properties:
+// pivotalArtifactoryBaseUrl = The base URL of your Maven Artifactory (e.g.: http://maven.xtremelabs.com/artifactory)
+// pivotalMavenUser = your user name on the above Artifactory.
+// pivotalMavenPassword = your password on the above Artifactory.  It is encourage to use the encrypted form of your password
+////////////////////////////////////////////////////////////////
+
 //// Set your application versionName and versionCode here. ////
-ext.versionName = "0.5"
-ext.versionCode = 5
-ext.isSnapshot = false
+ext {
+    versionName = "0.5"
+    versionCode = 5
+    isSnapshot = true
+}
 ////////////////////////////////////////////////////////////////
 
 buildscript {
@@ -22,9 +31,9 @@ allprojects {
 
     group = "com.pivotal.cf.mobile"
     if (isSnapshot) {
-        version = versionName + "-SNAPSHOT"
+        version =  versionName + "-SNAPSHOT"
     } else {
-        version = versionName + "-RELEASE"
+        version =  versionName + "-RELEASE"
     }
 }
 
@@ -45,6 +54,8 @@ configure ([
         buildToolsVersion "19.0.3"
 
         defaultConfig {
+            versionCode versionCode
+            versionName versionName
             minSdkVersion 10
             targetSdkVersion 19
         }
@@ -54,18 +65,15 @@ configure ([
         configuration = configurations.archives
         repositories.mavenDeployer {
 
-            def userName = System.getenv('MAVEN_USER')
-            def password = System.getenv('MAVEN_PASS')
-            def repositoryUrl
-
+            def repositoryUrl = pivotalArtifactoryBaseUrl
             if (isSnapshot) {
-                repositoryUrl = 'https://maven.xtremelabs.com/artifactory/libs-snapshot-local'
+                repositoryUrl += "/libs-snapshot-local"
             } else {
-                repositoryUrl = 'https://maven.xtremelabs.com/artifactory/libs-release-local'
+                repositoryUrl += "/libs-release-local"
             }
 
             repository(url: repositoryUrl) {
-                authentication(userName: userName, password: password)
+                authentication(userName: pivotalMavenUser, password: pivotalMavenPassword)
             }
         }
     }
