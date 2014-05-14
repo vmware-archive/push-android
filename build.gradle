@@ -2,7 +2,6 @@
 
 ////////////////////////////////////////////////////////////////
 //// Ensure your ~/.gradle/gradle.properties file or environment defines the following properties:
-// pivotalArtifactoryBaseUrl = The base URL of your Maven Artifactory (e.g.: http://maven.xtremelabs.com/artifactory)
 // pivotalMavenUser = your user name on the above Artifactory.
 // pivotalMavenPassword = your password on the above Artifactory.  It is encourage to use the encrypted form of your password
 ////////////////////////////////////////////////////////////////
@@ -30,7 +29,7 @@ allprojects {
         maven {
             url 'https://maven.xtremelabs.com/artifactory/xl-libs'
             credentials {
-                username "rob.szumlakowski"
+                username pivotalMavenUser
                 password pivotalMavenPassword
             }
         }
@@ -67,15 +66,10 @@ configure ([
     uploadArchives {
         configuration = configurations.archives
         repositories.mavenDeployer {
-
-            def repositoryUrl = pivotalArtifactoryBaseUrl
-            if (isSnapshot) {
-                repositoryUrl += "/libs-snapshot-local"
-            } else {
-                repositoryUrl += "/libs-release-local"
+            repository(url: 'https://maven.xtremelabs.com/artifactory/libs-release-local') {
+                authentication(userName: pivotalMavenUser, password: pivotalMavenPassword)
             }
-
-            repository(url: repositoryUrl) {
+            snapshotRepository(url: 'https://maven.xtremelabs.com/artifactory/libs-snapshot-local') {
                 authentication(userName: pivotalMavenUser, password: pivotalMavenPassword)
             }
         }
