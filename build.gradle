@@ -11,6 +11,14 @@ ext {
     versionName = "0.5"
     versionCode = 5
     isSnapshot = false
+    
+    libraryProjects = [
+        project(":PushSDK")
+    ]
+    applicationProjects = [
+        project(":PushSDK-Sample"),
+        project(":PushSDK-SimpleDemoApp")
+    ]
 }
 ////////////////////////////////////////////////////////////////
 
@@ -44,9 +52,7 @@ allprojects {
 }
 
 // LIBRARIES
-configure ([
-    project(":PushSDK")
-]) {
+configure (libraryProjects) {
 
     apply plugin: 'android-library'
     apply plugin: 'maven'
@@ -83,12 +89,12 @@ configure ([
 
     ext.pomInfo = {
         packaging 'aar'
-        url 'https://github.com/xtremelabs/pivotalcf-pushsdk-android'
+        url 'https://github.com/cfmobile/push-android'
 
         scm {
-            url 'git@github.com:xtremelabs/pivotalcf-pushsdk-android.git'
-            connection 'scm:git:git@github.com:xtremelabs/pivotalcf-pushsdk-android.git'
-            developerConnection 'scm:git:git@github.com:xtremelabs/pivotalcf-pushsdk-android.git'
+            url 'git@github.com:cfmobile/push-android.git'
+            connection 'scm:git:git@github.com:cfmobile/push-android.git'
+            developerConnection 'scm:git:git@github.com:cfmobile/push-android.git'
         }
 
         licenses {
@@ -110,10 +116,7 @@ configure ([
 }
 
 // APPLICATIONS
-configure ([
-    project(":PushSDK-Sample"),
-    project(":PushSDK-SimpleDemoApp")
-]) {
+configure (applicationProjects) {
 
     apply plugin: 'android'
 
