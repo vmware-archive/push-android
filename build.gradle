@@ -10,7 +10,7 @@
 ext {
     versionName = "0.5"
     versionCode = 5
-    isSnapshot = false
+    isSnapshot = true
     
     libraryProjects = [
         project(":PushSDK")

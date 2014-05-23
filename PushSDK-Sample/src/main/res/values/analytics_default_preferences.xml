@@ -2,9 +2,9 @@
 <resources>
 
     <!-- Should analytics be enabled, by default? -->
-    <bool name="pref_default_is_analytics_enabled">true</bool>
+    <bool name="pref_default_is_analytics_enabled">false</bool>
 
     <!-- The base URI of the Pivotal CF Mobile Services server that is used to provide analytics services.           -->
-    <string name="pref_default_analytics_base_server_url">http://ec2-54-87-125-154.compute-1.amazonaws.com</string>
+    <string name="pref_default_analytics_base_server_url">http://push-admin.main.vchs.cfms-apps.com</string>
 
 </resources>

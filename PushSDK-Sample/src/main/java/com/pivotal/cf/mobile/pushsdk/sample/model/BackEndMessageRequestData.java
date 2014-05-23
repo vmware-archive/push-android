@@ -19,9 +19,6 @@ import com.google.gson.annotations.SerializedName;
 
 public class BackEndMessageRequestData {
 
-    @SerializedName("title")
-    public String title;
-
     @SerializedName("body")
     public String body;
 
@@ -31,8 +28,7 @@ public class BackEndMessageRequestData {
 //    @SerializedName("msg_uuid")
 //    public String messageUuid;
 
-    public BackEndMessageRequestData(String title, String body) {
-        this.title = title;
+    public BackEndMessageRequestData(String body) {
         this.body = body;
 //        this.messageUuid = UUID.randomUUID().toString();
     }
