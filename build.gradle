@@ -8,8 +8,8 @@
 
 //// Set your application versionName and versionCode here. ////
 ext {
-    versionName = "0.5"
-    versionCode = 5
+    versionName = "0.6"
+    versionCode = 6
     isSnapshot = false
     
     libraryProjects = [
