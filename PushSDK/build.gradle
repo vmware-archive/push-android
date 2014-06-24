@@ -1,17 +1,17 @@
 dependencies {
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'com.google.android.gms:play-services:4.2.42'
-    compile 'com.pivotal.cf.mobile:Common:0.5-RELEASE'
-    compile 'com.pivotal.cf.mobile:AnalyticsSDK:0.5-RELEASE'
-    androidTestCompile 'com.pivotal.cf.mobile:CommonTest:0.5-RELEASE'
+    compile 'com.pivotal.mss:Common:0.6-RELEASE'
+    compile 'com.pivotal.mss:AnalyticsSDK:0.6-RELEASE'
+    androidTestCompile 'com.pivotal.mss:CommonTest:0.6-RELEASE'
 }
 
 uploadArchives {
     repositories.mavenDeployer {
         pom.project pomInfo
         pom.project {
-            name 'Pivotal CF Mobile Services Push Client SDK for Android'
-            description 'Lightweight Push SDK designed to register devices in applications using the Pivotal CF Mobile Services solution.'
+            name 'Pivotal Mobile Services Suite Push Client SDK for Android'
+            description 'Lightweight Push SDK designed to register devices in applications using the Pivotal Mobile Services Suite.'
         }
     }
 }

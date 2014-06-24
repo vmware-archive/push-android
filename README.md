@@ -1,12 +1,12 @@
-Pivotal CF Mobile Services Push and Analytics Client SDKs for Android
-=====================================================================
+Pivotal Mobile Services Suite Push and Analytics Client SDKs for Android
+========================================================================
 
 Features
 --------
 
-The Pivotal CF Mobile Services Push and Analytics Client SDKs are light-weight tools that will help your application:
+The Pivotal Mobile Services Suite Push and Analytics Client SDKs are light-weight tools that will help your application:
 
- 1. Register for push notifications with Google Cloud Messaging (GCM) and an instance of the Pivotal CF Mobile Services
+ 1. Register for push notifications with Google Cloud Messaging (GCM) and an instance of the Pivotal Mobile Services Suite
     push messaging server.
  2. Receive push messages sent via the same frameworks.
  3. Capture basic analytics regarding push messages and your application life cycle.
@@ -22,10 +22,11 @@ The Google Play Services application must be installed on the device before you 
 push messages.  Most devices should already have this application installed, but some odd ones may not.  By default,
 Android Virtual Devices (i.e.: emulators) do not have Google Play Services installed.
 
-Instructions for Integrating the Pivotal CF Mobile Push and Analytics Services Push Client SDK for Android
-----------------------------------------------------------------------------------------------------------
+Instructions for Integrating the Pivotal Mobile Services Suite Push and Analytics Client SDKs for Android
+---------------------------------------------------------------------------------------------------------
 
-In order to receive push messages from Pivotal CF in your Android application you will need to follow these tasks:
+In order to receive push messages from Pivotal Mobile Services Suite in your Android application you will need to follow
+these tasks:
 
  1. Set up a project on Google Cloud Console.  Follow the instructions here:
 
@@ -33,23 +34,23 @@ In order to receive push messages from Pivotal CF in your Android application yo
 
     You will need obtain the Project Number (AKA the "Sender ID") and register a "Web Application".  The Project
     Number is a parameter you most provide to the Push Client SDK when registering your device at run-time and to the
-	Pivotal CF console.  The Web Application on Google Cloud Console includes an "API Key" that you must supply to the
-	Pivotal CF administration console when creating your variant.
+	Pivotal Mobile Services Suite console.  The Web Application on Google Cloud Console includes an "API Key" that you
+	must supply to the Pivotal Mobile Services Suite administration console when creating your variant.
 
- 2. Set up your application, environment, and a variant on the Pivotal CF administration console.  This task is beyond
-    the scope of this document, but please note that you will need the two parameters from Google Cloud Console above.  
-    After setting up your variant in Pivotal CF, make sure to note the Variant UUID and Variant Secret parameters.  You
-	will need them below.
+ 2. Set up your application, environment, and a variant on the Pivotal Mobile Services Suite administration console.
+    This task is beyond the scope of this document, but please note that you will need the two parameters from Google
+    Cloud Console above.  After setting up your variant in Pivotal Mobile Services Suite, make sure to note the
+    Variant UUID and Variant Secret parameters.  You will need them below.
 
  3. Link the library to your project.  This project has not yet been published to any Maven repositories, but once it has
     then you can add the following line to the `dependencies` section of your `build.gradle` file:
 
-        compile 'com.pivotal.cf.mobile.pushsdk:1.0.0-RELEASE'
+        compile 'com.pivotal.mss.pushsdk:1.0.0-RELEASE'
 
     Note that the version name may be different.
 
 	Even if you don't have access to a Maven repository with this library, you could still link to the source of this module,
-	or simply obtain the compiled AAR files.  Please contact the Pivotal CF Mobile Services team for help.
+	or simply obtain the compiled AAR files.  Please contact the Pivotal Mobile Services Suite team for help.
 
  4. You will need define and use the following `permission` in the `manifest` element of your application's
     `AndroidManifest.xml` file.  Ensure that the base of the permission name is your application's package name:
@@ -63,7 +64,7 @@ In order to receive push messages from Pivotal CF in your Android application yo
     `AndroidManifest.xml` file.  Ensure that you set the category name to your application's package name:
 
         <receiver
-            android:name="com.pivotal.cf.mobile.pushsdk.broadcastreceiver.GcmBroadcastReceiver"
+            android:name="com.pivotal.mss.pushsdk.broadcastreceiver.GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
@@ -106,9 +107,9 @@ In order to receive push messages from Pivotal CF in your Android application yo
 	Both the Analytics and Push Client SDKs require you to specify the base URL for your servers in the `ANALYTICS_BASE_SERVER_URL`
 	and `PUSH_BASE_SERVER_URL` parameters.
 
-	If you do not want to use the Pivotal CF Mobile Service Analytics Client SDK then set `IS_ANALYTICS_ENABLED` to `false`.
-	If you are not using the Analytics Client SDK then you may provide a `null` value for the `ANALYTICS_BASE_SERVER_URL`
-	parameter.
+	If you do not want to use the Pivotal Mobile Services Suite Analytics Client SDK then set `IS_ANALYTICS_ENABLED` to
+	`false`.  If you are not using the Analytics Client SDK then you may provide a `null` value for the
+	`ANALYTICS_BASE_SERVER_URL` parameter.
 
 	You must call the `setupAnalytics` method in your `PushSDK` class instance before calling `startRegistration`.
 
@@ -118,15 +119,15 @@ In order to receive push messages from Pivotal CF in your Android application yo
     The `startRegistration` method is asynchronous and will return before registration is complete.  If you need to know
     when registration is complete (or if it fails), then provide a `RegistrationListener` as the second argument.
 
-    The Pivotal CF Push SDK takes care of the following tasks for you:
+    The Pivotal Mobile Services Suite Push SDK takes care of the following tasks for you:
 
         * Checking for Google Play Services.
         * Registering with Google Play Services.
         * Saving your registration ID.
-        * Sending your registration ID to the back-end (i.e.: Pivotal CF Mobile Services).
+        * Sending your registration ID to the back-end (i.e.: the Pivotal Mobile Services Suite).
         * Re-registering after the application version, or any other registration parameters are updated.
 
- 7. To receive push notifications in your application, you will need to add a `broadcast receiver` to your application.
+ 7. To receive push notifications in your application, you will need to add a "broadcast receiver" to your application.
     The intent that GCM sends is provided in the "gcm_intent" parcelable extra of the intent passed to your receiver's
     `onReceive` method.  Here is a simple example:
 
@@ -185,7 +186,7 @@ In order to receive push messages from Pivotal CF in your Android application yo
          <receiver
              android:name=".broadcastreceiver.MyBroadcastReceiver">
              <intent-filter>
-                 <action android:name="YOUR.PACKAGE.NAME.pcfmspushsdk.RECEIVE_PUSH"/>
+                 <action android:name="YOUR.PACKAGE.NAME.pmsspushsdk.RECEIVE_PUSH"/>
              </intent-filter>
          </receiver>
 
@@ -234,14 +235,14 @@ to point to a production server when it is available.
 Push Simple Demo Application
 ----------------------------
 
-The Push Simple Demo Application is an example of the simplest application possible that uses the Pivotal CF Mobile Services
+The Push Simple Demo Application is an example of the simplest application possible that uses the Pivotal Mobile Services Suite
 Push Client SDK.  At this time, it only demonstrates how to register for push notifications.
 
 This demo application registers for push notifications in the Activity object in order to make it easier to display the
 output on the screen.  It is probably more appropriate for you to register for push notifications in your Application
 object instead.
 
-This application is set up to receive push messages via the `MyPivotalCFMSRemotePushLibBroadcastReceiver` class.  These
+This application is set up to receive push messages via the `MyPivotalMSSRemotePushLibBroadcastReceiver` class.  These
 messages are not displayed in the activity window, but they will display a status bar notification.
 
 Push Sample Application
@@ -250,9 +251,9 @@ Push Sample Application
 There is a small sample application included in this repository to demonstrate and exercise the features in the Push
 Client SDK.
 
-You can use this sample application to test registration against Google Cloud Messaging (GCM) and the Pivotal CF Mobile
-Services back-end server for push messages.  Any push messages that are received are printed to the log window.
-Although not currently supported by the library itself, you can also send push messages with the sample application itself.
+You can use this sample application to test registration against Google Cloud Messaging (GCM) and the Pivotal Mobile Services Suite
+back-end server for push messages.  Any push messages that are received are printed to the log window.  Although not
+currently supported by the library itself, you can also send push messages with the sample application itself.
 
 At this time, the sample application uses a dummy project on Google Cloud Console.  It is recommend that you create your
 own test Google API Project by following the directions at http://developer.android.com/google/gcm/gs.html.
@@ -268,15 +269,15 @@ Rotate the display to landscape mode to see the captions for the action bar butt
 
 Press the `Register` button in the sample application action bar to ask the Push SDK to register the device.  If the
 device is not already registered, then you should see a lot of output scroll by as the library registers with both
-GCM and Pivotal CF Mobile Services.  If the device is already registered then the output should be shorter.
+GCM and the Pivotal Mobile Services Suite.  If the device is already registered then the output should be shorter.
 
 Press the `Unregister` button in the sample application action bar to ask the Push SDK to unregister the device.  This
-unregister option will unregister with GCM and with the Pivotal CF Mobile Services.
+unregister option will unregister with GCM and with the Pivotal Mobile Services Suite.
 
 You can clear all or parts of the saved registration data with the `Clear Registration` action bar option.  Clearing
 part or all of the registration data will cause a partial or complete re-registration the next time you press the
 `Register` button.  Unlike the `Unregister` button, the `Clear Registration` button simply causes the Push Client SDK
-to "forget" that it is registered.  Both GCM and Pivotal CF Mobile Services will still think that the device is
+to "forget" that it is registered.  Both GCM and Pivotal Mobile Services Suite will still think that the device is
 registered.
 
 You can use the `Clear Unsent Events` button to clear the database of any Analytics events that have yet to be sent
@@ -291,11 +292,11 @@ You can reset the registration preferences to the default values by selecting th
 the Preferences screen.
 
 The sample application is also set up to receive push messages once the device has been registered with GCM and
-Pivotal CF Mobile Services.  Any messages that are received are printed to the log window.
+the Pivotal Mobile Services Suite.  Any messages that are received are printed to the log window.
 
 Although the Push Client SDK has no support for sending push messages, the Push Sample App can do it for you as long
 as it is set up with the correct `GCM Browser API Key` parameter (when sending messages via GCM or the correct
-`Environment UUID` and `Environment Key` parameters (when sending messages via Pivotal CF Mobile Services).  The
+`Environment UUID` and `Environment Key` parameters (when sending messages via Pivotal Mobile Services Suite).  The
 application can not distinguish between messages sent via the two services.
 
 Analytics Sample Application

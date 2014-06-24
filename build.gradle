@@ -43,7 +43,7 @@ allprojects {
         }
     }
 
-    group = "com.pivotal.cf.mobile"
+    group = "com.pivotal.mss"
     if (isSnapshot) {
         version =  versionName + "-SNAPSHOT"
     } else {

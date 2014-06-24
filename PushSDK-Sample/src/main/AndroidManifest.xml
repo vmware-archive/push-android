@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.pivotal.cf.mobile.pushsdk.sample">
+    package="com.pivotal.mss.pushsdk.sample">
 
     <!-- =============================================================================================== -->
     <!-- You must add this permission, with your package name, to your manifest in order to receive push -->
     <!-- notifications.  The permission name must be YOUR.PACKAGE.NAME.permission.C2D_MESSAGE            -->
     <permission
-        android:name="com.pivotal.cf.mobile.pushsdk.sample.permission.C2D_MESSAGE"
+        android:name="com.pivotal.mss.pushsdk.sample.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
-    <uses-permission android:name="com.pivotal.cf.mobile.pushsdk.permission.C2D_MESSAGE" />
+    <uses-permission android:name="com.pivotal.mss.pushsdk.permission.C2D_MESSAGE" />
     <!-- =============================================================================================== -->
 
     <application
@@ -22,32 +22,32 @@
         <!-- your manifest in order to receive push notifications.  Do not change the package name in the    -->
         <!-- receiver name itself.                                                                           -->
         <receiver
-            android:name="com.pivotal.cf.mobile.pushsdk.broadcastreceiver.GcmBroadcastReceiver"
+            android:name="com.pivotal.mss.pushsdk.broadcastreceiver.GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
-                <category android:name="com.pivotal.cf.mobile.pushsdk.sample"/>
+                <category android:name="com.pivotal.mss.pushsdk.sample"/>
             </intent-filter>
         </receiver>
         <!-- =============================================================================================== -->
 
         <!-- =============================================================================================== -->
-        <!-- This BroadcastReceiver is called whenever the Pivotal CF Mobile Services Push SDK receives a    -->
+        <!-- This BroadcastReceiver is called whenever the Pivotal Mobile Services Suite Push SDK receives a -->
         <!-- push notification from GCM targeted at your application.  You can call it whatever you'd like   -->
         <!-- in your application. Make sure you add the action "YOUR.PACKAGE.NAME.pcfmspushsdk.RECEIVE_PUSH" -->
         <!-- to the broadcast receiver here.                                                                 -->
         <receiver
-            android:name="com.pivotal.cf.mobile.pushsdk.sample.broadcastreceiver.MyPivotalCFMSRemotePushLibBroadcastReceiver"
+            android:name=".broadcastreceiver.MyPivotalMSSRemotePushLibBroadcastReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.pivotal.cf.mobile.pushsdk.sample.pcfmspushsdk.RECEIVE_PUSH"/>
+                <action android:name="com.pivotal.mss.pushsdk.sample.pcfmspushsdk.RECEIVE_PUSH"/>
             </intent-filter>
         </receiver>
         <!-- =============================================================================================== -->
 
         <activity
-            android:name="com.pivotal.cf.mobile.pushsdk.sample.activity.MainActivity"
+            android:name="com.pivotal.mss.pushsdk.sample.activity.MainActivity"
             android:configChanges="orientation"
             android:label="@string/app_name" >
             <intent-filter>
@@ -59,10 +59,10 @@
         <activity
             android:name=".activity.PreferencesActivity"
             android:label="@string/title_activity_preferences"
-            android:parentActivityName="com.pivotal.cf.mobile.pushsdk.sample.activity.MainActivity" >
+            android:parentActivityName="com.pivotal.mss.pushsdk.sample.activity.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
-                android:value="com.pivotal.cf.mobile.pushsdk.sample.activity.MainActivity" />
+                android:value="com.pivotal.mss.pushsdk.sample.activity.MainActivity" />
         </activity>
 
     </application>
