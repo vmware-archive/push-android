@@ -1,33 +1,26 @@
-language: java
-jdk: oraclejdk7
+language: android
+
+android:
+    components:
+        - build-tools-19.1.0
 
 branches:
     only:
-      - master
-      - travis-test
+        - master
+        - travis-test
 
 env:
     global:
-        # Sets the ORG_GRADLE_PROPERTY_MAVEN_USER environment variable
-        - secure: "Hkd+KItH6fePUEuUsZmsnqrcEYj/Pumf+QwQIC3n2Kkvflbmx9dvZpzldfa4cRONcLA6vIFyEMepTjK03FUzOThElZEJjBwDbvbmJWDgtGGLkfHGqUIJ+QgV5Jg1/dZUa2+CBzkkXMtZ14ZQB48ICays9zpigsnZqBGicu88Hdo="
-        # Sets the ORG_GRADLE_PROPERTY_MAVEN_PASS environment variable
-        - secure: "DP0nRAmwhw9IYEF4uE1jY2GxY3cZtDimNUQ6lwLvDJGlQoyJOdDEFjB0/8wEXVr/DCqZrr4e6nQ+UaSd/lhyEpRx9Rjc/ww/V//L4TIvz7GEVI6P1gEbxkMmYOBFpZSX+J6d3sZ5jFKW+kgWlVy2p5WNK02DEO/1Bp0awXaABC8="
+        - secure: "eUH1gNZucRA7hmyUdeaP/EIXb0G2HiRqPaAKc7OxJP97lgDHExCCwlSvTi+tRNf1yH9RFscFl/mafJsXFkF67EGa2MKEI0zghSyHdJ17rRUOjggYRY4PxT7SQhbXOVdvo1dIMwHUq62FSECzRZ1Hzm8VIybPZenkR0PahPMXZaI="
+        - secure: "f2B+8u/1BXGL/izNjCSLvsEV923WJAQ9hum/qnXhpJ62TTy2syIERgPN4fiSK+VaYewWn0Adl6cH4TXboxl2ou+DvCUx3NrK7JbTupFzAOFzZ8Bnek/eCj6tBaIBP2yWwMHXNsPhUkkaAVbsqQZ1F0DveVk1vZcgH/U8/AHUglg="
 
 before_install:
-    # Install base Android SDK
-    - sudo apt-get update -qq
-    - sudo apt-get install -qq libstdc++6:i386 lib32z1
-    - export COMPONENTS=build-tools-19.0.3,android-19,sysimg-19,android-18,sysimg-18,extra-android-support,extra-google-google_play_services,extra-google-gcm,extra-android-m2repository,extra-google-m2repository,extra-android-support-v4,addon-google_apis-google-18,addon-google_apis-google-17,addon-google_apis-google-19,android-17,android-19,addon-google_apis-google-16,android-16
     - export ANDROID_TARGET=android-19
     - export ANDROID_ABI=armeabi-v7a
-    - curl -L https://raw.github.com/embarkmobile/android-sdk-installer/version-1/android-sdk-installer | bash /dev/stdin --install=$COMPONENTS
-    - source ~/.android-sdk-installer/env
-    # Create and start emulator
     - echo no | android create avd --force --name test-avd --target $ANDROID_TARGET --abi $ANDROID_ABI
     - emulator -avd test-avd -no-skin -no-audio -no-window &
 
-before_script:
-    - wait_for_emulator
-
 script:
-    - ./gradlew assemble connectedCheck
+    - "./gradlew assemble"
+    - ./wait_for_emulator.sh
+    - "./gradlew connectedCheck"
