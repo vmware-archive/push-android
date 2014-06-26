@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="io.pivotal.android.push.simpledemoapp">
+
+    <!-- =============================================================================================== -->
+    <!-- You must add this permission, with your package name, to your manifest in order to receive push -->
+    <!-- notifications.  The permission name must be YOUR.PACKAGE.NAME.permission.C2D_MESSAGE            -->
+    <permission
+        android:name="io.pivotal.android.push.simpledemoapp.permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
+    <uses-permission android:name="io.pivotal.android.push.simpledemoapp.permission.C2D_MESSAGE" />
+    <!-- =============================================================================================== -->
+
+    <application
+        android:allowBackup="true"
+        android:icon="@drawable/ic_launcher"
+        android:label="@string/short_app_name"
+        android:theme="@style/AppTheme" >
+
+        <!-- =============================================================================================== -->
+        <!-- You must add this receiver, with your package name as the category in the intent-filter, to     -->
+        <!-- your manifest in order to receive push notifications.  Do not change the package name in the    -->
+        <!-- receiver name itself.                                                                           -->
+        <receiver
+            android:name="io.pivotal.android.push.broadcastreceiver.GcmBroadcastReceiver"
+            android:permission="com.google.android.c2dm.permission.SEND"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+                <category android:name="io.pivotal.android.push.simpledemoapp"/>
+            </intent-filter>
+        </receiver>
+        <!-- =============================================================================================== -->
+
+        <!-- =============================================================================================== -->
+        <!-- This BroadcastReceiver is called whenever the Pivotal Mobile Services Suite Push SDK receives a -->
+        <!-- push notification from GCM targeted at your application.  You can call it whatever you'd like   -->
+        <!-- in your application. Make sure you add the action "YOUR.PACKAGE.NAME.io.pivotal.android.push.RECEIVE_PUSH" -->
+        <!-- to the broadcast receiver here.                                                                 -->
+        <receiver
+            android:name="io.pivotal.android.push.simpledemoapp.broadcastreceiver.MyPivotalMSSRemotePushLibBroadcastReceiver"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="io.pivotal.android.push.simpledemoapp.io.pivotal.android.push.RECEIVE_PUSH"/>
+            </intent-filter>
+        </receiver>
+        <!-- =============================================================================================== -->
+
+        <activity
+            android:name="io.pivotal.android.push.simpledemoapp.MainActivity"
+            android:label="@string/long_app_name" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
+
+    </application>
+
+</manifest>

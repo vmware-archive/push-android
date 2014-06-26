@@ -77,17 +77,17 @@ these tasks:
     your `Activity` class.
 
 		// Initialize the Push SDK.
-		final PushSDK pushSDK = PushSDK.getInstance(this);
+		final Push push = Push.getInstance(this);
 
 		// Setup the Analytics SDK.
 		final URL analyticsServerUrl = new URL(ANALYTICS_BASE_SERVER_URL);
 		final AnalyticsParameters analyticsParameters = new AnalyticsParameters(IS_ANALYTICS_ENABLED, analyticsServerUrl);
-		pushSDK.setupAnalytics(analyticsParameters);
+		push.setupAnalytics(analyticsParameters);
 
 		// Register for push notifications.  The listener itself is optional (may be null).
 		final URL pushServerUrl = new URL(PUSH_BASE_SERVER_URL);
 		final RegistrationParameters parameters = new RegistrationParameters(GCM_SENDER_ID, VARIANT_UUID, VARIANT_SECRET, DEVICE_ALIAS, pushServerUrl);
-		pushSDK.startRegistration(parameters, new RegistrationListener() {
+		push.startRegistration(parameters, new RegistrationListener() {
 
 			@Override
 			public void onRegistrationComplete() {
@@ -111,7 +111,7 @@ these tasks:
 	`false`.  If you are not using the Analytics Client SDK then you may provide a `null` value for the
 	`ANALYTICS_BASE_SERVER_URL` parameter.
 
-	You must call the `setupAnalytics` method in your `PushSDK` class instance before calling `startRegistration`.
+	You must call the `setupAnalytics` method in your `Push` class instance before calling `startRegistration`.
 
     You should only have to call `startRegistration` once in the lifetime of your process -- but calling it more times
 	is not harmful.
@@ -186,7 +186,7 @@ these tasks:
          <receiver
              android:name=".broadcastreceiver.MyBroadcastReceiver">
              <intent-filter>
-                 <action android:name="YOUR.PACKAGE.NAME.pmsspushsdk.RECEIVE_PUSH"/>
+                 <action android:name="YOUR.PACKAGE.NAME.io.pivotal.android.push.RECEIVE_PUSH"/>
              </intent-filter>
          </receiver>
 
@@ -213,17 +213,11 @@ to your computer then you can also run the unit test suite with the command `./g
 Modules in the Repository
 -------------------------
 
- 1. AnalyticsSDK - the source code for the Analytics Client SDK itself. Includes Android JUnit tests in the
-    `androidTest` directory.
- 2. AnalyticsSDK-Sample - an application that can be used to demonstrate the Analytics SDK (described below).
- 3. Common - code common to both the AnalyticsSDK and PushSDK modules.
- 4. CommonTest - code common to the Android JUnit tets for the AnalyticsSDK and PushSDK modules.
- 5. PushSDK - the source code for the Push Client SDK itself. Includes Android JUnit tests in the `androidTest`
-    directory.  The PushSDK depends on the AnalyticsSDK to handle 
- 6. PushSDK-Sample - an application that can be used to demonstrate the Push SDK (described below).
- 7. PushSDK-SimpleDemoApp - the simplest possible application that links to and demonstrates the Push Client
+ 1. Push - the source code for the Push Client SDK itself. Includes Android JUnit tests in the `androidTest`
+    directory.  The Push SDK depends on the Analytics SDK to handle analytics requirements. 
+ 2. Push-Sample - an application that can be used to demonstrate the Push SDK (described below).
+ 3. Push-SimpleDemoApp - the simplest possible application that links to and demonstrates the Push Client
     SDK. (described below).
- 8. SampleAppCore - code common to both the AnalyticsSDK-Sample and PushSDK-Sample modules.
 
 Staging Server
 --------------

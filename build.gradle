@@ -13,11 +13,11 @@ ext {
     isSnapshot = false
     
     libraryProjects = [
-        project(":PushSDK")
+        project(":Push")
     ]
     applicationProjects = [
-        project(":PushSDK-Sample"),
-        project(":PushSDK-SimpleDemoApp")
+        project(":Push-Sample"),
+        project(":Push-SimpleDemoApp")
     ]
 }
 ////////////////////////////////////////////////////////////////
