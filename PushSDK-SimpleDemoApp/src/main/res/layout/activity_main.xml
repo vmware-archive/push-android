@@ -6,7 +6,7 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     android:paddingBottom="@dimen/activity_vertical_margin"
-    tools:context="com.pivotal.mss.pushsdk.simpledemoapp.MainActivity">
+    tools:context="io.pivotal.android.push.simpledemoapp.MainActivity">
 
     <TextView
         android:text="@string/label_text"

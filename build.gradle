@@ -43,7 +43,7 @@ allprojects {
         }
     }
 
-    group = "com.pivotal.mss"
+    group = "io.pivotal.android"
     if (isSnapshot) {
         version =  versionName + "-SNAPSHOT"
     } else {

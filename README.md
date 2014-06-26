@@ -45,7 +45,7 @@ these tasks:
  3. Link the library to your project.  This project has not yet been published to any Maven repositories, but once it has
     then you can add the following line to the `dependencies` section of your `build.gradle` file:
 
-        compile 'com.pivotal.mss.pushsdk:1.0.0-RELEASE'
+        compile 'io.pivotal.android.push:1.0.0-RELEASE'
 
     Note that the version name may be different.
 
@@ -64,7 +64,7 @@ these tasks:
     `AndroidManifest.xml` file.  Ensure that you set the category name to your application's package name:
 
         <receiver
-            android:name="com.pivotal.mss.pushsdk.broadcastreceiver.GcmBroadcastReceiver"
+            android:name="io.pivotal.android.push.broadcastreceiver.GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE"/>

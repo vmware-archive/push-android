@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.pivotal.mss.pushsdk.simpledemoapp">
+    package="io.pivotal.android.push.simpledemoapp">
 
     <!-- =============================================================================================== -->
     <!-- You must add this permission, with your package name, to your manifest in order to receive push -->
     <!-- notifications.  The permission name must be YOUR.PACKAGE.NAME.permission.C2D_MESSAGE            -->
     <permission
-        android:name="com.pivotal.mss.pushsdk.simpledemoapp.permission.C2D_MESSAGE"
+        android:name="io.pivotal.android.push.simpledemoapp.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
-    <uses-permission android:name="com.pivotal.mss.pushsdk.simpledemoapp.permission.C2D_MESSAGE" />
+    <uses-permission android:name="io.pivotal.android.push.simpledemoapp.permission.C2D_MESSAGE" />
     <!-- =============================================================================================== -->
 
     <application
@@ -22,12 +22,12 @@
         <!-- your manifest in order to receive push notifications.  Do not change the package name in the    -->
         <!-- receiver name itself.                                                                           -->
         <receiver
-            android:name="com.pivotal.mss.pushsdk.broadcastreceiver.GcmBroadcastReceiver"
+            android:name="io.pivotal.android.push.broadcastreceiver.GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND"
             android:exported="true">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
-                <category android:name="com.pivotal.mss.pushsdk.simpledemoapp"/>
+                <category android:name="io.pivotal.android.push.simpledemoapp"/>
             </intent-filter>
         </receiver>
         <!-- =============================================================================================== -->
@@ -38,16 +38,16 @@
         <!-- in your application. Make sure you add the action "YOUR.PACKAGE.NAME.pcfmspushsdk.RECEIVE_PUSH" -->
         <!-- to the broadcast receiver here.                                                                 -->
         <receiver
-            android:name=".broadcastreceiver.MyPivotalMSSRemotePushLibBroadcastReceiver"
+            android:name="io.pivotal.android.push.simpledemoapp.broadcastreceiver.MyPivotalMSSRemotePushLibBroadcastReceiver"
             android:exported="false">
             <intent-filter>
-                <action android:name="com.pivotal.mss.pushsdk.simpledemoapp.pcfmspushsdk.RECEIVE_PUSH"/>
+                <action android:name="io.pivotal.android.push.simpledemoapp.pcfmspushsdk.RECEIVE_PUSH"/>
             </intent-filter>
         </receiver>
         <!-- =============================================================================================== -->
 
         <activity
-            android:name="com.pivotal.mss.pushsdk.simpledemoapp.MainActivity"
+            android:name="io.pivotal.android.push.simpledemoapp.MainActivity"
             android:label="@string/long_app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
