@@ -74,7 +74,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
         gcmProvider = new FakeGcmProvider(TEST_GCM_DEVICE_REGISTRATION_ID_1);
         gcmRegistrationApiRequestProvider = new GcmRegistrationApiRequestProvider(new FakeGcmRegistrationApiRequest(gcmProvider));
         gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(new FakeGcmUnregistrationApiRequest(gcmProvider));
-        pushPreferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null);
+        pushPreferencesProvider = new FakePushPreferencesProvider();
         analyticsPreferencesProvider = new FakeAnalyticsPreferencesProvider(true, null);
         versionProvider = new FakeVersionProvider(10);
         serviceStarter = new FakeServiceStarter();

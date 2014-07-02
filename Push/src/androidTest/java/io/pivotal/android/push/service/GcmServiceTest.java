@@ -1,214 +1,276 @@
 package io.pivotal.android.push.service;
 
-import android.content.BroadcastReceiver;
-import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.IntentFilter;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.ResultReceiver;
-import android.test.ServiceTestCase;
+import android.test.AndroidTestCase;
+
+import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import junit.framework.Assert;
 
 import java.util.HashMap;
-import java.util.concurrent.Semaphore;
 
 import io.pivotal.android.analytics.jobs.EnqueueEventJob;
 import io.pivotal.android.analytics.model.events.Event;
 import io.pivotal.android.analytics.service.EventService;
+import io.pivotal.android.common.prefs.AnalyticsPreferencesProvider;
 import io.pivotal.android.common.test.prefs.FakeAnalyticsPreferencesProvider;
 import io.pivotal.android.common.test.util.FakeServiceStarter;
+import io.pivotal.android.common.util.ServiceStarter;
 import io.pivotal.android.push.model.events.EventPushReceived;
 import io.pivotal.android.push.model.events.PushEventHelper;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
+import io.pivotal.android.push.prefs.PushPreferencesProvider;
 
-public class GcmServiceTest extends ServiceTestCase<GcmService> {
+public class GcmServiceTest extends AndroidTestCase {
 
-    private static final String TEST_PACKAGE_NAME = "io.pivotal.android.push.test";
     private static final String TEST_MESSAGE_UUID = "some-message-uuid";
     private static final String TEST_VARIANT_UUID = "some-variant-uuid";
     private static final String TEST_MESSAGE = "some fancy message";
-    private static final String KEY_MESSAGE = "message";
     private static final String TEST_DEVICE_ID = "some_device_id";
-
-    private int testResultCode = GcmService.NO_RESULT;
-    private Intent intent;
-    private boolean didReceiveBroadcast = false;
-    private TestResultReceiver testResultReceiver;
-    private TestBroadcastReceiver testBroadcastReceiver;
-    private Intent receivedIntent;
-    private FakePushPreferencesProvider pushPreferencesProvider;
-    private FakeAnalyticsPreferencesProvider analyticsPreferencesProvider;
-    private FakeServiceStarter serviceStarter;
-
-    // Captures result codes from the service itself
-    public class TestResultReceiver extends ResultReceiver {
-
-        public TestResultReceiver(Handler handler) {
-            super(handler);
-        }
-
-        @Override
-        protected void onReceiveResult(int resultCode, Bundle resultData) {
-            testResultCode = resultCode;
-        }
-    }
-
-    // Registers for broadcasts sent by the service
-    public class TestBroadcastReceiver extends BroadcastReceiver {
-
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            receivedIntent = intent;
-            didReceiveBroadcast = true;
-            GcmService.semaphore.release();
-        }
-    }
-
-    public GcmServiceTest() {
-        super(GcmService.class);
-    }
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        serviceStarter = new FakeServiceStarter();
-        analyticsPreferencesProvider = new FakeAnalyticsPreferencesProvider(false, null);
-        pushPreferencesProvider = new FakePushPreferencesProvider(null, TEST_DEVICE_ID, 0, null, TEST_VARIANT_UUID, null, null, null, null);
-        GcmService.semaphore = new Semaphore(0);
-        GcmService.serviceStarter = serviceStarter;
-        GcmService.pushPreferencesProvider = pushPreferencesProvider;
-        GcmService.analyticsPreferencesProvider = analyticsPreferencesProvider;
-        testResultReceiver = new TestResultReceiver(null);
-        testBroadcastReceiver = new TestBroadcastReceiver();
-        final IntentFilter intentFilter = new IntentFilter(TEST_PACKAGE_NAME + GcmService.BROADCAST_NAME_SUFFIX);
-        getContext().registerReceiver(testBroadcastReceiver, intentFilter);
-        intent = getServiceIntent();
     }
 
     @Override
     protected void tearDown() throws Exception {
-        GcmService.semaphore = null;
-        GcmService.serviceStarter = null;
-        GcmService.pushPreferencesProvider = null;
-        GcmService.analyticsPreferencesProvider = null;
-        getContext().unregisterReceiver(testBroadcastReceiver);
         super.tearDown();
     }
 
-    public void testReceiveNullIntent() throws InterruptedException {
-        startService(null);
-        GcmService.semaphore.acquire();
-        assertEquals(GcmService.NO_RESULT, testResultCode);
-        assertFalse(serviceStarter.wasStarted());
+    public void testHandleNullIntent() throws InterruptedException {
+        final FakeService service = startService(FakeService.class);
+        service.onHandleIntent(null);
+        service.assertMessageReceived(false);
+        service.assertAnalyticsServiceStarted(false);
+        service.onDestroy();
     }
 
-    public void testReceiveEmptyIntent() throws InterruptedException {
-        startService(intent);
-        GcmService.semaphore.acquire();
-        assertEquals(GcmService.RESULT_EMPTY_INTENT, testResultCode);
-        assertFalse(serviceStarter.wasStarted());
+    public void testHandleEmptyIntent() throws InterruptedException {
+        final Intent intent = new Intent(getContext(), FakeService.class);
+
+        final FakeService service = startService(FakeService.class);
+        service.onHandleIntent(intent);
+        service.assertMessageReceived(false);
+        service.assertAnalyticsServiceStarted(false);
+        service.onDestroy();
     }
 
-    public void testEmptyPackageName() throws InterruptedException {
-        intent.putExtra(KEY_MESSAGE, TEST_MESSAGE);
-        startService(intent);
-        GcmService.semaphore.acquire();
-        assertEquals(GcmService.RESULT_EMPTY_PACKAGE_NAME, testResultCode);
-        assertFalse(serviceStarter.wasStarted());
+    public void testMessageReceivedWithAnalyticsEnabled() throws InterruptedException {
+        final Intent intent = createMessageReceivedIntent(TEST_MESSAGE);
+
+        final FakeService service = startService(FakeService.class);
+        service.getAnalyticsPreferencesProvider().setIsAnalyticsEnabled(true);
+        service.onHandleIntent(intent);
+        service.assertMessageContent(TEST_MESSAGE);
+        service.assertAnalyticsServiceStarted(true);
+        service.onDestroy();
     }
 
-    public void testSendNotificationWithAnalyticsDisabled() throws InterruptedException {
-        intent.putExtra(KEY_MESSAGE, TEST_MESSAGE);
-        GcmService.pushPreferencesProvider.setPackageName(TEST_PACKAGE_NAME);
-        startService(intent);
-        GcmService.semaphore.acquire(2);
+    public void testMessageReceivedWithAnalyticsDisabled() throws InterruptedException {
+        final Intent intent = createMessageReceivedIntent(TEST_MESSAGE);
 
-        assertEquals(GcmService.RESULT_NOTIFIED_APPLICATION, testResultCode);
-        assertTrue(didReceiveBroadcast);
-        assertNotNull(receivedIntent);
-        assertTrue(receivedIntent.hasExtra(GcmService.KEY_GCM_INTENT));
-
-        final Intent gcmIntent = receivedIntent.getParcelableExtra(GcmService.KEY_GCM_INTENT);
-        assertNotNull(gcmIntent);
-
-        final Bundle extras = gcmIntent.getExtras();
-        assertNotNull(extras);
-        assertTrue(extras.containsKey(KEY_MESSAGE));
-        assertEquals(TEST_MESSAGE, extras.getString(KEY_MESSAGE));
-
-        assertFalse(serviceStarter.wasStarted());
+        final FakeService service = startService(FakeService.class);
+        service.getAnalyticsPreferencesProvider().setIsAnalyticsEnabled(false);
+        service.onHandleIntent(intent);
+        service.assertMessageContent(TEST_MESSAGE);
+        service.assertAnalyticsServiceStarted(false);
+        service.onDestroy();
     }
 
-    public void testSendNotificationWithAnalyticsEnabled() throws InterruptedException {
-        analyticsPreferencesProvider.setIsAnalyticsEnabled(true);
-        serviceStarter.setReturnedComponentName(new ComponentName(getContext(), EventService.class));
-        intent.putExtra(KEY_MESSAGE, TEST_MESSAGE);
-        GcmService.pushPreferencesProvider.setPackageName(TEST_PACKAGE_NAME);
-        startService(intent);
-        GcmService.semaphore.acquire(2);
+    public void testMessageDeletedWithAnalyticsEnabled() throws InterruptedException {
+        final Intent intent = createMessageDeletedIntent();
 
-        assertEquals(GcmService.RESULT_NOTIFIED_APPLICATION, testResultCode);
-        assertTrue(didReceiveBroadcast);
-        assertNotNull(receivedIntent);
-        assertTrue(receivedIntent.hasExtra(GcmService.KEY_GCM_INTENT));
+        final FakeService service = startService(FakeService.class);
+        service.getAnalyticsPreferencesProvider().setIsAnalyticsEnabled(true);
+        service.onHandleIntent(intent);
+        service.assertMessageDeleted(true);
+        service.assertAnalyticsServiceStarted(true);
+        service.onDestroy();
+    }
 
-        final Intent gcmIntent = receivedIntent.getParcelableExtra(GcmService.KEY_GCM_INTENT);
-        assertNotNull(gcmIntent);
+    public void testMessageDeletedWithAnalyticsDisabled() throws InterruptedException {
+        final Intent intent = createMessageDeletedIntent();
 
-        final Bundle extras = gcmIntent.getExtras();
-        assertNotNull(extras);
-        assertTrue(extras.containsKey(KEY_MESSAGE));
-        assertEquals(TEST_MESSAGE, extras.getString(KEY_MESSAGE));
+        final FakeService service = startService(FakeService.class);
+        service.getAnalyticsPreferencesProvider().setIsAnalyticsEnabled(false);
+        service.onHandleIntent(intent);
+        service.assertMessageDeleted(true);
+        service.assertAnalyticsServiceStarted(false);
+        service.onDestroy();
+    }
 
-        assertTrue(serviceStarter.wasStarted());
-        assertEquals(EventService.class.getCanonicalName(), serviceStarter.getStartedIntent().getComponent().getClassName());
+    public void testMessageSendErrorWithAnalyticsEnabled() throws InterruptedException {
+        final Intent intent = createMessageSendErrorIntent();
+
+        final FakeService service = startService(FakeService.class);
+        service.getAnalyticsPreferencesProvider().setIsAnalyticsEnabled(true);
+        service.onHandleIntent(intent);
+        service.assertMessageSendError(true);
+        service.assertAnalyticsServiceStarted(true);
+        service.onDestroy();
+    }
+
+    public void testMessageSendErrorWithAnalyticsDisabled() throws InterruptedException {
+        final Intent intent = createMessageSendErrorIntent();
+
+        final FakeService service = startService(FakeService.class);
+        service.getAnalyticsPreferencesProvider().setIsAnalyticsEnabled(false);
+        service.onHandleIntent(intent);
+        service.assertMessageSendError(true);
+        service.assertAnalyticsServiceStarted(false);
+        service.onDestroy();
     }
 
     public void testQueuesReceiptNotificationWithMessageUuidWithAnalyticsDisabled() throws InterruptedException {
+        final Intent intent = new Intent(getContext(), FakeService.class);
         intent.putExtra(GcmService.KEY_MESSAGE_UUID, TEST_MESSAGE_UUID);
-        GcmService.pushPreferencesProvider.setPackageName(TEST_PACKAGE_NAME);
-        startService(intent);
-        GcmService.semaphore.acquire(2);
 
-        assertEquals(GcmService.RESULT_NOTIFIED_APPLICATION, testResultCode);
-        assertTrue(didReceiveBroadcast);
-        assertNotNull(receivedIntent);
-        assertTrue(receivedIntent.hasExtra(GcmService.KEY_GCM_INTENT));
-
-        assertFalse(serviceStarter.wasStarted());
+        final FakeService service = startService(FakeService.class);
+        service.getAnalyticsPreferencesProvider().setIsAnalyticsEnabled(false);
+        service.getPushPreferencesProvider().setVariantUuid(TEST_VARIANT_UUID);
+        service.onHandleIntent(intent);
+        service.assertAnalyticsServiceStarted(false);
+        service.onDestroy();
     }
 
     public void testQueuesReceiptNotificationWithMessageUuidWithAnalyticsEnabled() throws InterruptedException {
-        analyticsPreferencesProvider.setIsAnalyticsEnabled(true);
-        serviceStarter.setReturnedComponentName(new ComponentName(getContext(), EventService.class));
+        final Intent intent = new Intent(getContext(), FakeService.class);
         intent.putExtra(GcmService.KEY_MESSAGE_UUID, TEST_MESSAGE_UUID);
-        GcmService.pushPreferencesProvider.setPackageName(TEST_PACKAGE_NAME);
-        startService(intent);
-        GcmService.semaphore.acquire(2);
 
-        assertEquals(GcmService.RESULT_NOTIFIED_APPLICATION, testResultCode);
-        assertTrue(didReceiveBroadcast);
-        assertNotNull(receivedIntent);
-        assertTrue(receivedIntent.hasExtra(GcmService.KEY_GCM_INTENT));
-
-        assertTrue(serviceStarter.wasStarted());
-        final Intent intent = serviceStarter.getStartedIntent();
-        assertEquals(EventService.class.getCanonicalName(), intent.getComponent().getClassName());
-        final EnqueueEventJob job = intent.getParcelableExtra(EventService.KEY_JOB);
-        final Event event = job.getEvent();
-        Assert.assertEquals(EventPushReceived.EVENT_TYPE, event.getEventType());
-        final HashMap<String, Object> map = event.getData();
-        assertEquals(TEST_MESSAGE_UUID, map.get(EventPushReceived.MESSAGE_UUID));
-        assertEquals(TEST_VARIANT_UUID, map.get(PushEventHelper.VARIANT_UUID));
-        assertEquals(TEST_DEVICE_ID, map.get(PushEventHelper.DEVICE_ID));
+        final FakeService service = startService(FakeService.class);
+        service.getAnalyticsPreferencesProvider().setIsAnalyticsEnabled(true);
+        service.getPushPreferencesProvider().setVariantUuid(TEST_VARIANT_UUID);
+        service.getPushPreferencesProvider().setBackEndDeviceRegistrationId(TEST_DEVICE_ID);
+        service.onHandleIntent(intent);
+        service.assertAnalyticsEventSent(TEST_MESSAGE_UUID, TEST_VARIANT_UUID, TEST_DEVICE_ID);
+        service.onDestroy();
     }
 
-    private Intent getServiceIntent() {
-        final Intent intent = new Intent(getContext(), GcmService.class);
-        intent.putExtra(GcmService.KEY_RESULT_RECEIVER, testResultReceiver);
+    private Intent createMessageReceivedIntent(final String message) {
+        final Intent intent = new Intent(getContext(), FakeService.class);
+        intent.setAction("com.google.android.c2dm.intent.RECEIVE");
+        intent.putExtra("message_type", GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE);
+        intent.putExtra(GcmService.KEY_MESSAGE, message);
         return intent;
+    }
+
+    private Intent createMessageDeletedIntent() {
+        final Intent intent = new Intent(getContext(), FakeService.class);
+        intent.setAction("com.google.android.c2dm.intent.RECEIVE");
+        intent.putExtra("message_type", GoogleCloudMessaging.MESSAGE_TYPE_DELETED);
+        return intent;
+    }
+
+    private Intent createMessageSendErrorIntent() {
+        final Intent intent = new Intent(getContext(), FakeService.class);
+        intent.setAction("com.google.android.c2dm.intent.RECEIVE");
+        intent.putExtra("message_type", GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR);
+        return intent;
+    }
+
+    private <T extends FakeService> T startService(final Class<T> klass) {
+        try {
+            final Object object = klass.newInstance();
+            final T service = klass.cast(object);
+            service.attachBaseContext(getContext());
+            service.onCreate();
+            return service;
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private static final class FakeService extends GcmService {
+
+        private boolean messageDeleted = false;
+        private boolean messageSendError = false;
+        private boolean messageReceived = false;
+
+        private Bundle bundle;
+
+        public FakeService() {
+            super();
+        }
+
+        @Override
+        public void attachBaseContext(final Context base) {
+            super.attachBaseContext(base);
+        }
+
+        @Override
+        public ServiceStarter onCreateServiceStarter() {
+            return new FakeServiceStarter();
+        }
+
+        @Override
+        public PushPreferencesProvider onCreatePushPreferencesProvider() {
+            return new FakePushPreferencesProvider();
+        }
+
+        @Override
+        public AnalyticsPreferencesProvider onCreateAnalyticsPreferencesProvider() {
+            return new FakeAnalyticsPreferencesProvider(false, null);
+        }
+
+        @Override
+        public void onReceiveMessage(final Bundle payload) {
+            super.onReceiveMessage(payload);
+            messageReceived = true;
+            bundle = payload;
+        }
+
+        @Override
+        public void onReceiveMessageSendError(final Bundle payload) {
+            super.onReceiveMessageSendError(payload);
+            messageSendError = true;
+        }
+
+        @Override
+        public void onReceiveMessageDeleted(final Bundle payload) {
+            super.onReceiveMessageDeleted(payload);
+            messageDeleted = true;
+        }
+
+        public void assertMessageContent(final String expected) {
+            assertTrue(messageReceived);
+            assertEquals(expected, bundle.getString(GcmService.KEY_MESSAGE));
+        }
+
+        public void assertMessageReceived(final boolean expected) {
+            assertEquals(expected, messageReceived);
+        }
+
+        public void assertMessageDeleted(final boolean expected) {
+            assertEquals(expected, messageDeleted);
+        }
+
+        public void assertMessageSendError(final boolean expected) {
+            assertEquals(expected, messageSendError);
+        }
+
+        public void assertAnalyticsServiceStarted(final boolean expected) {
+            final FakeServiceStarter starter = (FakeServiceStarter) getServiceStarter();
+            assertEquals(expected, starter.wasStarted());
+        }
+
+        public void assertAnalyticsEventSent(final String messageUUID, final String variantUUID, final String deviceID) {
+            final FakeServiceStarter starter = (FakeServiceStarter) getServiceStarter();
+            assertTrue(starter.wasStarted());
+
+            final Intent intent = starter.getStartedIntent();
+            assertEquals(EventService.class.getCanonicalName(), intent.getComponent().getClassName());
+
+            final EnqueueEventJob job = intent.getParcelableExtra(EventService.KEY_JOB);
+            final Event event = job.getEvent();
+            Assert.assertEquals(EventPushReceived.EVENT_TYPE, event.getEventType());
+
+            final HashMap<String, Object> map = event.getData();
+            assertEquals(messageUUID, map.get(EventPushReceived.MESSAGE_UUID));
+            assertEquals(variantUUID, map.get(PushEventHelper.VARIANT_UUID));
+            assertEquals(deviceID, map.get(PushEventHelper.DEVICE_ID));
+        }
     }
 }

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-package io.pivotal.android.push.sample.dialogfragment;
+package io.pivotal.android.push.sample.dialog;
 
 import android.app.AlertDialog;
 import android.app.Dialog;

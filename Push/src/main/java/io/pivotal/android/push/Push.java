@@ -88,9 +88,6 @@ public class Push {
         verifyArguments(context);
         saveArguments(context);
 
-        if (!Logger.isSetup()) {
-            Logger.setup(context);
-        }
         Logger.i("Push SDK initialized.");
     }
 
@@ -117,6 +114,19 @@ public class Push {
     public void setupAnalytics(AnalyticsParameters analyticsParameters) {
         final AnalyticsSDK analyticsSDK = AnalyticsSDK.getInstance(context);
         analyticsSDK.setParameters(analyticsParameters);
+    }
+
+    /**
+     * Asynchronously registers the device and application for receiving push notifications.  If the application
+     * is already registered then will do nothing.  If some of the registration parameters are different then
+     * the last successful registration then the device will be re-registered with the new parameters.  Only
+     * one registration attempt will run at a time: if some attempt is currently in progress, then this request
+     * will only start after the first attempt completes.
+     *
+     * @param parameters Provides the parameters required for registration.  May not be null.
+     */
+    public void startRegistration(final RegistrationParameters parameters) {
+        startRegistration(parameters, null);
     }
 
     /**
@@ -178,7 +188,17 @@ public class Push {
     }
 
     /**
-     * Asynchronously unregisters the device and application from receiving push notifications.  If the application
+     * Asynchronously unregisters the device and application from receiving push notifications.
+     *
+     * @param parameters Provides the parameters required for unregistration.  May not be null.
+     *
+     */
+    public void startUnregistration(final RegistrationParameters parameters) {
+        startUnregistration(parameters, null);
+    }
+
+    /**
+     * Asynchronously unregisters the device and application from receiving push notifications.
      *
      * @param parameters Provides the parameters required for unregistration.  May not be null.
      * @param listener Optional listener for receiving a callback after un`registration finishes. This callback may

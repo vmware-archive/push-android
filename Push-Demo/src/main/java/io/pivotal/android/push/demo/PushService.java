@@ -1,0 +1,74 @@
+package io.pivotal.android.push.demo;
+
+import android.app.NotificationManager;
+import android.app.PendingIntent;
+import android.content.Context;
+import android.content.Intent;
+import android.os.Bundle;
+import android.support.v4.app.NotificationCompat;
+
+import io.pivotal.android.common.util.Logger;
+import io.pivotal.android.push.service.GcmService;
+
+public class PushService extends GcmService {
+
+    public static final int NOTIFICATION_ID = 1;
+    private static final int NOTIFICATION_LIGHTS_COLOUR = 0xffaa55aa;
+    private static final int NOTIFICATION_LIGHTS_ON_MS = 500;
+    private static final int NOTIFICATION_LIGHTS_OFF_MS = 1000;
+
+    @Override
+    public void onReceive(Intent intent) {
+        super.onReceive(intent);
+
+        final Bundle bundle = intent.getExtras();
+        Logger.e("===================================");
+        for (String key : bundle.keySet()) {
+            Object value = bundle.get(key);
+            Logger.e("KEY: " + String.format("%s %s (%s)", key, value.toString(), value.getClass().getName()));
+        }
+        Logger.e("===================================\n");
+    }
+
+    @Override
+    public void onReceiveMessage(Bundle payload) {
+        String message;
+        if (payload.containsKey("message")) {
+            message = "Received: \"" + payload.getString("message") + "\".";
+        } else {
+            message = "Received message with no extras.";
+        }
+        Logger.i(message);
+        sendNotification(message);
+    }
+
+    @Override
+    public void onReceiveMessageDeleted(Bundle payload) {
+        Logger.i("Received message with type 'MESSAGE_TYPE_DELETED'.");
+        sendNotification("Deleted messages on server: " + payload.toString());
+    }
+
+    @Override
+    public void onReceiveMessageSendError(Bundle payload) {
+        Logger.i("Received message with type 'MESSAGE_TYPE_SEND_ERROR'.");
+        sendNotification("Send error: " + payload.toString());
+    }
+
+    private void sendNotification(String msg) {
+        final NotificationManager notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+        // Set up the notification to open MainActivity when the user touches it
+        final PendingIntent contentIntent = PendingIntent.getActivity(this, 0, new Intent(this, MainActivity.class), 0);
+
+        final NotificationCompat.Builder builder = new NotificationCompat.Builder(this)
+            .setSmallIcon(io.pivotal.android.push.demo.R.drawable.ic_launcher)
+            .setContentTitle("Pivotal MSS Push Simple Demo App")
+            .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
+            .setContentText(msg);
+
+        builder.setContentIntent(contentIntent);
+        builder.setLights(NOTIFICATION_LIGHTS_COLOUR, NOTIFICATION_LIGHTS_ON_MS, NOTIFICATION_LIGHTS_OFF_MS);
+        notificationManager.notify(NOTIFICATION_ID, builder.build());
+    }
+
+}

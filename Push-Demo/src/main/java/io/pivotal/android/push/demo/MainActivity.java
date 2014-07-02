@@ -1,4 +1,4 @@
-package io.pivotal.android.push.simpledemoapp;
+package io.pivotal.android.push.demo;
 
 import android.os.Bundle;
 import android.os.Handler;
@@ -24,11 +24,11 @@ public class MainActivity extends ActionBarActivity {
     // Set to your "Variant Secret" as provided by the Pivotal Mobile Services Suite console
     private static final String VARIANT_SECRET = "0de0f14a-ab2c-4f47-aa44-a6cb06531c6c";
 
-    // Set to your own defined alias for this device.  May not be null.  May be empty.
-    private static final String DEVICE_ALIAS = "test_device_alias";
-
     // Set to your instance of the Pivotal Mobile Services Suite server providing your push services.
     private static final String PUSH_BASE_SERVER_URL = "http://ec2-54-87-125-154.compute-1.amazonaws.com";
+
+    // Set to your own defined alias for this device.  May not be null.  May be empty.
+    private static final String DEVICE_ALIAS = "test_device_alias";
 
     // Set to your instance of the Pivotal Mobile Services Suite server providing your analytics services.
     // Right now, we're assuming it's the same as the push server.
@@ -49,9 +49,11 @@ public class MainActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
+
         label = (TextView) findViewById(R.id.label);
         label.setText("Any received push notifications will appear on your device status bar.");
         queueLogMessage(getResources().getString(R.string.label_text));
+
         registerForPushNotifications();
     }
 
@@ -61,11 +63,10 @@ public class MainActivity extends ActionBarActivity {
     private void registerForPushNotifications() {
 
         try {
-
             // Initialize the Push SDK.
             final Push push = Push.getInstance(this);
 
-            // Setup the Analytics SDK.
+            // (Optional) Setup the Analytics SDK
             final URL analyticsServerUrl = new URL(ANALYTICS_BASE_SERVER_URL);
             final AnalyticsParameters analyticsParameters = new AnalyticsParameters(IS_ANALYTICS_ENABLED, analyticsServerUrl);
             push.setupAnalytics(analyticsParameters);

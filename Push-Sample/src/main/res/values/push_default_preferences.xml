@@ -10,6 +10,7 @@
     <!-- This parameter is required to register with GCM.  It's the same as the Project Number assigned by Google    -->
     <!-- Cloud Console.  You will also need to enter this value in your "variant" in the Pivotal Mobile Services Suite -->
     <!-- Push Server admin console.                                                                                  -->
+
     <string name="pref_default_gcm_sender_id">816486687340</string>
 
     <!-- This parameter is only required if you want to push messages via GCM in the sample app, though you may      -->

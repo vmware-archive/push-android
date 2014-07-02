@@ -49,11 +49,11 @@ import io.pivotal.android.push.RegistrationParameters;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
 import io.pivotal.android.push.registration.RegistrationListener;
 import io.pivotal.android.push.registration.UnregistrationListener;
-import io.pivotal.android.push.sample.broadcastreceiver.MyPivotalMSSRemotePushLibBroadcastReceiver;
-import io.pivotal.android.push.sample.dialogfragment.ClearRegistrationDialogFragment;
-import io.pivotal.android.push.sample.dialogfragment.SendMessageDialogFragment;
+import io.pivotal.android.push.sample.dialog.ClearRegistrationDialogFragment;
+import io.pivotal.android.push.sample.dialog.SendMessageDialogFragment;
 import io.pivotal.android.push.sample.model.BackEndMessageRequest;
 import io.pivotal.android.push.sample.model.GcmMessageRequest;
+import io.pivotal.android.push.sample.service.PushService;
 import io.pivotal.android.push.sample.util.Preferences;
 
 public class MainActivity extends BaseMainActivity {
@@ -111,7 +111,7 @@ public class MainActivity extends BaseMainActivity {
 
     private void clearNotifications() {
         final NotificationManager notificationManager = (NotificationManager) this.getSystemService(Context.NOTIFICATION_SERVICE);
-        notificationManager.cancel(MyPivotalMSSRemotePushLibBroadcastReceiver.NOTIFICATION_ID);
+        notificationManager.cancel(PushService.NOTIFICATION_ID);
     }
 
     private void startRegistration() {

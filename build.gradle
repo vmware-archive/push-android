@@ -10,14 +10,14 @@
 ext {
     versionName = "0.6"
     versionCode = 6
-    isSnapshot = false
+    isSnapshot = true
     
     libraryProjects = [
         project(":Push")
     ]
     applicationProjects = [
         project(":Push-Sample"),
-        project(":Push-SimpleDemoApp")
+        project(":Push-Demo")
     ]
 }
 ////////////////////////////////////////////////////////////////
@@ -32,6 +32,16 @@ buildscript {
 }
 
 allprojects {
+    apply plugin: 'maven'
+
+    group = "io.pivotal.android"
+
+    if (isSnapshot) {
+        version =  versionName + "-SNAPSHOT"
+    } else {
+        version =  versionName
+    }
+
     repositories {
         mavenCentral()
         maven {
@@ -42,20 +52,12 @@ allprojects {
             }
         }
     }
-
-    group = "io.pivotal.android"
-    if (isSnapshot) {
-        version =  versionName + "-SNAPSHOT"
-    } else {
-        version =  versionName + "-RELEASE"
-    }
 }
 
 // LIBRARIES
 configure (libraryProjects) {
 
     apply plugin: 'android-library'
-    apply plugin: 'maven'
 
     android {
         compileSdkVersion 19
@@ -69,6 +71,12 @@ configure (libraryProjects) {
         }
     }
 
+    configurations {
+        archives {
+            extendsFrom configurations.default
+        }
+    }
+
     uploadArchives {
         configuration = configurations.archives
         repositories.mavenDeployer {
@@ -78,12 +86,6 @@ configure (libraryProjects) {
             snapshotRepository(url: 'https://maven.xtremelabs.com/artifactory/libs-snapshot-local') {
                 authentication(userName: MAVEN_USER, password: MAVEN_PASS)
             }
-        }
-    }
-
-    configurations {
-        archives {
-            extendsFrom configurations.default
         }
     }
 

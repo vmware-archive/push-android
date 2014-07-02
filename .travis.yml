@@ -3,6 +3,8 @@ language: android
 android:
     components:
         - build-tools-19.1.0
+    licences:
+        - android-sdk-license-5be876d5
 
 branches:
     only:
@@ -17,12 +19,10 @@ env:
         - secure: "I4L0mpR7cQFooDW85UvNRkdHebIjFDR5EvXg5N+KGu+8pZvkf9eW3OncX3nAs9O09f85cfE73UOK7Dn58s3HIAo6gJZW9hwCakSAqsaB/dv7H87+UxVPxCn+0nJLQaUtlqwFmsC/1Bwm6E7tdR5Py1iW+tbueo46DaVVuJViVa4="
 
 before_install:
-    - export ANDROID_TARGET=android-19
-    - export ANDROID_ABI=armeabi-v7a
-    - echo no | android create avd --force --name test-avd --target $ANDROID_TARGET --abi $ANDROID_ABI
+    - echo no | android create avd --force --name test-avd --target android-19 --abi armeabi-v7a
     - emulator -avd test-avd -no-skin -no-audio -no-window &
 
 script:
-    - "./gradlew assemble"
+    - ./gradlew assemble
     - ./wait_for_emulator.sh
-    - "./gradlew connectedCheck"
+    - ./gradlew connectedCheck uploadArchives

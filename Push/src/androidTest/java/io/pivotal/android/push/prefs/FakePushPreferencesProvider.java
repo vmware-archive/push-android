@@ -38,6 +38,9 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     private boolean wasPackageNameSaved = false;
     private boolean wasBaseServerUrlSaved = false;
 
+    public FakePushPreferencesProvider() {
+    }
+
     public FakePushPreferencesProvider(String gcmDeviceRegistrationIdToLoad,
                                        String backEndDeviceRegistrationIdToLoad,
                                        int appVersionToLoad,

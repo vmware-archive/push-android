@@ -8,6 +8,7 @@
     <permission
         android:name="io.pivotal.android.push.sample.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
+
     <uses-permission android:name="io.pivotal.android.push.permission.C2D_MESSAGE" />
     <!-- =============================================================================================== -->
 
@@ -22,7 +23,7 @@
         <!-- your manifest in order to receive push notifications.  Do not change the package name in the    -->
         <!-- receiver name itself.                                                                           -->
         <receiver
-            android:name="io.pivotal.android.push.broadcastreceiver.GcmBroadcastReceiver"
+            android:name="io.pivotal.android.push.receiver.GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND"
             android:exported="true">
             <intent-filter>
@@ -33,21 +34,12 @@
         <!-- =============================================================================================== -->
 
         <!-- =============================================================================================== -->
-        <!-- This BroadcastReceiver is called whenever the Pivotal Mobile Services Suite Push SDK receives a -->
-        <!-- push notification from GCM targeted at your application.  You can call it whatever you'd like   -->
-        <!-- in your application. Make sure you add the action "YOUR.PACKAGE.NAME.io.pivotal.android.push.RECEIVE_PUSH" -->
-        <!-- to the broadcast receiver here.                                                                 -->
-        <receiver
-            android:name="io.pivotal.android.push.sample.broadcastreceiver.MyPivotalMSSRemotePushLibBroadcastReceiver"
-            android:exported="false">
-            <intent-filter>
-                <action android:name="io.pivotal.android.push.sample.io.pivotal.android.push.RECEIVE_PUSH"/>
-            </intent-filter>
-        </receiver>
+        <!-- You must add your push service to your manifest in order to receive notification updates        -->
+        <service android:name=".service.PushService" android:exported="false"/>
         <!-- =============================================================================================== -->
 
         <activity
-            android:name="io.pivotal.android.push.sample.activity.MainActivity"
+            android:name=".activity.MainActivity"
             android:configChanges="orientation"
             android:label="@string/app_name" >
             <intent-filter>
@@ -57,9 +49,9 @@
         </activity>
 
         <activity
-            android:name="io.pivotal.android.push.sample.activity.PreferencesActivity"
+            android:name=".activity.PreferencesActivity"
             android:label="@string/title_activity_preferences"
-            android:parentActivityName="io.pivotal.android.push.sample.activity.MainActivity" >
+            android:parentActivityName=".activity.MainActivity" >
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value="io.pivotal.android.push.sample.activity.MainActivity" />

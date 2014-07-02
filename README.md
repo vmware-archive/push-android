@@ -45,7 +45,7 @@ these tasks:
  3. Link the library to your project.  This project has not yet been published to any Maven repositories, but once it has
     then you can add the following line to the `dependencies` section of your `build.gradle` file:
 
-        compile 'io.pivotal.android.push:1.0.0-RELEASE'
+        compile 'io.pivotal.android:push:1.0.0'
 
     Note that the version name may be different.
 
@@ -58,13 +58,14 @@ these tasks:
         <permission
             android:name="YOUR.PACKAGE.NAME.permission.C2D_MESSAGE"
             android:protectionLevel="signature" />
+
         <uses-permission android:name="YOUR.PACKAGE.NAME.permission.C2D_MESSAGE" />
 
  5. You will need to add the following `receiver` to the `application` element of your application's
     `AndroidManifest.xml` file.  Ensure that you set the category name to your application's package name:
 
         <receiver
-            android:name="io.pivotal.android.push.broadcastreceiver.GcmBroadcastReceiver"
+            android:name="io.pivotal.android.push.receiver.GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND">
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
@@ -73,32 +74,15 @@ these tasks:
         </receiver>
 
  6. Add the following lines of code to the initialization section of your application.  You will need a `Context` object
-    to pass to the `PushLib.init` method, so you should try to add this code to your `Application` class or to one of
+    to pass to the `getInstance` method, so you should try to add this code to your `Application` class or to one of
     your `Activity` class.
 
-		// Initialize the Push SDK.
+        final RegistrationParameters parameters = new RegistrationParameters(
+		    GCM_SENDER_ID, VARIANT_UUID, VARIANT_SECRET, DEVICE_ALIAS, new URL(PUSH_BASE_SERVER_URL)
+		);
+
 		final Push push = Push.getInstance(this);
-
-		// Setup the Analytics SDK.
-		final URL analyticsServerUrl = new URL(ANALYTICS_BASE_SERVER_URL);
-		final AnalyticsParameters analyticsParameters = new AnalyticsParameters(IS_ANALYTICS_ENABLED, analyticsServerUrl);
-		push.setupAnalytics(analyticsParameters);
-
-		// Register for push notifications.  The listener itself is optional (may be null).
-		final URL pushServerUrl = new URL(PUSH_BASE_SERVER_URL);
-		final RegistrationParameters parameters = new RegistrationParameters(GCM_SENDER_ID, VARIANT_UUID, VARIANT_SECRET, DEVICE_ALIAS, pushServerUrl);
-		push.startRegistration(parameters, new RegistrationListener() {
-
-			@Override
-			public void onRegistrationComplete() {
-				// Registration successful
-			}
-
-			@Override
-			public void onRegistrationFailed(String reason) {
-				// Registration failed. See reason.
-			}
-		});
+		push.startRegistration(parameters);
 
     The `GCM_SENDER_ID`, `VARIANT_UUID`, and `VARIANT_SECRET` are described above.  The `DEVICE_ALIAS` is a custom field that
     you can use to differentiate this device from others in your own push messaging campaigns.  You can leave it empty
@@ -127,68 +111,27 @@ these tasks:
         * Sending your registration ID to the back-end (i.e.: the Pivotal Mobile Services Suite).
         * Re-registering after the application version, or any other registration parameters are updated.
 
- 7. To receive push notifications in your application, you will need to add a "broadcast receiver" to your application.
-    The intent that GCM sends is provided in the "gcm_intent" parcelable extra of the intent passed to your receiver's
-    `onReceive` method.  Here is a simple example:
+ 7. To receive push notifications in your application, you will need to add a "service" to your application.
+    The intent that GCM sends is passed to your service's `onReceive` method.  Here is a simple example:
 
-        public class MyBroadcastReceiver extends WakefulBroadcastReceiver {
-
-            public static final int NOTIFICATION_ID = 1;
+        public class MyPushService extends GcmService {
 
             @Override
-            public void onReceive(Context context, Intent intent) {
-
-                final Intent gcmIntent = intent.getExtras().getParcelable("gcm_intent");
-                final Bundle extras = gcmIntent.getExtras();
-                final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
-                final String messageType = gcm.getMessageType(gcmIntent);
-
-                if (!extras.isEmpty()) {
-
-                    if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-
-                        // Post notification of received message.
-                        String message;
-                        if (extras.containsKey("message")) {
-                            message = "Received: \"" + extras.getString("message") + "\".";
-                        } else {
-                            message = "Received message with no extras.";
-                        }
-                        sendNotification(context, message);
-                    }
+            public void onReceiveMessage(Bundle payload) {
+                if (payload.containsKey("message")) {
+                    final String message = payload.getString("message");
+                    handleMessage(message);
                 }
-
-                MyBroadcastReceiver.completeWakefulIntent(intent);
             }
 
-            // Put the message into a notification and post it.
-            private void sendNotification(Context context, String msg) {
-                final NotificationManager notificationManager = (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
-
-                // Set up the notification to open MainActivity when the user touches it
-                final PendingIntent contentIntent = PendingIntent.getActivity(context, 0, new Intent(context, MyActivity.class), 0);
-
-                final NotificationCompat.Builder builder =
-                        new NotificationCompat.Builder(context)
-                                .setSmallIcon(R.drawable.your icon)
-                                .setContentTitle("Your application name")
-                                .setStyle(new NotificationCompat.BigTextStyle().bigText(msg))
-                                .setContentText(msg);
-
-                builder.setContentIntent(contentIntent);
-                notificationManager.notify(NOTIFICATION_ID, builder.build());
+            private void handleMessage(String msg) {
+                // Your code here
             }
         }
 
- 8. Finally, you will need to declare your broadcast receiver in your `AndroidManifest.xml` file.  The base of the
-    action name in the intent filter should be the same as your application's package name:
+ 8. Finally, you will need to declare your service in your `AndroidManifest.xml` file.
 
-         <receiver
-             android:name=".broadcastreceiver.MyBroadcastReceiver">
-             <intent-filter>
-                 <action android:name="YOUR.PACKAGE.NAME.io.pivotal.android.push.RECEIVE_PUSH"/>
-             </intent-filter>
-         </receiver>
+         <service android:name=".service.MyPushService" android:exported="false" />
 
 
 Building the SDKs themselves
@@ -216,7 +159,7 @@ Modules in the Repository
  1. Push - the source code for the Push Client SDK itself. Includes Android JUnit tests in the `androidTest`
     directory.  The Push SDK depends on the Analytics SDK to handle analytics requirements. 
  2. Push-Sample - an application that can be used to demonstrate the Push SDK (described below).
- 3. Push-SimpleDemoApp - the simplest possible application that links to and demonstrates the Push Client
+ 3. Push-Demo - the simplest possible application that links to and demonstrates the Push Client
     SDK. (described below).
 
 Staging Server
@@ -226,17 +169,17 @@ At this time, the library is hard coded to use the staging server on Amazon AWS.
 by looking at the `BACKEND_REGISTRATION_REQUEST_URL` string value in `Const.java`.  The intent is to change this value
 to point to a production server when it is available.
 
-Push Simple Demo Application
+Push Demo Application
 ----------------------------
 
-The Push Simple Demo Application is an example of the simplest application possible that uses the Pivotal Mobile Services Suite
+The Push Demo Application is an example of the simplest application possible that uses the Pivotal Mobile Services Suite
 Push Client SDK.  At this time, it only demonstrates how to register for push notifications.
 
 This demo application registers for push notifications in the Activity object in order to make it easier to display the
 output on the screen.  It is probably more appropriate for you to register for push notifications in your Application
 object instead.
 
-This application is set up to receive push messages via the `MyPivotalMSSRemotePushLibBroadcastReceiver` class.  These
+This application is set up to receive push messages via the `PushService` class.  These
 messages are not displayed in the activity window, but they will display a status bar notification.
 
 Push Sample Application
@@ -292,15 +235,3 @@ Although the Push Client SDK has no support for sending push messages, the Push 
 as it is set up with the correct `GCM Browser API Key` parameter (when sending messages via GCM or the correct
 `Environment UUID` and `Environment Key` parameters (when sending messages via Pivotal Mobile Services Suite).  The
 application can not distinguish between messages sent via the two services.
-
-Analytics Sample Application
-----------------------------
-
-This application is similar to the Push Sample Application, but somewhat simpler in nature since it deals only with the
-Analytics Client SDK.
-
-You can use the "Log xxxxx" button to log events of different types.  Using the log window, you should see the analytics
-events build up in the database.  After a short time (about one or two minutes in debug builds) you should see any unsent
-events sent to the server (unless you have cleared them with the `Clear Unsent Events` button).
-
-You can change the Analytics Preferences with the `Edit Preferences` option.
