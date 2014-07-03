@@ -12,17 +12,22 @@ import io.pivotal.android.push.registration.RegistrationListener;
 
 public class MainActivity extends ActionBarActivity {
 
-    // Set to your "Project Number" on your Google Cloud project
-    private static final String GCM_SENDER_ID = "961895792376";
+    private static final String GCM_SENDER_ID = "641043317726";
+    private static final String VARIANT_UUID = "a183a4ab-83b1-45ef-ba92-3727454dbc4b";
+    private static final String VARIANT_SECRET = "5c9b1b8a-b2fe-4c66-a01b-37797af485fd";
+    private static final String PUSH_BASE_SERVER_URL = "http://push-notifications.sherry.wine.cf-app.com";
 
-    // Set to your "Variant UUID", as provided by the Pivotal Mobile Services Suite console
-    private static final String VARIANT_UUID = "8e00641c-b264-4ae9-98db-dd6f2ca858b2";
-
-    // Set to your "Variant Secret" as provided by the Pivotal Mobile Services Suite console
-    private static final String VARIANT_SECRET = "0de0f14a-ab2c-4f47-aa44-a6cb06531c6c";
-
-    // Set to your instance of the Pivotal Mobile Services Suite server providing your push services.
-    private static final String PUSH_BASE_SERVER_URL = "http://ec2-54-87-125-154.compute-1.amazonaws.com";
+//    // Set to your "Project Number" on your Google Cloud project
+//    private static final String GCM_SENDER_ID = "961895792376";
+//
+//    // Set to your "Variant UUID", as provided by the Pivotal Mobile Services Suite console
+//    private static final String VARIANT_UUID = "8e00641c-b264-4ae9-98db-dd6f2ca858b2";
+//
+//    // Set to your "Variant Secret" as provided by the Pivotal Mobile Services Suite console
+//    private static final String VARIANT_SECRET = "0de0f14a-ab2c-4f47-aa44-a6cb06531c6c";
+//
+//    // Set to your instance of the Pivotal Mobile Services Suite server providing your push services.
+//    private static final String PUSH_BASE_SERVER_URL = "http://ec2-54-87-125-154.compute-1.amazonaws.com";
 
     // Set to your own defined alias for this device.  May not be null.  May be empty.
     private static final String DEVICE_ALIAS = "test_device_alias";

@@ -22,9 +22,6 @@ import android.content.pm.PackageManager;
 import java.io.File;
 import java.io.PrintWriter;
 
-import io.pivotal.android.common.util.DebugUtil;
-import io.pivotal.android.common.util.Logger;
-
 public class Util {
 
     /**

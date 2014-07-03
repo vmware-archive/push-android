@@ -23,7 +23,7 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import java.io.IOException;
 
-import io.pivotal.android.common.util.Logger;
+import io.pivotal.android.push.util.Logger;
 
 public class RealGcmProvider implements GcmProvider {
 

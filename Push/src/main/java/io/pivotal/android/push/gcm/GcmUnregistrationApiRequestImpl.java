@@ -19,7 +19,7 @@ import android.content.Context;
 
 import java.io.IOException;
 
-import io.pivotal.android.common.util.Logger;
+import io.pivotal.android.push.util.Logger;
 
 /**
  * API request for unregistering a device with the Google Cloud Messaging (GCM)

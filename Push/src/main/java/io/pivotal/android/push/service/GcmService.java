@@ -21,8 +21,8 @@ import android.os.Bundle;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
-import io.pivotal.android.common.util.Logger;
 import io.pivotal.android.push.receiver.GcmBroadcastReceiver;
+import io.pivotal.android.push.util.Logger;
 
 public class GcmService extends IntentService {
     public static final String KEY_MESSAGE = "message";
@@ -36,13 +36,10 @@ public class GcmService extends IntentService {
     protected final void onHandleIntent(Intent intent) {
         Logger.fd("GcmService has received a push message from GCM.");
 
-        if (intent == null) {
-            return;
+        if (intent != null) {
+            onReceive(intent);
+            GcmBroadcastReceiver.completeWakefulIntent(intent);
         }
-
-        onReceive(intent);
-
-        GcmBroadcastReceiver.completeWakefulIntent(intent);
     }
 
     public void onReceive(Intent intent) {

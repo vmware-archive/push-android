@@ -30,13 +30,13 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import io.pivotal.android.common.backend.ApiRequestImpl;
-import io.pivotal.android.common.network.NetworkWrapper;
-import io.pivotal.android.common.util.Logger;
 import io.pivotal.android.push.RegistrationParameters;
 import io.pivotal.android.push.model.api.BackEndApiRegistrationRequestData;
 import io.pivotal.android.push.model.api.BackEndApiRegistrationResponseData;
+import io.pivotal.android.push.util.ApiRequestImpl;
 import io.pivotal.android.push.util.Const;
+import io.pivotal.android.push.util.Logger;
+import io.pivotal.android.push.util.NetworkWrapper;
 import io.pivotal.android.push.util.Util;
 
 /**

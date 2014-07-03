@@ -21,13 +21,6 @@ import android.content.Context;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import io.pivotal.android.common.network.NetworkWrapper;
-import io.pivotal.android.common.network.NetworkWrapperImpl;
-import io.pivotal.android.common.prefs.AnalyticsPreferencesProvider;
-import io.pivotal.android.common.prefs.AnalyticsPreferencesProviderImpl;
-import io.pivotal.android.common.util.Logger;
-import io.pivotal.android.common.util.ServiceStarter;
-import io.pivotal.android.common.util.ServiceStarterImpl;
 import io.pivotal.android.push.backend.BackEndRegistrationApiRequest;
 import io.pivotal.android.push.backend.BackEndRegistrationApiRequestImpl;
 import io.pivotal.android.push.backend.BackEndRegistrationApiRequestProvider;
@@ -48,6 +41,11 @@ import io.pivotal.android.push.registration.RegistrationEngine;
 import io.pivotal.android.push.registration.RegistrationListener;
 import io.pivotal.android.push.registration.UnregistrationEngine;
 import io.pivotal.android.push.registration.UnregistrationListener;
+import io.pivotal.android.push.util.Logger;
+import io.pivotal.android.push.util.NetworkWrapper;
+import io.pivotal.android.push.util.NetworkWrapperImpl;
+import io.pivotal.android.push.util.ServiceStarter;
+import io.pivotal.android.push.util.ServiceStarterImpl;
 import io.pivotal.android.push.version.VersionProvider;
 import io.pivotal.android.push.version.VersionProviderImpl;
 
@@ -104,17 +102,6 @@ public class Push {
     }
 
     /**
-     * Sets up the Analytics SDK.  There can be no analytics events generated until this method
-     * is called at least once with the `analyticsEnabled` parameter set to `true`.
-     *
-     * @param analyticsParameters  the parameterization for the Analytics SDK.
-     */
-//    public void setupAnalytics(AnalyticsParameters analyticsParameters) {
-//        final AnalyticsSDK analyticsSDK = AnalyticsSDK.getInstance(context);
-//        analyticsSDK.setParameters(analyticsParameters);
-//    }
-
-    /**
      * Asynchronously registers the device and application for receiving push notifications.  If the application
      * is already registered then will do nothing.  If some of the registration parameters are different then
      * the last successful registration then the device will be re-registered with the new parameters.  Only
@@ -142,7 +129,6 @@ public class Push {
         verifyRegistrationArguments(parameters);
         final GcmProvider gcmProvider = new RealGcmProvider(context);
         final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
-        final AnalyticsPreferencesProvider analyticsPreferencesProvider = new AnalyticsPreferencesProviderImpl(context);
         final GcmRegistrationApiRequest dummyGcmRegistrationApiRequest = new GcmRegistrationApiRequestImpl(context, gcmProvider);
         final GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider = new GcmRegistrationApiRequestProvider(dummyGcmRegistrationApiRequest);
         final GcmUnregistrationApiRequest dummyGcmUnregistrationApiRequest = new GcmUnregistrationApiRequestImpl(context, gcmProvider);
@@ -157,7 +143,7 @@ public class Push {
             @Override
             public void run() {
                 try {
-                    final RegistrationEngine registrationEngine = new RegistrationEngine(context, context.getPackageName(), gcmProvider, pushPreferencesProvider, analyticsPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, serviceStarter);
+                    final RegistrationEngine registrationEngine = new RegistrationEngine(context, context.getPackageName(), gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, serviceStarter);
                     registrationEngine.registerDevice(parameters, listener);
                 } catch (Exception e) {
                     Logger.ex("Push SDK registration failed", e);
@@ -205,7 +191,6 @@ public class Push {
         verifyUnregistrationArguments(parameters);
         final GcmProvider gcmProvider = new RealGcmProvider(context);
         final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
-        final AnalyticsPreferencesProvider analyticsPreferencesProvider = new AnalyticsPreferencesProviderImpl(context);
         final GcmUnregistrationApiRequest dummyGcmUnregistrationApiRequest = new GcmUnregistrationApiRequestImpl(context, gcmProvider);
         final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(dummyGcmUnregistrationApiRequest);
         final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
@@ -217,7 +202,7 @@ public class Push {
             @Override
             public void run() {
                 try {
-                    final UnregistrationEngine unregistrationEngine = new UnregistrationEngine(context, gcmProvider, serviceStarter, pushPreferencesProvider, analyticsPreferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
+                    final UnregistrationEngine unregistrationEngine = new UnregistrationEngine(context, gcmProvider, serviceStarter, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
                     unregistrationEngine.unregisterDevice(parameters, listener);
                 } catch (Exception e) {
                     Logger.ex("Push SDK unregistration failed", e);

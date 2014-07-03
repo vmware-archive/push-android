@@ -18,9 +18,6 @@ package io.pivotal.android.push.registration;
 import android.content.Context;
 import android.test.AndroidTestCase;
 
-import io.pivotal.android.common.test.prefs.FakeAnalyticsPreferencesProvider;
-import io.pivotal.android.common.test.util.DelayedLoop;
-import io.pivotal.android.common.test.util.FakeServiceStarter;
 import io.pivotal.android.push.RegistrationParameters;
 import io.pivotal.android.push.backend.BackEndRegistrationApiRequestProvider;
 import io.pivotal.android.push.backend.FakeBackEndRegistrationApiRequest;
@@ -31,6 +28,8 @@ import io.pivotal.android.push.gcm.GcmRegistrationApiRequestProvider;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
+import io.pivotal.android.push.util.DelayedLoop;
+import io.pivotal.android.push.util.FakeServiceStarter;
 import io.pivotal.android.push.version.FakeVersionProvider;
 
 public class RegistrationEngineTestParameters {
@@ -108,7 +107,6 @@ public class RegistrationEngineTestParameters {
 
         final FakeGcmProvider gcmProvider = new FakeGcmProvider(gcmDeviceRegistrationIdFromServer, !shouldGcmDeviceRegistrationBeSuccessful, !shouldGcmDeviceUnregistrationBeSuccessful);
         final FakePushPreferencesProvider pushPreferencesProvider = new FakePushPreferencesProvider(gcmDeviceRegistrationIdInPrefs, backEndDeviceRegistrationIdInPrefs, appVersionInPrefs, gcmSenderIdInPrefs, variantUuidInPrefs, variantSecretInPrefs, deviceAliasInPrefs, packageNameInPrefs, baseServerUrlInPrefs);
-        final FakeAnalyticsPreferencesProvider analyticsPreferencesProvider = new FakeAnalyticsPreferencesProvider(isAnalyticsEnabled, null);
         final FakeGcmRegistrationApiRequest gcmRegistrationApiRequest = new FakeGcmRegistrationApiRequest(gcmProvider);
         final GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider = new GcmRegistrationApiRequestProvider(gcmRegistrationApiRequest);
         final FakeGcmUnregistrationApiRequest gcmUnregistrationApiRequest = new FakeGcmUnregistrationApiRequest(gcmProvider);
@@ -117,7 +115,7 @@ public class RegistrationEngineTestParameters {
         final FakeServiceStarter serviceStarter = new FakeServiceStarter();
         final FakeBackEndRegistrationApiRequest dummyBackEndRegistrationApiRequest = new FakeBackEndRegistrationApiRequest(backEndDeviceRegistrationIdFromServer, shouldBackEndDeviceRegistrationBeSuccessful);
         final BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider = new BackEndRegistrationApiRequestProvider(dummyBackEndRegistrationApiRequest);
-        final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, gcmProvider, pushPreferencesProvider, analyticsPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, serviceStarter);
+        final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, serviceStarter);
         final RegistrationParameters parameters = new RegistrationParameters(gcmSenderIdFromUser, variantUuidFromUser, variantSecretFromUser, deviceAliasFromUser, baseServerUrlFromUser);
 
         engine.registerDevice(parameters, new RegistrationListener() {

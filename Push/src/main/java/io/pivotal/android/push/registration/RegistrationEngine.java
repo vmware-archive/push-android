@@ -17,9 +17,6 @@ package io.pivotal.android.push.registration;
 
 import android.content.Context;
 
-import io.pivotal.android.common.prefs.AnalyticsPreferencesProvider;
-import io.pivotal.android.common.util.Logger;
-import io.pivotal.android.common.util.ServiceStarter;
 import io.pivotal.android.push.RegistrationParameters;
 import io.pivotal.android.push.backend.BackEndRegistrationApiRequest;
 import io.pivotal.android.push.backend.BackEndRegistrationApiRequestProvider;
@@ -32,6 +29,8 @@ import io.pivotal.android.push.gcm.GcmUnregistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
 import io.pivotal.android.push.gcm.GcmUnregistrationListener;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
+import io.pivotal.android.push.util.Logger;
+import io.pivotal.android.push.util.ServiceStarter;
 import io.pivotal.android.push.version.VersionProvider;
 
 /**
@@ -72,7 +71,6 @@ public class RegistrationEngine {
     private Context context;
     private GcmProvider gcmProvider;
     private PushPreferencesProvider pushPreferencesProvider;
-    private AnalyticsPreferencesProvider analyticsPreferencesProvider;
     private GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider;
     private GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider;
     private BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider;
@@ -95,7 +93,6 @@ public class RegistrationEngine {
      * @param packageName
      * @param gcmProvider  Some object that can provide the GCM services.
      * @param pushPreferencesProvider  Some object that can provide persistent storage for push preferences.
-     * @param analyticsPreferencesProvider  Some object that can provide persistent storage for analytics preferences.
      * @param gcmRegistrationApiRequestProvider  Some object that can provide GCMRegistrationApiRequest objects.
      * @param gcmUnregistrationApiRequestProvider  Some object that can provide GCMUnregistrationApiRequest objects.
      * @param backEndRegistrationApiRequestProvider  Some object that can provide BackEndRegistrationApiRequest objects.
@@ -106,7 +103,6 @@ public class RegistrationEngine {
                               String packageName,
                               GcmProvider gcmProvider,
                               PushPreferencesProvider pushPreferencesProvider,
-                              AnalyticsPreferencesProvider analyticsPreferencesProvider,
                               GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
                               GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                               BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider,
@@ -117,7 +113,6 @@ public class RegistrationEngine {
                 packageName,
                 gcmProvider,
                 pushPreferencesProvider,
-                analyticsPreferencesProvider,
                 gcmRegistrationApiRequestProvider,
                 gcmUnregistrationApiRequestProvider,
                 backEndRegistrationApiRequestProvider,
@@ -127,7 +122,6 @@ public class RegistrationEngine {
                 packageName,
                 gcmProvider,
                 pushPreferencesProvider,
-                analyticsPreferencesProvider,
                 gcmRegistrationApiRequestProvider,
                 gcmUnregistrationApiRequestProvider,
                 backEndRegistrationApiRequestProvider,
@@ -138,7 +132,6 @@ public class RegistrationEngine {
                                  String packageName,
                                  GcmProvider gcmProvider,
                                  PushPreferencesProvider pushPreferencesProvider,
-                                 AnalyticsPreferencesProvider analyticsPreferencesProvider,
                                  GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
                                  GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                  BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider,
@@ -156,9 +149,6 @@ public class RegistrationEngine {
         }
         if (pushPreferencesProvider == null) {
             throw new IllegalArgumentException("pushPreferencesProvider may not be null");
-        }
-        if (analyticsPreferencesProvider == null) {
-            throw new IllegalArgumentException("analyticsPreferencesProvider may not be null");
         }
         if (gcmRegistrationApiRequestProvider == null) {
             throw new IllegalArgumentException("gcmRegistrationApiRequestProvider may not be null");
@@ -181,7 +171,6 @@ public class RegistrationEngine {
                                String packageName,
                                GcmProvider gcmProvider,
                                PushPreferencesProvider pushPreferencesProvider,
-                               AnalyticsPreferencesProvider analyticsPreferencesProvider,
                                GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
                                GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider,
@@ -192,7 +181,6 @@ public class RegistrationEngine {
         this.packageName = packageName;
         this.gcmProvider = gcmProvider;
         this.pushPreferencesProvider = pushPreferencesProvider;
-        this.analyticsPreferencesProvider = analyticsPreferencesProvider;
         this.gcmRegistrationApiRequestProvider = gcmRegistrationApiRequestProvider;
         this.gcmUnregistrationApiRequestProvider = gcmUnregistrationApiRequestProvider;
         this.backEndRegistrationApiRequestProvider = backEndRegistrationApiRequestProvider;

@@ -18,11 +18,11 @@ package io.pivotal.android.push.backend;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import io.pivotal.android.common.backend.ApiRequestImpl;
-import io.pivotal.android.common.network.NetworkWrapper;
-import io.pivotal.android.common.util.Logger;
 import io.pivotal.android.push.RegistrationParameters;
+import io.pivotal.android.push.util.ApiRequestImpl;
 import io.pivotal.android.push.util.Const;
+import io.pivotal.android.push.util.Logger;
+import io.pivotal.android.push.util.NetworkWrapper;
 
 /**
  * API request for unregistering a device from the Pivotal Mobile Services Suite back-end server.

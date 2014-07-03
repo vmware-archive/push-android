@@ -19,10 +19,10 @@ import android.test.AndroidTestCase;
 
 import java.io.IOException;
 
-import io.pivotal.android.common.test.network.FakeHttpURLConnection;
-import io.pivotal.android.common.test.network.FakeNetworkWrapper;
-import io.pivotal.android.common.test.util.DelayedLoop;
 import io.pivotal.android.push.RegistrationParameters;
+import io.pivotal.android.push.util.DelayedLoop;
+import io.pivotal.android.push.util.FakeHttpURLConnection;
+import io.pivotal.android.push.util.FakeNetworkWrapper;
 
 public class BackEndUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
 

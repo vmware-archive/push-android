@@ -61,27 +61,6 @@
     </PreferenceCategory>
 
     <PreferenceCategory
-        android:title="@string/pref_title_back_end_analytics_preferences">
-
-        <CheckBoxPreference
-            android:key="test_is_analytics_enabled"
-            android:title="@string/pref_title_is_analytics_enabled"
-            android:defaultValue="@bool/pref_default_is_analytics_enabled"
-            android:persistent="true"/>
-
-        <EditTextPreference
-            android:key="test_analytics_base_server_url"
-            android:title="@string/pref_title_analytics_base_server_url"
-            android:defaultValue="@string/pref_default_analytics_base_server_url"
-            android:persistent="true"
-            android:selectAllOnFocus="true"
-            android:inputType="text"
-            android:singleLine="true"
-            android:maxLines="1"/>
-
-    </PreferenceCategory>
-
-    <PreferenceCategory
         android:title="@string/pref_title_gcm_push_preferences">
 
         <EditTextPreference

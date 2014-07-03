@@ -7,8 +7,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.NotificationCompat;
 
-import io.pivotal.android.common.util.Logger;
 import io.pivotal.android.push.service.GcmService;
+import io.pivotal.android.push.util.Logger;
 
 public class PushService extends GcmService {
 

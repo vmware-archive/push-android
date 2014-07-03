@@ -24,8 +24,8 @@ import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
-import io.pivotal.android.common.util.Logger;
 import io.pivotal.android.push.service.GcmService;
+import io.pivotal.android.push.util.Logger;
 
 public class GcmBroadcastReceiver extends WakefulBroadcastReceiver {
 

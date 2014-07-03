@@ -1,16 +1,4 @@
 dependencies {
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'com.google.android.gms:play-services:4.2.42'
-    compile 'io.pivotal.android:Common:0.6-RELEASE'
-    androidTestCompile 'io.pivotal.android:CommonTest:0.6-RELEASE'
-}
-
-uploadArchives {
-    repositories.mavenDeployer {
-        pom.project pomInfo
-        pom.project {
-            name 'Pivotal Mobile Services Suite Push Client SDK for Android'
-            description 'Lightweight Push SDK designed to register devices in applications using the Pivotal Mobile Services Suite.'
-        }
-    }
 }

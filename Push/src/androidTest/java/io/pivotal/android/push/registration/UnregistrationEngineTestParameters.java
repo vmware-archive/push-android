@@ -4,9 +4,6 @@ import android.content.Context;
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
 
-import io.pivotal.android.common.test.prefs.FakeAnalyticsPreferencesProvider;
-import io.pivotal.android.common.test.util.DelayedLoop;
-import io.pivotal.android.common.test.util.FakeServiceStarter;
 import io.pivotal.android.push.RegistrationParameters;
 import io.pivotal.android.push.backend.BackEndUnregisterDeviceApiRequestProvider;
 import io.pivotal.android.push.backend.FakeBackEndUnregisterDeviceApiRequest;
@@ -14,6 +11,8 @@ import io.pivotal.android.push.gcm.FakeGcmProvider;
 import io.pivotal.android.push.gcm.FakeGcmUnregistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
+import io.pivotal.android.push.util.DelayedLoop;
+import io.pivotal.android.push.util.FakeServiceStarter;
 
 public class UnregistrationEngineTestParameters {
 
@@ -66,14 +65,12 @@ public class UnregistrationEngineTestParameters {
             pushPreferencesProvider = new FakePushPreferencesProvider(GCM_DEVICE_ID_IN_PREFS, startingBackEndDeviceRegistrationIdInPrefs, APP_VERSION_IN_PREFS, GCM_SENDER_ID_IN_PREFS, startingVariantUuidInPrefs, VARIANT_SECRET_IN_PREFS, DEVICE_ALIAS_IN_PREFS, PACKAGE_NAME_IN_PREFS, BASE_SERVER_URL_IN_PREFS);
         }
 
-        final FakeAnalyticsPreferencesProvider analyticsPreferencesProvider = new FakeAnalyticsPreferencesProvider(isAnalyticsEnabled, null);
-
         final FakeGcmUnregistrationApiRequest gcmUnregistrationApiRequest = new FakeGcmUnregistrationApiRequest(gcmProvider);
         final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(gcmUnregistrationApiRequest);
         final FakeBackEndUnregisterDeviceApiRequest dummyBackEndUnregisterDeviceApiRequest = new FakeBackEndUnregisterDeviceApiRequest(shouldBackEndDeviceUnregistrationBeSuccessful);
         final BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider = new BackEndUnregisterDeviceApiRequestProvider(dummyBackEndUnregisterDeviceApiRequest);
         final FakeServiceStarter serviceStarter = new FakeServiceStarter();
-        final UnregistrationEngine engine = new UnregistrationEngine(context, gcmProvider, serviceStarter, pushPreferencesProvider, analyticsPreferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
+        final UnregistrationEngine engine = new UnregistrationEngine(context, gcmProvider, serviceStarter, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
 
         engine.unregisterDevice(parametersFromUser, new UnregistrationListener() {
 
