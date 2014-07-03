@@ -16,14 +16,8 @@
 package io.pivotal.android.push.registration;
 
 import android.content.Context;
-import android.content.Intent;
 import android.test.AndroidTestCase;
 
-import java.util.HashMap;
-
-import io.pivotal.android.analytics.jobs.EnqueueEventJob;
-import io.pivotal.android.analytics.model.events.Event;
-import io.pivotal.android.analytics.service.EventService;
 import io.pivotal.android.common.test.prefs.FakeAnalyticsPreferencesProvider;
 import io.pivotal.android.common.test.util.DelayedLoop;
 import io.pivotal.android.common.test.util.FakeServiceStarter;
@@ -35,8 +29,6 @@ import io.pivotal.android.push.gcm.FakeGcmRegistrationApiRequest;
 import io.pivotal.android.push.gcm.FakeGcmUnregistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmRegistrationApiRequestProvider;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
-import io.pivotal.android.push.model.events.EventPushRegistered;
-import io.pivotal.android.push.model.events.PushEventHelper;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.version.FakeVersionProvider;
@@ -173,21 +165,7 @@ public class RegistrationEngineTestParameters {
         AndroidTestCase.assertEquals(finalBaseServerUrlInPrefs, pushPreferencesProvider.getBaseServerUrl());
         AndroidTestCase.assertEquals(finalAppVersionInPrefs, pushPreferencesProvider.getAppVersion());
         AndroidTestCase.assertEquals(finalPackageNameInPrefs, pushPreferencesProvider.getPackageName());
-
-        if (isAnalyticsEnabled) {
-            AndroidTestCase.assertEquals(shouldPushRegisteredEventHaveBeenLogged, serviceStarter.wasStarted());
-            if (shouldPushRegisteredEventHaveBeenLogged) {
-                final Intent intent = serviceStarter.getStartedIntent();
-                final EnqueueEventJob job = intent.getParcelableExtra(EventService.KEY_JOB);
-                final Event event = job.getEvent();
-                AndroidTestCase.assertEquals(EventPushRegistered.EVENT_TYPE, event.getEventType());
-                final HashMap<String, Object> data = event.getData();
-                AndroidTestCase.assertEquals(finalVariantUuidInPrefs, data.get(PushEventHelper.VARIANT_UUID));
-                AndroidTestCase.assertEquals(finalBackEndDeviceRegistrationIdInPrefs, data.get(PushEventHelper.DEVICE_ID));
-            }
-        } else {
-            AndroidTestCase.assertFalse(serviceStarter.wasStarted());
-        }
+        AndroidTestCase.assertFalse(serviceStarter.wasStarted());
     }
 
     public RegistrationEngineTestParameters setupPackageName(String inPrefs, String fromUser, String finalValue, boolean shouldHaveBeenSaved) {

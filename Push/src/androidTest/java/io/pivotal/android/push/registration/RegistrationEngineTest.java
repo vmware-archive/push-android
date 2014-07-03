@@ -15,12 +15,10 @@
 
 package io.pivotal.android.push.registration;
 
-import android.content.ComponentName;
 import android.test.AndroidTestCase;
 
 import java.util.concurrent.Semaphore;
 
-import io.pivotal.android.analytics.service.EventService;
 import io.pivotal.android.common.test.prefs.FakeAnalyticsPreferencesProvider;
 import io.pivotal.android.common.test.util.FakeServiceStarter;
 import io.pivotal.android.common.util.Logger;
@@ -75,7 +73,6 @@ public class RegistrationEngineTest extends AndroidTestCase {
         analyticsPreferencesProvider = new FakeAnalyticsPreferencesProvider(true, null);
         versionProvider = new FakeVersionProvider(10);
         serviceStarter = new FakeServiceStarter();
-        serviceStarter.setReturnedComponentName(new ComponentName(getContext(), EventService.class));
         backEndRegistrationApiRequestProvider = new BackEndRegistrationApiRequestProvider(new FakeBackEndRegistrationApiRequest(TEST_BACK_END_DEVICE_REGISTRATION_ID_1));
     }
 

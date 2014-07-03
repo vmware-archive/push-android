@@ -38,7 +38,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import io.pivotal.android.analytics.database.DatabaseEventsStorage;
 import io.pivotal.android.common.sample.activity.BaseMainActivity;
 import io.pivotal.android.common.sample.activity.BasePreferencesActivity;
 import io.pivotal.android.common.util.DebugUtil;
@@ -392,8 +391,6 @@ public class MainActivity extends BaseMainActivity {
     private void clearEvents() {
         if (Preferences.isAnalyticsEnabled(this)) {
             addLogMessage("Clearing all events.");
-            final DatabaseEventsStorage eventsStorage = new DatabaseEventsStorage();
-            eventsStorage.reset();
         } else {
             addLogMessage("Cannot clear events if analytics are disabled.");
         }

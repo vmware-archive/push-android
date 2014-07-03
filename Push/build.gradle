@@ -2,7 +2,6 @@ dependencies {
     compile 'com.google.code.gson:gson:2.2.4'
     compile 'com.google.android.gms:play-services:4.2.42'
     compile 'io.pivotal.android:Common:0.6-RELEASE'
-    compile 'io.pivotal.android:Analytics:0.6-RELEASE'
     androidTestCompile 'io.pivotal.android:CommonTest:0.6-RELEASE'
 }
 

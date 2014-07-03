@@ -1,15 +1,9 @@
 package io.pivotal.android.push.registration;
 
 import android.content.Context;
-import android.content.Intent;
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
 
-import java.util.HashMap;
-
-import io.pivotal.android.analytics.jobs.EnqueueEventJob;
-import io.pivotal.android.analytics.model.events.Event;
-import io.pivotal.android.analytics.service.EventService;
 import io.pivotal.android.common.test.prefs.FakeAnalyticsPreferencesProvider;
 import io.pivotal.android.common.test.util.DelayedLoop;
 import io.pivotal.android.common.test.util.FakeServiceStarter;
@@ -19,8 +13,6 @@ import io.pivotal.android.push.backend.FakeBackEndUnregisterDeviceApiRequest;
 import io.pivotal.android.push.gcm.FakeGcmProvider;
 import io.pivotal.android.push.gcm.FakeGcmUnregistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
-import io.pivotal.android.push.model.events.EventPushUnregistered;
-import io.pivotal.android.push.model.events.PushEventHelper;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 
 public class UnregistrationEngineTestParameters {
@@ -135,21 +127,7 @@ public class UnregistrationEngineTestParameters {
         AndroidTestCase.assertEquals(shouldBackEndUnregisterHaveBeenCalled, dummyBackEndUnregisterDeviceApiRequest.wasUnregisterCalled());
         AndroidTestCase.assertFalse(gcmProvider.wasRegisterCalled());
         AndroidTestCase.assertTrue(gcmProvider.wasUnregisterCalled());
-
-        if (isAnalyticsEnabled && shouldPushUnregisteredEventHaveBeenLogged) {
-
-            AndroidTestCase.assertTrue(serviceStarter.wasStarted());
-            final Intent intent = serviceStarter.getStartedIntent();
-            final EnqueueEventJob job = intent.getParcelableExtra(EventService.KEY_JOB);
-            final Event event = job.getEvent();
-            AndroidTestCase.assertEquals(EventPushUnregistered.EVENT_TYPE, event.getEventType());
-            final HashMap<String, Object> data = event.getData();
-            AndroidTestCase.assertEquals(startingVariantUuidInPrefs, data.get(PushEventHelper.VARIANT_UUID));
-            AndroidTestCase.assertEquals(startingBackEndDeviceRegistrationIdInPrefs, data.get(PushEventHelper.DEVICE_ID));
-
-        } else {
-            AndroidTestCase.assertFalse(serviceStarter.wasStarted());
-        }
+        AndroidTestCase.assertFalse(serviceStarter.wasStarted());
     }
 
     public UnregistrationEngineTestParameters setShouldUnregistrationHaveSucceeded(boolean b) {

@@ -1,11 +1,7 @@
 package io.pivotal.android.push.registration;
 
 import android.content.Context;
-import android.content.Intent;
 
-import io.pivotal.android.analytics.jobs.EnqueueEventJob;
-import io.pivotal.android.analytics.model.events.Event;
-import io.pivotal.android.analytics.service.EventService;
 import io.pivotal.android.common.prefs.AnalyticsPreferencesProvider;
 import io.pivotal.android.common.util.Logger;
 import io.pivotal.android.common.util.ServiceStarter;
@@ -17,7 +13,6 @@ import io.pivotal.android.push.gcm.GcmProvider;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
 import io.pivotal.android.push.gcm.GcmUnregistrationListener;
-import io.pivotal.android.push.model.events.EventPushUnregistered;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 
 public class UnregistrationEngine {
@@ -213,13 +208,6 @@ public class UnregistrationEngine {
     }
 
     private void logPushUnregisteredEvent(String variantUuid, String deviceId) {
-        if (analyticsPreferencesProvider.isAnalyticsEnabled()) {
-            final Event event = EventPushUnregistered.getEvent(variantUuid, deviceId);
-            final EnqueueEventJob enqueueEventJob = new EnqueueEventJob(event);
-            final Intent enqueueEventJobIntent = EventService.getIntentToRunJob(context, enqueueEventJob);
-            if (serviceStarter.startService(context, enqueueEventJobIntent) == null) {
-                Logger.e("ERROR: could not start service '" + enqueueEventJobIntent + ". A 'push unregistered' event for this message will not be sent.");
-            }
-        }
+        // add analytics lib
     }
 }
