@@ -18,7 +18,6 @@ package io.pivotal.android.push.registration;
 import android.content.ComponentName;
 import android.test.AndroidTestCase;
 
-import java.net.URL;
 import java.util.concurrent.Semaphore;
 
 import io.pivotal.android.analytics.service.EventService;
@@ -52,8 +51,8 @@ public class RegistrationEngineTest extends AndroidTestCase {
     private static final String TEST_VARIANT_SECRET_2 = "TEST_VARIANT_SECRET_2";
     private static final String TEST_GCM_SENDER_ID_1 = "TEST_GCM_SENDER_ID_1";
     private static final String TEST_GCM_SENDER_ID_2 = "TEST_GCM_SENDER_ID_2";
-    private static URL TEST_BASE_SERVER_URL_1;
-    private static URL TEST_BASE_SERVER_URL_2;
+    private static String TEST_BASE_SERVER_URL_1 = "http://test1.com";
+    private static String TEST_BASE_SERVER_URL_2 = "http://test2.com";
     private static final String TEST_PACKAGE_NAME = "TEST.PACKAGE.NAME";
 
     private FakePushPreferencesProvider pushPreferencesProvider;
@@ -69,8 +68,6 @@ public class RegistrationEngineTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        TEST_BASE_SERVER_URL_1 = new URL("http://test1.com");
-        TEST_BASE_SERVER_URL_2 = new URL("http://test2.com");
         gcmProvider = new FakeGcmProvider(TEST_GCM_DEVICE_REGISTRATION_ID_1);
         gcmRegistrationApiRequestProvider = new GcmRegistrationApiRequestProvider(new FakeGcmRegistrationApiRequest(gcmProvider));
         gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(new FakeGcmUnregistrationApiRequest(gcmProvider));

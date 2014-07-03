@@ -2,7 +2,6 @@ package io.pivotal.android.push.registration;
 
 import android.test.AndroidTestCase;
 
-import java.net.URL;
 import java.util.concurrent.Semaphore;
 
 import io.pivotal.android.common.test.prefs.FakeAnalyticsPreferencesProvider;
@@ -38,8 +37,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        final URL url = new URL(TEST_BASE_SERVER_URL);
-        parameters = new RegistrationParameters(TEST_GCM_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_DEVICE_ALIAS, url);
+        parameters = new RegistrationParameters(TEST_GCM_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_DEVICE_ALIAS, TEST_BASE_SERVER_URL);
         serviceStarter = new FakeServiceStarter();
         pushPreferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null);
         analyticsPreferencesProvider = new FakeAnalyticsPreferencesProvider(true, null);

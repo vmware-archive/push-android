@@ -19,7 +19,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.test.AndroidTestCase;
 
-import java.net.URL;
 import java.util.HashMap;
 
 import io.pivotal.android.analytics.jobs.EnqueueEventJob;
@@ -61,8 +60,8 @@ public class RegistrationEngineTestParameters {
     private String variantSecretFromUser = "S";
     private String deviceAliasInPrefs = null;
     private String deviceAliasFromUser = "S";
-    private URL baseServerUrlInPrefs = null;
-    private URL baseServerUrlFromUser = null;
+    private String baseServerUrlInPrefs = null;
+    private String baseServerUrlFromUser = null;
     private String packageNameInPrefs = null;
     private String packageNameFromUser = ".";
     private String finalGcmDeviceRegistrationIdInPrefs = null;
@@ -72,7 +71,7 @@ public class RegistrationEngineTestParameters {
     private String finalVariantSecretInPrefs = null;
     private String finalDeviceAliasInPrefs = null;
     private String finalPackageNameInPrefs = null;
-    private URL finalBaseServerUrlInPrefs = null;
+    private String finalBaseServerUrlInPrefs = null;
 
     private boolean shouldGcmDeviceRegistrationBeSuccessful = false;
     private boolean shouldGcmDeviceUnregistrationBeSuccessful = false;
@@ -215,7 +214,7 @@ public class RegistrationEngineTestParameters {
         return this;
     }
 
-    public RegistrationEngineTestParameters setupBaseServerUrl(URL inPrefs, URL fromUser, URL finalValue, boolean shouldHaveBeenSaved) {
+    public RegistrationEngineTestParameters setupBaseServerUrl(String inPrefs, String fromUser, String finalValue, boolean shouldHaveBeenSaved) {
         baseServerUrlInPrefs = inPrefs;
         baseServerUrlFromUser = fromUser;
         finalBaseServerUrlInPrefs = finalValue;

@@ -21,8 +21,6 @@ import android.content.Context;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import io.pivotal.android.analytics.AnalyticsParameters;
-import io.pivotal.android.analytics.AnalyticsSDK;
 import io.pivotal.android.common.network.NetworkWrapper;
 import io.pivotal.android.common.network.NetworkWrapperImpl;
 import io.pivotal.android.common.prefs.AnalyticsPreferencesProvider;
@@ -111,10 +109,10 @@ public class Push {
      *
      * @param analyticsParameters  the parameterization for the Analytics SDK.
      */
-    public void setupAnalytics(AnalyticsParameters analyticsParameters) {
-        final AnalyticsSDK analyticsSDK = AnalyticsSDK.getInstance(context);
-        analyticsSDK.setParameters(analyticsParameters);
-    }
+//    public void setupAnalytics(AnalyticsParameters analyticsParameters) {
+//        final AnalyticsSDK analyticsSDK = AnalyticsSDK.getInstance(context);
+//        analyticsSDK.setParameters(analyticsParameters);
+//    }
 
     /**
      * Asynchronously registers the device and application for receiving push notifications.  If the application

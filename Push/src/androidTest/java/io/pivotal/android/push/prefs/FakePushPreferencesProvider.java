@@ -15,8 +15,6 @@
 
 package io.pivotal.android.push.prefs;
 
-import java.net.URL;
-
 public class FakePushPreferencesProvider implements PushPreferencesProvider {
 
     private String gcmDeviceRegistrationId;
@@ -26,7 +24,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     private String variantSecret;
     private String deviceAlias;
     private String packageName;
-    private URL baseServerUrl;
+    private String baseServerUrl;
     private int appVersion;
     private boolean wasGcmDeviceRegistrationIdSaved = false;
     private boolean wasBackEndDeviceRegistrationIdSaved = false;
@@ -49,7 +47,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
                                        String variantSecretToLoad,
                                        String deviceAliasToLoad,
                                        String packageNameToLoad,
-                                       URL baseServerUrlToLoad) {
+                                       String baseServerUrlToLoad) {
         this.gcmDeviceRegistrationId = gcmDeviceRegistrationIdToLoad;
         this.backEndDeviceRegistrationId = backEndDeviceRegistrationIdToLoad;
         this.appVersion = appVersionToLoad;
@@ -102,7 +100,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     }
 
     @Override
-    public URL getBaseServerUrl() {
+    public String getBaseServerUrl() {
         return baseServerUrl;
     }
 
@@ -155,7 +153,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     }
 
     @Override
-    public void setBaseServerUrl(URL baseServerUrl) {
+    public void setBaseServerUrl(String baseServerUrl) {
         this.baseServerUrl = baseServerUrl;
         wasBaseServerUrlSaved = true;
     }

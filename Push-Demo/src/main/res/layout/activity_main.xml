@@ -9,7 +9,6 @@
     tools:context="io.pivotal.android.push.demo.MainActivity">
 
     <TextView
-        android:text="@string/label_text"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:id="@+id/label"/>

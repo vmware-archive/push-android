@@ -1,8 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <string name="long_app_name">Pivotal MSS PushSDK Demo App</string>
+    <string name="long_app_name">MSS Push Demo App</string>
     <string name="short_app_name">Push Demo</string>
-    <string name="label_text">Registering for notifications...</string>
 
 </resources>

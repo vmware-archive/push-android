@@ -135,9 +135,9 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
 
     private URL getURL(boolean isUpdate, String previousBackEndDeviceRegistrationId, RegistrationParameters parameters) throws MalformedURLException {
         if (isUpdate) {
-            return new URL(parameters.getBaseServerUrl(), Const.BACKEND_REGISTRATION_REQUEST_ENDPOINT + "/" +  previousBackEndDeviceRegistrationId);
+            return new URL(parameters.getBaseServerUrl() + Const.BACKEND_REGISTRATION_REQUEST_ENDPOINT + "/" +  previousBackEndDeviceRegistrationId);
         } else {
-            return new URL(parameters.getBaseServerUrl(), Const.BACKEND_REGISTRATION_REQUEST_ENDPOINT);
+            return new URL(parameters.getBaseServerUrl() + Const.BACKEND_REGISTRATION_REQUEST_ENDPOINT);
         }
     }
 

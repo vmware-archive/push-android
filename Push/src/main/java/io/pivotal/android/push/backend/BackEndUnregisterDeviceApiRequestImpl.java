@@ -40,7 +40,7 @@ public class BackEndUnregisterDeviceApiRequestImpl extends ApiRequestImpl implem
 
         try {
             Logger.v("Making network request to the back-end server to unregister the device ID:" + backEndDeviceRegistrationId);
-            final URL url = new URL(parameters.getBaseServerUrl(), Const.BACKEND_REGISTRATION_REQUEST_ENDPOINT + "/" + backEndDeviceRegistrationId);
+            final URL url = new URL(parameters.getBaseServerUrl() + Const.BACKEND_REGISTRATION_REQUEST_ENDPOINT + "/" + backEndDeviceRegistrationId);
             final HttpURLConnection urlConnection = getHttpURLConnection(url);
             urlConnection.setRequestMethod("DELETE");
             urlConnection.addRequestProperty("Authorization", BackEndRegistrationApiRequestImpl.getBasicAuthorizationValue(parameters));

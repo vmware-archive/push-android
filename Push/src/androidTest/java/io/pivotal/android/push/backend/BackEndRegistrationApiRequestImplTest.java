@@ -18,13 +18,10 @@ package io.pivotal.android.push.backend;
 import android.test.AndroidTestCase;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URL;
 
 import io.pivotal.android.common.test.network.FakeHttpURLConnection;
 import io.pivotal.android.common.test.network.FakeNetworkWrapper;
 import io.pivotal.android.common.test.util.DelayedLoop;
-import io.pivotal.android.common.util.Logger;
 import io.pivotal.android.push.RegistrationParameters;
 
 public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
@@ -319,13 +316,6 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     }
 
     private RegistrationParameters getParameters() {
-        URL url;
-        try {
-            url = new URL(TEST_BASE_SERVER_URL);
-        } catch (MalformedURLException e) {
-            Logger.ex(e);
-            url = null;
-        }
-        return new RegistrationParameters(TEST_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_DEVICE_ALIAS, url);
+        return new RegistrationParameters(TEST_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_DEVICE_ALIAS, TEST_BASE_SERVER_URL);
     }
 }

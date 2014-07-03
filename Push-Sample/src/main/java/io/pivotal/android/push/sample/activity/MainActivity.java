@@ -36,10 +36,8 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
-import java.net.MalformedURLException;
 import java.net.URL;
 
-import io.pivotal.android.analytics.AnalyticsParameters;
 import io.pivotal.android.analytics.database.DatabaseEventsStorage;
 import io.pivotal.android.common.sample.activity.BaseMainActivity;
 import io.pivotal.android.common.sample.activity.BasePreferencesActivity;
@@ -81,7 +79,6 @@ public class MainActivity extends BaseMainActivity {
         super.onResume();
         updateCurrentBaseRowColour();
         setupPushSDK();
-        setupAnalyticsSDK();
         clearNotifications();
     }
 
@@ -91,22 +88,6 @@ public class MainActivity extends BaseMainActivity {
         } catch (IllegalArgumentException e) {
             addLogMessage("Not able to initialize Push SDK: " + e.getMessage());
         }
-    }
-
-    private void setupAnalyticsSDK() {
-        try {
-            final AnalyticsParameters analyticsParameters = getAnalyticsParameters();
-            push.setupAnalytics(analyticsParameters);
-        } catch (IllegalArgumentException e) {
-            addLogMessage("Not able to initialize Analytics SDK: " + e.getMessage());
-        }
-    }
-
-    private AnalyticsParameters getAnalyticsParameters() {
-        final URL baseServerUrl = getAnalyticsBaseServerUrl();
-        final boolean isAnalyticsEnabled = Preferences.isAnalyticsEnabled(this);
-        final AnalyticsParameters parameters = new AnalyticsParameters(isAnalyticsEnabled, baseServerUrl);
-        return parameters;
     }
 
     private void clearNotifications() {
@@ -146,30 +127,10 @@ public class MainActivity extends BaseMainActivity {
         final String variantUuid = Preferences.getVariantUuid(this);
         final String variantSecret = Preferences.getVariantSecret(this);
         final String deviceAlias = Preferences.getDeviceAlias(this);
-        final URL baseServerUrl = getPushBaseServerUrl();
+        final String baseServerUrl = Preferences.getPushBaseServerUrl(this);
         addLogMessage("GCM Sender ID: '" + gcmSenderId + "'\nVariant UUID: '" + variantUuid + "\nVariant Secret: '" + variantSecret + "'\nDevice Alias: '" + deviceAlias + "'\nBase Server URL: '" + baseServerUrl + "'.");
         final RegistrationParameters parameters = new RegistrationParameters(gcmSenderId, variantUuid, variantSecret, deviceAlias, baseServerUrl);
         return parameters;
-    }
-
-    private URL getPushBaseServerUrl() {
-        final String baseServerUrl = Preferences.getPushBaseServerUrl(this);
-        try {
-            return new URL(baseServerUrl);
-        } catch (MalformedURLException e) {
-            addLogMessage("Invalid push base server URL: '" + baseServerUrl + "'.");
-            return null;
-        }
-    }
-
-    private URL getAnalyticsBaseServerUrl() {
-        final String baseServerUrl = Preferences.getAnalyticsBaseServerUrl(this);
-        try {
-            return new URL(baseServerUrl);
-        } catch (MalformedURLException e) {
-            addLogMessage("Invalid analytics base server URL: '" + baseServerUrl + "'.");
-            return null;
-        }
     }
 
     @Override

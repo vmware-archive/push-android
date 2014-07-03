@@ -18,7 +18,6 @@ package io.pivotal.android.push.backend;
 import android.test.AndroidTestCase;
 
 import java.io.IOException;
-import java.net.URL;
 
 import io.pivotal.android.common.test.network.FakeHttpURLConnection;
 import io.pivotal.android.common.test.network.FakeNetworkWrapper;
@@ -27,8 +26,8 @@ import io.pivotal.android.push.RegistrationParameters;
 
 public class BackEndUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
 
-    private static final String TEST_BACK_END_DEVICE_REGISTRATION_ID = "TEST_BACK_END_DEVICE_REGISTRATION_ID";
     private static final long TEN_SECOND_TIMEOUT = 10000L;
+    private static final String TEST_BACK_END_DEVICE_REGISTRATION_ID = "TEST_BACK_END_DEVICE_REGISTRATION_ID";
     private static final String TEST_GCM_SENDER_ID = "TEST_GCM_SENDER_ID";
     private static final String TEST_VARIANT_UUID = "TEST_VARIANT_UUID";
     private static final String TEST_VARIANT_SECRET = "TEST_VARIANT_SECRET";
@@ -43,8 +42,7 @@ public class BackEndUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        final URL url = new URL(TEST_BASE_SERVER_URL);
-        parameters = new RegistrationParameters(TEST_GCM_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_DEVICE_ALIAS, url);
+        parameters = new RegistrationParameters(TEST_GCM_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_DEVICE_ALIAS, TEST_BASE_SERVER_URL);
         networkWrapper = new FakeNetworkWrapper();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
         FakeHttpURLConnection.reset();

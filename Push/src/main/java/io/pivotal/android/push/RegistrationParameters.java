@@ -15,8 +15,6 @@
 
 package io.pivotal.android.push;
 
-import java.net.URL;
-
 /**
  * Parameters used to register with the Pivotal Mobile Services Suite Push server.
  */
@@ -26,7 +24,7 @@ public class RegistrationParameters {
     private final String variantUuid;
     private final String variantSecret;
     private final String deviceAlias;
-    private final URL baseServerUrl;
+    private final String baseServerUrl;
 
     /**
      * Sets up parameters used by the Pivotal Mobile Services Suite Push SDK
@@ -38,7 +36,7 @@ public class RegistrationParameters {
 *                           of devices, in push or notification campaigns. May not be set to `null`. May be set to empty.
      * @param baseServerUrl The Pivotal Mobile Services Suite server used to provide push and related analytics services.
      */
-    public RegistrationParameters(String gcmSenderId, String variantUuid, String variantSecret, String deviceAlias, URL baseServerUrl) {
+    public RegistrationParameters(String gcmSenderId, String variantUuid, String variantSecret, String deviceAlias, String baseServerUrl) {
         this.gcmSenderId = gcmSenderId;
         this.variantUuid = variantUuid;
         this.variantSecret = variantSecret;
@@ -62,7 +60,7 @@ public class RegistrationParameters {
         return deviceAlias;
     }
 
-    public URL getBaseServerUrl() {
+    public String getBaseServerUrl() {
         return baseServerUrl;
     }
     

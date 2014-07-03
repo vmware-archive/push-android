@@ -5,7 +5,6 @@ import android.content.Intent;
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
 
-import java.net.URL;
 import java.util.HashMap;
 
 import io.pivotal.android.analytics.jobs.EnqueueEventJob;
@@ -71,9 +70,8 @@ public class UnregistrationEngineTestParameters {
             startingVariantUuidInPrefs = null;
             pushPreferencesProvider = new FakePushPreferencesProvider(null, startingBackEndDeviceRegistrationIdInPrefs, -1, null, startingVariantUuidInPrefs, null, null, null, null);
         } else {
-            final URL baseServerUrlInPrefs = new URL(BASE_SERVER_URL_IN_PREFS);
             startingVariantUuidInPrefs = VARIANT_UUID_IN_PREFS;
-            pushPreferencesProvider = new FakePushPreferencesProvider(GCM_DEVICE_ID_IN_PREFS, startingBackEndDeviceRegistrationIdInPrefs, APP_VERSION_IN_PREFS, GCM_SENDER_ID_IN_PREFS, startingVariantUuidInPrefs, VARIANT_SECRET_IN_PREFS, DEVICE_ALIAS_IN_PREFS, PACKAGE_NAME_IN_PREFS, baseServerUrlInPrefs);
+            pushPreferencesProvider = new FakePushPreferencesProvider(GCM_DEVICE_ID_IN_PREFS, startingBackEndDeviceRegistrationIdInPrefs, APP_VERSION_IN_PREFS, GCM_SENDER_ID_IN_PREFS, startingVariantUuidInPrefs, VARIANT_SECRET_IN_PREFS, DEVICE_ALIAS_IN_PREFS, PACKAGE_NAME_IN_PREFS, BASE_SERVER_URL_IN_PREFS);
         }
 
         final FakeAnalyticsPreferencesProvider analyticsPreferencesProvider = new FakeAnalyticsPreferencesProvider(isAnalyticsEnabled, null);

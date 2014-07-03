@@ -70,7 +70,7 @@ public class Preferences {
     }
 
     public static boolean isAnalyticsEnabled(Context context) {
-        return getSharedPreferences(context).getBoolean(IS_ANALYTICS_ENABLED, true);
+        return getSharedPreferences(context).getBoolean(IS_ANALYTICS_ENABLED, false);
     }
 
     public static String getAnalyticsBaseServerUrl(Context context) {

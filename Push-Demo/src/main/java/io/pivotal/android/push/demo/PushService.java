@@ -18,19 +18,6 @@ public class PushService extends GcmService {
     private static final int NOTIFICATION_LIGHTS_OFF_MS = 1000;
 
     @Override
-    public void onReceive(Intent intent) {
-        super.onReceive(intent);
-
-        final Bundle bundle = intent.getExtras();
-        Logger.e("===================================");
-        for (String key : bundle.keySet()) {
-            Object value = bundle.get(key);
-            Logger.e("KEY: " + String.format("%s %s (%s)", key, value.toString(), value.getClass().getName()));
-        }
-        Logger.e("===================================\n");
-    }
-
-    @Override
     public void onReceiveMessage(Bundle payload) {
         String message;
         if (payload.containsKey("message")) {

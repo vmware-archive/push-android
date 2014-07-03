@@ -18,11 +18,6 @@ package io.pivotal.android.push.prefs;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
-import io.pivotal.android.common.util.Logger;
-
 /**
  * Saves preferences to the SharedPreferences on the filesystem.
  */
@@ -156,28 +151,15 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
     }
 
     @Override
-    public URL getBaseServerUrl() {
-        final String preference = getSharedPreferences().getString(PROPERTY_BASE_SERVER_URL, null);
-        if (preference == null) {
-            return null;
-        }
-        try {
-            return new URL(preference);
-        } catch (MalformedURLException e) {
-            Logger.w("Invalid base server URL stored in preferences: " + preference);
-            return null;
-        }
+    public String getBaseServerUrl() {
+        return getSharedPreferences().getString(PROPERTY_BASE_SERVER_URL, null);
     }
 
     @Override
-    public void setBaseServerUrl(URL baseServerUrl) {
+    public void setBaseServerUrl(String baseServerUrl) {
         final SharedPreferences prefs = getSharedPreferences();
         final SharedPreferences.Editor editor = prefs.edit();
-        if (baseServerUrl != null) {
-            editor.putString(PROPERTY_BASE_SERVER_URL, baseServerUrl.toString());
-        } else {
-            editor.putString(PROPERTY_BASE_SERVER_URL, null);
-        }
+        editor.putString(PROPERTY_BASE_SERVER_URL, baseServerUrl);
         editor.commit();
     }
 

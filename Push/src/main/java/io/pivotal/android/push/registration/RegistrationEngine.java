@@ -92,7 +92,7 @@ public class RegistrationEngine {
     private String previousVariantUuid;
     private String previousVariantSecret;
     private String previousDeviceAlias;
-    private URL previousBackEndServerUrl;
+    private String previousBackEndServerUrl;
 
     /**
      * Instantiate an instance of the RegistrationEngine.
