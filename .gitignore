@@ -21,8 +21,6 @@ local.properties
 # Temporary files
 *.swp
 *.pyc
-device_uuid.txt
-gcm_registration_id.txt
 
 # Gradle files
 .gradle
@@ -39,8 +37,3 @@ proguard/
 *.ipr
 *.iws
 .idea/
-
-# Other local files
-post_loop.sh
-post_one.sh
-backend_post_one.sh

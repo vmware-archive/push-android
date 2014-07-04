@@ -1,5 +1,0 @@
-dependencies {
-    compile 'com.google.android.gms:play-services:4.0.30'
-    compile 'io.pivotal.android:SampleAppCore:0.6-RELEASE'
-    compile project(':Push')
-}

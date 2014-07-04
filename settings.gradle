@@ -1,1 +1,1 @@
-include 'Push', 'Push-Sample', 'Push-Demo'
+include 'push'
