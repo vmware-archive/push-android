@@ -4,7 +4,7 @@ Android Push Client SDK
 Features
 --------
 
-The Pivotal Mobile Services Suite Push and Analytics Client SDKs are light-weight tools that will help your application:
+The Pivotal Mobile Services Suite Push Client SDK is a light-weight library that will help your application:
 
  1. Register for push notifications with Google Cloud Messaging (GCM) and an instance of the Pivotal Mobile Services Suite
     push messaging server.
