@@ -44,7 +44,9 @@ these tasks:
  3. Link the library to your project.  This project has not yet been published to any Maven repositories, but once it has
     then you can add the following line to the `dependencies` section of your `build.gradle` file:
 
-        compile 'io.pivotal.android:push:1.0.0'
+    ```groovy
+    compile 'io.pivotal.android:push:1.0.0'
+    ```
 
     Note that the version name may be different.
 
@@ -54,33 +56,39 @@ these tasks:
  4. You will need to define and use the following `permission` in the `manifest` element of your application's
     `AndroidManifest.xml` file.  Ensure that the base of the permission name is your application's package name:
 
-        <permission
-            android:name="[YOUR.PACKAGE.NAME].permission.C2D_MESSAGE"
-            android:protectionLevel="signature" />
+    ```xml
+    <permission
+        android:name="[YOUR.PACKAGE.NAME].permission.C2D_MESSAGE"
+        android:protectionLevel="signature" />
 
-        <uses-permission android:name="[YOUR.PACKAGE.NAME].permission.C2D_MESSAGE" />
+    <uses-permission android:name="[YOUR.PACKAGE.NAME].permission.C2D_MESSAGE" />
+    ```
 
  5. You will need to add the following `receiver` to the `application` element of your application's
     `AndroidManifest.xml` file.  Ensure that you set the category name to your application's package name:
 
-        <receiver
-            android:name="io.pivotal.android.push.receiver.GcmBroadcastReceiver"
-            android:permission="com.google.android.c2dm.permission.SEND">
-            <intent-filter>
-                <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
-                <category android:name="[YOUR.PACKAGE.NAME]"/>
-            </intent-filter>
-        </receiver>
+    ```xml
+    <receiver
+        android:name="io.pivotal.android.push.receiver.GcmBroadcastReceiver"
+        android:permission="com.google.android.c2dm.permission.SEND">
+        <intent-filter>
+            <action android:name="com.google.android.c2dm.intent.RECEIVE"/>
+            <category android:name="[YOUR.PACKAGE.NAME]"/>
+        </intent-filter>
+    </receiver>
+    ```
 
  6. Add the following lines of code to the initialization section of your application.  You will need a `Context` object
     to pass to the `getInstance` method, so you should try to add this code to your `Application` class or to one of
     your `Activity` class.
 
-        final RegistrationParameters parameters = new RegistrationParameters(
-		    GCM_SENDER_ID, VARIANT_UUID, VARIANT_SECRET, DEVICE_ALIAS, PUSH_BASE_SERVER_URL
-		);
+    ```java
+    final RegistrationParameters parameters = new RegistrationParameters(
+        GCM_SENDER_ID, VARIANT_UUID, VARIANT_SECRET, DEVICE_ALIAS, PUSH_BASE_SERVER_URL
+    );
 
-		Push.getInstance(this).startRegistration(parameters);
+    Push.getInstance(this).startRegistration(parameters);
+    ```
 
     The `GCM_SENDER_ID`, `VARIANT_UUID`, and `VARIANT_SECRET` are described above.  The `DEVICE_ALIAS` is a custom field that
     you can use to differentiate this device from others in your own push messaging campaigns.  You can leave it empty
@@ -102,24 +110,28 @@ these tasks:
     extends the `GcmService` provided in the SDK. The intent that GCM sends is passed to your service's `onReceive` method.  
     Here is a simple example:
 
-        public class MyPushService extends GcmService {
+    ```java
+    public class MyPushService extends GcmService {
 
-            @Override
-            public void onReceiveMessage(Bundle payload) {
-                if (payload.containsKey("message")) {
-                    final String message = payload.getString("message");
-                    handleMessage(message);
-                }
-            }
-
-            private void handleMessage(String msg) {
-                // Your code here
+        @Override
+        public void onReceiveMessage(Bundle payload) {
+            if (payload.containsKey("message")) {
+                final String message = payload.getString("message");
+                handleMessage(message);
             }
         }
 
+        private void handleMessage(String msg) {
+            // Your code here
+        }
+    }
+    ```
+
  8. Finally, you will need to declare your service in your `AndroidManifest.xml` file.
 
-         <service android:name=".service.MyPushService" android:exported="false" />
+    ```xml
+    <service android:name=".service.MyPushService" android:exported="false" />
+    ```
 
 
 Building the SDK
