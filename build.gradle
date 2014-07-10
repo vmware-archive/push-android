@@ -16,8 +16,8 @@ buildscript {
 }
 
 ext {
-    versionName = "0.6"
-    versionCode = 6
+    versionName = "1.0.0"
+    versionCode = 1
     isSnapshot = true
 }
 
