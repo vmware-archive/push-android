@@ -3,6 +3,10 @@ Android Push Client SDK
 
 The Push SDK requires API level 10 or greater.
 
+Push SDK Usage
+--------------
+
+For more information please visit the [docs site](https://github.com/cfmobile/docs-pushnotifications-android)
 
 Building the SDK
 ----------------
@@ -24,7 +28,3 @@ To build the project from the command line, run the command `./gradlew clean ass
 to your computer then you can also run the unit test suite with the command `./gradlew connectedCheck`.
 
 
-User Guide
-----------------
-
-For user information please visit the [docs site](https://github.com/cfmobile/docs-pushnotifications-android)
