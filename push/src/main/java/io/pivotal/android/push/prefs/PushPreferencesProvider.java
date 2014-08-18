@@ -3,6 +3,8 @@
  */
 package io.pivotal.android.push.prefs;
 
+import java.util.Set;
+
 public interface PushPreferencesProvider {
 
     public static int NO_SAVED_VERSION = -1;
@@ -42,4 +44,8 @@ public interface PushPreferencesProvider {
     String getBaseServerUrl();
 
     void setBaseServerUrl(String baseServerUrl);
+
+    Set<String> getTags();
+
+    void setTags(Set<String> tags);
 }

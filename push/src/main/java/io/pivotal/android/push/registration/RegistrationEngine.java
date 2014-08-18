@@ -5,6 +5,9 @@ package io.pivotal.android.push.registration;
 
 import android.content.Context;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import io.pivotal.android.push.RegistrationParameters;
 import io.pivotal.android.push.backend.BackEndRegistrationApiRequest;
 import io.pivotal.android.push.backend.BackEndRegistrationApiRequestProvider;
@@ -16,6 +19,7 @@ import io.pivotal.android.push.gcm.GcmRegistrationListener;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
 import io.pivotal.android.push.gcm.GcmUnregistrationListener;
+import io.pivotal.android.push.model.api.BackEndApiRegistrationRequestData.Tags;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.ServiceStarter;
@@ -283,6 +287,23 @@ public class RegistrationEngine {
         return !parameters.getGcmSenderId().equals(previousGcmSenderId);
     }
 
+    private boolean haveTagsBeenUpdated(RegistrationParameters parameters) {
+        final Set<String> tags = new HashSet<String>(parameters.getAllTags());
+        Logger.v("Want tags: " + tags);
+
+        final Set<String> savedTags = new HashSet<String>(pushPreferencesProvider.getTags());
+        Logger.v("Saved tags: " + savedTags);
+
+        tags.removeAll(savedTags);
+        Logger.v("Subscribe tags: " + tags);
+
+        savedTags.removeAll(parameters.getAllTags());
+        Logger.v("Unsubscribe tags: " + savedTags);
+
+        parameters.setTags(new Tags(tags, savedTags));
+        return !(tags.isEmpty() && savedTags.isEmpty());
+    }
+
     private boolean hasAppBeenUpdated() {
         final int currentAppVersion = versionProvider.getAppVersion();
         final int savedAppVersion = pushPreferencesProvider.getAppVersion();
@@ -320,6 +341,10 @@ public class RegistrationEngine {
             Logger.v("The registration parameters have been updated. Device will need to update its registration with the back-end.");
             return true;
         }
+        if (haveTagsBeenUpdated(parameters)) {
+            Logger.v("App tags changed. Device will need to update its registration with the back-end.");
+            return true;
+        }
         Logger.v("It does not seem that the device needs to update its registration with the back-end.");
         return false;
     }
@@ -350,6 +375,7 @@ public class RegistrationEngine {
                 pushPreferencesProvider.setGcmDeviceRegistrationId(null);
                 pushPreferencesProvider.setGcmSenderId(null);
                 pushPreferencesProvider.setAppVersion(PushPreferencesProvider.NO_SAVED_VERSION);
+
                 registerDeviceWithGcm(parameters, listener);
             }
 
@@ -450,6 +476,8 @@ public class RegistrationEngine {
                 pushPreferencesProvider.setVariantSecret(parameters.getVariantSecret());
                 pushPreferencesProvider.setDeviceAlias(parameters.getDeviceAlias());
                 pushPreferencesProvider.setBaseServerUrl(parameters.getBaseServerUrl());
+                pushPreferencesProvider.setTags(parameters.getAllTags());
+                Logger.v("Saving tags: " + parameters.getAllTags());
 
                 logPushRegisteredEvent(parameters.getVariantUuid(), backEndDeviceRegistrationId);
 
@@ -504,6 +532,8 @@ public class RegistrationEngine {
                 pushPreferencesProvider.setVariantSecret(parameters.getVariantSecret());
                 pushPreferencesProvider.setDeviceAlias(parameters.getDeviceAlias());
                 pushPreferencesProvider.setBaseServerUrl(parameters.getBaseServerUrl());
+                pushPreferencesProvider.setTags(parameters.getAllTags());
+                Logger.v("Saving tags: " + parameters.getAllTags());
 
                 logPushRegisteredEvent(parameters.getVariantUuid(), backEndDeviceRegistrationId);
 
@@ -530,6 +560,7 @@ public class RegistrationEngine {
         pushPreferencesProvider.setVariantSecret(null);
         pushPreferencesProvider.setDeviceAlias(null);
         pushPreferencesProvider.setBaseServerUrl(null);
+        pushPreferencesProvider.setTags(null);
     }
 
     private void logPushRegisteredEvent(String variantUuid, String deviceId) {

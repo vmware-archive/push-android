@@ -18,7 +18,7 @@ buildscript {
 ext {
     versionName = "1.0.0"
     versionCode = 1
-    isSnapshot = true
+    isSnapshot = false
 }
 
 ext.pomInfo = {

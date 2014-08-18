@@ -18,6 +18,8 @@ package io.pivotal.android.push.model.api;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.Set;
+
 /**
  * Model used in the Pivotal Mobile Services Suite device registration API.
  */
@@ -46,6 +48,9 @@ public class BackEndApiRegistrationRequestData {
 
     @SerializedName("registration_token")
     private String registrationToken;
+
+    @SerializedName("tags")
+    private Tags tags;
 
     public BackEndApiRegistrationRequestData() {
     }
@@ -112,5 +117,35 @@ public class BackEndApiRegistrationRequestData {
 
     public void setRegistrationToken(String registrationToken) {
         this.registrationToken = registrationToken;
+    }
+
+    public Tags getTags() {
+        return tags;
+    }
+
+    public void setTags(Tags tags) {
+        this.tags = tags;
+    }
+
+    public static class Tags {
+
+        @SerializedName("subscribe")
+        private Set<String> subscribe;
+
+        @SerializedName("unsubscribe")
+        private Set<String> unsubscribe;
+
+        public Tags(Set<String> subscribe, Set<String> unsubscribe) {
+            this.subscribe = subscribe;
+            this.unsubscribe = unsubscribe;
+        }
+
+        public Set<String> getSubscribeTags() {
+            return subscribe;
+        }
+
+        public Set<String> getUnsubscripedTags() {
+            return subscribe;
+        }
     }
 }

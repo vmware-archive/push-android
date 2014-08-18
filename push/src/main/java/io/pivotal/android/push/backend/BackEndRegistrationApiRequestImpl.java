@@ -197,6 +197,7 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
         }
         data.setOsVersion(Build.VERSION.RELEASE);
         data.setRegistrationToken(deviceRegistrationId);
+        data.setTags(parameters.getTags());
         return data;
     }
 

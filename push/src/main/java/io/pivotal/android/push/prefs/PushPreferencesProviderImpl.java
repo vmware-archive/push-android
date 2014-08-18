@@ -3,8 +3,13 @@
  */
 package io.pivotal.android.push.prefs;
 
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
+
+import java.util.HashSet;
+import java.util.Set;
 
 /**
  * Saves preferences to the SharedPreferences on the filesystem.
@@ -24,6 +29,7 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
     private static final String PROPERTY_DEVICE_ALIAS = "device_alias";
     private static final String PROPERTY_PACKAGE_NAME = "package_name";
     private static final String PROPERTY_BASE_SERVER_URL = "base_server_url";
+    private static final String PROPERTY_TAGS = "tags";
 
     private final Context context;
 
@@ -151,7 +157,22 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
         editor.commit();
     }
 
+    @Override
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public Set<String> getTags() {
+        return getSharedPreferences().getStringSet(PROPERTY_TAGS, new HashSet<String>());
+    }
+
     private SharedPreferences getSharedPreferences() {
         return context.getSharedPreferences(TAG_NAME, Context.MODE_PRIVATE);
+    }
+
+    @Override
+    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
+    public void setTags(Set<String> tags) {
+        final SharedPreferences prefs = getSharedPreferences();
+        final SharedPreferences.Editor editor = prefs.edit();
+        editor.putStringSet(PROPERTY_TAGS, tags);
+        editor.commit();
     }
 }

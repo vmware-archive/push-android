@@ -3,6 +3,11 @@
  */
 package io.pivotal.android.push;
 
+import java.util.HashSet;
+import java.util.Set;
+
+import io.pivotal.android.push.model.api.BackEndApiRegistrationRequestData.Tags;
+
 /**
  * Parameters used to register with the Pivotal Mobile Services Suite Push server.
  */
@@ -14,6 +19,9 @@ public class RegistrationParameters {
     private final String deviceAlias;
     private final String baseServerUrl;
 
+    private final Set<String> alltags;
+    private Tags tags;
+
     /**
      * Sets up parameters used by the Pivotal Mobile Services Suite Push SDK
      * @param gcmSenderId   The "sender ID" or "project ID", as defined by the Google Cloud Messaging.  May not be null or empty.
@@ -24,12 +32,13 @@ public class RegistrationParameters {
 *                           of devices, in push or notification campaigns. May not be set to `null`. May be set to empty.
      * @param baseServerUrl The Pivotal Mobile Services Suite server used to provide push and related analytics services.
      */
-    public RegistrationParameters(String gcmSenderId, String variantUuid, String variantSecret, String deviceAlias, String baseServerUrl) {
+    public RegistrationParameters(String gcmSenderId, String variantUuid, String variantSecret, String deviceAlias, String baseServerUrl, Set<String> tags) {
         this.gcmSenderId = gcmSenderId;
         this.variantUuid = variantUuid;
         this.variantSecret = variantSecret;
         this.deviceAlias = deviceAlias;
         this.baseServerUrl = baseServerUrl;
+        this.alltags = tags;
     }
 
     public String getGcmSenderId() {
@@ -51,7 +60,19 @@ public class RegistrationParameters {
     public String getBaseServerUrl() {
         return baseServerUrl;
     }
-    
+
+    public Set<String> getAllTags() {
+        return alltags != null ? alltags : new HashSet<String>();
+    }
+
+    public void setTags(Tags tags) {
+        this.tags = tags;
+    }
+
+    public Tags getTags() {
+        return tags;
+    }
+
     @Override
     public boolean equals(Object o) {
 

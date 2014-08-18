@@ -3,6 +3,9 @@
  */
 package io.pivotal.android.push.prefs;
 
+import java.util.HashSet;
+import java.util.Set;
+
 public class FakePushPreferencesProvider implements PushPreferencesProvider {
 
     private String gcmDeviceRegistrationId;
@@ -23,6 +26,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     private boolean wasDeviceAliasSaved = false;
     private boolean wasPackageNameSaved = false;
     private boolean wasBaseServerUrlSaved = false;
+    private boolean wasTagsSaved = false;
 
     public FakePushPreferencesProvider() {
     }
@@ -93,6 +97,11 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     }
 
     @Override
+    public Set<String> getTags() {
+        return new HashSet<String>();
+    }
+
+    @Override
     public void setBackEndDeviceRegistrationId(String backendDeviceRegistrationId) {
         this.backEndDeviceRegistrationId = backendDeviceRegistrationId;
         wasBackEndDeviceRegistrationIdSaved = true;
@@ -146,6 +155,11 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
         wasBaseServerUrlSaved = true;
     }
 
+    @Override
+    public void setTags(Set<String> tags) {
+
+    }
+
     public boolean wasGcmDeviceRegistrationIdSaved() {
         return wasGcmDeviceRegistrationIdSaved;
     }
@@ -180,5 +194,9 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
 
     public boolean wasBaseServerUrlSaved() {
         return wasBaseServerUrlSaved;
+    }
+
+    public boolean wasTagsSaved() {
+        return wasTagsSaved;
     }
 }
