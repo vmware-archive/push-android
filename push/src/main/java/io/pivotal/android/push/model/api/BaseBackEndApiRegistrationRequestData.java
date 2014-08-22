@@ -1,29 +1,12 @@
 /*
  * Copyright (C) 2014 Pivotal Software, Inc. All rights reserved.
  */
-package io.pivotal.android.push.model.api;
 
-/*
-{
-        "variant_uuid": "guid_provided_by_developer",
-        "variant_secret": "guid_provided_by_developer",
-        "device_alias": "developer-specific",
-        "device_manufacturer": "ACME INC."
-        "device_model": "Nexus 5",
-        "os": "android",
-        "os_version": "4.4",
-        "registration_token": "provided_by_GCM"
-        }
-*/
+package io.pivotal.android.push.model.api;
 
 import com.google.gson.annotations.SerializedName;
 
-import java.util.Set;
-
-/**
- * Model used in the Pivotal Mobile Services Suite device registration API.
- */
-public class BackEndApiRegistrationRequestData {
+public abstract class BaseBackEndApiRegistrationRequestData {
 
     @SerializedName("variant_uuid")
     private String variantUuid;
@@ -48,12 +31,6 @@ public class BackEndApiRegistrationRequestData {
 
     @SerializedName("registration_token")
     private String registrationToken;
-
-    @SerializedName("tags")
-    private Tags tags;
-
-    public BackEndApiRegistrationRequestData() {
-    }
 
     public String getVariantUuid() {
         return variantUuid;
@@ -117,35 +94,5 @@ public class BackEndApiRegistrationRequestData {
 
     public void setRegistrationToken(String registrationToken) {
         this.registrationToken = registrationToken;
-    }
-
-    public Tags getTags() {
-        return tags;
-    }
-
-    public void setTags(Tags tags) {
-        this.tags = tags;
-    }
-
-    public static class Tags {
-
-        @SerializedName("subscribe")
-        private Set<String> subscribe;
-
-        @SerializedName("unsubscribe")
-        private Set<String> unsubscribe;
-
-        public Tags(Set<String> subscribe, Set<String> unsubscribe) {
-            this.subscribe = subscribe;
-            this.unsubscribe = unsubscribe;
-        }
-
-        public Set<String> getSubscribeTags() {
-            return subscribe;
-        }
-
-        public Set<String> getUnsubscripedTags() {
-            return subscribe;
-        }
     }
 }

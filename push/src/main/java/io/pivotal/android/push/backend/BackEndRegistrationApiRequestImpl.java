@@ -17,14 +17,18 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.Set;
 
 import io.pivotal.android.push.RegistrationParameters;
-import io.pivotal.android.push.model.api.BackEndApiRegistrationRequestData;
+import io.pivotal.android.push.model.api.BackEndApiRegistrationPostRequestData;
+import io.pivotal.android.push.model.api.BackEndApiRegistrationPutRequestData;
 import io.pivotal.android.push.model.api.BackEndApiRegistrationResponseData;
+import io.pivotal.android.push.model.api.BaseBackEndApiRegistrationRequestData;
 import io.pivotal.android.push.util.ApiRequestImpl;
 import io.pivotal.android.push.util.Const;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.NetworkWrapper;
+import io.pivotal.android.push.util.TagsHelper;
 import io.pivotal.android.push.util.Util;
 
 /**
@@ -51,18 +55,30 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
     }
 
     @Override
-    public void startNewDeviceRegistration(String gcmDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener) {
+    public void startNewDeviceRegistration(String gcmDeviceRegistrationId,
+                                           Set<String> savedTags,
+                                           RegistrationParameters parameters,
+                                           BackEndRegistrationListener listener) {
+
         verifyNewRegistrationArguments(gcmDeviceRegistrationId, parameters, listener);
-        handleRequest(gcmDeviceRegistrationId, null, parameters, listener, false);
+        handleRequest(gcmDeviceRegistrationId, null, savedTags, parameters, listener, false);
     }
 
     @Override
-    public void startUpdateDeviceRegistration(String gcmDeviceRegistrationId, String backEndDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener) {
+    public void startUpdateDeviceRegistration(String gcmDeviceRegistrationId,
+                                              String backEndDeviceRegistrationId,
+                                              Set<String> savedTags,
+                                              RegistrationParameters parameters,
+                                              BackEndRegistrationListener listener) {
+
         verifyUpdateRegistrationArguments(gcmDeviceRegistrationId, backEndDeviceRegistrationId, parameters, listener);
-        handleRequest(gcmDeviceRegistrationId, backEndDeviceRegistrationId, parameters, listener, true);
+        handleRequest(gcmDeviceRegistrationId, backEndDeviceRegistrationId, savedTags, parameters, listener, true);
     }
 
-    private void verifyNewRegistrationArguments(String gcmDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener) {
+    private void verifyNewRegistrationArguments(String gcmDeviceRegistrationId,
+                                                RegistrationParameters parameters,
+                                                BackEndRegistrationListener listener) {
+
         if (gcmDeviceRegistrationId == null) {
             throw new IllegalArgumentException("gcmDeviceRegistrationId may not be null");
         }
@@ -74,19 +90,29 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
         }
     }
 
-    private void verifyUpdateRegistrationArguments(String gcmDeviceRegistrationId, String backEndDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener) {
+    private void verifyUpdateRegistrationArguments(String gcmDeviceRegistrationId,
+                                                   String backEndDeviceRegistrationId,
+                                                   RegistrationParameters parameters,
+                                                   BackEndRegistrationListener listener) {
+
         verifyNewRegistrationArguments(gcmDeviceRegistrationId, parameters, listener);
         if (backEndDeviceRegistrationId == null) {
             throw new IllegalArgumentException("backEndDeviceRegistrationId may not be null");
         }
     }
 
-    private void handleRequest(String gcmDeviceRegistrationId, String previousBackEndDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener, boolean isUpdate) {
+    private void handleRequest(String gcmDeviceRegistrationId,
+                               String previousBackEndDeviceRegistrationId,
+                               Set<String> savedTags,
+                               RegistrationParameters parameters,
+                               BackEndRegistrationListener listener,
+                               boolean isUpdate) {
+
         OutputStream outputStream = null;
         try {
             final URL url = getURL(isUpdate, previousBackEndDeviceRegistrationId, parameters);
             final HttpURLConnection urlConnection = getHttpURLConnection(url);
-            urlConnection.setDoOutput(true); // indicate "POST" request
+            urlConnection.setDoOutput(true);
             urlConnection.setDoInput(true);
             urlConnection.setRequestMethod(getRequestMethod(isUpdate));
             urlConnection.addRequestProperty("Content-Type", "application/json");
@@ -94,7 +120,13 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
             urlConnection.connect();
 
             outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
-            final String requestBodyData = getRequestBodyData(gcmDeviceRegistrationId, parameters, isUpdate);
+
+            final String requestBodyData = getRequestBodyData(
+                    gcmDeviceRegistrationId,
+                    savedTags,
+                    parameters,
+                    isUpdate);
+
             Logger.v("Making network request to register this device with the back-end server: " + requestBodyData);
             writeOutput(requestBodyData, outputStream);
 
@@ -121,7 +153,10 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
         }
     }
 
-    private URL getURL(boolean isUpdate, String previousBackEndDeviceRegistrationId, RegistrationParameters parameters) throws MalformedURLException {
+    private URL getURL(boolean isUpdate,
+                       String previousBackEndDeviceRegistrationId,
+                       RegistrationParameters parameters) throws MalformedURLException {
+
         if (isUpdate) {
             return new URL(parameters.getBaseServerUrl() + "/" + Const.BACKEND_REGISTRATION_REQUEST_ENDPOINT + "/" +  previousBackEndDeviceRegistrationId);
         } else {
@@ -137,7 +172,9 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
         }
     }
 
-    public void onSuccessfulNetworkRequest(int statusCode, String responseString, final BackEndRegistrationListener listener) {
+    public void onSuccessfulNetworkRequest(int statusCode,
+                                           String responseString,
+                                           final BackEndRegistrationListener listener) {
 
         if (isFailureStatusCode(statusCode)) {
             Logger.e("Back-end server registration failed: server returned HTTP status " + statusCode);
@@ -177,14 +214,39 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
         listener.onBackEndRegistrationSuccess(deviceUuid);
     }
 
-    private String getRequestBodyData(String deviceRegistrationId, RegistrationParameters parameters, boolean isUpdate) {
-        final BackEndApiRegistrationRequestData data = getBackEndApiRegistrationRequestData(deviceRegistrationId, parameters, isUpdate);
+    private String getRequestBodyData(String deviceRegistrationId,
+                                      Set<String> savedTags,
+                                      RegistrationParameters parameters,
+                                      boolean isUpdate) {
+
+
+        final BaseBackEndApiRegistrationRequestData data = getBackEndApiRegistrationRequestData(
+                deviceRegistrationId,
+                savedTags,
+                parameters,
+                isUpdate);
+
         final Gson gson = new Gson();
         return gson.toJson(data);
     }
 
-    private BackEndApiRegistrationRequestData getBackEndApiRegistrationRequestData(String deviceRegistrationId, RegistrationParameters parameters, boolean isUpdate) {
-        final BackEndApiRegistrationRequestData data = new BackEndApiRegistrationRequestData();
+    private BaseBackEndApiRegistrationRequestData getBackEndApiRegistrationRequestData(String deviceRegistrationId,
+                                                                                      Set<String> savedTags,
+                                                                                      RegistrationParameters parameters,
+                                                                                      boolean isUpdate) {
+
+        final BaseBackEndApiRegistrationRequestData data;
+        if (isUpdate) {
+            final BackEndApiRegistrationPutRequestData putData = new BackEndApiRegistrationPutRequestData();
+            putData.setTags(getTags(savedTags, parameters));
+            data = putData;
+        } else {
+            final BackEndApiRegistrationPostRequestData postData = new BackEndApiRegistrationPostRequestData();
+            postData.setOs("android");
+            postData.setTags(parameters.getAllTags());
+            data = postData;
+        }
+
         if (parameters.getDeviceAlias() == null) {
             data.setDeviceAlias("");
         } else {
@@ -192,13 +254,16 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
         }
         data.setDeviceModel(Build.MODEL);
         data.setDeviceManufacturer(Build.MANUFACTURER);
-        if (!isUpdate) {
-            data.setOs("android");
-        }
         data.setOsVersion(Build.VERSION.RELEASE);
         data.setRegistrationToken(deviceRegistrationId);
-        data.setTags(parameters.getTags());
         return data;
+    }
+
+    private BackEndApiRegistrationPutRequestData.Tags getTags(Set<String> savedTags,
+                                                              RegistrationParameters parameters) {
+
+        final TagsHelper tagsHelper = new TagsHelper(savedTags, parameters.getAllTags());
+        return new BackEndApiRegistrationPutRequestData.Tags(tagsHelper.getSubscribeTags(), tagsHelper.getUnsubscribeTags());
     }
 
     public static String getBasicAuthorizationValue(RegistrationParameters parameters) {

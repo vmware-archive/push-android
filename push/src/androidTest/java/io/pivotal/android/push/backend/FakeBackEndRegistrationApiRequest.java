@@ -3,6 +3,8 @@
  */
 package io.pivotal.android.push.backend;
 
+import java.util.Set;
+
 import io.pivotal.android.push.RegistrationParameters;
 
 public class FakeBackEndRegistrationApiRequest implements BackEndRegistrationApiRequest {
@@ -33,7 +35,11 @@ public class FakeBackEndRegistrationApiRequest implements BackEndRegistrationApi
     }
 
     @Override
-    public void startNewDeviceRegistration(String gcmDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener) {
+    public void startNewDeviceRegistration(String gcmDeviceRegistrationId,
+                                           Set<String> savedTags,
+                                           RegistrationParameters parameters,
+                                           BackEndRegistrationListener listener) {
+
         wasRegisterCalled = true;
         isNewRegistration = true;
 
@@ -50,7 +56,11 @@ public class FakeBackEndRegistrationApiRequest implements BackEndRegistrationApi
     }
 
     @Override
-    public void startUpdateDeviceRegistration(String gcmDeviceRegistrationId, String previousBackEndDeviceRegistrationId, RegistrationParameters parameters, BackEndRegistrationListener listener) {
+    public void startUpdateDeviceRegistration(String gcmDeviceRegistrationId,
+                                              String previousBackEndDeviceRegistrationId,
+                                              Set<String> savedTags,
+                                              RegistrationParameters parameters,
+                                              BackEndRegistrationListener listener) {
         wasRegisterCalled = true;
         isUpdateRegistration = true;
 

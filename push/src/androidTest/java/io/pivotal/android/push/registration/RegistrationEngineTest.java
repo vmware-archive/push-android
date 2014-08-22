@@ -5,6 +5,10 @@ package io.pivotal.android.push.registration;
 
 import android.test.AndroidTestCase;
 
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Semaphore;
 
 import io.pivotal.android.push.RegistrationParameters;
@@ -38,6 +42,8 @@ public class RegistrationEngineTest extends AndroidTestCase {
     private static final String TEST_GCM_SENDER_ID_2 = "TEST_GCM_SENDER_ID_2";
     private static String TEST_BASE_SERVER_URL_1 = "http://test1.com";
     private static String TEST_BASE_SERVER_URL_2 = "http://test2.com";
+    private static final Set<String> TEST_TAGS1 = new HashSet<String>();
+    private static final Set<String> TEST_TAGS2 = new HashSet<String>();
     private static final String TEST_PACKAGE_NAME = "TEST.PACKAGE.NAME";
 
     private FakePushPreferencesProvider pushPreferencesProvider;
@@ -52,6 +58,8 @@ public class RegistrationEngineTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
+        TEST_TAGS1.addAll(Arrays.asList(new String[] {"CATS", "DOGS"}));
+        TEST_TAGS2.addAll(Arrays.asList(new String[] {"LEMURS", "MONKEYS"}));
         gcmProvider = new FakeGcmProvider(TEST_GCM_DEVICE_REGISTRATION_ID_1);
         gcmRegistrationApiRequestProvider = new GcmRegistrationApiRequestProvider(new FakeGcmRegistrationApiRequest(gcmProvider));
         gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(new FakeGcmUnregistrationApiRequest(gcmProvider));
@@ -225,6 +233,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(null, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, true)
                 .setupVariantSecret(null, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, true)
                 .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupTags(null, null, Collections.EMPTY_SET, true)
                 .setupBaseServerUrl(null, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, true)
                 .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -247,6 +256,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(null, TEST_VARIANT_UUID_1, null, false)
                 .setupVariantSecret(null, TEST_VARIANT_SECRET_1, null, false)
                 .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, null, false)
+                .setupTags(null, null, null, false)
                 .setupBaseServerUrl(null, TEST_BASE_SERVER_URL_1, null, false)
                 .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -269,6 +279,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(null, TEST_VARIANT_UUID_1, null, true)
                 .setupVariantSecret(null, TEST_VARIANT_SECRET_1, null, true)
                 .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, null, true)
+                .setupTags(null, null, null, true)
                 .setupBaseServerUrl(null, TEST_BASE_SERVER_URL_1, null, true)
                 .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -291,6 +302,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(null, TEST_VARIANT_UUID_1, null, true)
                 .setupVariantSecret(null, TEST_VARIANT_SECRET_1, null, true)
                 .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, null, true)
+                .setupTags(null, TEST_TAGS1, null, true)
                 .setupBaseServerUrl(null, TEST_BASE_SERVER_URL_1, null, true)
                 .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -313,6 +325,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, false)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, false)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
+                .setupTags(null, null, Collections.EMPTY_SET, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, false)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -335,6 +348,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, true)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_2, TEST_VARIANT_SECRET_2, true)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupTags(null, null, null, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -357,6 +371,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, true)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, true)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_2, TEST_DEVICE_ALIAS_2, true)
+                .setupTags(null, null, null, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -379,6 +394,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_2, TEST_VARIANT_UUID_2, true)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, true)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupTags(null, null, null, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -401,6 +417,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, true)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, true)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupTags(null, null, null, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_2, TEST_BASE_SERVER_URL_2, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -423,6 +440,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(null, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, true)
                 .setupVariantSecret(null, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, true)
                 .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupTags(null, null, null, true)
                 .setupBaseServerUrl(null, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -445,6 +463,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(null, TEST_VARIANT_UUID_1, null, true)
                 .setupVariantSecret(null, TEST_VARIANT_SECRET_1, null, true)
                 .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, null, true)
+                .setupTags(null, null, null, true)
                 .setupBaseServerUrl(null, TEST_BASE_SERVER_URL_1, null, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -467,6 +486,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(null, TEST_VARIANT_UUID_1, null, true)
                 .setupVariantSecret(null, TEST_VARIANT_SECRET_1, null, true)
                 .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, null, true)
+                .setupTags(null, null, null, true)
                 .setupBaseServerUrl(null, TEST_BASE_SERVER_URL_1, null, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -489,6 +509,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, false)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, false)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
+                .setupTags(null, null, null, false)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, false)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -511,6 +532,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, false)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, false)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
+                .setupTags(null, null, null, false)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, false)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -533,6 +555,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, false)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, false)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
+                .setupTags(null, null, null, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, false)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -555,6 +578,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, null, true)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, null, true)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, null, true)
+                .setupTags(null, null, null, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, null, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -577,6 +601,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, null, true)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, null, true)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, null, true)
+                .setupTags(null, null, null, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, null, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -599,6 +624,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, true)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, true)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupTags(null, null, Collections.EMPTY_SET, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -621,6 +647,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, true)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, true)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupTags(null, null, Collections.EMPTY_SET, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_2, TEST_BASE_SERVER_URL_2, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -643,6 +670,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, null, true)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, null, true)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, null, true)
+                .setupTags(null, null, null, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_2, null, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -665,6 +693,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, null, true)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, null, true)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, null, true)
+                .setupTags(null, null, null, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_2, null, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -687,6 +716,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(null, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, true)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, true)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupTags(null, null, Collections.EMPTY_SET, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -709,6 +739,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, true)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, true)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupTags(null, null, Collections.EMPTY_SET, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -731,6 +762,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, true)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, true)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupTags(null, null, Collections.EMPTY_SET, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -753,6 +785,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, true)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_2, TEST_VARIANT_SECRET_2, true)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupTags(null, null, Collections.EMPTY_SET, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -775,6 +808,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, true)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, true)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_2, TEST_DEVICE_ALIAS_2, true)
+                .setupTags(null, null, Collections.EMPTY_SET, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -797,6 +831,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_2, TEST_VARIANT_UUID_2, true)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, true)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupTags(null, null, Collections.EMPTY_SET, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -819,6 +854,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, true)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, true)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupTags(null, null, Collections.EMPTY_SET, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(false, false)
@@ -841,6 +877,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, true)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, true)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupTags(null, null, Collections.EMPTY_SET, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(true, false)
@@ -863,6 +900,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, false)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, false)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
+                .setupTags(null, null, null, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, false)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(true, false)
@@ -885,6 +923,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, true)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, true)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupTags(null, null, Collections.EMPTY_SET, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(true, true)
@@ -907,6 +946,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, false)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, false)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
+                .setupTags(null, null, Collections.EMPTY_SET, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, false)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(true, true)
@@ -929,6 +969,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, false)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, false)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
+                .setupTags(null, null, null, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, false)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(true, true)
@@ -951,6 +992,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setupVariantUuid(TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_UUID_1, true)
                 .setupVariantSecret(TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, TEST_VARIANT_SECRET_1, true)
                 .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupTags(null, null, Collections.EMPTY_SET, true)
                 .setupBaseServerUrl(TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, TEST_BASE_SERVER_URL_1, true)
                 .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, true)
                 .setupGcmUnregisterDevice(true, true)

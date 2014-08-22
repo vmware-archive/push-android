@@ -23,6 +23,7 @@ public class FakeHttpURLConnection extends HttpURLConnection {
     private static boolean willThrowConnectionException;
     private static Map<String, String> requestProperties;
     private static URL url;
+    private static ByteArrayOutputStream outputStream;
 
     protected FakeHttpURLConnection(URL url) {
         super(url);
@@ -65,6 +66,7 @@ public class FakeHttpURLConnection extends HttpURLConnection {
         FakeHttpURLConnection.requestProperties = null;
         FakeHttpURLConnection.receivedHttpMethod = null;
         FakeHttpURLConnection.connectionException = null;
+        FakeHttpURLConnection.outputStream = null;
         FakeHttpURLConnection.willThrowConnectionException = false;
     }
 
@@ -92,7 +94,7 @@ public class FakeHttpURLConnection extends HttpURLConnection {
 
     @Override
     public OutputStream getOutputStream() throws IOException {
-        final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        FakeHttpURLConnection.outputStream = new ByteArrayOutputStream();
         return outputStream;
     }
 
@@ -111,5 +113,9 @@ public class FakeHttpURLConnection extends HttpURLConnection {
     public void addRequestProperty(String field, String newValue) {
         super.addRequestProperty(field, newValue);
         FakeHttpURLConnection.requestProperties.put(field, newValue);
+    }
+
+    public static byte[] getRequestData() {
+        return FakeHttpURLConnection.outputStream.toByteArray();
     }
 }

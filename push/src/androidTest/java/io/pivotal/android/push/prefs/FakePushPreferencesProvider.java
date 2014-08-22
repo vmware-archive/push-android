@@ -3,7 +3,6 @@
  */
 package io.pivotal.android.push.prefs;
 
-import java.util.HashSet;
 import java.util.Set;
 
 public class FakePushPreferencesProvider implements PushPreferencesProvider {
@@ -16,6 +15,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     private String deviceAlias;
     private String packageName;
     private String baseServerUrl;
+    private Set<String> tags;
     private int appVersion;
     private boolean wasGcmDeviceRegistrationIdSaved = false;
     private boolean wasBackEndDeviceRegistrationIdSaved = false;
@@ -39,7 +39,23 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
                                        String variantSecretToLoad,
                                        String deviceAliasToLoad,
                                        String packageNameToLoad,
+                                       String baseServerUrlToLoad,
+                                       Set<String> tagsToLoad) {
+
+        this(gcmDeviceRegistrationIdToLoad, backEndDeviceRegistrationIdToLoad, appVersionToLoad, gcmSenderIdToLoad, variantUuidToLoad, variantSecretToLoad, deviceAliasToLoad, packageNameToLoad, baseServerUrlToLoad);
+        tags = tagsToLoad;
+    }
+
+    public FakePushPreferencesProvider(String gcmDeviceRegistrationIdToLoad,
+                                       String backEndDeviceRegistrationIdToLoad,
+                                       int appVersionToLoad,
+                                       String gcmSenderIdToLoad,
+                                       String variantUuidToLoad,
+                                       String variantSecretToLoad,
+                                       String deviceAliasToLoad,
+                                       String packageNameToLoad,
                                        String baseServerUrlToLoad) {
+
         this.gcmDeviceRegistrationId = gcmDeviceRegistrationIdToLoad;
         this.backEndDeviceRegistrationId = backEndDeviceRegistrationIdToLoad;
         this.appVersion = appVersionToLoad;
@@ -98,7 +114,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
 
     @Override
     public Set<String> getTags() {
-        return new HashSet<String>();
+        return tags;
     }
 
     @Override
@@ -157,7 +173,8 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
 
     @Override
     public void setTags(Set<String> tags) {
-
+        this.tags = tags;
+        wasTagsSaved = true;
     }
 
     public boolean wasGcmDeviceRegistrationIdSaved() {

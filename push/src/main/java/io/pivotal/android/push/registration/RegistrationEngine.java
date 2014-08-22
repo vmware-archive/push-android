@@ -5,7 +5,6 @@ package io.pivotal.android.push.registration;
 
 import android.content.Context;
 
-import java.util.HashSet;
 import java.util.Set;
 
 import io.pivotal.android.push.RegistrationParameters;
@@ -19,7 +18,6 @@ import io.pivotal.android.push.gcm.GcmRegistrationListener;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
 import io.pivotal.android.push.gcm.GcmUnregistrationListener;
-import io.pivotal.android.push.model.api.BackEndApiRegistrationRequestData.Tags;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.ServiceStarter;
@@ -220,10 +218,10 @@ public class RegistrationEngine {
             }
 
         } else if (isBackEndUpdateRegistrationRequired(previousGcmDeviceRegistrationId, parameters)) {
-            registerUpdateDeviceWithBackEnd(previousGcmDeviceRegistrationId, previousBackEndDeviceRegistrationId, parameters, listener);
+            registerUpdateDeviceWithBackEnd(previousGcmDeviceRegistrationId, previousBackEndDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
 
         } else if (isBackEndNewRegistrationRequired(parameters)) {
-            registerNewDeviceWithBackEnd(previousGcmDeviceRegistrationId, parameters, listener);
+            registerNewDeviceWithBackEnd(previousGcmDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
 
         } else {
             Logger.v("Already registered with GCM and back-end");
@@ -288,20 +286,9 @@ public class RegistrationEngine {
     }
 
     private boolean haveTagsBeenUpdated(RegistrationParameters parameters) {
-        final Set<String> tags = new HashSet<String>(parameters.getAllTags());
-        Logger.v("Want tags: " + tags);
-
-        final Set<String> savedTags = new HashSet<String>(pushPreferencesProvider.getTags());
-        Logger.v("Saved tags: " + savedTags);
-
-        tags.removeAll(savedTags);
-        Logger.v("Subscribe tags: " + tags);
-
-        savedTags.removeAll(parameters.getAllTags());
-        Logger.v("Unsubscribe tags: " + savedTags);
-
-        parameters.setTags(new Tags(tags, savedTags));
-        return !(tags.isEmpty() && savedTags.isEmpty());
+        final Set<String> savedTags = pushPreferencesProvider.getTags();
+        final Set<String> requestedTags = parameters.getAllTags();
+        return !requestedTags.equals(savedTags);
     }
 
     private boolean hasAppBeenUpdated() {
@@ -324,7 +311,6 @@ public class RegistrationEngine {
         }
         return isEmptyPreviousGcmDeviceRegistrationId() || isPreviousVariantUuidEmpty || areRegistrationParametersUpdated(parameters) || isBackEndServerUrlUpdated;
     }
-
 
     private boolean isBackEndUpdateRegistrationRequired(String newGcmDeviceRegistrationId, RegistrationParameters parameters) {
         final boolean isGcmDeviceRegistrationIdDifferent = isEmptyPreviousGcmDeviceRegistrationId() || !previousGcmDeviceRegistrationId.equals(newGcmDeviceRegistrationId);
@@ -421,10 +407,10 @@ public class RegistrationEngine {
                 }
 
                 if (isBackEndUpdateRegistrationRequired(gcmDeviceRegistrationId, parameters) && !isBackEndServerUrlUpdated) {
-                    registerUpdateDeviceWithBackEnd(gcmDeviceRegistrationId, previousBackEndDeviceRegistrationId, parameters, listener);
+                    registerUpdateDeviceWithBackEnd(gcmDeviceRegistrationId, previousBackEndDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
 
                 }  else if (isNewGcmDeviceRegistrationId || isBackEndServerUrlUpdated) {
-                    registerNewDeviceWithBackEnd(gcmDeviceRegistrationId, parameters, listener);
+                    registerNewDeviceWithBackEnd(gcmDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
 
                 } else if (listener != null) {
                     listener.onRegistrationComplete();
@@ -440,11 +426,17 @@ public class RegistrationEngine {
         });
     }
 
-    private void registerUpdateDeviceWithBackEnd(String gcmDeviceRegistrationId, String backEndDeviceRegistrationId, RegistrationParameters parameters, final RegistrationListener listener) {
+    private void registerUpdateDeviceWithBackEnd(String gcmDeviceRegistrationId,
+                                                 String backEndDeviceRegistrationId,
+                                                 Set<String> savedTags,
+                                                 RegistrationParameters parameters,
+                                                 RegistrationListener listener) {
+
         Logger.i("Initiating update device registration with the back-end.");
         final BackEndRegistrationApiRequest backEndRegistrationApiRequest = backEndRegistrationApiRequestProvider.getRequest();
         backEndRegistrationApiRequest.startUpdateDeviceRegistration(gcmDeviceRegistrationId,
                 backEndDeviceRegistrationId,
+                savedTags,
                 parameters,
                 getBackEndUpdateRegistrationListener(parameters, listener));
     }
@@ -498,10 +490,14 @@ public class RegistrationEngine {
         };
     }
 
-    private void registerNewDeviceWithBackEnd(final String gcmDeviceRegistrationId, RegistrationParameters parameters, final RegistrationListener listener) {
+    private void registerNewDeviceWithBackEnd(final String gcmDeviceRegistrationId,
+                                              Set<String> savedTags,
+                                              RegistrationParameters parameters,
+                                              RegistrationListener listener) {
+
         Logger.i("Initiating new device registration with the back-end.");
         final BackEndRegistrationApiRequest backEndRegistrationApiRequest = backEndRegistrationApiRequestProvider.getRequest();
-        backEndRegistrationApiRequest.startNewDeviceRegistration(gcmDeviceRegistrationId, parameters, getBackEndNewRegistrationListener(parameters, listener));
+        backEndRegistrationApiRequest.startNewDeviceRegistration(gcmDeviceRegistrationId, savedTags, parameters, getBackEndNewRegistrationListener(parameters, listener));
     }
 
     private BackEndRegistrationListener getBackEndNewRegistrationListener(final RegistrationParameters parameters, final RegistrationListener listener) {

@@ -6,8 +6,6 @@ package io.pivotal.android.push;
 import java.util.HashSet;
 import java.util.Set;
 
-import io.pivotal.android.push.model.api.BackEndApiRegistrationRequestData.Tags;
-
 /**
  * Parameters used to register with the Pivotal Mobile Services Suite Push server.
  */
@@ -18,9 +16,7 @@ public class RegistrationParameters {
     private final String variantSecret;
     private final String deviceAlias;
     private final String baseServerUrl;
-
-    private final Set<String> alltags;
-    private Tags tags;
+    private final Set<String> allTags;
 
     /**
      * Sets up parameters used by the Pivotal Mobile Services Suite Push SDK
@@ -31,6 +27,9 @@ public class RegistrationParameters {
      * @param deviceAlias   A developer-defined "device alias" which can be used to designate this device, or class.
 *                           of devices, in push or notification campaigns. May not be set to `null`. May be set to empty.
      * @param baseServerUrl The Pivotal Mobile Services Suite server used to provide push and related analytics services.
+     * @param tags          A set of tags to register to.  You should always register all tags that you want to listen to, even if you have
+     *                      already subscribed to them.  If you exclude any subscribed tags in a registration request, then those tags
+     *                      will be "unsubscribed" from.
      */
     public RegistrationParameters(String gcmSenderId, String variantUuid, String variantSecret, String deviceAlias, String baseServerUrl, Set<String> tags) {
         this.gcmSenderId = gcmSenderId;
@@ -38,7 +37,7 @@ public class RegistrationParameters {
         this.variantSecret = variantSecret;
         this.deviceAlias = deviceAlias;
         this.baseServerUrl = baseServerUrl;
-        this.alltags = tags;
+        this.allTags = tags;
     }
 
     public String getGcmSenderId() {
@@ -62,15 +61,7 @@ public class RegistrationParameters {
     }
 
     public Set<String> getAllTags() {
-        return alltags != null ? alltags : new HashSet<String>();
-    }
-
-    public void setTags(Tags tags) {
-        this.tags = tags;
-    }
-
-    public Tags getTags() {
-        return tags;
+        return allTags != null ? allTags : new HashSet<String>();
     }
 
     @Override
