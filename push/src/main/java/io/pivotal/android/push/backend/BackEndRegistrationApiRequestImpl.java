@@ -243,7 +243,7 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
         } else {
             final BackEndApiRegistrationPostRequestData postData = new BackEndApiRegistrationPostRequestData();
             postData.setOs("android");
-            postData.setTags(parameters.getAllTags());
+            postData.setTags(parameters.getTags());
             data = postData;
         }
 
@@ -262,7 +262,7 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
     private BackEndApiRegistrationPutRequestData.Tags getTags(Set<String> savedTags,
                                                               RegistrationParameters parameters) {
 
-        final TagsHelper tagsHelper = new TagsHelper(savedTags, parameters.getAllTags());
+        final TagsHelper tagsHelper = new TagsHelper(savedTags, parameters.getTags());
         return new BackEndApiRegistrationPutRequestData.Tags(tagsHelper.getSubscribeTags(), tagsHelper.getUnsubscribeTags());
     }
 

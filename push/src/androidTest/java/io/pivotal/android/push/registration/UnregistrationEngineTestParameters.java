@@ -7,6 +7,10 @@ import android.content.Context;
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
+
 import io.pivotal.android.push.RegistrationParameters;
 import io.pivotal.android.push.backend.BackEndUnregisterDeviceApiRequestProvider;
 import io.pivotal.android.push.backend.FakeBackEndUnregisterDeviceApiRequest;
@@ -28,6 +32,7 @@ public class UnregistrationEngineTestParameters {
     private static final String GCM_DEVICE_ID_IN_PREFS = "GCM DEVICE ID";
     private static final String PACKAGE_NAME_IN_PREFS = "PACKAGE.NAME";
     private static final String BASE_SERVER_URL_IN_PREFS = "http://test.com";
+    private static final Set<String> TAGS_IN_PREFS = new HashSet<String>();
 
     private final Context context;
     private final DelayedLoop delayedLoop;
@@ -38,34 +43,22 @@ public class UnregistrationEngineTestParameters {
     private String backEndDeviceRegistrationIdResultant;
     private boolean shouldBackEndUnregisterHaveBeenCalled;
     private RegistrationParameters parametersFromUser;
-    private String startingVariantUuidInPrefs;
 
     public UnregistrationEngineTestParameters(Context context) {
         this.context = context;
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
+        TAGS_IN_PREFS.addAll(Arrays.asList("BANANAS", "PAPAYAS"));
     }
 
     public void run() throws Exception {
-
-        final boolean shouldPushUnregisteredEventHaveBeenLogged =
-                shouldBackEndUnregisterHaveBeenCalled &&
-                        (backEndDeviceRegistrationIdResultant == null);
-
-        runWithAnalyticsEnabled(false, shouldPushUnregisteredEventHaveBeenLogged);
-        runWithAnalyticsEnabled(true, shouldPushUnregisteredEventHaveBeenLogged);
-    }
-
-    private void runWithAnalyticsEnabled(boolean isAnalyticsEnabled, boolean shouldPushUnregisteredEventHaveBeenLogged) throws Exception {
 
         final FakeGcmProvider gcmProvider = new FakeGcmProvider(null, true, !shouldGcmDeviceUnregistrationBeSuccessful);
         final FakePushPreferencesProvider pushPreferencesProvider;
 
         if (startingBackEndDeviceRegistrationIdInPrefs == null) {
-            startingVariantUuidInPrefs = null;
-            pushPreferencesProvider = new FakePushPreferencesProvider(null, startingBackEndDeviceRegistrationIdInPrefs, -1, null, startingVariantUuidInPrefs, null, null, null, null);
+            pushPreferencesProvider = new FakePushPreferencesProvider(null, startingBackEndDeviceRegistrationIdInPrefs, -1, null, null, null, null, null, null, null);
         } else {
-            startingVariantUuidInPrefs = VARIANT_UUID_IN_PREFS;
-            pushPreferencesProvider = new FakePushPreferencesProvider(GCM_DEVICE_ID_IN_PREFS, startingBackEndDeviceRegistrationIdInPrefs, APP_VERSION_IN_PREFS, GCM_SENDER_ID_IN_PREFS, startingVariantUuidInPrefs, VARIANT_SECRET_IN_PREFS, DEVICE_ALIAS_IN_PREFS, PACKAGE_NAME_IN_PREFS, BASE_SERVER_URL_IN_PREFS);
+            pushPreferencesProvider = new FakePushPreferencesProvider(GCM_DEVICE_ID_IN_PREFS, startingBackEndDeviceRegistrationIdInPrefs, APP_VERSION_IN_PREFS, GCM_SENDER_ID_IN_PREFS, VARIANT_UUID_IN_PREFS, VARIANT_SECRET_IN_PREFS, DEVICE_ALIAS_IN_PREFS, PACKAGE_NAME_IN_PREFS, BASE_SERVER_URL_IN_PREFS, TAGS_IN_PREFS);
         }
 
         final FakeGcmUnregistrationApiRequest gcmUnregistrationApiRequest = new FakeGcmUnregistrationApiRequest(gcmProvider);
@@ -115,12 +108,14 @@ public class UnregistrationEngineTestParameters {
             AndroidTestCase.assertNull(pushPreferencesProvider.getVariantSecret());
             AndroidTestCase.assertNull(pushPreferencesProvider.getVariantSecret());
             AndroidTestCase.assertNull(pushPreferencesProvider.getBaseServerUrl());
+            AndroidTestCase.assertNull(pushPreferencesProvider.getTags());
         } else {
             AndroidTestCase.assertNotNull(pushPreferencesProvider.getBackEndDeviceRegistrationId());
             AndroidTestCase.assertNotNull(pushPreferencesProvider.getDeviceAlias());
             AndroidTestCase.assertNotNull(pushPreferencesProvider.getVariantSecret());
             AndroidTestCase.assertNotNull(pushPreferencesProvider.getVariantSecret());
             AndroidTestCase.assertNotNull(pushPreferencesProvider.getBaseServerUrl());
+            AndroidTestCase.assertNotNull(pushPreferencesProvider.getTags());
         }
 
         AndroidTestCase.assertNull(pushPreferencesProvider.getPackageName());

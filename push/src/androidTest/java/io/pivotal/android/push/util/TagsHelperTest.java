@@ -13,6 +13,7 @@ import java.util.Set;
 
 public class TagsHelperTest extends AndroidTestCase {
 
+    public static final Set<String> EMPTY_SET = Collections.emptySet();
     private TagsHelper tagsHelper;
 
     public void testNullInput() {
@@ -22,25 +23,25 @@ public class TagsHelperTest extends AndroidTestCase {
     }
 
     public void testNullSavedTags() {
-        tagsHelper = new TagsHelper(null, Collections.EMPTY_SET);
+        tagsHelper = new TagsHelper(null, EMPTY_SET);
         assertTrue(tagsHelper.getSubscribeTags().isEmpty());
         assertTrue(tagsHelper.getUnsubscribeTags().isEmpty());
     }
 
     public void testNullNewTags() {
-        tagsHelper = new TagsHelper(Collections.EMPTY_SET, null);
+        tagsHelper = new TagsHelper(EMPTY_SET, null);
         assertTrue(tagsHelper.getSubscribeTags().isEmpty());
         assertTrue(tagsHelper.getUnsubscribeTags().isEmpty());
     }
 
     public void testEmptyLists() {
-        tagsHelper = new TagsHelper(Collections.EMPTY_SET, Collections.EMPTY_SET);
+        tagsHelper = new TagsHelper(EMPTY_SET, EMPTY_SET);
         assertTrue(tagsHelper.getSubscribeTags().isEmpty());
         assertTrue(tagsHelper.getUnsubscribeTags().isEmpty());
     }
 
     public void testEmptySavedTagsListShouldResultInAPopulatedSubscribeList() {
-        tagsHelper = new TagsHelper(Collections.EMPTY_SET, makeSet("DON'T", "YOU", "HATE", "PANTS"));
+        tagsHelper = new TagsHelper(EMPTY_SET, makeSet("DON'T", "YOU", "HATE", "PANTS"));
         assertEquals(makeSet("DON'T", "YOU", "HATE", "PANTS"), tagsHelper.getSubscribeTags());
         assertTrue(tagsHelper.getUnsubscribeTags().isEmpty());
     }
@@ -52,7 +53,7 @@ public class TagsHelperTest extends AndroidTestCase {
     }
 
     public void testEmptyNewTagsListShouldResultInAPopulatedUnsubscribeList() {
-        tagsHelper = new TagsHelper(makeSet("WOOZLE", "WOZZLE"), Collections.EMPTY_SET);
+        tagsHelper = new TagsHelper(makeSet("WOOZLE", "WOZZLE"), EMPTY_SET);
         assertTrue(tagsHelper.getSubscribeTags().isEmpty());
         assertEquals(makeSet("WOOZLE", "WOZZLE"), tagsHelper.getUnsubscribeTags());
     }

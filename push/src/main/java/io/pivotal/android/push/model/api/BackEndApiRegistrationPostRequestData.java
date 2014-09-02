@@ -27,16 +27,16 @@ import java.util.Set;
 public class BackEndApiRegistrationPostRequestData extends BaseBackEndApiRegistrationRequestData {
 
     @SerializedName("tags")
-    private Set tags;
+    private Set<String> tags;
 
     public BackEndApiRegistrationPostRequestData() {
     }
 
-    public Set getTags() {
+    public Set<String> getTags() {
         return tags;
     }
 
-    public void setTags(Set tags) {
+    public void setTags(Set<String> tags) {
         this.tags = tags;
     }
 

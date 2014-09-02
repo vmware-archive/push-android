@@ -287,8 +287,21 @@ public class RegistrationEngine {
 
     private boolean haveTagsBeenUpdated(RegistrationParameters parameters) {
         final Set<String> savedTags = pushPreferencesProvider.getTags();
-        final Set<String> requestedTags = parameters.getAllTags();
-        return !requestedTags.equals(savedTags);
+        final Set<String> requestedTags = parameters.getTags();
+
+        if (isNullOrEmpty(savedTags) && isNullOrEmpty(requestedTags)) {
+            return false;
+        } else if (isNullOrEmpty(savedTags) && !isNullOrEmpty(requestedTags)) {
+            return true;
+        } else if (!isNullOrEmpty(savedTags) && isNullOrEmpty(requestedTags)) {
+            return true;
+        } else {
+            return !requestedTags.equals(savedTags);
+        }
+    }
+
+    private boolean isNullOrEmpty(Set<String> s) {
+        return (s == null || s.isEmpty());
     }
 
     private boolean hasAppBeenUpdated() {
@@ -468,8 +481,8 @@ public class RegistrationEngine {
                 pushPreferencesProvider.setVariantSecret(parameters.getVariantSecret());
                 pushPreferencesProvider.setDeviceAlias(parameters.getDeviceAlias());
                 pushPreferencesProvider.setBaseServerUrl(parameters.getBaseServerUrl());
-                pushPreferencesProvider.setTags(parameters.getAllTags());
-                Logger.v("Saving tags: " + parameters.getAllTags());
+                pushPreferencesProvider.setTags(parameters.getTags());
+                Logger.v("Saving tags: " + parameters.getTags());
 
                 logPushRegisteredEvent(parameters.getVariantUuid(), backEndDeviceRegistrationId);
 
@@ -528,8 +541,8 @@ public class RegistrationEngine {
                 pushPreferencesProvider.setVariantSecret(parameters.getVariantSecret());
                 pushPreferencesProvider.setDeviceAlias(parameters.getDeviceAlias());
                 pushPreferencesProvider.setBaseServerUrl(parameters.getBaseServerUrl());
-                pushPreferencesProvider.setTags(parameters.getAllTags());
-                Logger.v("Saving tags: " + parameters.getAllTags());
+                pushPreferencesProvider.setTags(parameters.getTags());
+                Logger.v("Saving tags: " + parameters.getTags());
 
                 logPushRegisteredEvent(parameters.getVariantUuid(), backEndDeviceRegistrationId);
 

@@ -16,7 +16,7 @@ public class RegistrationParameters {
     private final String variantSecret;
     private final String deviceAlias;
     private final String baseServerUrl;
-    private final Set<String> allTags;
+    private final Set<String> tags;
 
     /**
      * Sets up parameters used by the Pivotal Mobile Services Suite Push SDK
@@ -37,7 +37,7 @@ public class RegistrationParameters {
         this.variantSecret = variantSecret;
         this.deviceAlias = deviceAlias;
         this.baseServerUrl = baseServerUrl;
-        this.allTags = tags;
+        this.tags = tags;
     }
 
     public String getGcmSenderId() {
@@ -60,8 +60,8 @@ public class RegistrationParameters {
         return baseServerUrl;
     }
 
-    public Set<String> getAllTags() {
-        return allTags != null ? allTags : new HashSet<String>();
+    public Set<String> getTags() {
+        return tags != null ? tags : new HashSet<String>();
     }
 
     @Override
@@ -127,6 +127,16 @@ public class RegistrationParameters {
             return false;
         }
 
+        if (tags == null && other.tags != null) {
+            return false;
+        }
+        if (tags != null && other.tags == null) {
+            return false;
+        }
+        if (tags != null && other.tags != null && !other.tags.equals(tags)) {
+            return false;
+        }
+
         return true;
     }
 
@@ -138,6 +148,7 @@ public class RegistrationParameters {
         result = (result * 31) + (variantSecret == null ? 0 : variantSecret.hashCode());
         result = (result * 31) + (deviceAlias == null ? 0 : deviceAlias.hashCode());
         result = (result * 31) + (baseServerUrl == null ? 0 : baseServerUrl.hashCode());
+        result = (result * 31) + (tags == null ? 0 : tags.hashCode());
         return result;
     }
 }

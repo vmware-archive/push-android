@@ -5,6 +5,9 @@ package io.pivotal.android.push.registration;
 
 import android.test.AndroidTestCase;
 
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import java.util.concurrent.Semaphore;
 
 import io.pivotal.android.push.RegistrationParameters;
@@ -26,6 +29,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
     private static final String TEST_VARIANT_SECRET = "TEST_VARIANT_SECRET";
     private static final String TEST_DEVICE_ALIAS = "TEST_DEVICE_ALIAS";
     private static final String TEST_BASE_SERVER_URL = "http://test.com";
+    private static final Set<String> TEST_TAGS = new HashSet<String>();
 
     private FakeGcmProvider gcmProvider;
     private GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider;
@@ -38,9 +42,10 @@ public class UnregistrationEngineTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        parameters = new RegistrationParameters(TEST_GCM_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_DEVICE_ALIAS, TEST_BASE_SERVER_URL, null);
+        TEST_TAGS.addAll(Arrays.asList("DONKEYS", "BURROS"));
+        parameters = new RegistrationParameters(TEST_GCM_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_DEVICE_ALIAS, TEST_BASE_SERVER_URL, TEST_TAGS);
         serviceStarter = new FakeServiceStarter();
-        pushPreferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null);
+        pushPreferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null, null);
         gcmProvider = new FakeGcmProvider(TEST_GCM_DEVICE_REGISTRATION_ID_1);
         gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(new FakeGcmUnregistrationApiRequest(gcmProvider));
         backEndUnregisterDeviceApiRequestProvider = new BackEndUnregisterDeviceApiRequestProvider(new FakeBackEndUnregisterDeviceApiRequest());

@@ -9,7 +9,6 @@ import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -166,7 +165,7 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
 
     public void testSuccessfulUpdateDeviceRegistrationRequestSubscribeToTags() {
         final Set<String> expectedSubscribeTags = makeSet("TACO TAG", "BURRITO TAG");
-        final Set<String> expectedUnsubscribeTags = Collections.EMPTY_SET;
+        final Set<String> expectedUnsubscribeTags = makeSet();
         makeListenersForSuccessfulRequestFromNetwork(true, 200, HTTP_PUT, expectedSubscribeTags, expectedUnsubscribeTags, TEST_BACK_END_DEVICE_REGISTRATION_ID);
         final BackEndRegistrationApiRequestImpl request = new BackEndRegistrationApiRequestImpl(getContext(), networkWrapper);
         request.startUpdateDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, TEST_BACK_END_DEVICE_REGISTRATION_ID, null, getParameters(expectedSubscribeTags), listener);
@@ -175,11 +174,19 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     }
 
     public void testSuccessfulUpdateDeviceRegistrationRequestUnsubscribeFromTags() {
-        final Set<String> expectedSubscribeTags = Collections.EMPTY_SET;
+        final Set<String> expectedSubscribeTags = makeSet();
         final Set<String> expectedUnsubscribeTags = makeSet("DONUT TAG", "CUPCAKE TAG");
         makeListenersForSuccessfulRequestFromNetwork(true, 200, HTTP_PUT, expectedSubscribeTags, expectedUnsubscribeTags, TEST_BACK_END_DEVICE_REGISTRATION_ID);
         final BackEndRegistrationApiRequestImpl request = new BackEndRegistrationApiRequestImpl(getContext(), networkWrapper);
         request.startUpdateDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, TEST_BACK_END_DEVICE_REGISTRATION_ID, expectedUnsubscribeTags, getParameters(), listener);
+        delayedLoop.startLoop();
+        assertTrue(delayedLoop.isSuccess());
+    }
+
+    public void testSuccessfulUpdateDeviceRegistrationRequestSubscribeAndUnsubscribeFromTags() {
+        makeListenersForSuccessfulRequestFromNetwork(true, 200, HTTP_PUT, makeSet("NEW1"), makeSet("REMOVE1"), TEST_BACK_END_DEVICE_REGISTRATION_ID);
+        final BackEndRegistrationApiRequestImpl request = new BackEndRegistrationApiRequestImpl(getContext(), networkWrapper);
+        request.startUpdateDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, TEST_BACK_END_DEVICE_REGISTRATION_ID, makeSet("REMOVE1", "KEEP1"), getParameters(makeSet("KEEP1", "NEW1")), listener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
@@ -345,7 +352,6 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
                     assertTrue(FakeHttpURLConnection.getReceivedURL().toString().endsWith(previousBackEndDeviceRegistrationId));
                 }
 
-
                 final byte[] requestData = FakeHttpURLConnection.getRequestData();
                 assertNotNull(requestData);
                 if (FakeHttpURLConnection.getReceivedHttpMethod().equals("PUT")) {
@@ -381,16 +387,8 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
                     fail("Unexpected HTTP method: " + FakeHttpURLConnection.getReceivedHttpMethod());
                 }
 
-
-
-
-
-                if (isSuccessfulRequest) {
-                    delayedLoop.flagSuccess();
-                    assertEquals(TEST_BACK_END_DEVICE_REGISTRATION_ID, backEndDeviceRegistrationId);
-                } else {
-                    delayedLoop.flagFailure();
-                }
+                assertEquals(TEST_BACK_END_DEVICE_REGISTRATION_ID, backEndDeviceRegistrationId);
+                delayedLoop.flagSuccess();
             }
 
             @Override
@@ -400,11 +398,7 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
                 if (previousBackEndDeviceRegistrationId != null) {
                     assertTrue(FakeHttpURLConnection.getReceivedURL().toString().endsWith(previousBackEndDeviceRegistrationId));
                 }
-                if (isSuccessfulRequest) {
-                    delayedLoop.flagFailure();
-                } else {
-                    delayedLoop.flagSuccess();
-                }
+                delayedLoop.flagSuccess();
             }
         };
     }

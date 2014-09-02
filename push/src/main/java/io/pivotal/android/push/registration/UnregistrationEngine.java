@@ -196,6 +196,7 @@ public class UnregistrationEngine {
         pushPreferencesProvider.setVariantSecret(null);
         pushPreferencesProvider.setDeviceAlias(null);
         pushPreferencesProvider.setBaseServerUrl(null);
+        pushPreferencesProvider.setTags(null);
     }
 
     private void logPushUnregisteredEvent(String variantUuid, String deviceId) {

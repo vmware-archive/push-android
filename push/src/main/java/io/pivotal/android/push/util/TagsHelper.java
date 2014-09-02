@@ -10,6 +10,7 @@ import java.util.Set;
 
 public class TagsHelper {
 
+    public static final Set<String> EMPTY_SET = Collections.emptySet();
     private final Set<String> subscribeTags;
     private final Set<String> unsubscribeTags;
 
@@ -17,17 +18,17 @@ public class TagsHelper {
 
         if ((isNullOrEmpty(savedTags) && isNullOrEmpty(newTags)) || (newTags != null && newTags.equals(savedTags))) {
 
-            subscribeTags = Collections.EMPTY_SET;
-            unsubscribeTags = Collections.EMPTY_SET;
+            subscribeTags = EMPTY_SET;
+            unsubscribeTags = EMPTY_SET;
 
         } else if (isNullOrEmpty(savedTags)) {
 
             subscribeTags = new HashSet<String>(newTags);
-            unsubscribeTags = Collections.EMPTY_SET;
+            unsubscribeTags = EMPTY_SET;
 
         } else if (isNullOrEmpty(newTags)) {
 
-            subscribeTags = Collections.EMPTY_SET;
+            subscribeTags = EMPTY_SET;
             unsubscribeTags = new HashSet<String>(savedTags);
 
         } else {

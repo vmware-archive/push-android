@@ -42,20 +42,6 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
                                        String baseServerUrlToLoad,
                                        Set<String> tagsToLoad) {
 
-        this(gcmDeviceRegistrationIdToLoad, backEndDeviceRegistrationIdToLoad, appVersionToLoad, gcmSenderIdToLoad, variantUuidToLoad, variantSecretToLoad, deviceAliasToLoad, packageNameToLoad, baseServerUrlToLoad);
-        tags = tagsToLoad;
-    }
-
-    public FakePushPreferencesProvider(String gcmDeviceRegistrationIdToLoad,
-                                       String backEndDeviceRegistrationIdToLoad,
-                                       int appVersionToLoad,
-                                       String gcmSenderIdToLoad,
-                                       String variantUuidToLoad,
-                                       String variantSecretToLoad,
-                                       String deviceAliasToLoad,
-                                       String packageNameToLoad,
-                                       String baseServerUrlToLoad) {
-
         this.gcmDeviceRegistrationId = gcmDeviceRegistrationIdToLoad;
         this.backEndDeviceRegistrationId = backEndDeviceRegistrationIdToLoad;
         this.appVersion = appVersionToLoad;
@@ -65,6 +51,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
         this.deviceAlias = deviceAliasToLoad;
         this.packageName = packageNameToLoad;
         this.baseServerUrl = baseServerUrlToLoad;
+        tags = tagsToLoad;
     }
 
     @Override
@@ -213,7 +200,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
         return wasBaseServerUrlSaved;
     }
 
-    public boolean wasTagsSaved() {
+    public boolean wereTagsSaved() {
         return wasTagsSaved;
     }
 }
