@@ -180,12 +180,16 @@ public class UnregistrationEngine {
             public void onBackEndUnregisterDeviceSuccess() {
                 logPushUnregisteredEvent(previousVariantUuid, previousBackEndDeviceRegistrationId);
                 clearBackEndRegistrationPreferences();
-                listener.onUnregistrationComplete();
+                if (listener != null) {
+                    listener.onUnregistrationComplete();
+                }
             }
 
             @Override
             public void onBackEndUnregisterDeviceFailed(String reason) {
-                listener.onUnregistrationFailed(reason);
+                if (listener != null) {
+                    listener.onUnregistrationFailed(reason);
+                }
             }
         };
     }
