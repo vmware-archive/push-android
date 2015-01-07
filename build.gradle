@@ -11,13 +11,13 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:0.12.2'
+        classpath 'com.android.tools.build:gradle:1.0.0'
     }
 }
 
 ext {
-    versionName = "1.0.1"
-    versionCode = 1
+    versionName = "1.0.2"
+    versionCode = 2
     isSnapshot = false
 }
 
@@ -33,8 +33,8 @@ ext.pomInfo = {
 
     licenses {
         license {
-            name 'The Apache Software License, Version 2.0'
-            url 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+            name 'Pivotal Software License'
+            url 'http://www.pivotal.io/products/software-license-agreement'
             distribution 'repo'
         }
     }
@@ -43,7 +43,7 @@ ext.pomInfo = {
         developer {
             id 'rszumlakowski'
             name 'Robert Szumlakowski'
-            email 'robsz@pivotallabs.com'
+            email 'rszumlakowski@pivotal.io'
         }
     }
 }
@@ -68,14 +68,14 @@ subprojects {
     apply plugin: 'android-library'
 
     android {
-        compileSdkVersion 19
-        buildToolsVersion "19.1.0"
+        compileSdkVersion 21
+        buildToolsVersion "21.1.2"
 
         defaultConfig {
             versionCode versionCode
             versionName versionName
             minSdkVersion 10
-            targetSdkVersion 19
+            targetSdkVersion 21
         }
     }
 
@@ -88,6 +88,11 @@ subprojects {
     uploadArchives {
         configuration = configurations.archives
         repositories.mavenDeployer {
+
+            // Publishes to local repository
+            // repository url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
+
+            // Publishes to remote repository
             repository(url: 'https://maven.xtremelabs.com/artifactory/libs-release-local') {
                 authentication(userName: MAVEN_USER, password: MAVEN_PASS)
             }

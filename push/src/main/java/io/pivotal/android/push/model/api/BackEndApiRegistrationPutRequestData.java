@@ -4,9 +4,7 @@
 package io.pivotal.android.push.model.api;
 
 /*
-{
-        "variant_uuid": "guid_provided_by_developer",
-        "variant_secret": "guid_provided_by_developer",
+    {
         "device_alias": "developer-specific",
         "device_manufacturer": "ACME INC."
         "device_model": "Nexus 5",
@@ -17,6 +15,7 @@ package io.pivotal.android.push.model.api;
             "subscribe": ["tag1", "tag2"],
             "unsubscribe": ["tag3", "tag4"]
         }
+    }
 */
 
 import com.google.gson.annotations.SerializedName;
@@ -24,7 +23,7 @@ import com.google.gson.annotations.SerializedName;
 import java.util.Set;
 
 /**
- * Model used in the Pivotal Mobile Services Suite device registration API.
+ * Model used in the Pivotal CF Mobile Services device registration API.
  */
 public class BackEndApiRegistrationPutRequestData extends BaseBackEndApiRegistrationRequestData  {
 

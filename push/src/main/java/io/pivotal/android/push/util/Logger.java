@@ -20,7 +20,7 @@ import java.util.Locale;
  */
 public class Logger {
 
-    public static final String TAG_NAME = "PivotalMSS";
+    public static final String TAG_NAME = "PivotalCFMS";
 
     private static final String UI_THREAD = "UI";
     private static final String BACKGROUND_THREAD = "BG";

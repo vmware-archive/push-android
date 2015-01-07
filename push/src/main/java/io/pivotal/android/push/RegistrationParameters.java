@@ -7,7 +7,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Parameters used to register with the Pivotal Mobile Services Suite Push server.
+ * Parameters used to register with the Pivotal CF Mobile Services Push server.
  */
 public class RegistrationParameters {
 
@@ -19,14 +19,14 @@ public class RegistrationParameters {
     private final Set<String> tags;
 
     /**
-     * Sets up parameters used by the Pivotal Mobile Services Suite Push SDK
+     * Sets up parameters used by the Pivotal CF Mobile Services Push SDK
      * @param gcmSenderId   The "sender ID" or "project ID", as defined by the Google Cloud Messaging.  May not be null or empty.
      *                      You can find it on the Google Cloud Console (https://cloud.google.com) for your project.
-     * @param variantUuid   The "variant_uuid", as defined by Pivotal Mobile Services Suite Push Services for your variant.  May not be null or empty.
-     * @param variantSecret The "variant secret", as defined by Pivotal Mobile Services Suite Push Services for your variant.  May not be null or empty.
+     * @param variantUuid   The "variant_uuid", as defined by Pivotal CF Mobile Services Push Services for your variant.  May not be null or empty.
+     * @param variantSecret The "variant secret", as defined by Pivotal CF Mobile Services Push Services for your variant.  May not be null or empty.
      * @param deviceAlias   A developer-defined "device alias" which can be used to designate this device, or class.
 *                           of devices, in push or notification campaigns. May not be set to `null`. May be set to empty.
-     * @param baseServerUrl The Pivotal Mobile Services Suite server used to provide push and related analytics services.
+     * @param baseServerUrl The Pivotal CF Mobile Services server used to provide push and related analytics services.
      * @param tags          A set of tags to register to.  You should always register all tags that you want to listen to, even if you have
      *                      already subscribed to them.  If you exclude any subscribed tags in a registration request, then those tags
      *                      will be "unsubscribed" from.

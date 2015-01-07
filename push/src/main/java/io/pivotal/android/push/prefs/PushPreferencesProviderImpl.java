@@ -16,7 +16,7 @@ import java.util.Set;
  */
 public class PushPreferencesProviderImpl implements PushPreferencesProvider {
 
-    public static final String TAG_NAME = "PivotalMSSPush";
+    public static final String TAG_NAME = "PivotalCFMSPush";
 
     // If you add or change any of these strings, then please also update their copies in the
     // sample app's MainActivity::clearRegistration method.

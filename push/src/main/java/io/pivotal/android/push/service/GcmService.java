@@ -24,9 +24,14 @@ public class GcmService extends IntentService {
     protected final void onHandleIntent(Intent intent) {
         Logger.fd("GcmService has received a push message from GCM.");
 
-        if (intent != null) {
-            onReceive(intent);
-            GcmBroadcastReceiver.completeWakefulIntent(intent);
+        try {
+            if (intent != null) {
+                onReceive(intent);
+            }
+        } finally {
+            if (intent != null) {
+                GcmBroadcastReceiver.completeWakefulIntent(intent);
+            }
         }
     }
 

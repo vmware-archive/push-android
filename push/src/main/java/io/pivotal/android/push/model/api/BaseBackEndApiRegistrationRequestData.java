@@ -8,12 +8,6 @@ import com.google.gson.annotations.SerializedName;
 
 public abstract class BaseBackEndApiRegistrationRequestData {
 
-    @SerializedName("variant_uuid")
-    private String variantUuid;
-
-    @SerializedName("secret")
-    private String secret;
-
     @SerializedName("device_alias")
     private String deviceAlias;
 
@@ -31,22 +25,6 @@ public abstract class BaseBackEndApiRegistrationRequestData {
 
     @SerializedName("registration_token")
     private String registrationToken;
-
-    public String getVariantUuid() {
-        return variantUuid;
-    }
-
-    public void setVariantUuid(String variantUuid) {
-        this.variantUuid = variantUuid;
-    }
-
-    public String getSecret() {
-        return secret;
-    }
-
-    public void setSecret(String secret) {
-        this.secret = secret;
-    }
 
     public String getDeviceAlias() {
         return deviceAlias;

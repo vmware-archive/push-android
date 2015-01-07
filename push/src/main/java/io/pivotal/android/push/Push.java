@@ -54,7 +54,7 @@ public class Push {
     private static final ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
     /**
-     * Retrieves an instance of the Pivotal Mobile Services Suite Push SDK singleton object.
+     * Retrieves an instance of the Pivotal CF Mobile Services Push SDK singleton object.
      *
      * @param context       A context object.  May not be null.
      * @return  A reference to the singleton Push object.

@@ -32,7 +32,7 @@ import io.pivotal.android.push.util.TagsHelper;
 import io.pivotal.android.push.util.Util;
 
 /**
- * API request for registering a device with the Pivotal Mobile Services Suite back-end server.
+ * API request for registering a device with the Pivotal CF Mobile Services back-end server.
  */
 public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements BackEndRegistrationApiRequest {
 

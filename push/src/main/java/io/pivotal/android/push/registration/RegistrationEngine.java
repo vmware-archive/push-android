@@ -36,7 +36,7 @@ import io.pivotal.android.push.version.VersionProvider;
  *  previous registration then the Registration Engine won't do anything.
  *
  *  On a fresh install, the Registration Engine will register with Google Cloud Messaging (GCM) and then with the
- *  Pivotal Mobile Services Suite back-end server.
+ *  Pivotal CF Mobile Services back-end server.
  *
  *  If the GCM Sender ID is different then the previous registration, then the Registration Engine will
  *  attempt to unregister the device with GCM (Google Cloud Messaging) first.
@@ -44,9 +44,9 @@ import io.pivotal.android.push.version.VersionProvider;
  *  If the application version code or the GCM Sender ID is updated since the previous registration, then the
  *  Registration Engine will attempt to re-register with GCM.
  *
- *  If any of the Pivotal Mobile Services Suite registration parameters (variant_uuid, variant_secret, device_alias), or
+ *  If any of the Pivotal CF Mobile Services registration parameters (variant_uuid, variant_secret, device_alias), or
  *  if a GCM registration provides a different device registration ID than a previous install, then the Registration
- *  Engine will attempt to update its registration wih the Pivotal Mobile Services Suite server (i.e.: HTTP PUT).
+ *  Engine will attempt to update its registration wih the Pivotal CF Mobile Services Push server (i.e.: HTTP PUT).
  *
  *  If, however, the base_server_url parameter is different than the existing registration, then the Registration
  *  Engine will abandon its registration with the previous server and make a new one (i.e.: HTTP POST) with the new

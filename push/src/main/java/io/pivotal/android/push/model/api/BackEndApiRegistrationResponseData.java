@@ -4,22 +4,20 @@
 package io.pivotal.android.push.model.api;
 
 /*
-{
-        "variant_uuid": "9e60c311-f5c7-4416-aea2-d07bbc94f208",
-        "secret": "3c676b20-3c49-4215-be1a-3932e3458514",
+    {
         "device_alias": "android test",
         "device_manufacturer": "Phone Corp",
         "device_model": "Ultimate Phone 1999",
         "os": "android",
         "os_version": "version",
         "registration_token": "SomeString"
-        }
+    }
 */
 
 import com.google.gson.annotations.SerializedName;
 
 /**
- * Model returned by the Pivotal Mobile Services Suite device registration API.
+ * Model returned by the Pivotal CF Mobile Services device registration API.
  */
 public class BackEndApiRegistrationResponseData {
 

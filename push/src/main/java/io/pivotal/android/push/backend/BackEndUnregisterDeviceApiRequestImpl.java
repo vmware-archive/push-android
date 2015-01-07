@@ -13,7 +13,7 @@ import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.NetworkWrapper;
 
 /**
- * API request for unregistering a device from the Pivotal Mobile Services Suite back-end server.
+ * API request for unregistering a device from the Pivotal CF Mobile Services back-end server.
  */
 public class BackEndUnregisterDeviceApiRequestImpl extends ApiRequestImpl implements BackEndUnregisterDeviceApiRequest {
 
