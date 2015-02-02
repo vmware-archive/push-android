@@ -6,6 +6,7 @@ package io.pivotal.android.push;
 import android.app.Application;
 import android.content.Context;
 
+import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -23,6 +24,7 @@ import io.pivotal.android.push.gcm.GcmUnregistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestImpl;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
 import io.pivotal.android.push.gcm.RealGcmProvider;
+import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
 import io.pivotal.android.push.registration.RegistrationEngine;
@@ -49,8 +51,7 @@ public class Push {
 
     private static Push instance;
 
-    // TODO - consider creating an IntentService (instead of a thread pool) in order to process
-    // registration and unregistration requests.
+    // TODO - consider creating an IntentService (instead of a thread pool) in order to process registration and unregistration requests.
     private static final ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
     /**
@@ -96,10 +97,11 @@ public class Push {
      * one registration attempt will run at a time: if some attempt is currently in progress, then this request
      * will only start after the first attempt completes.
      *
-     * @param parameters Provides the parameters required for registration.  May not be null.
+     * @param deviceAlias Provides the device alias for registration.  This is optional and may be null
+     * @param tags Provides the list of tags for registration.  This is optional and may be null.
      */
-    public void startRegistration(final RegistrationParameters parameters) {
-        startRegistration(parameters, null);
+    public void startRegistration(final String deviceAlias, final Set<String> tags) {
+        startRegistration(deviceAlias, tags, null);
     }
 
     /**
@@ -109,12 +111,12 @@ public class Push {
      * one registration attempt will run at a time: if some attempt is currently in progress, then this request
      * will only start after the first attempt completes.
      *
-     * @param parameters Provides the parameters required for registration.  May not be null.
+     * @param deviceAlias Provides the device alias for registration.  This is optional and may be null.
+     * @param tags Provides the list of tags for registration.  This is optional and may be null.
      * @param listener Optional listener for receiving a callback after registration finishes. This callback may
      *                 be called on a background thread.  May be null.
      */
-    public void startRegistration(final RegistrationParameters parameters, final RegistrationListener listener) {
-        verifyRegistrationArguments(parameters);
+    public void startRegistration(final String deviceAlias, final Set<String> tags, final RegistrationListener listener) {
         final GcmProvider gcmProvider = new RealGcmProvider(context);
         final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
         final GcmRegistrationApiRequest dummyGcmRegistrationApiRequest = new GcmRegistrationApiRequestImpl(context, gcmProvider);
@@ -126,6 +128,10 @@ public class Push {
         final BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider = new BackEndRegistrationApiRequestProvider(dummyBackEndRegistrationApiRequest);
         final VersionProvider versionProvider = new VersionProviderImpl(context);
         final ServiceStarter serviceStarter = new ServiceStarterImpl();
+        final RegistrationParameters parameters = getRegistrationParameters(deviceAlias, tags);
+
+        verifyRegistrationArguments(parameters);
+
         final Runnable runnable = new Runnable() {
 
             @Override
@@ -139,6 +145,14 @@ public class Push {
             }
         };
         threadPool.execute(runnable);
+    }
+
+    private RegistrationParameters getRegistrationParameters(String deviceAlias, Set<String> tags) {
+        final String gcmSenderId = Pivotal.getGcmSenderId();
+        final String platformUuid = Pivotal.getPlatformUuid();
+        final String platformSecret = Pivotal.getPlatformSecret();
+        final String serviceUrl = Pivotal.getServiceUrl();
+        return new RegistrationParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, deviceAlias, tags);
     }
 
     private void verifyRegistrationArguments(RegistrationParameters parameters) {
@@ -162,21 +176,20 @@ public class Push {
     /**
      * Asynchronously unregisters the device and application from receiving push notifications.
      *
-     * @param parameters Provides the parameters required for unregistration.  May not be null.
-     *
      */
-    public void startUnregistration(final RegistrationParameters parameters) {
-        startUnregistration(parameters, null);
+    public void startUnregistration() {
+        startUnregistration(null);
     }
 
     /**
      * Asynchronously unregisters the device and application from receiving push notifications.
      *
-     * @param parameters Provides the parameters required for unregistration.  May not be null.
      * @param listener Optional listener for receiving a callback after un`registration finishes. This callback may
      */
-    public void startUnregistration(final RegistrationParameters parameters, final UnregistrationListener listener) {
+    public void startUnregistration(final UnregistrationListener listener) {
+        final RegistrationParameters parameters = getRegistrationParameters(null, null);
         verifyUnregistrationArguments(parameters);
+
         final GcmProvider gcmProvider = new RealGcmProvider(context);
         final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
         final GcmUnregistrationApiRequest dummyGcmUnregistrationApiRequest = new GcmUnregistrationApiRequestImpl(context, gcmProvider);

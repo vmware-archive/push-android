@@ -30,7 +30,7 @@ public class BackEndUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        parameters = new RegistrationParameters(TEST_GCM_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_DEVICE_ALIAS, TEST_BASE_SERVER_URL, null);
+        parameters = new RegistrationParameters(TEST_GCM_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_BASE_SERVER_URL, TEST_DEVICE_ALIAS, null);
         networkWrapper = new FakeNetworkWrapper();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
         FakeHttpURLConnection.reset();

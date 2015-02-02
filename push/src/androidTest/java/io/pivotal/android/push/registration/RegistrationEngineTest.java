@@ -164,7 +164,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     public void testNullSenderId() {
         try {
             final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, serviceStarter);
-            engine.registerDevice(new RegistrationParameters(null, TEST_VARIANT_UUID_1, TEST_VARIANT_SECRET_1, TEST_DEVICE_ALIAS_1, TEST_BASE_SERVER_URL_1, null), getListenerForRegistration(false));
+            engine.registerDevice(new RegistrationParameters(null, TEST_VARIANT_UUID_1, TEST_VARIANT_SECRET_1, TEST_BASE_SERVER_URL_1, TEST_DEVICE_ALIAS_1, null), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -174,7 +174,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     public void testNullVariantUuid() {
         try {
             final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, serviceStarter);
-            engine.registerDevice(new RegistrationParameters(TEST_GCM_SENDER_ID_1, null, TEST_VARIANT_SECRET_1, TEST_DEVICE_ALIAS_1, TEST_BASE_SERVER_URL_1, null), getListenerForRegistration(false));
+            engine.registerDevice(new RegistrationParameters(TEST_GCM_SENDER_ID_1, null, TEST_VARIANT_SECRET_1, TEST_BASE_SERVER_URL_1, TEST_DEVICE_ALIAS_1, null), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -184,7 +184,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     public void testNullVariantSecret() {
         try {
             final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, serviceStarter);
-            engine.registerDevice(new RegistrationParameters(TEST_GCM_SENDER_ID_1, TEST_VARIANT_UUID_1, null, TEST_DEVICE_ALIAS_1, TEST_BASE_SERVER_URL_1, null), getListenerForRegistration(false));
+            engine.registerDevice(new RegistrationParameters(TEST_GCM_SENDER_ID_1, TEST_VARIANT_UUID_1, null, TEST_BASE_SERVER_URL_1, TEST_DEVICE_ALIAS_1, null), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -194,7 +194,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     public void testNullDeviceAlias() throws InterruptedException {
         try {
             final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, serviceStarter);
-            engine.registerDevice(new RegistrationParameters(TEST_GCM_SENDER_ID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_SECRET_1, null, TEST_BASE_SERVER_URL_1, null), getListenerForRegistration(false));
+            engine.registerDevice(new RegistrationParameters(TEST_GCM_SENDER_ID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_SECRET_1, TEST_BASE_SERVER_URL_1, null, null), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -203,14 +203,14 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testEmptyDeviceAlias() throws InterruptedException {
         final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, serviceStarter);
-        engine.registerDevice(new RegistrationParameters(TEST_GCM_SENDER_ID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_SECRET_1, "", TEST_BASE_SERVER_URL_1, null), getListenerForRegistration(true));
+        engine.registerDevice(new RegistrationParameters(TEST_GCM_SENDER_ID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_SECRET_1, TEST_BASE_SERVER_URL_1, "", null), getListenerForRegistration(true));
         semaphore.acquire();
     }
 
     public void testEmptyBaseServerUrl() throws InterruptedException {
         try {
             final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, serviceStarter);
-            engine.registerDevice(new RegistrationParameters(TEST_GCM_SENDER_ID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_SECRET_1, TEST_DEVICE_ALIAS_1, null, null), getListenerForRegistration(true));
+            engine.registerDevice(new RegistrationParameters(TEST_GCM_SENDER_ID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_SECRET_1, null, TEST_DEVICE_ALIAS_1, null), getListenerForRegistration(true));
             semaphore.acquire();
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -221,7 +221,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     public void testGooglePlayServicesNotAvailable() throws InterruptedException {
         gcmProvider.setIsGooglePlayServicesInstalled(false);
         final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, serviceStarter);
-        final RegistrationParameters parameters = new RegistrationParameters(TEST_GCM_SENDER_ID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_SECRET_1, TEST_DEVICE_ALIAS_1, TEST_BASE_SERVER_URL_1, null);
+        final RegistrationParameters parameters = new RegistrationParameters(TEST_GCM_SENDER_ID_1, TEST_VARIANT_UUID_1, TEST_VARIANT_SECRET_1, TEST_BASE_SERVER_URL_1, TEST_DEVICE_ALIAS_1, null);
         engine.registerDevice(parameters, getListenerForRegistration(false));
         semaphore.acquire();
     }

@@ -404,11 +404,11 @@ public class BackEndRegistrationApiRequestImplTest extends AndroidTestCase {
     }
 
     private RegistrationParameters getParameters() {
-        return new RegistrationParameters(TEST_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_DEVICE_ALIAS, TEST_BASE_SERVER_URL, null);
+        return new RegistrationParameters(TEST_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_BASE_SERVER_URL, TEST_DEVICE_ALIAS, null);
     }
 
     private RegistrationParameters getParameters(Set<String> tags) {
-        return new RegistrationParameters(TEST_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_DEVICE_ALIAS, TEST_BASE_SERVER_URL, tags);
+        return new RegistrationParameters(TEST_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_BASE_SERVER_URL, TEST_DEVICE_ALIAS, tags);
     }
 
     private Set<String> makeSet(String... strings) {

@@ -43,7 +43,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         TEST_TAGS.addAll(Arrays.asList("DONKEYS", "BURROS"));
-        parameters = new RegistrationParameters(TEST_GCM_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_DEVICE_ALIAS, TEST_BASE_SERVER_URL, TEST_TAGS);
+        parameters = new RegistrationParameters(TEST_GCM_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_BASE_SERVER_URL, TEST_DEVICE_ALIAS, TEST_TAGS);
         serviceStarter = new FakeServiceStarter();
         pushPreferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null, null);
         gcmProvider = new FakeGcmProvider(TEST_GCM_DEVICE_REGISTRATION_ID_1);
@@ -118,7 +118,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
     public void testNullBaseServerUrl() {
         try {
             final UnregistrationEngine engine = new UnregistrationEngine(getContext(),gcmProvider, serviceStarter, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
-            parameters = new RegistrationParameters(TEST_GCM_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_DEVICE_ALIAS, null, null);
+            parameters = new RegistrationParameters(TEST_GCM_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, null, TEST_DEVICE_ALIAS, null);
             engine.unregisterDevice(parameters, getListenerForUnregistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {

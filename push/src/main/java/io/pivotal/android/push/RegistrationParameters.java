@@ -14,8 +14,8 @@ public class RegistrationParameters {
     private final String gcmSenderId;
     private final String variantUuid;
     private final String variantSecret;
-    private final String deviceAlias;
     private final String baseServerUrl;
+    private final String deviceAlias;
     private final Set<String> tags;
 
     /**
@@ -24,19 +24,19 @@ public class RegistrationParameters {
      *                      You can find it on the Google Cloud Console (https://cloud.google.com) for your project.
      * @param variantUuid   The "variant_uuid", as defined by Pivotal CF Mobile Services Push Services for your variant.  May not be null or empty.
      * @param variantSecret The "variant secret", as defined by Pivotal CF Mobile Services Push Services for your variant.  May not be null or empty.
-     * @param deviceAlias   A developer-defined "device alias" which can be used to designate this device, or class.
-*                           of devices, in push or notification campaigns. May not be set to `null`. May be set to empty.
      * @param baseServerUrl The Pivotal CF Mobile Services server used to provide push and related analytics services.
+     * @param deviceAlias   A developer-defined "device alias" which can be used to designate this device, or class.
+     *                      of devices, in push or notification campaigns. May not be set to `null`. May be set to empty.
      * @param tags          A set of tags to register to.  You should always register all tags that you want to listen to, even if you have
      *                      already subscribed to them.  If you exclude any subscribed tags in a registration request, then those tags
-     *                      will be "unsubscribed" from.
+     *                      will be unsubscribed.
      */
-    public RegistrationParameters(String gcmSenderId, String variantUuid, String variantSecret, String deviceAlias, String baseServerUrl, Set<String> tags) {
+    public RegistrationParameters(String gcmSenderId, String variantUuid, String variantSecret, String baseServerUrl, String deviceAlias, Set<String> tags) {
         this.gcmSenderId = gcmSenderId;
         this.variantUuid = variantUuid;
         this.variantSecret = variantSecret;
-        this.deviceAlias = deviceAlias;
         this.baseServerUrl = baseServerUrl;
+        this.deviceAlias = deviceAlias;
         this.tags = tags;
     }
 
@@ -52,12 +52,12 @@ public class RegistrationParameters {
         return variantSecret;
     }
 
-    public String getDeviceAlias() {
-        return deviceAlias;
-    }
-
     public String getBaseServerUrl() {
         return baseServerUrl;
+    }
+
+    public String getDeviceAlias() {
+        return deviceAlias;
     }
 
     public Set<String> getTags() {
@@ -107,16 +107,6 @@ public class RegistrationParameters {
             return false;
         }
 
-        if (deviceAlias == null && other.deviceAlias != null) {
-            return false;
-        }
-        if (deviceAlias != null && other.deviceAlias == null) {
-            return false;
-        }
-        if (deviceAlias != null && other.deviceAlias != null && !other.deviceAlias.equals(deviceAlias)) {
-            return false;
-        }
-
         if (baseServerUrl == null && other.baseServerUrl != null) {
             return false;
         }
@@ -124,6 +114,16 @@ public class RegistrationParameters {
             return false;
         }
         if (baseServerUrl != null && other.baseServerUrl != null && !other.baseServerUrl.equals(baseServerUrl)) {
+            return false;
+        }
+
+        if (deviceAlias == null && other.deviceAlias != null) {
+            return false;
+        }
+        if (deviceAlias != null && other.deviceAlias == null) {
+            return false;
+        }
+        if (deviceAlias != null && other.deviceAlias != null && !other.deviceAlias.equals(deviceAlias)) {
             return false;
         }
 
@@ -146,8 +146,8 @@ public class RegistrationParameters {
         result = (result * 31) + (gcmSenderId == null ? 0 : gcmSenderId.hashCode());
         result = (result * 31) + (variantUuid == null ? 0 : variantUuid.hashCode());
         result = (result * 31) + (variantSecret == null ? 0 : variantSecret.hashCode());
-        result = (result * 31) + (deviceAlias == null ? 0 : deviceAlias.hashCode());
         result = (result * 31) + (baseServerUrl == null ? 0 : baseServerUrl.hashCode());
+        result = (result * 31) + (deviceAlias == null ? 0 : deviceAlias.hashCode());
         result = (result * 31) + (tags == null ? 0 : tags.hashCode());
         return result;
     }
