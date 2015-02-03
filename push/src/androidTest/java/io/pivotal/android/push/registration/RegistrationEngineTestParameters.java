@@ -19,7 +19,6 @@ import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.util.DelayedLoop;
-import io.pivotal.android.push.util.FakeServiceStarter;
 import io.pivotal.android.push.version.FakeVersionProvider;
 
 public class RegistrationEngineTestParameters {
@@ -94,10 +93,9 @@ public class RegistrationEngineTestParameters {
         final FakeGcmUnregistrationApiRequest gcmUnregistrationApiRequest = new FakeGcmUnregistrationApiRequest(gcmProvider);
         final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(gcmUnregistrationApiRequest);
         final FakeVersionProvider versionProvider = new FakeVersionProvider(currentAppVersion);
-        final FakeServiceStarter serviceStarter = new FakeServiceStarter();
         final FakePCFPushRegistrationApiRequest fakePCFPushRegistrationApiRequest = new FakePCFPushRegistrationApiRequest(pcfPushDeviceRegistrationIdFromServer, shouldPCFPushDeviceRegistrationBeSuccessful);
         final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(fakePCFPushRegistrationApiRequest);
-        final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, PCFPushRegistrationApiRequestProvider, versionProvider, serviceStarter);
+        final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, PCFPushRegistrationApiRequestProvider, versionProvider);
         final RegistrationParameters parameters = new RegistrationParameters(gcmSenderIdFromUser, platformUuidFromUser, platformSecretFromUser, serviceUrlFromUser, deviceAliasFromUser, tagsFromUser);
 
         engine.registerDevice(parameters, new RegistrationListener() {
@@ -147,7 +145,6 @@ public class RegistrationEngineTestParameters {
         AndroidTestCase.assertEquals(finalAppVersionInPrefs, pushPreferencesProvider.getAppVersion());
         AndroidTestCase.assertEquals(finalPackageNameInPrefs, pushPreferencesProvider.getPackageName());
         AndroidTestCase.assertEquals(finalTagsInPrefs, pushPreferencesProvider.getTags());
-        AndroidTestCase.assertFalse(serviceStarter.wasStarted());
     }
 
     public RegistrationEngineTestParameters setupPackageName(String inPrefs, String fromUser, String finalValue, boolean shouldHaveBeenSaved) {

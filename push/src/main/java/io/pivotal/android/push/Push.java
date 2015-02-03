@@ -34,8 +34,6 @@ import io.pivotal.android.push.registration.UnregistrationListener;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.NetworkWrapper;
 import io.pivotal.android.push.util.NetworkWrapperImpl;
-import io.pivotal.android.push.util.ServiceStarter;
-import io.pivotal.android.push.util.ServiceStarterImpl;
 import io.pivotal.android.push.version.VersionProvider;
 import io.pivotal.android.push.version.VersionProviderImpl;
 
@@ -127,7 +125,6 @@ public class Push {
         final PCFPushRegistrationApiRequest dummyPCFPushRegistrationApiRequest = new PCFPushRegistrationApiRequestImpl(context, networkWrapper);
         final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(dummyPCFPushRegistrationApiRequest);
         final VersionProvider versionProvider = new VersionProviderImpl(context);
-        final ServiceStarter serviceStarter = new ServiceStarterImpl();
         final RegistrationParameters parameters = getRegistrationParameters(deviceAlias, tags);
 
         verifyRegistrationArguments(parameters);
@@ -137,7 +134,7 @@ public class Push {
             @Override
             public void run() {
                 try {
-                    final RegistrationEngine registrationEngine = new RegistrationEngine(context, context.getPackageName(), gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, PCFPushRegistrationApiRequestProvider, versionProvider, serviceStarter);
+                    final RegistrationEngine registrationEngine = new RegistrationEngine(context, context.getPackageName(), gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, PCFPushRegistrationApiRequestProvider, versionProvider);
                     registrationEngine.registerDevice(parameters, listener);
                 } catch (Exception e) {
                     Logger.ex("Push SDK registration failed", e);

@@ -19,7 +19,6 @@ import io.pivotal.android.push.gcm.FakeGcmUnregistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.util.DelayedLoop;
-import io.pivotal.android.push.util.FakeServiceStarter;
 
 public class UnregistrationEngineTestParameters {
 
@@ -65,7 +64,6 @@ public class UnregistrationEngineTestParameters {
         final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(gcmUnregistrationApiRequest);
         final FakePCFPushUnregisterDeviceApiRequest fakePCFPushUnregisterDeviceApiRequest = new FakePCFPushUnregisterDeviceApiRequest(shouldPCFPushDeviceUnregistrationBeSuccessful);
         final PCFPushUnregisterDeviceApiRequestProvider PCFPushUnregisterDeviceApiRequestProvider = new PCFPushUnregisterDeviceApiRequestProvider(fakePCFPushUnregisterDeviceApiRequest);
-        final FakeServiceStarter serviceStarter = new FakeServiceStarter();
         final UnregistrationEngine engine = new UnregistrationEngine(context, gcmProvider, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, PCFPushUnregisterDeviceApiRequestProvider);
 
         engine.unregisterDevice(parametersFromUser, new UnregistrationListener() {
@@ -122,7 +120,6 @@ public class UnregistrationEngineTestParameters {
         AndroidTestCase.assertEquals(shouldPCFPushUnregisterHaveBeenCalled, fakePCFPushUnregisterDeviceApiRequest.wasUnregisterCalled());
         AndroidTestCase.assertFalse(gcmProvider.wasRegisterCalled());
         AndroidTestCase.assertTrue(gcmProvider.wasUnregisterCalled());
-        AndroidTestCase.assertFalse(serviceStarter.wasStarted());
     }
 
     public UnregistrationEngineTestParameters setShouldUnregistrationHaveSucceeded(boolean b) {

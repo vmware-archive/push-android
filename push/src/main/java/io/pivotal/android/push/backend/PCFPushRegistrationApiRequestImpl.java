@@ -20,10 +20,10 @@ import java.net.URL;
 import java.util.Set;
 
 import io.pivotal.android.push.RegistrationParameters;
+import io.pivotal.android.push.model.api.BasePCFPushApiRegistrationRequestData;
 import io.pivotal.android.push.model.api.PCFPushApiRegistrationPostRequestData;
 import io.pivotal.android.push.model.api.PCFPushApiRegistrationPutRequestData;
 import io.pivotal.android.push.model.api.PCFPushApiRegistrationResponseData;
-import io.pivotal.android.push.model.api.BasePCFPushApiRegistrationRequestData;
 import io.pivotal.android.push.util.ApiRequestImpl;
 import io.pivotal.android.push.util.Const;
 import io.pivotal.android.push.util.Logger;

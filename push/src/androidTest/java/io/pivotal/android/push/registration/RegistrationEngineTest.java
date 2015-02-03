@@ -21,7 +21,6 @@ import io.pivotal.android.push.gcm.GcmRegistrationApiRequestProvider;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
-import io.pivotal.android.push.util.FakeServiceStarter;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.version.FakeVersionProvider;
 import io.pivotal.android.push.version.VersionProvider;
@@ -53,7 +52,6 @@ public class RegistrationEngineTest extends AndroidTestCase {
     private PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider;
     private VersionProvider versionProvider;
     private FakeGcmProvider gcmProvider;
-    private FakeServiceStarter serviceStarter;
     private Semaphore semaphore = new Semaphore(0);
 
     @Override
@@ -66,13 +64,12 @@ public class RegistrationEngineTest extends AndroidTestCase {
         gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(new FakeGcmUnregistrationApiRequest(gcmProvider));
         pushPreferencesProvider = new FakePushPreferencesProvider();
         versionProvider = new FakeVersionProvider(10);
-        serviceStarter = new FakeServiceStarter();
         pcfPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(new FakePCFPushRegistrationApiRequest(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1));
     }
 
     public void testNullContext() {
         try {
-            new RegistrationEngine(null, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, serviceStarter);
+            new RegistrationEngine(null, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -81,7 +78,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullPackageName() {
         try {
-            new RegistrationEngine(getContext(), null, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, serviceStarter);
+            new RegistrationEngine(getContext(), null, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -90,7 +87,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullGcmProvider() {
         try {
-            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, null, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, serviceStarter);
+            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, null, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -99,7 +96,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullPushPreferencesProvider() {
         try {
-            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, null, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, serviceStarter);
+            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, null, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -108,7 +105,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullGcmRegistrationApiRequestProvider() {
         try {
-            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, null, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, serviceStarter);
+            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, null, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -117,7 +114,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullGcmUnregistrationApiRequestProvider() {
         try {
-            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, null, pcfPushRegistrationApiRequestProvider, versionProvider, serviceStarter);
+            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, null, pcfPushRegistrationApiRequestProvider, versionProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -126,7 +123,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullPCFPushRegisterDeviceApiRequestProvider() {
         try {
-            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, null, versionProvider, serviceStarter);
+            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, null, versionProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -135,16 +132,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullVersionProvider() {
         try {
-            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, null, serviceStarter);
-            fail("should not have succeeded");
-        } catch (IllegalArgumentException e) {
-            // success
-        }
-    }
-
-    public void testNullServiceStarter() {
-        try {
-            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, null);
+            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, null);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -153,7 +141,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullParameters() {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, serviceStarter);
+            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider);
             engine.registerDevice(null, getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -163,7 +151,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullSenderId() {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, serviceStarter);
+            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider);
             engine.registerDevice(new RegistrationParameters(null, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, null), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -173,7 +161,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullPlatformUuid() {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, serviceStarter);
+            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider);
             engine.registerDevice(new RegistrationParameters(TEST_GCM_SENDER_ID_1, null, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, null), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -183,7 +171,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullPlatformSecret() {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, serviceStarter);
+            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider);
             engine.registerDevice(new RegistrationParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, null, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, null), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -192,24 +180,20 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testNullDeviceAlias() throws InterruptedException {
-        try {
-            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, serviceStarter);
-            engine.registerDevice(new RegistrationParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, null, null), getListenerForRegistration(false));
-            fail("should not have succeeded");
-        } catch (IllegalArgumentException e) {
-            // success
-        }
+        final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider);
+        engine.registerDevice(new RegistrationParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, null, null), getListenerForRegistration(true));
+        semaphore.acquire();
     }
 
     public void testEmptyDeviceAlias() throws InterruptedException {
-        final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, serviceStarter);
+        final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider);
         engine.registerDevice(new RegistrationParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, "", null), getListenerForRegistration(true));
         semaphore.acquire();
     }
 
     public void testEmptyServiceUrl() throws InterruptedException {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, serviceStarter);
+            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider);
             engine.registerDevice(new RegistrationParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, null, TEST_DEVICE_ALIAS_1, null), getListenerForRegistration(true));
             semaphore.acquire();
             fail("should not have succeeded");
@@ -220,7 +204,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testGooglePlayServicesNotAvailable() throws InterruptedException {
         gcmProvider.setIsGooglePlayServicesInstalled(false);
-        final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, serviceStarter);
+        final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider);
         final RegistrationParameters parameters = new RegistrationParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, null);
         engine.registerDevice(parameters, getListenerForRegistration(false));
         semaphore.acquire();

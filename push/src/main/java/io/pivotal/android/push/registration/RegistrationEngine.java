@@ -20,7 +20,6 @@ import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
 import io.pivotal.android.push.gcm.GcmUnregistrationListener;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.util.Logger;
-import io.pivotal.android.push.util.ServiceStarter;
 import io.pivotal.android.push.version.VersionProvider;
 
 /**
@@ -65,7 +64,6 @@ public class RegistrationEngine {
     private GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider;
     private PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider;
     private VersionProvider versionProvider;
-    private ServiceStarter serviceStarter;
     private String packageName;
     private String previousGcmDeviceRegistrationId = null;
     private String previousPCFPushDeviceRegistrationId = null;
@@ -87,7 +85,6 @@ public class RegistrationEngine {
      * @param gcmUnregistrationApiRequestProvider  Some object that can provide GCMUnregistrationApiRequest objects.
      * @param pcfPushRegistrationApiRequestProvider  Some object that can provide PCFPushRegistrationApiRequest objects.
      * @param versionProvider  Some object that can provide the application version.
-     * @param serviceStarter  Some object that can be used to start services.
      */
     public RegistrationEngine(Context context,
                               String packageName,
@@ -96,8 +93,7 @@ public class RegistrationEngine {
                               GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
                               GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                               PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
-                              VersionProvider versionProvider,
-                              ServiceStarter serviceStarter) {
+                              VersionProvider versionProvider) {
 
         verifyArguments(context,
                 packageName,
@@ -106,7 +102,7 @@ public class RegistrationEngine {
                 gcmRegistrationApiRequestProvider,
                 gcmUnregistrationApiRequestProvider,
                 pcfPushRegistrationApiRequestProvider,
-                versionProvider, serviceStarter);
+                versionProvider);
 
         saveArguments(context,
                 packageName,
@@ -115,7 +111,7 @@ public class RegistrationEngine {
                 gcmRegistrationApiRequestProvider,
                 gcmUnregistrationApiRequestProvider,
                 pcfPushRegistrationApiRequestProvider,
-                versionProvider, serviceStarter);
+                versionProvider);
     }
 
     private void verifyArguments(Context context,
@@ -125,8 +121,7 @@ public class RegistrationEngine {
                                  GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
                                  GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                  PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
-                                 VersionProvider versionProvider,
-                                 ServiceStarter serviceStarter) {
+                                 VersionProvider versionProvider) {
 
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
@@ -152,9 +147,6 @@ public class RegistrationEngine {
         if (versionProvider == null) {
             throw new IllegalArgumentException("versionProvider may not be null");
         }
-        if (serviceStarter == null) {
-            throw new IllegalArgumentException("serviceStarter may not be null");
-        }
     }
 
     private void saveArguments(Context context,
@@ -164,8 +156,7 @@ public class RegistrationEngine {
                                GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
                                GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
-                               VersionProvider versionProvider,
-                               ServiceStarter serviceStarter) {
+                               VersionProvider versionProvider) {
 
         this.context = context;
         this.packageName = packageName;
@@ -175,7 +166,6 @@ public class RegistrationEngine {
         this.gcmUnregistrationApiRequestProvider = gcmUnregistrationApiRequestProvider;
         this.pcfPushRegistrationApiRequestProvider = pcfPushRegistrationApiRequestProvider;
         this.versionProvider = versionProvider;
-        this.serviceStarter = serviceStarter;
         this.previousGcmDeviceRegistrationId = pushPreferencesProvider.getGcmDeviceRegistrationId();
         this.previousPCFPushDeviceRegistrationId = pushPreferencesProvider.getPCFPushDeviceRegistrationId();
         this.previousGcmSenderId = pushPreferencesProvider.getGcmSenderId();
@@ -243,9 +233,6 @@ public class RegistrationEngine {
         }
         if (parameters.getPlatformSecret() == null || parameters.getPlatformSecret().isEmpty()) {
             throw new IllegalArgumentException("parameters.platformSecret may not be null or empty");
-        }
-        if (parameters.getDeviceAlias() == null) {
-            throw new IllegalArgumentException("parameters.deviceAlias may not be null");
         }
         if (parameters.getServiceUrl() == null) {
             throw new IllegalArgumentException("parameters.serviceUrl may not be null");
@@ -355,7 +342,7 @@ public class RegistrationEngine {
         final boolean isPlatformSecretUpdated = (isPreviousPlatformSecretEmpty && !parameters.getPlatformSecret().isEmpty()) || !parameters.getPlatformSecret().equals(previousPlatformSecret);
         final boolean isPreviousDeviceAliasEmpty = previousDeviceAlias == null || previousDeviceAlias.isEmpty();
         final boolean isNewDeviceAliasEmpty = parameters.getDeviceAlias() == null || parameters.getDeviceAlias().isEmpty();
-        final boolean isDeviceAliasUpdated = (isPreviousDeviceAliasEmpty && !isNewDeviceAliasEmpty) || (!isPreviousDeviceAliasEmpty && isNewDeviceAliasEmpty) || !parameters.getDeviceAlias().equals(previousDeviceAlias);
+        final boolean isDeviceAliasUpdated = (isPreviousDeviceAliasEmpty && !isNewDeviceAliasEmpty) || (!isPreviousDeviceAliasEmpty && isNewDeviceAliasEmpty) || (!isNewDeviceAliasEmpty && !parameters.getDeviceAlias().equals(previousDeviceAlias));
         return isDeviceAliasUpdated || isPlatformSecretUpdated || isPlatformUuidUpdated;
     }
 
