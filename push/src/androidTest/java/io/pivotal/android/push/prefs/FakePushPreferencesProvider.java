@@ -8,49 +8,49 @@ import java.util.Set;
 public class FakePushPreferencesProvider implements PushPreferencesProvider {
 
     private String gcmDeviceRegistrationId;
-    private String backEndDeviceRegistrationId;
+    private String pcfPushDeviceRegistrationId;
     private String gcmSenderId;
-    private String variantUuid;
-    private String variantSecret;
+    private String platformUuid;
+    private String platformSecret;
     private String deviceAlias;
     private String packageName;
-    private String baseServerUrl;
+    private String serviceUrl;
     private Set<String> tags;
     private int appVersion;
     private boolean wasGcmDeviceRegistrationIdSaved = false;
-    private boolean wasBackEndDeviceRegistrationIdSaved = false;
+    private boolean wasPCFPushDeviceRegistrationIdSaved = false;
     private boolean wasAppVersionSaved = false;
     private boolean wasGcmSenderIdSaved = false;
-    private boolean wasVariantUuidSaved = false;
-    private boolean wasVariantSecretSaved = false;
+    private boolean wasPlatformUuidSaved = false;
+    private boolean wasPlatformSecretSaved = false;
     private boolean wasDeviceAliasSaved = false;
     private boolean wasPackageNameSaved = false;
-    private boolean wasBaseServerUrlSaved = false;
+    private boolean wasServiceUrlSaved = false;
     private boolean wasTagsSaved = false;
 
     public FakePushPreferencesProvider() {
     }
 
     public FakePushPreferencesProvider(String gcmDeviceRegistrationIdToLoad,
-                                       String backEndDeviceRegistrationIdToLoad,
+                                       String pcfPushDeviceRegistrationIdToLoad,
                                        int appVersionToLoad,
                                        String gcmSenderIdToLoad,
-                                       String variantUuidToLoad,
-                                       String variantSecretToLoad,
+                                       String platformUuidToLoad,
+                                       String platformSecretToLoad,
                                        String deviceAliasToLoad,
                                        String packageNameToLoad,
-                                       String baseServerUrlToLoad,
+                                       String serviceUrlToLoad,
                                        Set<String> tagsToLoad) {
 
         this.gcmDeviceRegistrationId = gcmDeviceRegistrationIdToLoad;
-        this.backEndDeviceRegistrationId = backEndDeviceRegistrationIdToLoad;
+        this.pcfPushDeviceRegistrationId = pcfPushDeviceRegistrationIdToLoad;
         this.appVersion = appVersionToLoad;
         this.gcmSenderId = gcmSenderIdToLoad;
-        this.variantUuid = variantUuidToLoad;
-        this.variantSecret = variantSecretToLoad;
+        this.platformUuid = platformUuidToLoad;
+        this.platformSecret = platformSecretToLoad;
         this.deviceAlias = deviceAliasToLoad;
         this.packageName = packageNameToLoad;
-        this.baseServerUrl = baseServerUrlToLoad;
+        this.serviceUrl = serviceUrlToLoad;
         tags = tagsToLoad;
     }
 
@@ -60,8 +60,8 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     }
 
     @Override
-    public String getBackEndDeviceRegistrationId() {
-        return backEndDeviceRegistrationId;
+    public String getPCFPushDeviceRegistrationId() {
+        return pcfPushDeviceRegistrationId;
     }
 
     @Override
@@ -75,13 +75,13 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     }
 
     @Override
-    public String getVariantUuid() {
-        return variantUuid;
+    public String getPlatformUuid() {
+        return platformUuid;
     }
 
     @Override
-    public String getVariantSecret() {
-        return variantSecret;
+    public String getPlatformSecret() {
+        return platformSecret;
     }
 
     @Override
@@ -95,8 +95,8 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     }
 
     @Override
-    public String getBaseServerUrl() {
-        return baseServerUrl;
+    public String getServiceUrl() {
+        return serviceUrl;
     }
 
     @Override
@@ -105,9 +105,9 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     }
 
     @Override
-    public void setBackEndDeviceRegistrationId(String backendDeviceRegistrationId) {
-        this.backEndDeviceRegistrationId = backendDeviceRegistrationId;
-        wasBackEndDeviceRegistrationIdSaved = true;
+    public void setPCFPushDeviceRegistrationId(String pcfPushDeviceRegistrationId) {
+        this.pcfPushDeviceRegistrationId = pcfPushDeviceRegistrationId;
+        wasPCFPushDeviceRegistrationIdSaved = true;
     }
 
     @Override
@@ -129,15 +129,15 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     }
 
     @Override
-    public void setVariantUuid(String variantUuid) {
-        this.variantUuid = variantUuid;
-        wasVariantUuidSaved = true;
+    public void setPlatformUuid(String platformUuid) {
+        this.platformUuid = platformUuid;
+        wasPlatformUuidSaved = true;
     }
 
     @Override
-    public void setVariantSecret(String variantUuid) {
-        this.variantSecret = variantUuid;
-        wasVariantSecretSaved = true;
+    public void setPlatformSecret(String platformSecret) {
+        this.platformSecret = platformSecret;
+        wasPlatformSecretSaved = true;
     }
 
     @Override
@@ -153,9 +153,9 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     }
 
     @Override
-    public void setBaseServerUrl(String baseServerUrl) {
-        this.baseServerUrl = baseServerUrl;
-        wasBaseServerUrlSaved = true;
+    public void setServiceUrl(String serviceUrl) {
+        this.serviceUrl = serviceUrl;
+        wasServiceUrlSaved = true;
     }
 
     @Override
@@ -168,8 +168,8 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
         return wasGcmDeviceRegistrationIdSaved;
     }
 
-    public boolean wasBackEndDeviceRegistrationIdSaved() {
-        return wasBackEndDeviceRegistrationIdSaved;
+    public boolean wasPCFPushDeviceRegistrationIdSaved() {
+        return wasPCFPushDeviceRegistrationIdSaved;
     }
 
     public boolean wasAppVersionSaved() {
@@ -180,12 +180,12 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
         return wasGcmSenderIdSaved;
     }
 
-    public boolean wasVariantUuidSaved() {
-        return wasVariantUuidSaved;
+    public boolean wasPlatformUuidSaved() {
+        return wasPlatformUuidSaved;
     }
 
-    public boolean wasVariantSecretSaved() {
-        return wasVariantSecretSaved;
+    public boolean wasPlatformSecretSaved() {
+        return wasPlatformSecretSaved;
     }
 
     public boolean wasDeviceAliasSaved() {
@@ -196,8 +196,8 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
         return wasPackageNameSaved;
     }
 
-    public boolean wasBaseServerUrlSaved() {
-        return wasBaseServerUrlSaved;
+    public boolean wasServiceUrlSaved() {
+        return wasServiceUrlSaved;
     }
 
     public boolean wereTagsSaved() {

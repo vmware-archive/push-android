@@ -33,7 +33,7 @@ public class Util {
      * debuggable and if it has WRITE_EXTERNAL_STORAGE permission.  Otherwise does nothing.
      *
      * Used for debugging, and by the sample application to send push message requests to GCM
-     * and to the back-end server.
+     * and to the PCF Push server.
      *
      * @param context A context.
      * @param id      The ID string to save.

@@ -22,12 +22,12 @@ import java.util.Set;
 /**
  * Model used in the Pivotal CF Mobile Services device registration API.
  */
-public class BackEndApiRegistrationPostRequestData extends BaseBackEndApiRegistrationRequestData {
+public class PCFPushApiRegistrationPostRequestData extends BasePCFPushApiRegistrationRequestData {
 
     @SerializedName("tags")
     private Set<String> tags;
 
-    public BackEndApiRegistrationPostRequestData() {
+    public PCFPushApiRegistrationPostRequestData() {
     }
 
     public Set<String> getTags() {

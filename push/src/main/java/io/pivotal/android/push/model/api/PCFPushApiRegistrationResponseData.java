@@ -1,12 +1,31 @@
 /*
  * Copyright (C) 2014 Pivotal Software, Inc. All rights reserved.
  */
-
 package io.pivotal.android.push.model.api;
+
+/*
+    {
+        "device_alias": "android test",
+        "device_manufacturer": "Phone Corp",
+        "device_model": "Ultimate Phone 1999",
+        "os": "android",
+        "os_version": "version",
+        "registration_token": "SomeString"
+    }
+*/
 
 import com.google.gson.annotations.SerializedName;
 
-public abstract class BaseBackEndApiRegistrationRequestData {
+/**
+ * Model returned by the Pivotal CF Mobile Services device registration API.
+ */
+public class PCFPushApiRegistrationResponseData {
+
+    @SerializedName("variant_uuid")
+    private String variantUuid;
+
+    @SerializedName("device_uuid")
+    private String deviceUuid;
 
     @SerializedName("device_alias")
     private String deviceAlias;
@@ -25,6 +44,25 @@ public abstract class BaseBackEndApiRegistrationRequestData {
 
     @SerializedName("registration_token")
     private String registrationToken;
+
+    public PCFPushApiRegistrationResponseData() {
+    }
+
+    public String getVariantUuid() {
+        return variantUuid;
+    }
+
+    public void setVariantUuid(String variantUuid) {
+        this.variantUuid = variantUuid;
+    }
+
+    public String getDeviceUuid() {
+        return deviceUuid;
+    }
+
+    public void setDeviceUuid(String deviceUuid) {
+        this.deviceUuid = deviceUuid;
+    }
 
     public String getDeviceAlias() {
         return deviceAlias;

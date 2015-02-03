@@ -12,25 +12,25 @@ import io.pivotal.android.push.util.DelayedLoop;
 import io.pivotal.android.push.util.FakeHttpURLConnection;
 import io.pivotal.android.push.util.FakeNetworkWrapper;
 
-public class BackEndUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
+public class PCFPushUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
 
     private static final long TEN_SECOND_TIMEOUT = 10000L;
-    private static final String TEST_BACK_END_DEVICE_REGISTRATION_ID = "TEST_BACK_END_DEVICE_REGISTRATION_ID";
+    private static final String TEST_PCF_PUSH_DEVICE_REGISTRATION_ID = "TEST_PCF_PUSH_DEVICE_REGISTRATION_ID";
     private static final String TEST_GCM_SENDER_ID = "TEST_GCM_SENDER_ID";
-    private static final String TEST_VARIANT_UUID = "TEST_VARIANT_UUID";
-    private static final String TEST_VARIANT_SECRET = "TEST_VARIANT_SECRET";
+    private static final String TEST_PLATFORM_UUID = "TEST_PLATFORM_UUID";
+    private static final String TEST_PLATFORM_SECRET = "TEST_PLATFORM_SECRET";
     private static final String TEST_DEVICE_ALIAS = "TEST_DEVICE_ALIAS";
-    private static final String TEST_BASE_SERVER_URL = "http://test.com";
+    private static final String TEST_SERVICE_URL = "http://test.com";
 
     private RegistrationParameters parameters;
     private FakeNetworkWrapper networkWrapper;
     private DelayedLoop delayedLoop;
-    private BackEndUnregisterDeviceListener backEndUnregisterDeviceListener;
+    private PCFPushUnregisterDeviceListener PCFPushUnregisterDeviceListener;
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        parameters = new RegistrationParameters(TEST_GCM_SENDER_ID, TEST_VARIANT_UUID, TEST_VARIANT_SECRET, TEST_BASE_SERVER_URL, TEST_DEVICE_ALIAS, null);
+        parameters = new RegistrationParameters(TEST_GCM_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null);
         networkWrapper = new FakeNetworkWrapper();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
         FakeHttpURLConnection.reset();
@@ -38,18 +38,18 @@ public class BackEndUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresNetworkWrapper() {
         try {
-            new BackEndUnregisterDeviceApiRequestImpl(null);
+            new PCFPushUnregisterDeviceApiRequestImpl(null);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
             // Success
         }
     }
 
-    public void testRequiresBackEndDeviceRegistrationId() {
+    public void testRequiresPCFPushDeviceRegistrationId() {
         try {
-            final BackEndUnregisterDeviceApiRequestImpl backEndRegistrationApiRequestImpl = new BackEndUnregisterDeviceApiRequestImpl(new FakeNetworkWrapper());
-            makeBackEndUnegisterDeviceApiRequestListener(true);
-            backEndRegistrationApiRequestImpl.startUnregisterDevice(null, parameters, backEndUnregisterDeviceListener);
+            final PCFPushUnregisterDeviceApiRequestImpl request = new PCFPushUnregisterDeviceApiRequestImpl(new FakeNetworkWrapper());
+            makePCFPushUnegisterDeviceApiRequestListener(true);
+            request.startUnregisterDevice(null, parameters, PCFPushUnregisterDeviceListener);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
             // Success
@@ -58,9 +58,9 @@ public class BackEndUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresParameters() {
         try {
-            final BackEndUnregisterDeviceApiRequestImpl backEndRegistrationApiRequestImpl = new BackEndUnregisterDeviceApiRequestImpl(new FakeNetworkWrapper());
-            makeBackEndUnegisterDeviceApiRequestListener(true);
-            backEndRegistrationApiRequestImpl.startUnregisterDevice(TEST_BACK_END_DEVICE_REGISTRATION_ID, null, backEndUnregisterDeviceListener);
+            final PCFPushUnregisterDeviceApiRequestImpl request = new PCFPushUnregisterDeviceApiRequestImpl(new FakeNetworkWrapper());
+            makePCFPushUnegisterDeviceApiRequestListener(true);
+            request.startUnregisterDevice(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, null, PCFPushUnregisterDeviceListener);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
             // Success
@@ -69,8 +69,8 @@ public class BackEndUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresListener() {
         try {
-            final BackEndUnregisterDeviceApiRequestImpl backEndRegistrationApiRequestImpl = new BackEndUnregisterDeviceApiRequestImpl(new FakeNetworkWrapper());
-            backEndRegistrationApiRequestImpl.startUnregisterDevice(TEST_BACK_END_DEVICE_REGISTRATION_ID, parameters, null);
+            final PCFPushUnregisterDeviceApiRequestImpl request = new PCFPushUnregisterDeviceApiRequestImpl(new FakeNetworkWrapper());
+            request.startUnregisterDevice(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, parameters, null);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
             // Success
@@ -79,16 +79,16 @@ public class BackEndUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
 
     public void testSuccessfulRequest() {
         makeListenersForSuccessfulRequestFromNetwork(true, 200);
-        final BackEndUnregisterDeviceApiRequestImpl registrar = new BackEndUnregisterDeviceApiRequestImpl(networkWrapper);
-        registrar.startUnregisterDevice(TEST_BACK_END_DEVICE_REGISTRATION_ID, parameters, backEndUnregisterDeviceListener);
+        final PCFPushUnregisterDeviceApiRequestImpl request = new PCFPushUnregisterDeviceApiRequestImpl(networkWrapper);
+        request.startUnregisterDevice(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, parameters, PCFPushUnregisterDeviceListener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
 
     public void testFailed405() {
         makeListenersForSuccessfulRequestFromNetwork(false, 405);
-        final BackEndUnregisterDeviceApiRequestImpl registrar = new BackEndUnregisterDeviceApiRequestImpl(networkWrapper);
-        registrar.startUnregisterDevice(TEST_BACK_END_DEVICE_REGISTRATION_ID, parameters, backEndUnregisterDeviceListener);
+        final PCFPushUnregisterDeviceApiRequestImpl request = new PCFPushUnregisterDeviceApiRequestImpl(networkWrapper);
+        request.startUnregisterDevice(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, parameters, PCFPushUnregisterDeviceListener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
@@ -96,31 +96,31 @@ public class BackEndUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
     // 404 errors are not considered failures
     public void testSuccessful404() {
         makeListenersForSuccessfulRequestFromNetwork(true, 404);
-        final BackEndUnregisterDeviceApiRequestImpl registrar = new BackEndUnregisterDeviceApiRequestImpl(networkWrapper);
-        registrar.startUnregisterDevice(TEST_BACK_END_DEVICE_REGISTRATION_ID, parameters, backEndUnregisterDeviceListener);
+        final PCFPushUnregisterDeviceApiRequestImpl request = new PCFPushUnregisterDeviceApiRequestImpl(networkWrapper);
+        request.startUnregisterDevice(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, parameters, PCFPushUnregisterDeviceListener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
 
     public void testFailed403() {
         makeListenersForSuccessfulRequestFromNetwork(false, 403);
-        final BackEndUnregisterDeviceApiRequestImpl registrar = new BackEndUnregisterDeviceApiRequestImpl(networkWrapper);
-        registrar.startUnregisterDevice(TEST_BACK_END_DEVICE_REGISTRATION_ID, parameters, backEndUnregisterDeviceListener);
+        final PCFPushUnregisterDeviceApiRequestImpl request = new PCFPushUnregisterDeviceApiRequestImpl(networkWrapper);
+        request.startUnregisterDevice(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, parameters, PCFPushUnregisterDeviceListener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
 
     public void testCouldNotConnect() {
         makeListenersFromFailedRequestFromNetwork("Your server is busted");
-        final BackEndUnregisterDeviceApiRequestImpl registrar = new BackEndUnregisterDeviceApiRequestImpl(networkWrapper);
-        registrar.startUnregisterDevice(TEST_BACK_END_DEVICE_REGISTRATION_ID, parameters, backEndUnregisterDeviceListener);
+        final PCFPushUnregisterDeviceApiRequestImpl request = new PCFPushUnregisterDeviceApiRequestImpl(networkWrapper);
+        request.startUnregisterDevice(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, parameters, PCFPushUnregisterDeviceListener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
 
     private void makeListenersForSuccessfulRequestFromNetwork(boolean isSuccessfulResult, int expectedHttpStatusCode) {
         FakeHttpURLConnection.setResponseCode(expectedHttpStatusCode);
-        makeBackEndUnegisterDeviceApiRequestListener(isSuccessfulResult);
+        makePCFPushUnegisterDeviceApiRequestListener(isSuccessfulResult);
     }
 
     private void makeListenersFromFailedRequestFromNetwork(String exceptionText) {
@@ -130,19 +130,19 @@ public class BackEndUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
         }
         FakeHttpURLConnection.willThrowConnectionException(true);
         FakeHttpURLConnection.setConnectionException(exception);
-        makeBackEndUnegisterDeviceApiRequestListener(false);
+        makePCFPushUnegisterDeviceApiRequestListener(false);
     }
 
-    public void makeBackEndUnegisterDeviceApiRequestListener(final boolean isSuccessfulRequest) {
-        backEndUnregisterDeviceListener = new BackEndUnregisterDeviceListener() {
+    public void makePCFPushUnegisterDeviceApiRequestListener(final boolean isSuccessfulRequest) {
+        PCFPushUnregisterDeviceListener = new PCFPushUnregisterDeviceListener() {
 
             @Override
-            public void onBackEndUnregisterDeviceSuccess() {
+            public void onPCFPushUnregisterDeviceSuccess() {
                 assertTrue(isSuccessfulRequest);
                 assertEquals("DELETE", FakeHttpURLConnection.getReceivedHttpMethod());
                 assertTrue(FakeHttpURLConnection.getRequestPropertiesMap().containsKey("Authorization"));
                 if (isSuccessfulRequest) {
-                    assertTrue(FakeHttpURLConnection.getReceivedURL().toString().endsWith(TEST_BACK_END_DEVICE_REGISTRATION_ID));
+                    assertTrue(FakeHttpURLConnection.getReceivedURL().toString().endsWith(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID));
                     delayedLoop.flagSuccess();
                 } else {
                     delayedLoop.flagFailure();
@@ -150,7 +150,7 @@ public class BackEndUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
             }
 
             @Override
-            public void onBackEndUnregisterDeviceFailed(String reason) {
+            public void onPCFPushUnregisterDeviceFailed(String reason) {
                 assertFalse(isSuccessfulRequest);
                 if (isSuccessfulRequest) {
                     delayedLoop.flagFailure();

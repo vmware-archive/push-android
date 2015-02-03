@@ -13,9 +13,9 @@ public interface PushPreferencesProvider {
 
     void setGcmDeviceRegistrationId(String gcmDeviceRegistrationId);
 
-    String getBackEndDeviceRegistrationId();
+    String getPCFPushDeviceRegistrationId();
 
-    void setBackEndDeviceRegistrationId(String backendDeviceRegistrationId);
+    void setPCFPushDeviceRegistrationId(String pcfPushDeviceRegistrationId);
 
     int getAppVersion();
 
@@ -25,13 +25,13 @@ public interface PushPreferencesProvider {
 
     void setGcmSenderId(String gcmSenderId);
 
-    String getVariantUuid();
+    String getPlatformUuid();
 
-    void setVariantUuid(String variantUuid);
+    void setPlatformUuid(String platformUuid);
 
-    String getVariantSecret();
+    String getPlatformSecret();
 
-    void setVariantSecret(String variantUuid);
+    void setPlatformSecret(String platformSecret);
 
     String getDeviceAlias();
 
@@ -41,9 +41,9 @@ public interface PushPreferencesProvider {
 
     void setPackageName(String packageName);
 
-    String getBaseServerUrl();
+    String getServiceUrl();
 
-    void setBaseServerUrl(String baseServerUrl);
+    void setServiceUrl(String serviceUrl);
 
     Set<String> getTags();
 

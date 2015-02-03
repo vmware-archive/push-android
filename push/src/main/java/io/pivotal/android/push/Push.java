@@ -10,12 +10,12 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import io.pivotal.android.push.backend.BackEndRegistrationApiRequest;
-import io.pivotal.android.push.backend.BackEndRegistrationApiRequestImpl;
-import io.pivotal.android.push.backend.BackEndRegistrationApiRequestProvider;
-import io.pivotal.android.push.backend.BackEndUnregisterDeviceApiRequest;
-import io.pivotal.android.push.backend.BackEndUnregisterDeviceApiRequestImpl;
-import io.pivotal.android.push.backend.BackEndUnregisterDeviceApiRequestProvider;
+import io.pivotal.android.push.backend.PCFPushRegistrationApiRequest;
+import io.pivotal.android.push.backend.PCFPushRegistrationApiRequestImpl;
+import io.pivotal.android.push.backend.PCFPushRegistrationApiRequestProvider;
+import io.pivotal.android.push.backend.PCFPushUnregisterDeviceApiRequest;
+import io.pivotal.android.push.backend.PCFPushUnregisterDeviceApiRequestImpl;
+import io.pivotal.android.push.backend.PCFPushUnregisterDeviceApiRequestProvider;
 import io.pivotal.android.push.gcm.GcmProvider;
 import io.pivotal.android.push.gcm.GcmRegistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmRegistrationApiRequestImpl;
@@ -124,8 +124,8 @@ public class Push {
         final GcmUnregistrationApiRequest dummyGcmUnregistrationApiRequest = new GcmUnregistrationApiRequestImpl(context, gcmProvider);
         final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(dummyGcmUnregistrationApiRequest);
         final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
-        final BackEndRegistrationApiRequest dummyBackEndRegistrationApiRequest = new BackEndRegistrationApiRequestImpl(context, networkWrapper);
-        final BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider = new BackEndRegistrationApiRequestProvider(dummyBackEndRegistrationApiRequest);
+        final PCFPushRegistrationApiRequest dummyPCFPushRegistrationApiRequest = new PCFPushRegistrationApiRequestImpl(context, networkWrapper);
+        final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(dummyPCFPushRegistrationApiRequest);
         final VersionProvider versionProvider = new VersionProviderImpl(context);
         final ServiceStarter serviceStarter = new ServiceStarterImpl();
         final RegistrationParameters parameters = getRegistrationParameters(deviceAlias, tags);
@@ -137,7 +137,7 @@ public class Push {
             @Override
             public void run() {
                 try {
-                    final RegistrationEngine registrationEngine = new RegistrationEngine(context, context.getPackageName(), gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, backEndRegistrationApiRequestProvider, versionProvider, serviceStarter);
+                    final RegistrationEngine registrationEngine = new RegistrationEngine(context, context.getPackageName(), gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, PCFPushRegistrationApiRequestProvider, versionProvider, serviceStarter);
                     registrationEngine.registerDevice(parameters, listener);
                 } catch (Exception e) {
                     Logger.ex("Push SDK registration failed", e);
@@ -162,14 +162,14 @@ public class Push {
         if (parameters.getGcmSenderId() == null || parameters.getGcmSenderId().isEmpty()) {
             throw new IllegalArgumentException("parameters.senderId may not be null or empty");
         }
-        if (parameters.getVariantUuid() == null || parameters.getVariantUuid().isEmpty()) {
-            throw new IllegalArgumentException("parameters.variantUuid may not be null or empty");
+        if (parameters.getPlatformUuid() == null || parameters.getPlatformUuid().isEmpty()) {
+            throw new IllegalArgumentException("parameters.platformUuid may not be null or empty");
         }
-        if (parameters.getVariantSecret() == null || parameters.getVariantSecret().isEmpty()) {
-            throw new IllegalArgumentException("parameters.variantSecret may not be null or empty");
+        if (parameters.getPlatformSecret() == null || parameters.getPlatformSecret().isEmpty()) {
+            throw new IllegalArgumentException("parameters.platformSecret may not be null or empty");
         }
-        if (parameters.getBaseServerUrl() == null) {
-            throw new IllegalArgumentException("parameters.baseServerUrl may not be null");
+        if (parameters.getServiceUrl() == null) {
+            throw new IllegalArgumentException("parameters.serviceUrl may not be null");
         }
     }
 
@@ -195,15 +195,14 @@ public class Push {
         final GcmUnregistrationApiRequest dummyGcmUnregistrationApiRequest = new GcmUnregistrationApiRequestImpl(context, gcmProvider);
         final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(dummyGcmUnregistrationApiRequest);
         final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
-        final BackEndUnregisterDeviceApiRequest dummyBackEndUnregisterDeviceApiRequest = new BackEndUnregisterDeviceApiRequestImpl(networkWrapper);
-        final BackEndUnregisterDeviceApiRequestProvider backEndUnregisterDeviceApiRequestProvider = new BackEndUnregisterDeviceApiRequestProvider(dummyBackEndUnregisterDeviceApiRequest);
-        final ServiceStarter serviceStarter = new ServiceStarterImpl();
+        final PCFPushUnregisterDeviceApiRequest dummyPCFPushUnregisterDeviceApiRequest = new PCFPushUnregisterDeviceApiRequestImpl(networkWrapper);
+        final PCFPushUnregisterDeviceApiRequestProvider PCFPushUnregisterDeviceApiRequestProvider = new PCFPushUnregisterDeviceApiRequestProvider(dummyPCFPushUnregisterDeviceApiRequest);
         final Runnable runnable = new Runnable() {
 
             @Override
             public void run() {
                 try {
-                    final UnregistrationEngine unregistrationEngine = new UnregistrationEngine(context, gcmProvider, serviceStarter, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, backEndUnregisterDeviceApiRequestProvider);
+                    final UnregistrationEngine unregistrationEngine = new UnregistrationEngine(context, gcmProvider, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, PCFPushUnregisterDeviceApiRequestProvider);
                     unregistrationEngine.unregisterDevice(parameters, listener);
                 } catch (Exception e) {
                     Logger.ex("Push SDK unregistration failed", e);
@@ -217,8 +216,8 @@ public class Push {
         if (parameters == null) {
             throw new IllegalArgumentException("parameters may not be null");
         }
-        if (parameters.getBaseServerUrl() == null) {
-            throw new IllegalArgumentException("parameters.baseServerUrl may not be null");
+        if (parameters.getServiceUrl() == null) {
+            throw new IllegalArgumentException("parameters.serviceUrl may not be null");
         }
     }
 }

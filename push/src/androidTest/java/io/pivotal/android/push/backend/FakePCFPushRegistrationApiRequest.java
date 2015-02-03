@@ -7,30 +7,30 @@ import java.util.Set;
 
 import io.pivotal.android.push.RegistrationParameters;
 
-public class FakeBackEndRegistrationApiRequest implements BackEndRegistrationApiRequest {
+public class FakePCFPushRegistrationApiRequest implements PCFPushRegistrationApiRequest {
 
-    private final FakeBackEndRegistrationApiRequest originatingRequest;
-    private final String backEndDeviceRegistrationIdFromServer;
+    private final FakePCFPushRegistrationApiRequest originatingRequest;
+    private final String pcfPushDeviceRegistrationIdFromServer;
     private final boolean willBeSuccessfulRequest;
     private boolean wasRegisterCalled = false;
     private boolean isNewRegistration;
     private boolean isUpdateRegistration;
 
-    public FakeBackEndRegistrationApiRequest(String backEndDeviceRegistrationIdFromServer) {
+    public FakePCFPushRegistrationApiRequest(String pcfPushDeviceRegistrationIdFromServer) {
         this.originatingRequest = null;
-        this.backEndDeviceRegistrationIdFromServer = backEndDeviceRegistrationIdFromServer;
+        this.pcfPushDeviceRegistrationIdFromServer = pcfPushDeviceRegistrationIdFromServer;
         this.willBeSuccessfulRequest = true;
     }
 
-    public FakeBackEndRegistrationApiRequest(String backEndDeviceRegistrationIdFromServer, boolean willBeSuccessfulRequest) {
+    public FakePCFPushRegistrationApiRequest(String pcfPushDeviceRegistrationIdFromServer, boolean willBeSuccessfulRequest) {
         this.originatingRequest = null;
-        this.backEndDeviceRegistrationIdFromServer = backEndDeviceRegistrationIdFromServer;
+        this.pcfPushDeviceRegistrationIdFromServer = pcfPushDeviceRegistrationIdFromServer;
         this.willBeSuccessfulRequest = willBeSuccessfulRequest;
     }
 
-    public FakeBackEndRegistrationApiRequest(FakeBackEndRegistrationApiRequest originatingRequest, String backEndDeviceRegistrationIdFromServer, boolean willBeSuccessfulRequest) {
+    public FakePCFPushRegistrationApiRequest(FakePCFPushRegistrationApiRequest originatingRequest, String pcfPushDeviceRegistrationIdFromServer, boolean willBeSuccessfulRequest) {
         this.originatingRequest = originatingRequest;
-        this.backEndDeviceRegistrationIdFromServer = backEndDeviceRegistrationIdFromServer;
+        this.pcfPushDeviceRegistrationIdFromServer = pcfPushDeviceRegistrationIdFromServer;
         this.willBeSuccessfulRequest = willBeSuccessfulRequest;
     }
 
@@ -38,7 +38,7 @@ public class FakeBackEndRegistrationApiRequest implements BackEndRegistrationApi
     public void startNewDeviceRegistration(String gcmDeviceRegistrationId,
                                            Set<String> savedTags,
                                            RegistrationParameters parameters,
-                                           BackEndRegistrationListener listener) {
+                                           PCFPushRegistrationListener listener) {
 
         wasRegisterCalled = true;
         isNewRegistration = true;
@@ -49,18 +49,18 @@ public class FakeBackEndRegistrationApiRequest implements BackEndRegistrationApi
         }
 
         if (willBeSuccessfulRequest) {
-            listener.onBackEndRegistrationSuccess(backEndDeviceRegistrationIdFromServer);
+            listener.onPCFPushRegistrationSuccess(pcfPushDeviceRegistrationIdFromServer);
         } else {
-            listener.onBackEndRegistrationFailed("Fake back-end new registration failed fakely");
+            listener.onPCFPushRegistrationFailed("Fake PCF Push new registration failed fakely");
         }
     }
 
     @Override
     public void startUpdateDeviceRegistration(String gcmDeviceRegistrationId,
-                                              String previousBackEndDeviceRegistrationId,
+                                              String previousPCFPushDeviceRegistrationId,
                                               Set<String> savedTags,
                                               RegistrationParameters parameters,
-                                              BackEndRegistrationListener listener) {
+                                              PCFPushRegistrationListener listener) {
         wasRegisterCalled = true;
         isUpdateRegistration = true;
 
@@ -70,15 +70,15 @@ public class FakeBackEndRegistrationApiRequest implements BackEndRegistrationApi
         }
 
         if (willBeSuccessfulRequest) {
-            listener.onBackEndRegistrationSuccess(backEndDeviceRegistrationIdFromServer);
+            listener.onPCFPushRegistrationSuccess(pcfPushDeviceRegistrationIdFromServer);
         } else {
-            listener.onBackEndRegistrationFailed("Fake back-end update registration failed fakely");
+            listener.onPCFPushRegistrationFailed("Fake PCF Push update registration failed fakely");
         }
     }
 
     @Override
-    public BackEndRegistrationApiRequest copy() {
-        return new FakeBackEndRegistrationApiRequest(this, backEndDeviceRegistrationIdFromServer, willBeSuccessfulRequest);
+    public PCFPushRegistrationApiRequest copy() {
+        return new FakePCFPushRegistrationApiRequest(this, pcfPushDeviceRegistrationIdFromServer, willBeSuccessfulRequest);
     }
 
     public boolean wasRegisterCalled() {

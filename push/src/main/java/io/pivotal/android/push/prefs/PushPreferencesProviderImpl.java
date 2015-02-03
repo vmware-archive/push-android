@@ -21,14 +21,14 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
     // If you add or change any of these strings, then please also update their copies in the
     // sample app's MainActivity::clearRegistration method.
     private static final String PROPERTY_GCM_DEVICE_REGISTRATION_ID = "gcm_device_registration_id";
-    private static final String PROPERTY_BACKEND_DEVICE_REGISTRATION_ID = "backend_device_registration_id";
+    private static final String PROPERTY_PCF_PUSH_DEVICE_REGISTRATION_ID = "backend_device_registration_id";
     private static final String PROPERTY_APP_VERSION = "app_version";
     private static final String PROPERTY_GCM_SENDER_ID = "gcm_sender_id";
-    private static final String PROPERTY_VARIANT_UUID = "variant_uuid";
-    private static final String PROPERTY_VARIANT_SECRET = "variant_secret";
+    private static final String PROPERTY_PLATFORM_UUID = "variant_uuid";
+    private static final String PROPERTY_PLATFORM_SECRET = "variant_secret";
     private static final String PROPERTY_DEVICE_ALIAS = "device_alias";
     private static final String PROPERTY_PACKAGE_NAME = "package_name";
-    private static final String PROPERTY_BASE_SERVER_URL = "base_server_url";
+    private static final String PROPERTY_SERVICE_URL = "base_server_url";
     private static final String PROPERTY_TAGS = "tags";
 
     private final Context context;
@@ -54,15 +54,15 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
     }
 
     @Override
-    public String getBackEndDeviceRegistrationId() {
-        return getSharedPreferences().getString(PROPERTY_BACKEND_DEVICE_REGISTRATION_ID, null);
+    public String getPCFPushDeviceRegistrationId() {
+        return getSharedPreferences().getString(PROPERTY_PCF_PUSH_DEVICE_REGISTRATION_ID, null);
     }
 
     @Override
-    public void setBackEndDeviceRegistrationId(String backendDeviceRegistrationId) {
+    public void setPCFPushDeviceRegistrationId(String pcfPushDeviceRegistrationId) {
         final SharedPreferences prefs = getSharedPreferences();
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(PROPERTY_BACKEND_DEVICE_REGISTRATION_ID, backendDeviceRegistrationId);
+        editor.putString(PROPERTY_PCF_PUSH_DEVICE_REGISTRATION_ID, pcfPushDeviceRegistrationId);
         editor.commit();
     }
 
@@ -93,28 +93,28 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
     }
 
     @Override
-    public String getVariantUuid() {
-        return getSharedPreferences().getString(PROPERTY_VARIANT_UUID, null);
+    public String getPlatformUuid() {
+        return getSharedPreferences().getString(PROPERTY_PLATFORM_UUID, null);
     }
 
     @Override
-    public void setVariantUuid(String variantUuid) {
+    public void setPlatformUuid(String platformUuid) {
         final SharedPreferences prefs = getSharedPreferences();
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(PROPERTY_VARIANT_UUID, variantUuid);
+        editor.putString(PROPERTY_PLATFORM_UUID, platformUuid);
         editor.commit();
     }
 
     @Override
-    public String getVariantSecret() {
-        return getSharedPreferences().getString(PROPERTY_VARIANT_SECRET, null);
+    public String getPlatformSecret() {
+        return getSharedPreferences().getString(PROPERTY_PLATFORM_SECRET, null);
     }
 
     @Override
-    public void setVariantSecret(String variantUuid) {
+    public void setPlatformSecret(String platformSecret) {
         final SharedPreferences prefs = getSharedPreferences();
         SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(PROPERTY_VARIANT_SECRET, variantUuid);
+        editor.putString(PROPERTY_PLATFORM_SECRET, platformSecret);
         editor.commit();
     }
 
@@ -145,15 +145,15 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
     }
 
     @Override
-    public String getBaseServerUrl() {
-        return getSharedPreferences().getString(PROPERTY_BASE_SERVER_URL, null);
+    public String getServiceUrl() {
+        return getSharedPreferences().getString(PROPERTY_SERVICE_URL, null);
     }
 
     @Override
-    public void setBaseServerUrl(String baseServerUrl) {
+    public void setServiceUrl(String serviceUrl) {
         final SharedPreferences prefs = getSharedPreferences();
         final SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(PROPERTY_BASE_SERVER_URL, baseServerUrl);
+        editor.putString(PROPERTY_SERVICE_URL, serviceUrl);
         editor.commit();
     }
 

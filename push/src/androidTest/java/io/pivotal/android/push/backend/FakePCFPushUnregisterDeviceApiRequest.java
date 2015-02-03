@@ -5,44 +5,44 @@ package io.pivotal.android.push.backend;
 
 import io.pivotal.android.push.RegistrationParameters;
 
-public class FakeBackEndUnregisterDeviceApiRequest implements BackEndUnregisterDeviceApiRequest {
+public class FakePCFPushUnregisterDeviceApiRequest implements PCFPushUnregisterDeviceApiRequest {
 
-    private final FakeBackEndUnregisterDeviceApiRequest originatingRequest;
+    private final FakePCFPushUnregisterDeviceApiRequest originatingRequest;
     private final boolean willBeSuccessfulRequest;
     private boolean wasUnregisterCalled = false;
 
-    public FakeBackEndUnregisterDeviceApiRequest() {
+    public FakePCFPushUnregisterDeviceApiRequest() {
         this.originatingRequest = null;
         this.willBeSuccessfulRequest = true;
     }
 
-    public FakeBackEndUnregisterDeviceApiRequest(boolean willBeSuccessfulRequest) {
+    public FakePCFPushUnregisterDeviceApiRequest(boolean willBeSuccessfulRequest) {
         this.originatingRequest = null;
         this.willBeSuccessfulRequest = willBeSuccessfulRequest;
     }
 
-    public FakeBackEndUnregisterDeviceApiRequest(FakeBackEndUnregisterDeviceApiRequest originatingRequest, boolean willBeSuccessfulRequest) {
+    public FakePCFPushUnregisterDeviceApiRequest(FakePCFPushUnregisterDeviceApiRequest originatingRequest, boolean willBeSuccessfulRequest) {
         this.originatingRequest = originatingRequest;
         this.willBeSuccessfulRequest = willBeSuccessfulRequest;
     }
 
     @Override
-    public void startUnregisterDevice(String backEndDeviceRegistrationId, RegistrationParameters parameters, BackEndUnregisterDeviceListener listener) {
+    public void startUnregisterDevice(String pcfPushDeviceRegistrationId, RegistrationParameters parameters, PCFPushUnregisterDeviceListener listener) {
         wasUnregisterCalled = true;
         if (originatingRequest != null) {
             originatingRequest.wasUnregisterCalled = true;
         }
 
         if (willBeSuccessfulRequest) {
-            listener.onBackEndUnregisterDeviceSuccess();
+            listener.onPCFPushUnregisterDeviceSuccess();
         } else {
-            listener.onBackEndUnregisterDeviceFailed("Fake back-end registration failed fakely");
+            listener.onPCFPushUnregisterDeviceFailed("Fake PCF Push registration failed fakely");
         }
     }
 
     @Override
-    public BackEndUnregisterDeviceApiRequest copy() {
-        return new FakeBackEndUnregisterDeviceApiRequest(this, willBeSuccessfulRequest);
+    public PCFPushUnregisterDeviceApiRequest copy() {
+        return new FakePCFPushUnregisterDeviceApiRequest(this, willBeSuccessfulRequest);
     }
 
     public boolean wasUnregisterCalled() {

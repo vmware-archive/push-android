@@ -7,19 +7,19 @@ import java.util.Set;
 
 import io.pivotal.android.push.RegistrationParameters;
 
-public interface BackEndRegistrationApiRequest {
+public interface PCFPushRegistrationApiRequest {
 
     void startNewDeviceRegistration(String gcmDeviceRegistrationId,
                                     Set<String> savedTags,
                                     RegistrationParameters parameters,
-                                    BackEndRegistrationListener listener);
+                                    PCFPushRegistrationListener listener);
 
     void startUpdateDeviceRegistration(String gcmDeviceRegistrationId,
-                                       String backEndDeviceRegistrationId,
+                                       String pcfPushDeviceRegistrationId,
                                        Set<String> savedTags,
                                        RegistrationParameters parameters,
-                                       BackEndRegistrationListener listener);
+                                       PCFPushRegistrationListener listener);
 
-    BackEndRegistrationApiRequest copy();
+    PCFPushRegistrationApiRequest copy();
 
 }

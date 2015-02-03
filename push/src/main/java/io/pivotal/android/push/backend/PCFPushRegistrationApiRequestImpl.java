@@ -20,10 +20,10 @@ import java.net.URL;
 import java.util.Set;
 
 import io.pivotal.android.push.RegistrationParameters;
-import io.pivotal.android.push.model.api.BackEndApiRegistrationPostRequestData;
-import io.pivotal.android.push.model.api.BackEndApiRegistrationPutRequestData;
-import io.pivotal.android.push.model.api.BackEndApiRegistrationResponseData;
-import io.pivotal.android.push.model.api.BaseBackEndApiRegistrationRequestData;
+import io.pivotal.android.push.model.api.PCFPushApiRegistrationPostRequestData;
+import io.pivotal.android.push.model.api.PCFPushApiRegistrationPutRequestData;
+import io.pivotal.android.push.model.api.PCFPushApiRegistrationResponseData;
+import io.pivotal.android.push.model.api.BasePCFPushApiRegistrationRequestData;
 import io.pivotal.android.push.util.ApiRequestImpl;
 import io.pivotal.android.push.util.Const;
 import io.pivotal.android.push.util.Logger;
@@ -32,13 +32,13 @@ import io.pivotal.android.push.util.TagsHelper;
 import io.pivotal.android.push.util.Util;
 
 /**
- * API request for registering a device with the Pivotal CF Mobile Services back-end server.
+ * API request for registering a device with the Pivotal CF Mobile Services Push server.
  */
-public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements BackEndRegistrationApiRequest {
+public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements PCFPushRegistrationApiRequest {
 
     private Context context;
 
-    public BackEndRegistrationApiRequestImpl(Context context, NetworkWrapper networkWrapper) {
+    public PCFPushRegistrationApiRequestImpl(Context context, NetworkWrapper networkWrapper) {
         super(networkWrapper);
         verifyArguments(context);
         saveArguments(context);
@@ -58,7 +58,7 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
     public void startNewDeviceRegistration(String gcmDeviceRegistrationId,
                                            Set<String> savedTags,
                                            RegistrationParameters parameters,
-                                           BackEndRegistrationListener listener) {
+                                           PCFPushRegistrationListener listener) {
 
         verifyNewRegistrationArguments(gcmDeviceRegistrationId, parameters, listener);
         handleRequest(gcmDeviceRegistrationId, null, savedTags, parameters, listener, false);
@@ -66,18 +66,18 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
 
     @Override
     public void startUpdateDeviceRegistration(String gcmDeviceRegistrationId,
-                                              String backEndDeviceRegistrationId,
+                                              String pcfPushDeviceRegistrationId,
                                               Set<String> savedTags,
                                               RegistrationParameters parameters,
-                                              BackEndRegistrationListener listener) {
+                                              PCFPushRegistrationListener listener) {
 
-        verifyUpdateRegistrationArguments(gcmDeviceRegistrationId, backEndDeviceRegistrationId, parameters, listener);
-        handleRequest(gcmDeviceRegistrationId, backEndDeviceRegistrationId, savedTags, parameters, listener, true);
+        verifyUpdateRegistrationArguments(gcmDeviceRegistrationId, pcfPushDeviceRegistrationId, parameters, listener);
+        handleRequest(gcmDeviceRegistrationId, pcfPushDeviceRegistrationId, savedTags, parameters, listener, true);
     }
 
     private void verifyNewRegistrationArguments(String gcmDeviceRegistrationId,
                                                 RegistrationParameters parameters,
-                                                BackEndRegistrationListener listener) {
+                                                PCFPushRegistrationListener listener) {
 
         if (gcmDeviceRegistrationId == null) {
             throw new IllegalArgumentException("gcmDeviceRegistrationId may not be null");
@@ -91,26 +91,26 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
     }
 
     private void verifyUpdateRegistrationArguments(String gcmDeviceRegistrationId,
-                                                   String backEndDeviceRegistrationId,
+                                                   String pcfPushDeviceRegistrationId,
                                                    RegistrationParameters parameters,
-                                                   BackEndRegistrationListener listener) {
+                                                   PCFPushRegistrationListener listener) {
 
         verifyNewRegistrationArguments(gcmDeviceRegistrationId, parameters, listener);
-        if (backEndDeviceRegistrationId == null) {
-            throw new IllegalArgumentException("backEndDeviceRegistrationId may not be null");
+        if (pcfPushDeviceRegistrationId == null) {
+            throw new IllegalArgumentException("pcfPushDeviceRegistrationId may not be null");
         }
     }
 
     private void handleRequest(String gcmDeviceRegistrationId,
-                               String previousBackEndDeviceRegistrationId,
+                               String previousPCFPushDeviceRegistrationId,
                                Set<String> savedTags,
                                RegistrationParameters parameters,
-                               BackEndRegistrationListener listener,
+                               PCFPushRegistrationListener listener,
                                boolean isUpdate) {
 
         OutputStream outputStream = null;
         try {
-            final URL url = getURL(isUpdate, previousBackEndDeviceRegistrationId, parameters);
+            final URL url = getURL(isUpdate, previousPCFPushDeviceRegistrationId, parameters);
             final HttpURLConnection urlConnection = getHttpURLConnection(url);
             urlConnection.setDoOutput(true);
             urlConnection.setDoInput(true);
@@ -127,7 +127,7 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
                     parameters,
                     isUpdate);
 
-            Logger.v("Making network request to register this device with the back-end server: " + requestBodyData);
+            Logger.v("Making network request to register this device with the PCF Push server: " + requestBodyData);
             writeOutput(requestBodyData, outputStream);
 
             final int statusCode = urlConnection.getResponseCode();
@@ -140,8 +140,8 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
             onSuccessfulNetworkRequest(statusCode, responseString, listener);
 
         } catch (Exception e) {
-            Logger.ex("Back-end device registration attempt failed", e);
-            listener.onBackEndRegistrationFailed(e.getLocalizedMessage());
+            Logger.ex("PCF Push device registration attempt failed", e);
+            listener.onPCFPushRegistrationFailed(e.getLocalizedMessage());
         }
 
         finally {
@@ -154,13 +154,13 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
     }
 
     private URL getURL(boolean isUpdate,
-                       String previousBackEndDeviceRegistrationId,
+                       String previousPCFPushDeviceRegistrationId,
                        RegistrationParameters parameters) throws MalformedURLException {
 
         if (isUpdate) {
-            return new URL(parameters.getBaseServerUrl() + "/" + Const.BACKEND_REGISTRATION_REQUEST_ENDPOINT + "/" +  previousBackEndDeviceRegistrationId);
+            return new URL(parameters.getServiceUrl() + "/" + Const.PCF_PUSH_REGISTRATION_REQUEST_ENDPOINT + "/" +  previousPCFPushDeviceRegistrationId);
         } else {
-            return new URL(parameters.getBaseServerUrl() + "/" + Const.BACKEND_REGISTRATION_REQUEST_ENDPOINT);
+            return new URL(parameters.getServiceUrl() + "/" + Const.PCF_PUSH_REGISTRATION_REQUEST_ENDPOINT);
         }
     }
 
@@ -174,44 +174,44 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
 
     public void onSuccessfulNetworkRequest(int statusCode,
                                            String responseString,
-                                           final BackEndRegistrationListener listener) {
+                                           final PCFPushRegistrationListener listener) {
 
         if (isFailureStatusCode(statusCode)) {
-            Logger.e("Back-end server registration failed: server returned HTTP status " + statusCode);
-            listener.onBackEndRegistrationFailed("Back-end server returned HTTP status " + statusCode);
+            Logger.e("PCF Push server registration failed: server returned HTTP status " + statusCode);
+            listener.onPCFPushRegistrationFailed("PCF Push server returned HTTP status " + statusCode);
             return;
         }
 
         if (responseString == null) {
-            Logger.e("Back-end server registration failed: server response empty");
-            listener.onBackEndRegistrationFailed("Back-end server response empty");
+            Logger.e("PCF Push server registration failed: server response empty");
+            listener.onPCFPushRegistrationFailed("PCF Push server response empty");
             return;
         }
 
         final Gson gson = new Gson();
-        final BackEndApiRegistrationResponseData responseData;
+        final PCFPushApiRegistrationResponseData responseData;
         try {
-            responseData = gson.fromJson(responseString, BackEndApiRegistrationResponseData.class);
+            responseData = gson.fromJson(responseString, PCFPushApiRegistrationResponseData.class);
             if (responseData == null) {
                 throw new Exception("unable to parse server response");
             }
         } catch (Exception e) {
-            Logger.e("Back-end server registration failed: " + e.getLocalizedMessage());
-            listener.onBackEndRegistrationFailed(e.getLocalizedMessage());
+            Logger.e("PCF Push server registration failed: " + e.getLocalizedMessage());
+            listener.onPCFPushRegistrationFailed(e.getLocalizedMessage());
             return;
         }
 
         final String deviceUuid = responseData.getDeviceUuid();
         if (deviceUuid == null || deviceUuid.isEmpty()) {
-            Logger.e("Back-end server registration failed: did not return device_uuid");
-            listener.onBackEndRegistrationFailed("Back-end server did not return device_uuid");
+            Logger.e("PCF Push server registration failed: did not return device_uuid");
+            listener.onPCFPushRegistrationFailed("PCF Push server did not return device_uuid");
             return;
         }
 
         Util.saveIdToFilesystem(context, deviceUuid, "device_uuid");
 
-        Logger.i("Back-end Server registration succeeded.");
-        listener.onBackEndRegistrationSuccess(deviceUuid);
+        Logger.i("PCF Push Server registration succeeded.");
+        listener.onPCFPushRegistrationSuccess(deviceUuid);
     }
 
     private String getRequestBodyData(String deviceRegistrationId,
@@ -220,7 +220,7 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
                                       boolean isUpdate) {
 
 
-        final BaseBackEndApiRegistrationRequestData data = getBackEndApiRegistrationRequestData(
+        final BasePCFPushApiRegistrationRequestData data = getPCFPushApiRegistrationRequestData(
                 deviceRegistrationId,
                 savedTags,
                 parameters,
@@ -230,18 +230,18 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
         return gson.toJson(data);
     }
 
-    private BaseBackEndApiRegistrationRequestData getBackEndApiRegistrationRequestData(String deviceRegistrationId,
-                                                                                      Set<String> savedTags,
-                                                                                      RegistrationParameters parameters,
-                                                                                      boolean isUpdate) {
+    private BasePCFPushApiRegistrationRequestData getPCFPushApiRegistrationRequestData(String deviceRegistrationId,
+                                                                                       Set<String> savedTags,
+                                                                                       RegistrationParameters parameters,
+                                                                                       boolean isUpdate) {
 
-        final BaseBackEndApiRegistrationRequestData data;
+        final BasePCFPushApiRegistrationRequestData data;
         if (isUpdate) {
-            final BackEndApiRegistrationPutRequestData putData = new BackEndApiRegistrationPutRequestData();
+            final PCFPushApiRegistrationPutRequestData putData = new PCFPushApiRegistrationPutRequestData();
             putData.setTags(getTags(savedTags, parameters));
             data = putData;
         } else {
-            final BackEndApiRegistrationPostRequestData postData = new BackEndApiRegistrationPostRequestData();
+            final PCFPushApiRegistrationPostRequestData postData = new PCFPushApiRegistrationPostRequestData();
             postData.setOs("android");
             postData.setTags(parameters.getTags());
             data = postData;
@@ -259,20 +259,20 @@ public class BackEndRegistrationApiRequestImpl extends ApiRequestImpl implements
         return data;
     }
 
-    private BackEndApiRegistrationPutRequestData.Tags getTags(Set<String> savedTags,
+    private PCFPushApiRegistrationPutRequestData.Tags getTags(Set<String> savedTags,
                                                               RegistrationParameters parameters) {
 
         final TagsHelper tagsHelper = new TagsHelper(savedTags, parameters.getTags());
-        return new BackEndApiRegistrationPutRequestData.Tags(tagsHelper.getSubscribeTags(), tagsHelper.getUnsubscribeTags());
+        return new PCFPushApiRegistrationPutRequestData.Tags(tagsHelper.getSubscribeTags(), tagsHelper.getUnsubscribeTags());
     }
 
     public static String getBasicAuthorizationValue(RegistrationParameters parameters) {
-        final String stringToEncode = parameters.getVariantUuid() + ":" + parameters.getVariantSecret();
+        final String stringToEncode = parameters.getPlatformUuid() + ":" + parameters.getPlatformSecret();
         return "Basic  " + Base64.encodeToString(stringToEncode.getBytes(), Base64.DEFAULT | Base64.NO_WRAP);
     }
 
     @Override
-    public BackEndRegistrationApiRequest copy() {
-        return new BackEndRegistrationApiRequestImpl(context, networkWrapper);
+    public PCFPushRegistrationApiRequest copy() {
+        return new PCFPushRegistrationApiRequestImpl(context, networkWrapper);
     }
 }

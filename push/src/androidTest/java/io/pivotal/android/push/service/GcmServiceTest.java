@@ -12,10 +12,7 @@ import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 public class GcmServiceTest extends AndroidTestCase {
 
-    private static final String TEST_MESSAGE_UUID = "some-message-uuid";
-    private static final String TEST_VARIANT_UUID = "some-variant-uuid";
     private static final String TEST_MESSAGE = "some fancy message";
-    private static final String TEST_DEVICE_ID = "some_device_id";
 
     @Override
     protected void setUp() throws Exception {

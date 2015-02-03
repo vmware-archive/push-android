@@ -12,30 +12,30 @@ import java.util.Set;
 public class RegistrationParameters {
 
     private final String gcmSenderId;
-    private final String variantUuid;
-    private final String variantSecret;
-    private final String baseServerUrl;
+    private final String platformUuid;
+    private final String platformSecret;
+    private final String serviceUrl;
     private final String deviceAlias;
     private final Set<String> tags;
 
     /**
      * Sets up parameters used by the Pivotal CF Mobile Services Push SDK
-     * @param gcmSenderId   The "sender ID" or "project ID", as defined by the Google Cloud Messaging.  May not be null or empty.
-     *                      You can find it on the Google Cloud Console (https://cloud.google.com) for your project.
-     * @param variantUuid   The "variant_uuid", as defined by Pivotal CF Mobile Services Push Services for your variant.  May not be null or empty.
-     * @param variantSecret The "variant secret", as defined by Pivotal CF Mobile Services Push Services for your variant.  May not be null or empty.
-     * @param baseServerUrl The Pivotal CF Mobile Services server used to provide push and related analytics services.
-     * @param deviceAlias   A developer-defined "device alias" which can be used to designate this device, or class.
-     *                      of devices, in push or notification campaigns. May not be set to `null`. May be set to empty.
-     * @param tags          A set of tags to register to.  You should always register all tags that you want to listen to, even if you have
-     *                      already subscribed to them.  If you exclude any subscribed tags in a registration request, then those tags
-     *                      will be unsubscribed.
+     * @param gcmSenderId    The "sender ID" or "project ID", as defined by the Google Cloud Messaging.  May not be null or empty.
+     *                       You can find it on the Google Cloud Console (https://cloud.google.com) for your project.
+     * @param platformUuid   The "platform", as defined by Pivotal CF Mobile Services Push Services for your platform.  May not be null or empty.
+     * @param platformSecret The "platform secret", as defined by Pivotal CF Mobile Services Push Services for your platform.  May not be null or empty.
+     * @param serviceUrl     The Pivotal CF Mobile Services server used to provide push and related analytics services.
+     * @param deviceAlias    A developer-defined "device alias" which can be used to designate this device, or class.
+     *                       of devices, in push or notification campaigns. May not be set to `null`. May be set to empty.
+     * @param tags           A set of tags to register to.  You should always register all tags that you want to listen to, even if you have
+     *                       already subscribed to them.  If you exclude any subscribed tags in a registration request, then those tags
+     *                       will be unsubscribed.
      */
-    public RegistrationParameters(String gcmSenderId, String variantUuid, String variantSecret, String baseServerUrl, String deviceAlias, Set<String> tags) {
+    public RegistrationParameters(String gcmSenderId, String platformUuid, String platformSecret, String serviceUrl, String deviceAlias, Set<String> tags) {
         this.gcmSenderId = gcmSenderId;
-        this.variantUuid = variantUuid;
-        this.variantSecret = variantSecret;
-        this.baseServerUrl = baseServerUrl;
+        this.platformUuid = platformUuid;
+        this.platformSecret = platformSecret;
+        this.serviceUrl = serviceUrl;
         this.deviceAlias = deviceAlias;
         this.tags = tags;
     }
@@ -44,16 +44,16 @@ public class RegistrationParameters {
         return gcmSenderId;
     }
 
-    public String getVariantUuid() {
-        return variantUuid;
+    public String getPlatformUuid() {
+        return platformUuid;
     }
 
-    public String getVariantSecret() {
-        return variantSecret;
+    public String getPlatformSecret() {
+        return platformSecret;
     }
 
-    public String getBaseServerUrl() {
-        return baseServerUrl;
+    public String getServiceUrl() {
+        return serviceUrl;
     }
 
     public String getDeviceAlias() {
@@ -87,33 +87,33 @@ public class RegistrationParameters {
             return false;
         }
 
-        if (variantUuid == null && other.variantUuid != null) {
+        if (platformUuid == null && other.platformUuid != null) {
             return false;
         }
-        if (variantUuid != null && other.variantUuid == null) {
+        if (platformUuid != null && other.platformUuid == null) {
             return false;
         }
-        if (variantUuid != null && other.variantUuid != null && !other.variantUuid.equals(variantUuid)) {
-            return false;
-        }
-
-        if (variantSecret == null && other.variantSecret != null) {
-            return false;
-        }
-        if (variantSecret != null && other.variantSecret == null) {
-            return false;
-        }
-        if (variantSecret != null && other.variantSecret != null && !other.variantSecret.equals(variantSecret)) {
+        if (platformUuid != null && other.platformUuid != null && !other.platformUuid.equals(platformUuid)) {
             return false;
         }
 
-        if (baseServerUrl == null && other.baseServerUrl != null) {
+        if (platformSecret == null && other.platformSecret != null) {
             return false;
         }
-        if (baseServerUrl != null && other.baseServerUrl == null) {
+        if (platformSecret != null && other.platformSecret == null) {
             return false;
         }
-        if (baseServerUrl != null && other.baseServerUrl != null && !other.baseServerUrl.equals(baseServerUrl)) {
+        if (platformSecret != null && other.platformSecret != null && !other.platformSecret.equals(platformSecret)) {
+            return false;
+        }
+
+        if (serviceUrl == null && other.serviceUrl != null) {
+            return false;
+        }
+        if (serviceUrl != null && other.serviceUrl == null) {
+            return false;
+        }
+        if (serviceUrl != null && other.serviceUrl != null && !other.serviceUrl.equals(serviceUrl)) {
             return false;
         }
 
@@ -144,9 +144,9 @@ public class RegistrationParameters {
     public int hashCode() {
         int result = 17;
         result = (result * 31) + (gcmSenderId == null ? 0 : gcmSenderId.hashCode());
-        result = (result * 31) + (variantUuid == null ? 0 : variantUuid.hashCode());
-        result = (result * 31) + (variantSecret == null ? 0 : variantSecret.hashCode());
-        result = (result * 31) + (baseServerUrl == null ? 0 : baseServerUrl.hashCode());
+        result = (result * 31) + (platformUuid == null ? 0 : platformUuid.hashCode());
+        result = (result * 31) + (platformSecret == null ? 0 : platformSecret.hashCode());
+        result = (result * 31) + (serviceUrl == null ? 0 : serviceUrl.hashCode());
         result = (result * 31) + (deviceAlias == null ? 0 : deviceAlias.hashCode());
         result = (result * 31) + (tags == null ? 0 : tags.hashCode());
         return result;

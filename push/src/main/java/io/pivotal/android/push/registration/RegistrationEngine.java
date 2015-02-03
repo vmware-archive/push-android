@@ -8,9 +8,9 @@ import android.content.Context;
 import java.util.Set;
 
 import io.pivotal.android.push.RegistrationParameters;
-import io.pivotal.android.push.backend.BackEndRegistrationApiRequest;
-import io.pivotal.android.push.backend.BackEndRegistrationApiRequestProvider;
-import io.pivotal.android.push.backend.BackEndRegistrationListener;
+import io.pivotal.android.push.backend.PCFPushRegistrationApiRequest;
+import io.pivotal.android.push.backend.PCFPushRegistrationApiRequestProvider;
+import io.pivotal.android.push.backend.PCFPushRegistrationListener;
 import io.pivotal.android.push.gcm.GcmProvider;
 import io.pivotal.android.push.gcm.GcmRegistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmRegistrationApiRequestProvider;
@@ -36,7 +36,7 @@ import io.pivotal.android.push.version.VersionProvider;
  *  previous registration then the Registration Engine won't do anything.
  *
  *  On a fresh install, the Registration Engine will register with Google Cloud Messaging (GCM) and then with the
- *  Pivotal CF Mobile Services back-end server.
+ *  Pivotal CF Mobile Services server.
  *
  *  If the GCM Sender ID is different then the previous registration, then the Registration Engine will
  *  attempt to unregister the device with GCM (Google Cloud Messaging) first.
@@ -44,7 +44,7 @@ import io.pivotal.android.push.version.VersionProvider;
  *  If the application version code or the GCM Sender ID is updated since the previous registration, then the
  *  Registration Engine will attempt to re-register with GCM.
  *
- *  If any of the Pivotal CF Mobile Services registration parameters (variant_uuid, variant_secret, device_alias), or
+ *  If any of the Pivotal CF Mobile Services registration parameters (platform_uuid, platform_secret, device_alias), or
  *  if a GCM registration provides a different device registration ID than a previous install, then the Registration
  *  Engine will attempt to update its registration wih the Pivotal CF Mobile Services Push server (i.e.: HTTP PUT).
  *
@@ -54,7 +54,7 @@ import io.pivotal.android.push.version.VersionProvider;
  *
  *  The Registration Engine is also designed to successfully complete previous registrations that have failed. For
  *  instance, if the previous registration attempt successfully registered with GCM but failed to complete the
- *  registration with the back-end then it will simply try to re-register with the back-end if called again.
+ *  registration with PCF Push then it will simply try to re-register with the server if called again.
  */
 public class RegistrationEngine {
 
@@ -63,17 +63,17 @@ public class RegistrationEngine {
     private PushPreferencesProvider pushPreferencesProvider;
     private GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider;
     private GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider;
-    private BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider;
+    private PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider;
     private VersionProvider versionProvider;
     private ServiceStarter serviceStarter;
     private String packageName;
     private String previousGcmDeviceRegistrationId = null;
-    private String previousBackEndDeviceRegistrationId = null;
+    private String previousPCFPushDeviceRegistrationId = null;
     private String previousGcmSenderId;
-    private String previousVariantUuid;
-    private String previousVariantSecret;
+    private String previousPlatformUuid;
+    private String previousPlatformSecret;
     private String previousDeviceAlias;
-    private String previousBackEndServerUrl;
+    private String previousServiceUrl;
 
     /**
      * Instantiate an instance of the RegistrationEngine.
@@ -85,7 +85,7 @@ public class RegistrationEngine {
      * @param pushPreferencesProvider  Some object that can provide persistent storage for push preferences.
      * @param gcmRegistrationApiRequestProvider  Some object that can provide GCMRegistrationApiRequest objects.
      * @param gcmUnregistrationApiRequestProvider  Some object that can provide GCMUnregistrationApiRequest objects.
-     * @param backEndRegistrationApiRequestProvider  Some object that can provide BackEndRegistrationApiRequest objects.
+     * @param pcfPushRegistrationApiRequestProvider  Some object that can provide PCFPushRegistrationApiRequest objects.
      * @param versionProvider  Some object that can provide the application version.
      * @param serviceStarter  Some object that can be used to start services.
      */
@@ -95,7 +95,7 @@ public class RegistrationEngine {
                               PushPreferencesProvider pushPreferencesProvider,
                               GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
                               GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
-                              BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider,
+                              PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
                               VersionProvider versionProvider,
                               ServiceStarter serviceStarter) {
 
@@ -105,7 +105,7 @@ public class RegistrationEngine {
                 pushPreferencesProvider,
                 gcmRegistrationApiRequestProvider,
                 gcmUnregistrationApiRequestProvider,
-                backEndRegistrationApiRequestProvider,
+                pcfPushRegistrationApiRequestProvider,
                 versionProvider, serviceStarter);
 
         saveArguments(context,
@@ -114,7 +114,7 @@ public class RegistrationEngine {
                 pushPreferencesProvider,
                 gcmRegistrationApiRequestProvider,
                 gcmUnregistrationApiRequestProvider,
-                backEndRegistrationApiRequestProvider,
+                pcfPushRegistrationApiRequestProvider,
                 versionProvider, serviceStarter);
     }
 
@@ -124,7 +124,7 @@ public class RegistrationEngine {
                                  PushPreferencesProvider pushPreferencesProvider,
                                  GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
                                  GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
-                                 BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider,
+                                 PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
                                  VersionProvider versionProvider,
                                  ServiceStarter serviceStarter) {
 
@@ -146,8 +146,8 @@ public class RegistrationEngine {
         if (gcmUnregistrationApiRequestProvider == null) {
             throw new IllegalArgumentException("gcmUnregistrationApiRequestProvider may not be null");
         }
-        if (backEndRegistrationApiRequestProvider == null) {
-            throw new IllegalArgumentException("backEndRegistrationApiRequestProvider may not be null");
+        if (pcfPushRegistrationApiRequestProvider == null) {
+            throw new IllegalArgumentException("pcfPushRegistrationApiRequestProvider may not be null");
         }
         if (versionProvider == null) {
             throw new IllegalArgumentException("versionProvider may not be null");
@@ -163,7 +163,7 @@ public class RegistrationEngine {
                                PushPreferencesProvider pushPreferencesProvider,
                                GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
                                GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
-                               BackEndRegistrationApiRequestProvider backEndRegistrationApiRequestProvider,
+                               PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
                                VersionProvider versionProvider,
                                ServiceStarter serviceStarter) {
 
@@ -173,16 +173,16 @@ public class RegistrationEngine {
         this.pushPreferencesProvider = pushPreferencesProvider;
         this.gcmRegistrationApiRequestProvider = gcmRegistrationApiRequestProvider;
         this.gcmUnregistrationApiRequestProvider = gcmUnregistrationApiRequestProvider;
-        this.backEndRegistrationApiRequestProvider = backEndRegistrationApiRequestProvider;
+        this.pcfPushRegistrationApiRequestProvider = pcfPushRegistrationApiRequestProvider;
         this.versionProvider = versionProvider;
         this.serviceStarter = serviceStarter;
         this.previousGcmDeviceRegistrationId = pushPreferencesProvider.getGcmDeviceRegistrationId();
-        this.previousBackEndDeviceRegistrationId = pushPreferencesProvider.getBackEndDeviceRegistrationId();
+        this.previousPCFPushDeviceRegistrationId = pushPreferencesProvider.getPCFPushDeviceRegistrationId();
         this.previousGcmSenderId = pushPreferencesProvider.getGcmSenderId();
-        this.previousVariantUuid = pushPreferencesProvider.getVariantUuid();
-        this.previousVariantSecret = pushPreferencesProvider.getVariantSecret();
+        this.previousPlatformUuid = pushPreferencesProvider.getPlatformUuid();
+        this.previousPlatformSecret = pushPreferencesProvider.getPlatformSecret();
         this.previousDeviceAlias = pushPreferencesProvider.getDeviceAlias();
-        this.previousBackEndServerUrl = pushPreferencesProvider.getBaseServerUrl();
+        this.previousServiceUrl = pushPreferencesProvider.getServiceUrl();
     }
 
     /**
@@ -217,14 +217,14 @@ public class RegistrationEngine {
                 }
             }
 
-        } else if (isBackEndUpdateRegistrationRequired(previousGcmDeviceRegistrationId, parameters)) {
-            registerUpdateDeviceWithBackEnd(previousGcmDeviceRegistrationId, previousBackEndDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
+        } else if (isPCFPushUpdateRegistrationRequired(previousGcmDeviceRegistrationId, parameters)) {
+            registerUpdateDeviceWithPCFPush(previousGcmDeviceRegistrationId, previousPCFPushDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
 
-        } else if (isBackEndNewRegistrationRequired(parameters)) {
-            registerNewDeviceWithBackEnd(previousGcmDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
+        } else if (isPCFPushNewRegistrationRequired(parameters)) {
+            registerNewDeviceWithPCFPush(previousGcmDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
 
         } else {
-            Logger.v("Already registered with GCM and back-end");
+            Logger.v("Already registered with GCM and PCF Push");
             if (listener != null) {
                 listener.onRegistrationComplete();
             }
@@ -238,17 +238,17 @@ public class RegistrationEngine {
         if (parameters.getGcmSenderId() == null || parameters.getGcmSenderId().isEmpty()) {
             throw new IllegalArgumentException("parameters.senderId may not be null or empty");
         }
-        if (parameters.getVariantUuid() == null || parameters.getVariantUuid().isEmpty()) {
-            throw new IllegalArgumentException("parameters.variantUuid may not be null or empty");
+        if (parameters.getPlatformUuid() == null || parameters.getPlatformUuid().isEmpty()) {
+            throw new IllegalArgumentException("parameters.platformUuid may not be null or empty");
         }
-        if (parameters.getVariantSecret() == null || parameters.getVariantSecret().isEmpty()) {
-            throw new IllegalArgumentException("parameters.variantSecret may not be null or empty");
+        if (parameters.getPlatformSecret() == null || parameters.getPlatformSecret().isEmpty()) {
+            throw new IllegalArgumentException("parameters.platformSecret may not be null or empty");
         }
         if (parameters.getDeviceAlias() == null) {
             throw new IllegalArgumentException("parameters.deviceAlias may not be null");
         }
-        if (parameters.getBaseServerUrl() == null) {
-            throw new IllegalArgumentException("parameters.baseServerUrl may not be null");
+        if (parameters.getServiceUrl() == null) {
+            throw new IllegalArgumentException("parameters.serviceUrl may not be null");
         }
     }
 
@@ -310,59 +310,59 @@ public class RegistrationEngine {
         return currentAppVersion != savedAppVersion;
     }
 
-    private boolean isBackEndNewRegistrationRequired(RegistrationParameters parameters) {
-        final boolean isPreviousVariantUuidEmpty = previousVariantUuid == null || previousVariantUuid.isEmpty();
-        final boolean isBackEndServerUrlUpdated = isBackEndServerUrlUpdated(parameters);
+    private boolean isPCFPushNewRegistrationRequired(RegistrationParameters parameters) {
+        final boolean isPreviousPlatformUuidEmpty = previousPlatformUuid == null || previousPlatformUuid.isEmpty();
+        final boolean isServiceUrlUpdated = isServiceUrlUpdated(parameters);
         if (isEmptyPreviousGcmDeviceRegistrationId()) {
-            Logger.v("previousGcmDeviceRegistrationId is empty. Device registration with the back-end will be required.");
+            Logger.v("previousGcmDeviceRegistrationId is empty. Device registration with PCF Push will be required.");
         }
-        if (isPreviousVariantUuidEmpty) {
-            Logger.v("previousVariantUuid is empty. Device registration with the back-end will be required.");
+        if (isPreviousPlatformUuidEmpty) {
+            Logger.v("previousPlatformUuid is empty. Device registration with PCF Push will be required.");
         }
-        if (isBackEndServerUrlUpdated) {
-            Logger.v("The backEndServerUrl has been updated. Device registration with the back-end will be required.");
+        if (isServiceUrlUpdated) {
+            Logger.v("The serviceUrl has been updated. Device registration with PCF Push will be required.");
         }
-        return isEmptyPreviousGcmDeviceRegistrationId() || isPreviousVariantUuidEmpty || areRegistrationParametersUpdated(parameters) || isBackEndServerUrlUpdated;
+        return isEmptyPreviousGcmDeviceRegistrationId() || isPreviousPlatformUuidEmpty || areRegistrationParametersUpdated(parameters) || isServiceUrlUpdated;
     }
 
-    private boolean isBackEndUpdateRegistrationRequired(String newGcmDeviceRegistrationId, RegistrationParameters parameters) {
+    private boolean isPCFPushUpdateRegistrationRequired(String newGcmDeviceRegistrationId, RegistrationParameters parameters) {
         final boolean isGcmDeviceRegistrationIdDifferent = isEmptyPreviousGcmDeviceRegistrationId() || !previousGcmDeviceRegistrationId.equals(newGcmDeviceRegistrationId);
-        final boolean isPreviousBackEndDeviceRegistrationIdEmpty = previousBackEndDeviceRegistrationId == null || previousBackEndDeviceRegistrationId.isEmpty();
-        if (isPreviousBackEndDeviceRegistrationIdEmpty) {
-            Logger.v("previousBackEndDeviceRegistrationId is empty. Device will NOT require an update-registration with the back-end.");
+        final boolean isPreviousPCFPushDeviceRegistrationIdEmpty = previousPCFPushDeviceRegistrationId == null || previousPCFPushDeviceRegistrationId.isEmpty();
+        if (isPreviousPCFPushDeviceRegistrationIdEmpty) {
+            Logger.v("previousPCFPushDeviceRegistrationId is empty. Device will NOT require an update-registration with PCF Push.");
             return false;
         }
         if (isGcmDeviceRegistrationIdDifferent) {
-            Logger.v("The gcmDeviceRegistrationId is different. Device will need to update its registration with the back-end.");
+            Logger.v("The gcmDeviceRegistrationId is different. Device will need to update its registration with PCF Push.");
             return true;
         }
         if (areRegistrationParametersUpdated(parameters)) {
-            Logger.v("The registration parameters have been updated. Device will need to update its registration with the back-end.");
+            Logger.v("The registration parameters have been updated. Device will need to update its registration with PCF Push.");
             return true;
         }
         if (haveTagsBeenUpdated(parameters)) {
-            Logger.v("App tags changed. Device will need to update its registration with the back-end.");
+            Logger.v("App tags changed. Device will need to update its registration with PCF Push.");
             return true;
         }
-        Logger.v("It does not seem that the device needs to update its registration with the back-end.");
+        Logger.v("It does not seem that the device needs to update its registration with PCF Push.");
         return false;
     }
 
     private boolean areRegistrationParametersUpdated(RegistrationParameters parameters) {
-        final boolean isPreviousVariantUuidEmpty = previousVariantUuid == null || previousVariantUuid.isEmpty();
-        final boolean isVariantUuidUpdated = (isPreviousVariantUuidEmpty && !parameters.getVariantUuid().isEmpty()) || !parameters.getVariantUuid().equals(previousVariantUuid);
-        final boolean isPreviousVariantSecretEmpty = previousVariantSecret == null || previousVariantSecret.isEmpty();
-        final boolean isVariantSecretUpdated = (isPreviousVariantSecretEmpty && !parameters.getVariantSecret().isEmpty()) || !parameters.getVariantSecret().equals(previousVariantSecret);
+        final boolean isPreviousPlatformUuidEmpty = previousPlatformUuid == null || previousPlatformUuid.isEmpty();
+        final boolean isPlatformUuidUpdated = (isPreviousPlatformUuidEmpty && !parameters.getPlatformUuid().isEmpty()) || !parameters.getPlatformUuid().equals(previousPlatformUuid);
+        final boolean isPreviousPlatformSecretEmpty = previousPlatformSecret == null || previousPlatformSecret.isEmpty();
+        final boolean isPlatformSecretUpdated = (isPreviousPlatformSecretEmpty && !parameters.getPlatformSecret().isEmpty()) || !parameters.getPlatformSecret().equals(previousPlatformSecret);
         final boolean isPreviousDeviceAliasEmpty = previousDeviceAlias == null || previousDeviceAlias.isEmpty();
         final boolean isNewDeviceAliasEmpty = parameters.getDeviceAlias() == null || parameters.getDeviceAlias().isEmpty();
         final boolean isDeviceAliasUpdated = (isPreviousDeviceAliasEmpty && !isNewDeviceAliasEmpty) || (!isPreviousDeviceAliasEmpty && isNewDeviceAliasEmpty) || !parameters.getDeviceAlias().equals(previousDeviceAlias);
-        return isDeviceAliasUpdated || isVariantSecretUpdated || isVariantUuidUpdated;
+        return isDeviceAliasUpdated || isPlatformSecretUpdated || isPlatformUuidUpdated;
     }
 
-    private boolean isBackEndServerUrlUpdated(RegistrationParameters parameters) {
-        final boolean isPreviousBackEndServerUrlEmpty = previousBackEndServerUrl == null;
-        final boolean isBackEndServerUrlUpdated = (isPreviousBackEndServerUrlEmpty && parameters.getBaseServerUrl() != null) || !parameters.getBaseServerUrl().equals(previousBackEndServerUrl);
-        return isBackEndServerUrlUpdated;
+    private boolean isServiceUrlUpdated(RegistrationParameters parameters) {
+        final boolean isPreviousServiceUrlEmpty = previousServiceUrl == null;
+        final boolean isServiceUrlUpdated = (isPreviousServiceUrlEmpty && parameters.getServiceUrl() != null) || !parameters.getServiceUrl().equals(previousServiceUrl);
+        return isServiceUrlUpdated;
     }
 
     private void unregisterDeviceWithGcm(final RegistrationParameters parameters, final RegistrationListener listener) {
@@ -414,16 +414,16 @@ public class RegistrationEngine {
                     isNewGcmDeviceRegistrationId = true;
                 }
 
-                final boolean isBackEndServerUrlUpdated = isBackEndServerUrlUpdated(parameters);
-                if (isBackEndServerUrlUpdated) {
-                    Logger.v("The back-end server has been updated. A new registration with the back-end server is required.");
+                final boolean isServiceUrlUpdated = isServiceUrlUpdated(parameters);
+                if (isServiceUrlUpdated) {
+                    Logger.v("The PCF Push serviceUrl has been updated. A new registration with the PCF Push server is required.");
                 }
 
-                if (isBackEndUpdateRegistrationRequired(gcmDeviceRegistrationId, parameters) && !isBackEndServerUrlUpdated) {
-                    registerUpdateDeviceWithBackEnd(gcmDeviceRegistrationId, previousBackEndDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
+                if (isPCFPushUpdateRegistrationRequired(gcmDeviceRegistrationId, parameters) && !isServiceUrlUpdated) {
+                    registerUpdateDeviceWithPCFPush(gcmDeviceRegistrationId, previousPCFPushDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
 
-                }  else if (isNewGcmDeviceRegistrationId || isBackEndServerUrlUpdated) {
-                    registerNewDeviceWithBackEnd(gcmDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
+                }  else if (isNewGcmDeviceRegistrationId || isServiceUrlUpdated) {
+                    registerNewDeviceWithPCFPush(gcmDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
 
                 } else if (listener != null) {
                     listener.onRegistrationComplete();
@@ -439,52 +439,50 @@ public class RegistrationEngine {
         });
     }
 
-    private void registerUpdateDeviceWithBackEnd(String gcmDeviceRegistrationId,
-                                                 String backEndDeviceRegistrationId,
+    private void registerUpdateDeviceWithPCFPush(String gcmDeviceRegistrationId,
+                                                 String pcfPushDeviceRegistrationId,
                                                  Set<String> savedTags,
                                                  RegistrationParameters parameters,
                                                  RegistrationListener listener) {
 
-        Logger.i("Initiating update device registration with the back-end.");
-        final BackEndRegistrationApiRequest backEndRegistrationApiRequest = backEndRegistrationApiRequestProvider.getRequest();
-        backEndRegistrationApiRequest.startUpdateDeviceRegistration(gcmDeviceRegistrationId,
-                backEndDeviceRegistrationId,
+        Logger.i("Initiating update device registration with PCF Push.");
+        final PCFPushRegistrationApiRequest PCFPushRegistrationApiRequest = pcfPushRegistrationApiRequestProvider.getRequest();
+        PCFPushRegistrationApiRequest.startUpdateDeviceRegistration(gcmDeviceRegistrationId,
+                pcfPushDeviceRegistrationId,
                 savedTags,
                 parameters,
-                getBackEndUpdateRegistrationListener(parameters, listener));
+                getPCFPushUpdateRegistrationListener(parameters, listener));
     }
 
-    private BackEndRegistrationListener getBackEndUpdateRegistrationListener(final RegistrationParameters parameters, final RegistrationListener listener) {
-        return new BackEndRegistrationListener() {
+    private PCFPushRegistrationListener getPCFPushUpdateRegistrationListener(final RegistrationParameters parameters, final RegistrationListener listener) {
+        return new PCFPushRegistrationListener() {
 
             @Override
-            public void onBackEndRegistrationSuccess(String backEndDeviceRegistrationId) {
+            public void onPCFPushRegistrationSuccess(String pcfPushDeviceRegistrationId) {
 
-                if (backEndDeviceRegistrationId == null) {
-                    Logger.e("Back-end server return null backEndDeviceRegistrationId upon registration update.");
+                if (pcfPushDeviceRegistrationId == null) {
+                    Logger.e("PCF Push server return null pcfPushDeviceRegistrationId upon registration update.");
 
                     // The server didn't return a valid registration response.  We should clear our local
                     // registration data so that we can attempt to reregister next time.
-                    clearBackEndRegistrationPreferences();
+                    clearPCFPushRegistrationPreferences();
 
                     if (listener != null) {
-                        listener.onRegistrationFailed("Back-end server return null backEndDeviceRegistrationId upon registration update.");
+                        listener.onRegistrationFailed("PCF Push server return null pcfPushDeviceRegistrationId upon registration update.");
                     }
                     return;
                 }
 
-                Logger.i("Saving back-end device registration ID: " + backEndDeviceRegistrationId);
-                pushPreferencesProvider.setBackEndDeviceRegistrationId(backEndDeviceRegistrationId);
+                Logger.i("Saving PCF Push device registration ID: " + pcfPushDeviceRegistrationId);
+                pushPreferencesProvider.setPCFPushDeviceRegistrationId(pcfPushDeviceRegistrationId);
 
-                Logger.v("Saving updated variantUuid, variantSecret, deviceAlias, and baseServerUrl");
-                pushPreferencesProvider.setVariantUuid(parameters.getVariantUuid());
-                pushPreferencesProvider.setVariantSecret(parameters.getVariantSecret());
+                Logger.v("Saving updated platformUuid, platformSecret, deviceAlias, and serviceUrl");
+                pushPreferencesProvider.setPlatformUuid(parameters.getPlatformUuid());
+                pushPreferencesProvider.setPlatformSecret(parameters.getPlatformSecret());
                 pushPreferencesProvider.setDeviceAlias(parameters.getDeviceAlias());
-                pushPreferencesProvider.setBaseServerUrl(parameters.getBaseServerUrl());
+                pushPreferencesProvider.setServiceUrl(parameters.getServiceUrl());
                 pushPreferencesProvider.setTags(parameters.getTags());
                 Logger.v("Saving tags: " + parameters.getTags());
-
-                logPushRegisteredEvent(parameters.getVariantUuid(), backEndDeviceRegistrationId);
 
                 if (listener != null) {
                     listener.onRegistrationComplete();
@@ -492,9 +490,9 @@ public class RegistrationEngine {
             }
 
             @Override
-            public void onBackEndRegistrationFailed(String reason) {
+            public void onPCFPushRegistrationFailed(String reason) {
 
-                clearBackEndRegistrationPreferences();
+                clearPCFPushRegistrationPreferences();
 
                 if (listener != null) {
                     listener.onRegistrationFailed(reason);
@@ -503,48 +501,46 @@ public class RegistrationEngine {
         };
     }
 
-    private void registerNewDeviceWithBackEnd(final String gcmDeviceRegistrationId,
+    private void registerNewDeviceWithPCFPush(final String gcmDeviceRegistrationId,
                                               Set<String> savedTags,
                                               RegistrationParameters parameters,
                                               RegistrationListener listener) {
 
-        Logger.i("Initiating new device registration with the back-end.");
-        final BackEndRegistrationApiRequest backEndRegistrationApiRequest = backEndRegistrationApiRequestProvider.getRequest();
-        backEndRegistrationApiRequest.startNewDeviceRegistration(gcmDeviceRegistrationId, savedTags, parameters, getBackEndNewRegistrationListener(parameters, listener));
+        Logger.i("Initiating new device registration with PCF Push.");
+        final PCFPushRegistrationApiRequest PCFPushRegistrationApiRequest = pcfPushRegistrationApiRequestProvider.getRequest();
+        PCFPushRegistrationApiRequest.startNewDeviceRegistration(gcmDeviceRegistrationId, savedTags, parameters, getPCFPushNewRegistrationListener(parameters, listener));
     }
 
-    private BackEndRegistrationListener getBackEndNewRegistrationListener(final RegistrationParameters parameters, final RegistrationListener listener) {
-        return new BackEndRegistrationListener() {
+    private PCFPushRegistrationListener getPCFPushNewRegistrationListener(final RegistrationParameters parameters, final RegistrationListener listener) {
+        return new PCFPushRegistrationListener() {
 
             @Override
-            public void onBackEndRegistrationSuccess(String backEndDeviceRegistrationId) {
+            public void onPCFPushRegistrationSuccess(String pcfPushDeviceRegistrationId) {
 
-                if (backEndDeviceRegistrationId == null) {
+                if (pcfPushDeviceRegistrationId == null) {
 
-                    Logger.e("Back-end server returned null backEndDeviceRegistrationId");
+                    Logger.e("PCF Push returned null pcfPushDeviceRegistrationId");
 
                     // The server didn't return a valid registration response.  We should clear our local
                     // registration data so that we can attempt to reregister next time.
-                    clearBackEndRegistrationPreferences();
+                    clearPCFPushRegistrationPreferences();
 
                     if (listener != null) {
-                        listener.onRegistrationFailed("Back-end server return null backEndDeviceRegistrationId");
+                        listener.onRegistrationFailed("PCF Push returned null pcfPushDeviceRegistrationId");
                     }
                     return;
                 }
 
-                Logger.i("Saving back-end device registration ID: " + backEndDeviceRegistrationId);
-                pushPreferencesProvider.setBackEndDeviceRegistrationId(backEndDeviceRegistrationId);
+                Logger.i("Saving PCF Push device registration ID: " + pcfPushDeviceRegistrationId);
+                pushPreferencesProvider.setPCFPushDeviceRegistrationId(pcfPushDeviceRegistrationId);
 
-                Logger.v("Saving updated variantUuid, variantSecret, deviceAlias, and baseServerUrl");
-                pushPreferencesProvider.setVariantUuid(parameters.getVariantUuid());
-                pushPreferencesProvider.setVariantSecret(parameters.getVariantSecret());
+                Logger.v("Saving updated platformUuid, platformSecret, deviceAlias, and serviceUrl");
+                pushPreferencesProvider.setPlatformUuid(parameters.getPlatformUuid());
+                pushPreferencesProvider.setPlatformSecret(parameters.getPlatformSecret());
                 pushPreferencesProvider.setDeviceAlias(parameters.getDeviceAlias());
-                pushPreferencesProvider.setBaseServerUrl(parameters.getBaseServerUrl());
+                pushPreferencesProvider.setServiceUrl(parameters.getServiceUrl());
                 pushPreferencesProvider.setTags(parameters.getTags());
                 Logger.v("Saving tags: " + parameters.getTags());
-
-                logPushRegisteredEvent(parameters.getVariantUuid(), backEndDeviceRegistrationId);
 
                 if (listener != null) {
                     listener.onRegistrationComplete();
@@ -552,9 +548,9 @@ public class RegistrationEngine {
             }
 
             @Override
-            public void onBackEndRegistrationFailed(String reason) {
+            public void onPCFPushRegistrationFailed(String reason) {
 
-                clearBackEndRegistrationPreferences();
+                clearPCFPushRegistrationPreferences();
 
                 if (listener != null) {
                     listener.onRegistrationFailed(reason);
@@ -563,16 +559,12 @@ public class RegistrationEngine {
         };
     }
 
-    private void clearBackEndRegistrationPreferences() {
-        pushPreferencesProvider.setBackEndDeviceRegistrationId(null);
-        pushPreferencesProvider.setVariantUuid(null);
-        pushPreferencesProvider.setVariantSecret(null);
+    private void clearPCFPushRegistrationPreferences() {
+        pushPreferencesProvider.setPCFPushDeviceRegistrationId(null);
+        pushPreferencesProvider.setPlatformUuid(null);
+        pushPreferencesProvider.setPlatformSecret(null);
         pushPreferencesProvider.setDeviceAlias(null);
-        pushPreferencesProvider.setBaseServerUrl(null);
+        pushPreferencesProvider.setServiceUrl(null);
         pushPreferencesProvider.setTags(null);
-    }
-
-    private void logPushRegisteredEvent(String variantUuid, String deviceId) {
-        // add analytics lib
     }
 }
