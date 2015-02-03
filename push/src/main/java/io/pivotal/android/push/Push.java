@@ -29,6 +29,7 @@ import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
 import io.pivotal.android.push.registration.RegistrationEngine;
 import io.pivotal.android.push.registration.RegistrationListener;
+import io.pivotal.android.push.registration.SubscribeToTagsListener;
 import io.pivotal.android.push.registration.UnregistrationEngine;
 import io.pivotal.android.push.registration.UnregistrationListener;
 import io.pivotal.android.push.util.Logger;
@@ -168,6 +169,61 @@ public class Push {
         if (parameters.getServiceUrl() == null) {
             throw new IllegalArgumentException("parameters.serviceUrl may not be null");
         }
+    }
+
+    /**
+     * Sets the tags that the device should be subscribed to. Always provide the entire
+     * list of tags that the device should be subscribed to. If the device is already subscribed to
+     * some tags and those tags are not provided when calling this method again then those
+     * tags will be unsubscribed.
+     *
+     * NOTE: Calling this method will perform a device registration, if the device has not been registered yet
+     *
+     * @param tags Provides the list of tags the device should subscribe to. Allowed to be `nil` or empty.
+     */
+    public void subscribeToTags(final Set<String> tags) {
+        subscribeToTags(tags, null);
+    }
+
+    /**
+     * Sets the tags that the device should be subscribed to. Always provide the entire
+     * list of tags that the device should be subscribed to. If the device is already subscribed to
+     * some tags and those tags are not provided when calling this method again then those
+     * tags will be unsubscribed.
+     *
+     * NOTE: Calling this method will perform a device registration, if the device has not been registered yet
+     *
+     * @param tags Provides the list of tags the device should subscribe to. Allowed to be `nil` or empty.
+     *
+     * @param subscribeToTagsListener Optional listener for receiving a callback after registration finishes.
+     *        This callback may be called on a background thread.  May be null.
+     *
+     *        onSubscribeToTagsComplete will be executed if subscription is successful. This method may be called on
+     *                a background thread. May be 'nil'.
+     *
+     *        onSubscribeToTagsFailed will be executed if subscription fails. This method may be called on a
+     *                background thread. May be 'nil'.
+     */
+    public void subscribeToTags(final Set<String> tags, final SubscribeToTagsListener subscribeToTagsListener) {
+
+        final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
+        final String deviceAlias = pushPreferencesProvider.getDeviceAlias();
+
+        startRegistration(deviceAlias, tags, new RegistrationListener() {
+            @Override
+            public void onRegistrationComplete() {
+                if (subscribeToTagsListener != null) {
+                    subscribeToTagsListener.onSubscribeToTagsComplete();
+                }
+            }
+
+            @Override
+            public void onRegistrationFailed(String reason) {
+                if (subscribeToTagsListener != null) {
+                    subscribeToTagsListener.onSubscribeToTagsFailed(reason);
+                }
+            }
+        });
     }
 
     /**
