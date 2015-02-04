@@ -23,21 +23,20 @@ public class TagsHelper {
 
         } else if (isNullOrEmpty(savedTags)) {
 
-            subscribeTags = new HashSet<String>(newTags);
+            subscribeTags = new HashSet<>(newTags);
             unsubscribeTags = EMPTY_SET;
 
         } else if (isNullOrEmpty(newTags)) {
 
             subscribeTags = EMPTY_SET;
-            unsubscribeTags = new HashSet<String>(savedTags);
+            unsubscribeTags = new HashSet<>(savedTags);
 
         } else {
 
-            subscribeTags = new HashSet<String>(newTags);
-            unsubscribeTags = new HashSet<String>(savedTags);
+            subscribeTags = new HashSet<>(newTags);
+            unsubscribeTags = new HashSet<>(savedTags);
             subscribeTags.removeAll(savedTags);
             unsubscribeTags.removeAll(newTags);
-
         }
     }
 

@@ -179,7 +179,7 @@ public class Push {
      *
      * NOTE: Calling this method will perform a device registration, if the device has not been registered yet
      *
-     * @param tags Provides the list of tags the device should subscribe to. Allowed to be `nil` or empty.
+     * @param tags Provides the list of tags the device should subscribe to. Allowed to be `null` or empty.
      */
     public void subscribeToTags(final Set<String> tags) {
         subscribeToTags(tags, null);
@@ -193,16 +193,16 @@ public class Push {
      *
      * NOTE: Calling this method will perform a device registration, if the device has not been registered yet
      *
-     * @param tags Provides the list of tags the device should subscribe to. Allowed to be `nil` or empty.
+     * @param tags Provides the list of tags the device should subscribe to. Allowed to be `null` or empty.
      *
      * @param subscribeToTagsListener Optional listener for receiving a callback after registration finishes.
-     *        This callback may be called on a background thread.  May be null.
+     *        This callback may be called on a background thread.  May be `null`.
      *
      *        onSubscribeToTagsComplete will be executed if subscription is successful. This method may be called on
-     *                a background thread. May be 'nil'.
+     *                a background thread.
      *
      *        onSubscribeToTagsFailed will be executed if subscription fails. This method may be called on a
-     *                background thread. May be 'nil'.
+     *                background thread.
      */
     public void subscribeToTags(final Set<String> tags, final SubscribeToTagsListener subscribeToTagsListener) {
 

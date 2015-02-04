@@ -158,7 +158,6 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
     }
 
     @Override
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public Set<String> getTags() {
         return getSharedPreferences().getStringSet(PROPERTY_TAGS, new HashSet<String>());
     }
@@ -168,7 +167,6 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
     }
 
     @Override
-    @TargetApi(Build.VERSION_CODES.HONEYCOMB)
     public void setTags(Set<String> tags) {
         final SharedPreferences prefs = getSharedPreferences();
         final SharedPreferences.Editor editor = prefs.edit();
