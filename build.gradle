@@ -16,8 +16,8 @@ buildscript {
 }
 
 ext {
-    versionName = "1.0.3"
-    versionCode = 3
+    pushSdkVersionCode = 3
+    pushSdkVersionName = "1.0.3"
     isSnapshot = false
 }
 
@@ -54,9 +54,9 @@ allprojects {
     group = "io.pivotal.android"
 
     if (isSnapshot) {
-        version =  versionName + "-SNAPSHOT"
+        version =  pushSdkVersionName + "-SNAPSHOT"
     } else {
-        version =  versionName
+        version =  pushSdkVersionName
     }
 
     repositories {
@@ -72,8 +72,8 @@ subprojects {
         buildToolsVersion "21.1.2"
 
         defaultConfig {
-            versionCode versionCode
-            versionName versionName
+            versionCode pushSdkVersionCode
+            versionName pushSdkVersionName
             minSdkVersion 14
             targetSdkVersion 21
         }

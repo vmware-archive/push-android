@@ -273,4 +273,11 @@ public class Push {
             throw new IllegalArgumentException("parameters.serviceUrl may not be null");
         }
     }
+
+    /**
+     * @return the current version of the Pivotal CF Push Client SDK.
+     */
+    public static String getVersion() {
+        return BuildConfig.VERSION_NAME;
+    }
 }
