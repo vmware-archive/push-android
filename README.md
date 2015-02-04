@@ -1,7 +1,7 @@
 Android Push Client SDK
 =======================
 
-The Push SDK requires API level 10 or greater.
+The Push SDK requires API level 14 or greater.
 
 Push SDK Usage
 --------------
