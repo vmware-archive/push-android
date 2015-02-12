@@ -9,8 +9,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.Properties;
 
-import io.pivotal.android.push.util.Logger;
-
 public class Pivotal {
 
     private static final class Keys {
@@ -42,7 +40,7 @@ public class Pivotal {
             try {
                 return loadProperties(path);
             } catch (final Exception e) {
-                Logger.ex(e);
+                // Swallow exception
             }
         }
         throw new IllegalStateException("Could not find pivotal.properties file.");
