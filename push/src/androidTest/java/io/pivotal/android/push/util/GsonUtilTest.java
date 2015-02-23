@@ -2,12 +2,9 @@ package io.pivotal.android.push.util;
 
 import android.test.AndroidTestCase;
 
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.util.Date;
 import java.util.List;
 
@@ -44,7 +41,7 @@ public class GsonUtilTest extends AndroidTestCase {
     public void testDeserializeAndSerializeLongSparseArrayWithOneItem() throws IOException {
         // Deserialize
         final TypeToken<PCFPushGeofenceDataList> typeToken = new TypeToken<PCFPushGeofenceDataList>(){};
-        final PCFPushGeofenceDataList array = getJson("geofence_one_item.json", typeToken);
+        final PCFPushGeofenceDataList array = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_one_item.json");
         final PCFPushGeofenceData data = array.get(7L);
         final List<PCFPushGeofenceLocation> locations = data.getLocations();
         final PCFPushGeofenceLocation location = locations.get(0);
@@ -74,20 +71,20 @@ public class GsonUtilTest extends AndroidTestCase {
     public void testDeserializeAndSerializeLongSparseArrayWithThreeItems() throws IOException {
         // Deserialize
         final TypeToken<PCFPushGeofenceDataList> typeToken = new TypeToken<PCFPushGeofenceDataList>(){};
-        final PCFPushGeofenceDataList array = getJson("geofence_three_items.json", typeToken);
+        final PCFPushGeofenceDataList array = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_three_items.json");
         assertNotNull(array);
         assertEquals(3, array.size());
         assertNotNull(array.get(7L));
         assertEquals(1, array.get(7L).getLocations().size());
-        assertNotNull(array.get(10L));
-        assertEquals(1, array.get(10L).getLocations().size());
+        assertNotNull(array.get(9L));
+        assertEquals(1, array.get(9L).getLocations().size());
         assertNotNull(array.get(44L));
         assertEquals(2, array.get(44L).getLocations().size());
 
         // Serialize
         final String json = GsonUtil.getGson().toJson(array, typeToken.getType());
         assertTrue(json.contains("\"id\":7"));
-        assertTrue(json.contains("\"id\":10"));
+        assertTrue(json.contains("\"id\":9"));
         assertTrue(json.contains("\"id\":44"));
     }
 
@@ -117,20 +114,6 @@ public class GsonUtilTest extends AndroidTestCase {
 
     private Date deserializeDate(String s) {
         return GsonUtil.getGson().fromJson(s, DateTestClass.class).date;
-    }
-
-    private <T> T getJson(String filename, TypeToken<T> typeToken) throws IOException {
-        InputStream is = null;
-        try {
-            is = getContext().getAssets().open(filename);
-            final InputStreamReader reader = new InputStreamReader(is);
-            final Gson gson = GsonUtil.getGson();
-            return gson.fromJson(reader, typeToken.getType());
-        } finally {
-            if (is != null) {
-                is.close();
-            }
-        }
     }
 
     private static class DateTestClass {
