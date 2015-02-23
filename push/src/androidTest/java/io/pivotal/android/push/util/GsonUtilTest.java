@@ -8,9 +8,9 @@ import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
-import io.pivotal.android.push.model.api.PCFPushGeofenceData;
-import io.pivotal.android.push.model.api.PCFPushGeofenceDataList;
-import io.pivotal.android.push.model.api.PCFPushGeofenceLocation;
+import io.pivotal.android.push.model.geofence.PCFPushGeofenceData;
+import io.pivotal.android.push.model.geofence.PCFPushGeofenceDataList;
+import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocation;
 
 public class GsonUtilTest extends AndroidTestCase {
 

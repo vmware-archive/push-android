@@ -1,4 +1,4 @@
-package io.pivotal.android.push.model.api;
+package io.pivotal.android.push.model.geofence;
 
 import android.support.v4.util.LongSparseArray;
 
@@ -16,9 +16,11 @@ public class PCFPushGeofenceDataList extends LongSparseArray<PCFPushGeofenceData
 
     public boolean addAll(Iterable<PCFPushGeofenceData> i) {
         boolean changed = false;
-        for (final PCFPushGeofenceData item : i) {
-            put(item.getId(), item);
-            changed = true;
+        if (i != null) {
+            for (final PCFPushGeofenceData item : i) {
+                put(item.getId(), item);
+                changed = true;
+            }
         }
         return changed;
     }
@@ -45,5 +47,28 @@ public class PCFPushGeofenceDataList extends LongSparseArray<PCFPushGeofenceData
                 throw new UnsupportedOperationException();
             }
         };
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        if (!(o instanceof PCFPushGeofenceDataList)) return false;
+
+        final PCFPushGeofenceDataList other = (PCFPushGeofenceDataList)o;
+        if (size() != other.size()) return false;
+
+        final Iterator<PCFPushGeofenceData> otherIterator = other.iterator();
+
+        for (final PCFPushGeofenceData thisItem : this) {
+            final PCFPushGeofenceData otherItem = otherIterator.next();
+            if (thisItem == null) {
+                if (otherItem != null) return false;
+            } else {
+                if (!thisItem.equals(otherItem)) return false;
+            }
+        }
+
+        return true;
     }
 }

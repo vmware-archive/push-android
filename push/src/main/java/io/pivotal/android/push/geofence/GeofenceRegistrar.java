@@ -1,12 +1,12 @@
 package io.pivotal.android.push.geofence;
 
-import java.util.Map;
-
-import io.pivotal.android.push.model.api.PCFPushGeofenceLocation;
+import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocationMap;
 
 public class GeofenceRegistrar {
 
-    public void registerGeofences(Map<String, PCFPushGeofenceLocation> geofences) {
+    public void registerGeofences(PCFPushGeofenceLocationMap geofences) {
+
+        // TODO - implement
 
     }
 }

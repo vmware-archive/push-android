@@ -1,4 +1,4 @@
-package io.pivotal.android.push.model.api;
+package io.pivotal.android.push.model.geofence;
 
 import com.google.gson.annotations.SerializedName;
 

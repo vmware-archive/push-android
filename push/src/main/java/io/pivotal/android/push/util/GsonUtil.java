@@ -19,8 +19,8 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Date;
 
-import io.pivotal.android.push.model.api.PCFPushGeofenceData;
-import io.pivotal.android.push.model.api.PCFPushGeofenceDataList;
+import io.pivotal.android.push.model.geofence.PCFPushGeofenceData;
+import io.pivotal.android.push.model.geofence.PCFPushGeofenceDataList;
 
 public class GsonUtil {
 

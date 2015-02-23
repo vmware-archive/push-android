@@ -1,36 +1,34 @@
 package io.pivotal.android.push.geofence;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import io.pivotal.android.push.model.api.PCFPushGeofenceData;
-import io.pivotal.android.push.model.api.PCFPushGeofenceDataList;
-import io.pivotal.android.push.model.api.PCFPushGeofenceLocation;
-import io.pivotal.android.push.model.api.PCFPushGeofenceResponseData;
+import io.pivotal.android.push.model.geofence.PCFPushGeofenceData;
+import io.pivotal.android.push.model.geofence.PCFPushGeofenceDataList;
+import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocationMap;
+import io.pivotal.android.push.model.geofence.PCFPushGeofenceResponseData;
 
 public class GeofenceEngine {
 
     private GeofenceRegistrar registrar;
-    private GeofencePersistentStore persistentStore;
+    private GeofencePersistentStore store;
 
-    public GeofenceEngine(GeofenceRegistrar registrar, GeofencePersistentStore persistentStore) {
-        verifyArguments(registrar, persistentStore);
-        saveArguments(registrar, persistentStore);
+    public GeofenceEngine(GeofenceRegistrar registrar, GeofencePersistentStore store) {
+        verifyArguments(registrar, store);
+        saveArguments(registrar, store);
     }
 
-    private void verifyArguments(GeofenceRegistrar geofenceRegistrar, GeofencePersistentStore persistentStore) {
+    private void verifyArguments(GeofenceRegistrar geofenceRegistrar, GeofencePersistentStore store) {
         if (geofenceRegistrar == null) {
             throw new IllegalArgumentException("registrar may not be null");
         }
-        if (persistentStore == null) {
-            throw new IllegalArgumentException("persistentStore may not be null");
+        if (store == null) {
+            throw new IllegalArgumentException("store may not be null");
         }
     }
 
-    private void saveArguments(GeofenceRegistrar geofenceRegistrar, GeofencePersistentStore geofencePersistentStore) {
-        this.registrar = geofenceRegistrar;
-        this.persistentStore = geofencePersistentStore;
+    private void saveArguments(GeofenceRegistrar registrar, GeofencePersistentStore store) {
+        this.registrar = registrar;
+        this.store = store;
     }
 
     public void processResponseData(PCFPushGeofenceResponseData responseData) {
@@ -39,7 +37,7 @@ public class GeofenceEngine {
             return;
         }
 
-        final PCFPushGeofenceDataList storedGeofences = persistentStore.getCurrentlyRegisteredGeofences();
+        final PCFPushGeofenceDataList storedGeofences = store.getCurrentlyRegisteredGeofences();
 
         if (storedGeofences != null && storedGeofences.size() == 0 && (responseData.getGeofences() == null || responseData.getGeofences().size() == 0)) {
             return;
@@ -64,18 +62,10 @@ public class GeofenceEngine {
             requiredGeofences.addAll(newGeofences);
         }
 
-        final Map<String, PCFPushGeofenceLocation> requiredGeofencesMap = new HashMap<>();
-        if (requiredGeofences.size() > 0) {
-            for (final PCFPushGeofenceData geofence : requiredGeofences) {
-                for (final PCFPushGeofenceLocation location : geofence.getLocations()) {
-                    requiredGeofencesMap.put(getAndroidRequestId(geofence.getId(), location.getId()), location);
-                }
-            }
-        }
-        registrar.registerGeofences(requiredGeofencesMap);
-    }
+        final PCFPushGeofenceLocationMap requiredGeofencesMap = new PCFPushGeofenceLocationMap();
+        requiredGeofencesMap.addAll(requiredGeofences);
 
-    public static String getAndroidRequestId(long geofenceId, long locationId) {
-        return String.format("%d_%d", geofenceId, locationId);
+        registrar.registerGeofences(requiredGeofencesMap);
+        store.saveRegisteredGeofences(requiredGeofences);
     }
 }

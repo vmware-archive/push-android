@@ -9,8 +9,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-import io.pivotal.android.push.model.api.PCFPushGeofenceDataList;
-import io.pivotal.android.push.model.api.PCFPushGeofenceResponseData;
+import io.pivotal.android.push.model.geofence.PCFPushGeofenceDataList;
+import io.pivotal.android.push.model.geofence.PCFPushGeofenceResponseData;
 
 public class ModelUtil {
 
