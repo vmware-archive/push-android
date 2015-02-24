@@ -6,6 +6,10 @@ import java.util.Iterator;
 
 public class PCFPushGeofenceDataList extends LongSparseArray<PCFPushGeofenceData> implements Iterable<PCFPushGeofenceData> {
 
+    public interface Filter {
+        public boolean filterItem(PCFPushGeofenceData item);
+    }
+
     public PCFPushGeofenceData first() {
         if (size() <= 0) {
             return null;
@@ -18,6 +22,23 @@ public class PCFPushGeofenceDataList extends LongSparseArray<PCFPushGeofenceData
         boolean changed = false;
         if (i != null) {
             for (final PCFPushGeofenceData item : i) {
+                if (item != null) {
+                    put(item.getId(), item);
+                    changed = true;
+                }
+            }
+        }
+        return changed;
+    }
+
+    public boolean filteredAddAll(Iterable<PCFPushGeofenceData> i, Filter filter) {
+        if (i == null || filter == null) {
+            return false;
+        }
+
+        boolean changed = false;
+        for (final PCFPushGeofenceData item : i) {
+            if (item != null && filter.filterItem(item)) {
                 put(item.getId(), item);
                 changed = true;
             }

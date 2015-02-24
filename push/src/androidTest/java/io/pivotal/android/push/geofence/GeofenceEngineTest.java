@@ -238,6 +238,13 @@ public class GeofenceEngineTest extends AndroidTestCase {
         assertSaveRegisteredGeofences(expectedList);
     }
 
+    public void testCullsItemsWithInsufficientData() throws IOException {
+        final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_all_items_culled.json");
+        engine.processResponseData(updateData);
+        assertRegisterGeofences(EMPTY_GEOFENCE_MAP);
+        assertSaveRegisteredGeofences(EMPTY_GEOFENCE_LIST);
+    }
+
     private void assertRegisterGeofences(PCFPushGeofenceLocationMap geofences) {
         final ArgumentCaptor<PCFPushGeofenceLocationMap> captor = ArgumentCaptor.forClass(PCFPushGeofenceLocationMap.class);
         verify(registrar).registerGeofences(captor.capture());

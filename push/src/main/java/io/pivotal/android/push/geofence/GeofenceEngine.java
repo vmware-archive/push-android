@@ -39,33 +39,62 @@ public class GeofenceEngine {
 
         final PCFPushGeofenceDataList storedGeofences = store.getCurrentlyRegisteredGeofences();
 
-        if (storedGeofences != null && storedGeofences.size() == 0 && (responseData.getGeofences() == null || responseData.getGeofences().size() == 0)) {
+        if (isEmptyUpdate(responseData, storedGeofences)) {
             return;
         }
 
         final PCFPushGeofenceDataList requiredGeofences = new PCFPushGeofenceDataList();
-        final List<PCFPushGeofenceData> newGeofences = responseData.getGeofences();
 
-        if (storedGeofences != null) {
-
-            if (responseData.getDeletedGeofenceIds() != null && responseData.getDeletedGeofenceIds().size() > 0) {
-                for(final long id : responseData.getDeletedGeofenceIds()) {
-                    if (storedGeofences.indexOfKey(id) >= 0) {
-                        storedGeofences.remove(id);
-                    }
-                }
-            }
-
+        if (areDeletedGeofences(responseData)) {
+            addStoredGeofencesThatWereNotDeleted(requiredGeofences, storedGeofences, responseData);
+        } else {
             requiredGeofences.addAll(storedGeofences);
         }
-        if (newGeofences != null) {
-            requiredGeofences.addAll(newGeofences);
-        }
+
+        addValidGeofencesFromUpdate(requiredGeofences, responseData.getGeofences());
 
         final PCFPushGeofenceLocationMap requiredGeofencesMap = new PCFPushGeofenceLocationMap();
         requiredGeofencesMap.addAll(requiredGeofences);
 
         registrar.registerGeofences(requiredGeofencesMap);
         store.saveRegisteredGeofences(requiredGeofences);
+    }
+
+    private boolean isEmptyUpdate(PCFPushGeofenceResponseData responseData, PCFPushGeofenceDataList storedGeofences) {
+        return storedGeofences != null && storedGeofences.size() == 0 && (responseData.getGeofences() == null || responseData.getGeofences().size() == 0);
+    }
+
+    private boolean areDeletedGeofences(PCFPushGeofenceResponseData responseData) {
+        return responseData.getDeletedGeofenceIds() != null && responseData.getDeletedGeofenceIds().size() > 0;
+    }
+
+    private void addStoredGeofencesThatWereNotDeleted(PCFPushGeofenceDataList requiredGeofences, PCFPushGeofenceDataList storedGeofences, final PCFPushGeofenceResponseData responseData) {
+        requiredGeofences.filteredAddAll(storedGeofences, new PCFPushGeofenceDataList.Filter() {
+            @Override
+            public boolean filterItem(PCFPushGeofenceData item) {
+                return isItemNotDeleted(item);
+            }
+
+            private boolean isItemNotDeleted(PCFPushGeofenceData item) {
+                return !responseData.getDeletedGeofenceIds().contains(item.getId());
+            }
+        });
+    }
+
+    private void addValidGeofencesFromUpdate(PCFPushGeofenceDataList requiredGeofences, List<PCFPushGeofenceData> newGeofences) {
+        requiredGeofences.filteredAddAll(newGeofences, new PCFPushGeofenceDataList.Filter() {
+
+            @Override
+            public boolean filterItem(PCFPushGeofenceData item) {
+                return isItemValid(item);
+            }
+
+            private boolean isItemValid(PCFPushGeofenceData item) {
+                if (item.getLocations() == null || item.getLocations().size() <= 0) return false;
+                if (item.getData() == null || item.getData().size() <= 0) return false;
+                if (item.getTriggerType() == null) return false;
+                return true;
+            }
+        });
     }
 }

@@ -31,11 +31,13 @@ public class PCFPushGeofenceLocationMap extends HashMap<String, PCFPushGeofenceL
     }
 
     public void addAll(PCFPushGeofenceDataList list) {
-        if (list != null && list.size() > 0) {
+        if (list != null) {
             for (final PCFPushGeofenceData geofence : list) {
-                for (final PCFPushGeofenceLocation location : geofence.getLocations()) {
-                    final String id = getAndroidRequestId(geofence.getId(), location.getId());
-                    this.put(id, location);
+                if (geofence != null && geofence.getLocations() != null) {
+                    for (final PCFPushGeofenceLocation location : geofence.getLocations()) {
+                        final String id = getAndroidRequestId(geofence.getId(), location.getId());
+                        this.put(id, location);
+                    }
                 }
             }
         }

@@ -39,6 +39,72 @@ public class PCFPushGeofenceDataListTest extends AndroidTestCase {
         assertEquals(3, model.size());
     }
 
+    public void testFilteredAddAllNullList() {
+        final boolean changed = model.filteredAddAll(null, new PCFPushGeofenceDataList.Filter() {
+            @Override
+            public boolean filterItem(PCFPushGeofenceData item) {
+                return true;
+            }
+        });
+        assertFalse(changed);
+        assertEquals(0, model.size());
+    }
+
+    public void testFilteredAddAllEmptyList() {
+        final PCFPushGeofenceDataList emptyList = new PCFPushGeofenceDataList();
+        final boolean changed = model.filteredAddAll(emptyList, new PCFPushGeofenceDataList.Filter() {
+            @Override
+            public boolean filterItem(PCFPushGeofenceData item) {
+                return true;
+            }
+        });
+        assertFalse(changed);
+        assertEquals(0, model.size());
+    }
+
+    public void testFilteredAddAllNullFilter() throws IOException {
+        final PCFPushGeofenceDataList populatedList = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_three_items.json");
+        final boolean changed = model.filteredAddAll(populatedList, null);
+        assertFalse(changed);
+        assertEquals(0, model.size());
+    }
+
+    public void testFilteredAddAllWithFilterThatAddsEverything() throws IOException {
+        final PCFPushGeofenceDataList populatedList = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_three_items.json");
+        final boolean changed = model.filteredAddAll(populatedList, new PCFPushGeofenceDataList.Filter() {
+            @Override
+            public boolean filterItem(PCFPushGeofenceData item) {
+                return true;
+            }
+        });
+        assertTrue(changed);
+        assertEquals(3, model.size());
+    }
+
+    public void testFilteredAddAllWithFilterThatAddsNothing() throws IOException {
+        final PCFPushGeofenceDataList populatedList = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_three_items.json");
+        final boolean changed = model.filteredAddAll(populatedList, new PCFPushGeofenceDataList.Filter() {
+            @Override
+            public boolean filterItem(PCFPushGeofenceData item) {
+                return false;
+            }
+        });
+        assertFalse(changed);
+        assertEquals(0, model.size());
+    }
+
+    public void testFilteredAddAllWithFilterThatItemsWithOddIds() throws IOException {
+        final PCFPushGeofenceDataList populatedList = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_three_items.json");
+        final boolean changed = model.filteredAddAll(populatedList, new PCFPushGeofenceDataList.Filter() {
+            @Override
+            public boolean filterItem(PCFPushGeofenceData item) {
+                return item.getId() % 2 == 1;
+            }
+        });
+        assertTrue(changed);
+        assertEquals(2, model.size());
+    }
+
     public void testIterateEmptyList() {
         final Type type = new TypeToken<PCFPushGeofenceDataList>(){}.getType();
         final PCFPushGeofenceDataList list = GsonUtil.getGson().fromJson("[]", type);
