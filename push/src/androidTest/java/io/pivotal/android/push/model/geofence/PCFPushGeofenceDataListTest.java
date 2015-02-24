@@ -63,21 +63,27 @@ public class PCFPushGeofenceDataListTest extends AndroidTestCase {
     }
 
     public void testIterateThreeItemList() throws IOException {
-        final TypeToken<PCFPushGeofenceDataList> typeToken = new TypeToken<PCFPushGeofenceDataList>(){};
         final PCFPushGeofenceDataList list = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_three_items.json");
         assertEquals(3, list.size());
+
         final Iterator<PCFPushGeofenceData> i = list.iterator();
         assertNotNull(i);
         assertTrue(i.hasNext());
+
         final PCFPushGeofenceData item1 = i.next();
         assertEquals(7L, item1.getId());
         assertEquals(7L, list.first().getId());
+        assertEquals(PCFPushGeofenceData.TriggerType.ENTER, item1.getTriggerType());
         assertTrue(i.hasNext());
+
         final PCFPushGeofenceData item2 = i.next();
         assertEquals(9L, item2.getId());
+        assertEquals(PCFPushGeofenceData.TriggerType.ENTER_OR_EXIT, item2.getTriggerType());
         assertTrue(i.hasNext());
+
         final PCFPushGeofenceData item3 = i.next();
         assertEquals(44L, item3.getId());
+        assertEquals(PCFPushGeofenceData.TriggerType.EXIT, item3.getTriggerType());
         assertFalse(i.hasNext());
     }
 

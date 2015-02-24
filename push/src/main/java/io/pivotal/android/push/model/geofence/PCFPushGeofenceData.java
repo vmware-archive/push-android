@@ -8,6 +8,10 @@ import java.util.Map;
 
 public final class PCFPushGeofenceData {
 
+    public static enum TriggerType {
+        ENTER, EXIT, ENTER_OR_EXIT
+    }
+
     @SerializedName("id")
     private long id;
 
@@ -22,6 +26,9 @@ public final class PCFPushGeofenceData {
 
     @SerializedName("tags")
     private List<String> tags;
+
+    @SerializedName("trigger_type")
+    private TriggerType triggerType;
 
     public long getId() {
         return id;
@@ -41,6 +48,10 @@ public final class PCFPushGeofenceData {
 
     public Map<String, String> getData() {
         return data;
+    }
+
+    public TriggerType getTriggerType() {
+        return triggerType;
     }
 
     @Override

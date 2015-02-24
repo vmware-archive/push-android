@@ -2,9 +2,11 @@ package io.pivotal.android.push.util;
 
 import android.test.AndroidTestCase;
 
+import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.List;
 
@@ -74,12 +76,21 @@ public class GsonUtilTest extends AndroidTestCase {
         final PCFPushGeofenceDataList array = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_three_items.json");
         assertNotNull(array);
         assertEquals(3, array.size());
-        assertNotNull(array.get(7L));
-        assertEquals(1, array.get(7L).getLocations().size());
-        assertNotNull(array.get(9L));
-        assertEquals(1, array.get(9L).getLocations().size());
-        assertNotNull(array.get(44L));
-        assertEquals(2, array.get(44L).getLocations().size());
+
+        final PCFPushGeofenceData item1 = array.get(7L);
+        assertNotNull(item1);
+        assertEquals(PCFPushGeofenceData.TriggerType.ENTER, item1.getTriggerType());
+        assertEquals(1, item1.getLocations().size());
+
+        final PCFPushGeofenceData item2 = array.get(9L);
+        assertNotNull(item2);
+        assertEquals(PCFPushGeofenceData.TriggerType.ENTER_OR_EXIT, item2.getTriggerType());
+        assertEquals(1, item2.getLocations().size());
+
+        final PCFPushGeofenceData item3 = array.get(44L);
+        assertNotNull(item3);
+        assertEquals(PCFPushGeofenceData.TriggerType.EXIT, item3.getTriggerType());
+        assertEquals(2, item3.getLocations().size());
 
         // Serialize
         final String json = GsonUtil.getGson().toJson(array, typeToken.getType());
@@ -108,12 +119,54 @@ public class GsonUtilTest extends AndroidTestCase {
         assertEquals("{\"date\":1424309210305}", serializeTestClass(new DateTestClass(new Date(1424309210305L))));
     }
 
+    public void testDeserializeTriggerTypes() {
+        assertEquals(null, deserializeTriggerType(null));
+        assertEquals(PCFPushGeofenceData.TriggerType.ENTER, deserializeTriggerType("enter"));
+        assertEquals(PCFPushGeofenceData.TriggerType.EXIT, deserializeTriggerType("exit"));
+        assertEquals(PCFPushGeofenceData.TriggerType.ENTER_OR_EXIT, deserializeTriggerType("enter_or_exit"));
+    }
+
+    public void testDeserializeBadTriggerTypes() {
+        try {
+            GsonUtil.getGsonAndSerializeNulls().fromJson("{\"trigger_type\":\"PANTS\"}", TriggerTypeTestClass.class);
+            fail();
+        } catch (Exception e) {}
+        try {
+            GsonUtil.getGsonAndSerializeNulls().fromJson("{\"trigger_type\":1337}", TriggerTypeTestClass.class);
+            fail();
+        } catch (Exception e) {}
+    }
+
+    public void testSerializeTriggerTypes() {
+        assertEquals("{\"trigger_type\":null}", serializeTriggerType(null));
+        assertEquals("{\"trigger_type\":\"enter\"}", serializeTriggerType(PCFPushGeofenceData.TriggerType.ENTER));
+        assertEquals("{\"trigger_type\":\"exit\"}", serializeTriggerType(PCFPushGeofenceData.TriggerType.EXIT));
+        assertEquals("{\"trigger_type\":\"enter_or_exit\"}", serializeTriggerType(PCFPushGeofenceData.TriggerType.ENTER_OR_EXIT));
+    }
+
     private String serializeTestClass(DateTestClass testClass) {
         return GsonUtil.getGson().toJson(testClass, DateTestClass.class);
     }
 
     private Date deserializeDate(String s) {
         return GsonUtil.getGson().fromJson(s, DateTestClass.class).date;
+    }
+
+    private PCFPushGeofenceData.TriggerType deserializeTriggerType(String triggerType) {
+        final String json;
+        if (triggerType == null) {
+            json = "{\"trigger_type\":null}";
+        } else {
+            json = "{\"trigger_type\":\"" + triggerType + "\"}";
+        }
+        return GsonUtil.getGsonAndSerializeNulls().fromJson(json, TriggerTypeTestClass.class).triggerType;
+    }
+
+    private String serializeTriggerType(PCFPushGeofenceData.TriggerType triggerType) {
+        final Type type = new TypeToken<TriggerTypeTestClass>(){}.getType();
+        final TriggerTypeTestClass testClass = new TriggerTypeTestClass();
+        testClass.triggerType = triggerType;
+        return GsonUtil.getGsonAndSerializeNulls().toJson(testClass, type);
     }
 
     private static class DateTestClass {
@@ -126,5 +179,11 @@ public class GsonUtilTest extends AndroidTestCase {
 
     private static class ArrayTestClass {
         public PCFPushGeofenceDataList array;
+    }
+
+    private static class TriggerTypeTestClass {
+
+        @SerializedName("trigger_type")
+        public PCFPushGeofenceData.TriggerType triggerType;
     }
 }

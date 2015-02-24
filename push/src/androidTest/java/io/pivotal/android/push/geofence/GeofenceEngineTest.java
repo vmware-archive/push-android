@@ -184,7 +184,8 @@ public class GeofenceEngineTest extends AndroidTestCase {
         putLocation(expectedMap, updateData.getGeofences().get(1), 0);
         putLocation(expectedMap, updateData.getGeofences().get(2), 0);
         putLocation(expectedMap, updateData.getGeofences().get(2), 1);
-        assertEquals(4, expectedMap.size());
+        putLocation(expectedMap, updateData.getGeofences().get(2), 2);
+        assertEquals(5, expectedMap.size());
         assertRegisterGeofences(expectedMap);
 
         final PCFPushGeofenceDataList expectedList = new PCFPushGeofenceDataList();
@@ -202,9 +203,10 @@ public class GeofenceEngineTest extends AndroidTestCase {
         putLocation(expectedMap, ONE_ITEM_GEOFENCE_LIST.get(7L), 0);   // ID 7  -- was kept. Note that ID 9 was deleted.
         putLocation(expectedMap, updateData.getGeofences().get(0), 0); // ID 5  -- got added
         putLocation(expectedMap, updateData.getGeofences().get(1), 0); // ID 10 -- got added
-        putLocation(expectedMap, updateData.getGeofences().get(2), 0); // ID 44 -- got added
-        putLocation(expectedMap, updateData.getGeofences().get(2), 1); // ID 44 -- got added
-        assertEquals(5, expectedMap.size());
+        putLocation(expectedMap, updateData.getGeofences().get(2), 0); // ID 44 -- got added (1st location)
+        putLocation(expectedMap, updateData.getGeofences().get(2), 1); // ID 44 -- got added (2nd location)
+        putLocation(expectedMap, updateData.getGeofences().get(2), 2); // ID 44 -- got added (3rd location)
+        assertEquals(6, expectedMap.size());
         assertRegisterGeofences(expectedMap);
 
         final PCFPushGeofenceDataList expectedList = new PCFPushGeofenceDataList();
@@ -219,14 +221,15 @@ public class GeofenceEngineTest extends AndroidTestCase {
         when(store.getCurrentlyRegisteredGeofences()).thenReturn(THREE_ITEM_GEOFENCE_LIST);
         engine.processResponseData(updateData);
 
-        final PCFPushGeofenceLocationMap map = new PCFPushGeofenceLocationMap();
-        putLocation(map, THREE_ITEM_GEOFENCE_LIST.get(7L), 0); // ID 7  -- was kept. Note that ID 9 was deleted.
-        putLocation(map, updateData.getGeofences().get(0), 0); // ID 5  -- got added
-        putLocation(map, updateData.getGeofences().get(1), 0); // ID 10 -- got added
-        putLocation(map, updateData.getGeofences().get(2), 0); // ID 44 -- got updated
-        putLocation(map, updateData.getGeofences().get(2), 1); // ID 44 -- got updated
-        assertEquals(5, map.size());
-        assertRegisterGeofences(map);
+        final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
+        putLocation(expectedMap, THREE_ITEM_GEOFENCE_LIST.get(7L), 0); // ID 7  -- was kept. Note that ID 9 was deleted.
+        putLocation(expectedMap, updateData.getGeofences().get(0), 0); // ID 5  -- got added
+        putLocation(expectedMap, updateData.getGeofences().get(1), 0); // ID 10 -- got added
+        putLocation(expectedMap, updateData.getGeofences().get(2), 0); // ID 44 -- got added (1st location)
+        putLocation(expectedMap, updateData.getGeofences().get(2), 1); // ID 44 -- got added (2nd location)
+        putLocation(expectedMap, updateData.getGeofences().get(2), 2); // ID 44 -- got added (3rd location)
+        assertEquals(6, expectedMap.size());
+        assertRegisterGeofences(expectedMap);
 
         final PCFPushGeofenceDataList expectedList = new PCFPushGeofenceDataList();
         expectedList.put(7L, THREE_ITEM_GEOFENCE_LIST.get(7L));

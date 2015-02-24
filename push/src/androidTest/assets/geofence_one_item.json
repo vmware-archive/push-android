@@ -5,6 +5,7 @@
             "message": "tacos"
         },
         "expiry_time": 1142744274,
+        "trigger_type": "exit",
         "locations": [
             {
                 "id": 66,
