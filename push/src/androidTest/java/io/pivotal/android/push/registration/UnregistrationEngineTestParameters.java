@@ -11,7 +11,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import io.pivotal.android.push.RegistrationParameters;
+import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.api.FakePCFPushUnregisterDeviceApiRequest;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestProvider;
 import io.pivotal.android.push.gcm.FakeGcmProvider;
@@ -41,7 +41,7 @@ public class UnregistrationEngineTestParameters {
     private String startingPCFPushDeviceRegistrationIdInPrefs;
     private String pcfPushDeviceRegistrationIdResultant;
     private boolean shouldPCFPushUnregisterHaveBeenCalled;
-    private RegistrationParameters parametersFromUser;
+    private PushParameters parametersFromUser;
 
     public UnregistrationEngineTestParameters(Context context) {
         this.context = context;
@@ -140,7 +140,7 @@ public class UnregistrationEngineTestParameters {
         return this;
     }
 
-    public UnregistrationEngineTestParameters setupParameters(RegistrationParameters parameters) {
+    public UnregistrationEngineTestParameters setupParameters(PushParameters parameters) {
         parametersFromUser = parameters;
         return this;
     }

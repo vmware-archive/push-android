@@ -3,7 +3,7 @@
  */
 package io.pivotal.android.push.backend.api;
 
-import io.pivotal.android.push.RegistrationParameters;
+import io.pivotal.android.push.PushParameters;
 
 public class FakePCFPushUnregisterDeviceApiRequest implements PCFPushUnregisterDeviceApiRequest {
 
@@ -27,7 +27,7 @@ public class FakePCFPushUnregisterDeviceApiRequest implements PCFPushUnregisterD
     }
 
     @Override
-    public void startUnregisterDevice(String pcfPushDeviceRegistrationId, RegistrationParameters parameters, PCFPushUnregisterDeviceListener listener) {
+    public void startUnregisterDevice(String pcfPushDeviceRegistrationId, PushParameters parameters, PCFPushUnregisterDeviceListener listener) {
         wasUnregisterCalled = true;
         if (originatingRequest != null) {
             originatingRequest.wasUnregisterCalled = true;

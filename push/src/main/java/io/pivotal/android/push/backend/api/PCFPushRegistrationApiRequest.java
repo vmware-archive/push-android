@@ -5,19 +5,19 @@ package io.pivotal.android.push.backend.api;
 
 import java.util.Set;
 
-import io.pivotal.android.push.RegistrationParameters;
+import io.pivotal.android.push.PushParameters;
 
 public interface PCFPushRegistrationApiRequest {
 
     void startNewDeviceRegistration(String gcmDeviceRegistrationId,
                                     Set<String> savedTags,
-                                    RegistrationParameters parameters,
+                                    PushParameters parameters,
                                     PCFPushRegistrationListener listener);
 
     void startUpdateDeviceRegistration(String gcmDeviceRegistrationId,
                                        String pcfPushDeviceRegistrationId,
                                        Set<String> savedTags,
-                                       RegistrationParameters parameters,
+                                       PushParameters parameters,
                                        PCFPushRegistrationListener listener);
 
     PCFPushRegistrationApiRequest copy();

@@ -5,7 +5,7 @@ package io.pivotal.android.push.backend.api;
 
 import java.util.Set;
 
-import io.pivotal.android.push.RegistrationParameters;
+import io.pivotal.android.push.PushParameters;
 
 public class FakePCFPushRegistrationApiRequest implements PCFPushRegistrationApiRequest {
 
@@ -37,7 +37,7 @@ public class FakePCFPushRegistrationApiRequest implements PCFPushRegistrationApi
     @Override
     public void startNewDeviceRegistration(String gcmDeviceRegistrationId,
                                            Set<String> savedTags,
-                                           RegistrationParameters parameters,
+                                           PushParameters parameters,
                                            PCFPushRegistrationListener listener) {
 
         wasRegisterCalled = true;
@@ -59,7 +59,7 @@ public class FakePCFPushRegistrationApiRequest implements PCFPushRegistrationApi
     public void startUpdateDeviceRegistration(String gcmDeviceRegistrationId,
                                               String previousPCFPushDeviceRegistrationId,
                                               Set<String> savedTags,
-                                              RegistrationParameters parameters,
+                                              PushParameters parameters,
                                               PCFPushRegistrationListener listener) {
         wasRegisterCalled = true;
         isUpdateRegistration = true;

@@ -7,7 +7,7 @@ import android.test.AndroidTestCase;
 
 import java.io.IOException;
 
-import io.pivotal.android.push.RegistrationParameters;
+import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceResponseData;
 import io.pivotal.android.push.util.DelayedLoop;
 import io.pivotal.android.push.util.FakeHttpURLConnection;
@@ -179,7 +179,7 @@ public class PCFPushGetGeofenceUpdatesApiRequestTest extends AndroidTestCase {
         };
     }
 
-    private RegistrationParameters getParameters() {
-        return new RegistrationParameters(null, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, null, null);
+    private PushParameters getParameters() {
+        return new PushParameters(null, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, null, null);
     }
 }

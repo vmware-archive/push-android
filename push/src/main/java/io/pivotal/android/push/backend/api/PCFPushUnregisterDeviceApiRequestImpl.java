@@ -6,7 +6,7 @@ package io.pivotal.android.push.backend.api;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import io.pivotal.android.push.RegistrationParameters;
+import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.util.ApiRequestImpl;
 import io.pivotal.android.push.util.Const;
 import io.pivotal.android.push.util.Logger;
@@ -22,7 +22,7 @@ public class PCFPushUnregisterDeviceApiRequestImpl extends ApiRequestImpl implem
     }
 
     @Override
-    public void startUnregisterDevice(String pcfPushDeviceRegistrationId, RegistrationParameters parameters, PCFPushUnregisterDeviceListener listener) {
+    public void startUnregisterDevice(String pcfPushDeviceRegistrationId, PushParameters parameters, PCFPushUnregisterDeviceListener listener) {
 
         verifyUnregistrationArguments(pcfPushDeviceRegistrationId, parameters, listener);
 
@@ -46,7 +46,7 @@ public class PCFPushUnregisterDeviceApiRequestImpl extends ApiRequestImpl implem
         }
     }
 
-    private void verifyUnregistrationArguments(String pcfPushDeviceRegistrationId, RegistrationParameters parameters, PCFPushUnregisterDeviceListener listener) {
+    private void verifyUnregistrationArguments(String pcfPushDeviceRegistrationId, PushParameters parameters, PCFPushUnregisterDeviceListener listener) {
         if (pcfPushDeviceRegistrationId == null) {
             throw new IllegalArgumentException("pcfPushDeviceRegistrationId may not be null");
         }

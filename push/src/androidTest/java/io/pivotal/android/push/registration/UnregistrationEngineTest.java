@@ -10,7 +10,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 
-import io.pivotal.android.push.RegistrationParameters;
+import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestProvider;
 import io.pivotal.android.push.backend.api.FakePCFPushUnregisterDeviceApiRequest;
 import io.pivotal.android.push.gcm.FakeGcmProvider;
@@ -34,14 +34,14 @@ public class UnregistrationEngineTest extends AndroidTestCase {
     private GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider;
     private FakePushPreferencesProvider pushPreferencesProvider;
     private PCFPushUnregisterDeviceApiRequestProvider pcfPushUnregisterDeviceApiRequestProvider;
-    private RegistrationParameters parameters;
+    private PushParameters parameters;
     private Semaphore semaphore = new Semaphore(0);
 
     @Override
     protected void setUp() throws Exception {
         super.setUp();
         TEST_TAGS.addAll(Arrays.asList("DONKEYS", "BURROS"));
-        parameters = new RegistrationParameters(TEST_GCM_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, TEST_TAGS);
+        parameters = new PushParameters(TEST_GCM_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, TEST_TAGS);
         pushPreferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null, null);
         gcmProvider = new FakeGcmProvider(TEST_GCM_DEVICE_REGISTRATION_ID_1);
         gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(new FakeGcmUnregistrationApiRequest(gcmProvider));
@@ -106,7 +106,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
     public void testNullServiceUrl() {
         try {
             final UnregistrationEngine engine = new UnregistrationEngine(getContext(),gcmProvider, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, pcfPushUnregisterDeviceApiRequestProvider);
-            parameters = new RegistrationParameters(TEST_GCM_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, null, TEST_DEVICE_ALIAS, null);
+            parameters = new PushParameters(TEST_GCM_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, null, TEST_DEVICE_ALIAS, null);
             engine.unregisterDevice(parameters, getListenerForUnregistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {

@@ -126,7 +126,7 @@ public class Push {
         final PCFPushRegistrationApiRequest dummyPCFPushRegistrationApiRequest = new PCFPushRegistrationApiRequestImpl(context, networkWrapper);
         final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(dummyPCFPushRegistrationApiRequest);
         final VersionProvider versionProvider = new VersionProviderImpl(context);
-        final RegistrationParameters parameters = getRegistrationParameters(deviceAlias, tags);
+        final PushParameters parameters = getPushParameters(deviceAlias, tags);
 
         verifyRegistrationArguments(parameters);
 
@@ -145,15 +145,15 @@ public class Push {
         threadPool.execute(runnable);
     }
 
-    private RegistrationParameters getRegistrationParameters(String deviceAlias, Set<String> tags) {
+    private PushParameters getPushParameters(String deviceAlias, Set<String> tags) {
         final String gcmSenderId = Pivotal.getGcmSenderId();
         final String platformUuid = Pivotal.getPlatformUuid();
         final String platformSecret = Pivotal.getPlatformSecret();
         final String serviceUrl = Pivotal.getServiceUrl();
-        return new RegistrationParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, deviceAlias, tags);
+        return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, deviceAlias, tags);
     }
 
-    private void verifyRegistrationArguments(RegistrationParameters parameters) {
+    private void verifyRegistrationArguments(PushParameters parameters) {
         if (parameters == null) {
             throw new IllegalArgumentException("parameters may not be null");
         }
@@ -240,7 +240,7 @@ public class Push {
      * @param listener Optional listener for receiving a callback after un`registration finishes. This callback may
      */
     public void startUnregistration(final UnregistrationListener listener) {
-        final RegistrationParameters parameters = getRegistrationParameters(null, null);
+        final PushParameters parameters = getPushParameters(null, null);
         verifyUnregistrationArguments(parameters);
 
         final GcmProvider gcmProvider = new RealGcmProvider(context);
@@ -265,7 +265,7 @@ public class Push {
         threadPool.execute(runnable);
     }
 
-    private void verifyUnregistrationArguments(RegistrationParameters parameters) {
+    private void verifyUnregistrationArguments(PushParameters parameters) {
         if (parameters == null) {
             throw new IllegalArgumentException("parameters may not be null");
         }

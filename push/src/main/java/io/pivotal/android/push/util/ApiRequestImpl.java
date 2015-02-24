@@ -12,7 +12,7 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-import io.pivotal.android.push.RegistrationParameters;
+import io.pivotal.android.push.PushParameters;
 
 public class ApiRequestImpl {
 
@@ -23,7 +23,7 @@ public class ApiRequestImpl {
         saveArguments(networkWrapper);
     }
 
-    public static String getBasicAuthorizationValue(RegistrationParameters parameters) {
+    public static String getBasicAuthorizationValue(PushParameters parameters) {
         final String stringToEncode = parameters.getPlatformUuid() + ":" + parameters.getPlatformSecret();
         return "Basic  " + Base64.encodeToString(stringToEncode.getBytes(), Base64.DEFAULT | Base64.NO_WRAP);
     }

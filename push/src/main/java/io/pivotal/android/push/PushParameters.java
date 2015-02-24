@@ -9,7 +9,7 @@ import java.util.Set;
 /**
  * Parameters used to register with the Pivotal CF Mobile Services Push server.
  */
-public class RegistrationParameters {
+public class PushParameters {
 
     private final String gcmSenderId;
     private final String platformUuid;
@@ -31,7 +31,7 @@ public class RegistrationParameters {
      *                       already subscribed to them.  If you exclude any subscribed tags in a registration request, then those tags
      *                       will be unsubscribed.
      */
-    public RegistrationParameters(String gcmSenderId, String platformUuid, String platformSecret, String serviceUrl, String deviceAlias, Set<String> tags) {
+    public PushParameters(String gcmSenderId, String platformUuid, String platformSecret, String serviceUrl, String deviceAlias, Set<String> tags) {
         this.gcmSenderId = gcmSenderId;
         this.platformUuid = platformUuid;
         this.platformSecret = platformSecret;
@@ -71,11 +71,11 @@ public class RegistrationParameters {
             return false;
         }
 
-        if (!(o instanceof RegistrationParameters)) {
+        if (!(o instanceof PushParameters)) {
             return false;
         }
 
-        RegistrationParameters other = (RegistrationParameters)o;
+        PushParameters other = (PushParameters)o;
         
         if (gcmSenderId == null && other.gcmSenderId != null) {
             return false;

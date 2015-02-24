@@ -18,7 +18,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Set;
 
-import io.pivotal.android.push.RegistrationParameters;
+import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.model.api.BasePCFPushApiRegistrationRequestData;
 import io.pivotal.android.push.model.api.PCFPushApiRegistrationPostRequestData;
 import io.pivotal.android.push.model.api.PCFPushApiRegistrationPutRequestData;
@@ -56,7 +56,7 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
     @Override
     public void startNewDeviceRegistration(String gcmDeviceRegistrationId,
                                            Set<String> savedTags,
-                                           RegistrationParameters parameters,
+                                           PushParameters parameters,
                                            PCFPushRegistrationListener listener) {
 
         verifyNewRegistrationArguments(gcmDeviceRegistrationId, parameters, listener);
@@ -67,7 +67,7 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
     public void startUpdateDeviceRegistration(String gcmDeviceRegistrationId,
                                               String pcfPushDeviceRegistrationId,
                                               Set<String> savedTags,
-                                              RegistrationParameters parameters,
+                                              PushParameters parameters,
                                               PCFPushRegistrationListener listener) {
 
         verifyUpdateRegistrationArguments(gcmDeviceRegistrationId, pcfPushDeviceRegistrationId, parameters, listener);
@@ -75,7 +75,7 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
     }
 
     private void verifyNewRegistrationArguments(String gcmDeviceRegistrationId,
-                                                RegistrationParameters parameters,
+                                                PushParameters parameters,
                                                 PCFPushRegistrationListener listener) {
 
         if (gcmDeviceRegistrationId == null) {
@@ -91,7 +91,7 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
 
     private void verifyUpdateRegistrationArguments(String gcmDeviceRegistrationId,
                                                    String pcfPushDeviceRegistrationId,
-                                                   RegistrationParameters parameters,
+                                                   PushParameters parameters,
                                                    PCFPushRegistrationListener listener) {
 
         verifyNewRegistrationArguments(gcmDeviceRegistrationId, parameters, listener);
@@ -103,7 +103,7 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
     private void handleRequest(String gcmDeviceRegistrationId,
                                String previousPCFPushDeviceRegistrationId,
                                Set<String> savedTags,
-                               RegistrationParameters parameters,
+                               PushParameters parameters,
                                PCFPushRegistrationListener listener,
                                boolean isUpdate) {
 
@@ -154,7 +154,7 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
 
     private URL getURL(boolean isUpdate,
                        String previousPCFPushDeviceRegistrationId,
-                       RegistrationParameters parameters) throws MalformedURLException {
+                       PushParameters parameters) throws MalformedURLException {
 
         if (isUpdate) {
             return new URL(parameters.getServiceUrl() + "/" + Const.PCF_PUSH_REGISTRATION_REQUEST_ENDPOINT + "/" +  previousPCFPushDeviceRegistrationId);
@@ -215,7 +215,7 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
 
     private String getRequestBodyData(String deviceRegistrationId,
                                       Set<String> savedTags,
-                                      RegistrationParameters parameters,
+                                      PushParameters parameters,
                                       boolean isUpdate) {
 
 
@@ -231,7 +231,7 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
 
     private BasePCFPushApiRegistrationRequestData getPCFPushApiRegistrationRequestData(String deviceRegistrationId,
                                                                                        Set<String> savedTags,
-                                                                                       RegistrationParameters parameters,
+                                                                                       PushParameters parameters,
                                                                                        boolean isUpdate) {
 
         final BasePCFPushApiRegistrationRequestData data;
@@ -259,7 +259,7 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
     }
 
     private PCFPushApiRegistrationPutRequestData.Tags getTags(Set<String> savedTags,
-                                                              RegistrationParameters parameters) {
+                                                              PushParameters parameters) {
 
         final TagsHelper tagsHelper = new TagsHelper(savedTags, parameters.getTags());
         return new PCFPushApiRegistrationPutRequestData.Tags(tagsHelper.getSubscribeTags(), tagsHelper.getUnsubscribeTags());

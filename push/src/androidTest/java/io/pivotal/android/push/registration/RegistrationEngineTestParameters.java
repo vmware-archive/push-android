@@ -8,7 +8,7 @@ import android.test.AndroidTestCase;
 
 import java.util.Set;
 
-import io.pivotal.android.push.RegistrationParameters;
+import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestProvider;
 import io.pivotal.android.push.backend.api.FakePCFPushRegistrationApiRequest;
 import io.pivotal.android.push.gcm.FakeGcmProvider;
@@ -96,7 +96,7 @@ public class RegistrationEngineTestParameters {
         final FakePCFPushRegistrationApiRequest fakePCFPushRegistrationApiRequest = new FakePCFPushRegistrationApiRequest(pcfPushDeviceRegistrationIdFromServer, shouldPCFPushDeviceRegistrationBeSuccessful);
         final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(fakePCFPushRegistrationApiRequest);
         final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, PCFPushRegistrationApiRequestProvider, versionProvider);
-        final RegistrationParameters parameters = new RegistrationParameters(gcmSenderIdFromUser, platformUuidFromUser, platformSecretFromUser, serviceUrlFromUser, deviceAliasFromUser, tagsFromUser);
+        final PushParameters parameters = new PushParameters(gcmSenderIdFromUser, platformUuidFromUser, platformSecretFromUser, serviceUrlFromUser, deviceAliasFromUser, tagsFromUser);
 
         engine.registerDevice(parameters, new RegistrationListener() {
 

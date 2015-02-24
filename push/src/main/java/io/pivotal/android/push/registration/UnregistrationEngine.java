@@ -5,7 +5,7 @@ package io.pivotal.android.push.registration;
 
 import android.content.Context;
 
-import io.pivotal.android.push.RegistrationParameters;
+import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequest;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestProvider;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceListener;
@@ -93,7 +93,7 @@ public class UnregistrationEngine {
         this.previousPCFPushDeviceRegistrationId = pushPreferencesProvider.getPCFPushDeviceRegistrationId();
     }
 
-    public void unregisterDevice(RegistrationParameters parameters, UnregistrationListener listener) {
+    public void unregisterDevice(PushParameters parameters, UnregistrationListener listener) {
 
         verifyUnregisterDeviceArguments(parameters);
 
@@ -110,7 +110,7 @@ public class UnregistrationEngine {
         }
     }
 
-    private void verifyUnregisterDeviceArguments(RegistrationParameters parameters) {
+    private void verifyUnregisterDeviceArguments(PushParameters parameters) {
         if (parameters == null) {
             throw new IllegalArgumentException("parameters may not be null");
         }
@@ -119,13 +119,13 @@ public class UnregistrationEngine {
         }
     }
 
-    private void unregisterDeviceWithGcm(RegistrationParameters parameters, final UnregistrationListener listener) {
+    private void unregisterDeviceWithGcm(PushParameters parameters, final UnregistrationListener listener) {
         Logger.i("Unregistering sender ID with GCM.");
         final GcmUnregistrationApiRequest gcmUnregistrationApiRequest = gcmUnregistrationApiRequestProvider.getRequest();
         gcmUnregistrationApiRequest.startUnregistration(getGcmUnregistrationListener(parameters, listener));
     }
 
-    private GcmUnregistrationListener getGcmUnregistrationListener(final RegistrationParameters parameters, final UnregistrationListener listener) {
+    private GcmUnregistrationListener getGcmUnregistrationListener(final PushParameters parameters, final UnregistrationListener listener) {
 
         return new GcmUnregistrationListener() {
             @Override
@@ -148,7 +148,7 @@ public class UnregistrationEngine {
         pushPreferencesProvider.setAppVersion(-1);
     }
 
-    private void unregisterDeviceWithPCFPush(final String pcfPushDeviceRegistrationId, RegistrationParameters parameters, final UnregistrationListener listener) {
+    private void unregisterDeviceWithPCFPush(final String pcfPushDeviceRegistrationId, PushParameters parameters, final UnregistrationListener listener) {
         if (pcfPushDeviceRegistrationId == null) {
             Logger.i("Not currently registered with PCF Push.  Unregistration is not required.");
             listener.onUnregistrationComplete();

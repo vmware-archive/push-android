@@ -12,7 +12,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 
-import io.pivotal.android.push.RegistrationParameters;
+import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.model.api.PCFPushApiRegistrationPostRequestData;
 import io.pivotal.android.push.model.api.PCFPushApiRegistrationPutRequestData;
 import io.pivotal.android.push.util.ApiRequestImpl;
@@ -404,12 +404,12 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
         };
     }
 
-    private RegistrationParameters getParameters() {
-        return new RegistrationParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null);
+    private PushParameters getParameters() {
+        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null);
     }
 
-    private RegistrationParameters getParameters(Set<String> tags) {
-        return new RegistrationParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, tags);
+    private PushParameters getParameters(Set<String> tags) {
+        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, tags);
     }
 
     private Set<String> makeSet(String... strings) {

@@ -7,9 +7,7 @@ import android.test.AndroidTestCase;
 
 import java.io.IOException;
 
-import io.pivotal.android.push.RegistrationParameters;
-import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestImpl;
-import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceListener;
+import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.util.DelayedLoop;
 import io.pivotal.android.push.util.FakeHttpURLConnection;
 import io.pivotal.android.push.util.FakeNetworkWrapper;
@@ -24,7 +22,7 @@ public class PCFPushUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
     private static final String TEST_DEVICE_ALIAS = "TEST_DEVICE_ALIAS";
     private static final String TEST_SERVICE_URL = "http://test.com";
 
-    private RegistrationParameters parameters;
+    private PushParameters parameters;
     private FakeNetworkWrapper networkWrapper;
     private DelayedLoop delayedLoop;
     private io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceListener PCFPushUnregisterDeviceListener;
@@ -32,7 +30,7 @@ public class PCFPushUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        parameters = new RegistrationParameters(TEST_GCM_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null);
+        parameters = new PushParameters(TEST_GCM_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null);
         networkWrapper = new FakeNetworkWrapper();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
         FakeHttpURLConnection.reset();

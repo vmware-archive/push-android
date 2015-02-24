@@ -7,7 +7,7 @@ import android.content.Context;
 
 import java.util.Set;
 
-import io.pivotal.android.push.RegistrationParameters;
+import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequest;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestProvider;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationListener;
@@ -188,7 +188,7 @@ public class RegistrationEngine {
      * @param parameters  The registration parameters.  May not be null.
      * @param listener  An optional listener if you care to know when registration completes or fails.
      */
-    public void registerDevice(RegistrationParameters parameters, final RegistrationListener listener) {
+    public void registerDevice(PushParameters parameters, final RegistrationListener listener) {
 
         verifyRegistrationArguments(parameters);
 
@@ -221,7 +221,7 @@ public class RegistrationEngine {
         }
     }
 
-    private void verifyRegistrationArguments(RegistrationParameters parameters) {
+    private void verifyRegistrationArguments(PushParameters parameters) {
         if (parameters == null) {
             throw new IllegalArgumentException("parameters may not be null");
         }
@@ -239,7 +239,7 @@ public class RegistrationEngine {
         }
     }
 
-    private boolean isGcmRegistrationRequired(RegistrationParameters parameters) {
+    private boolean isGcmRegistrationRequired(PushParameters parameters) {
         if (isEmptyPreviousGcmDeviceRegistrationId()) {
             Logger.v("previousGcmDeviceRegistrationId is empty. Device registration with GCM will be required");
             return true;
@@ -268,11 +268,11 @@ public class RegistrationEngine {
         return isPreviousGcmSenderIdEmpty;
     }
 
-    private boolean isUpdatedGcmSenderId(RegistrationParameters parameters) {
+    private boolean isUpdatedGcmSenderId(PushParameters parameters) {
         return !parameters.getGcmSenderId().equals(previousGcmSenderId);
     }
 
-    private boolean haveTagsBeenUpdated(RegistrationParameters parameters) {
+    private boolean haveTagsBeenUpdated(PushParameters parameters) {
         final Set<String> savedTags = pushPreferencesProvider.getTags();
         final Set<String> requestedTags = parameters.getTags();
 
@@ -297,7 +297,7 @@ public class RegistrationEngine {
         return currentAppVersion != savedAppVersion;
     }
 
-    private boolean isPCFPushNewRegistrationRequired(RegistrationParameters parameters) {
+    private boolean isPCFPushNewRegistrationRequired(PushParameters parameters) {
         final boolean isPreviousPlatformUuidEmpty = previousPlatformUuid == null || previousPlatformUuid.isEmpty();
         final boolean isServiceUrlUpdated = isServiceUrlUpdated(parameters);
         if (isEmptyPreviousGcmDeviceRegistrationId()) {
@@ -312,7 +312,7 @@ public class RegistrationEngine {
         return isEmptyPreviousGcmDeviceRegistrationId() || isPreviousPlatformUuidEmpty || areRegistrationParametersUpdated(parameters) || isServiceUrlUpdated;
     }
 
-    private boolean isPCFPushUpdateRegistrationRequired(String newGcmDeviceRegistrationId, RegistrationParameters parameters) {
+    private boolean isPCFPushUpdateRegistrationRequired(String newGcmDeviceRegistrationId, PushParameters parameters) {
         final boolean isGcmDeviceRegistrationIdDifferent = isEmptyPreviousGcmDeviceRegistrationId() || !previousGcmDeviceRegistrationId.equals(newGcmDeviceRegistrationId);
         final boolean isPreviousPCFPushDeviceRegistrationIdEmpty = previousPCFPushDeviceRegistrationId == null || previousPCFPushDeviceRegistrationId.isEmpty();
         if (isPreviousPCFPushDeviceRegistrationIdEmpty) {
@@ -335,7 +335,7 @@ public class RegistrationEngine {
         return false;
     }
 
-    private boolean areRegistrationParametersUpdated(RegistrationParameters parameters) {
+    private boolean areRegistrationParametersUpdated(PushParameters parameters) {
         final boolean isPreviousPlatformUuidEmpty = previousPlatformUuid == null || previousPlatformUuid.isEmpty();
         final boolean isPlatformUuidUpdated = (isPreviousPlatformUuidEmpty && !parameters.getPlatformUuid().isEmpty()) || !parameters.getPlatformUuid().equals(previousPlatformUuid);
         final boolean isPreviousPlatformSecretEmpty = previousPlatformSecret == null || previousPlatformSecret.isEmpty();
@@ -346,13 +346,13 @@ public class RegistrationEngine {
         return isDeviceAliasUpdated || isPlatformSecretUpdated || isPlatformUuidUpdated;
     }
 
-    private boolean isServiceUrlUpdated(RegistrationParameters parameters) {
+    private boolean isServiceUrlUpdated(PushParameters parameters) {
         final boolean isPreviousServiceUrlEmpty = previousServiceUrl == null;
         final boolean isServiceUrlUpdated = (isPreviousServiceUrlEmpty && parameters.getServiceUrl() != null) || !parameters.getServiceUrl().equals(previousServiceUrl);
         return isServiceUrlUpdated;
     }
 
-    private void unregisterDeviceWithGcm(final RegistrationParameters parameters, final RegistrationListener listener) {
+    private void unregisterDeviceWithGcm(final PushParameters parameters, final RegistrationListener listener) {
         Logger.i("GCM Sender ID has been changed. Unregistering sender ID with GCM.");
         final GcmUnregistrationApiRequest gcmUnregistrationApiRequest = gcmUnregistrationApiRequestProvider.getRequest();
         gcmUnregistrationApiRequest.startUnregistration(new GcmUnregistrationListener() {
@@ -373,7 +373,7 @@ public class RegistrationEngine {
         });
     }
 
-    private void registerDeviceWithGcm(final RegistrationParameters parameters, final RegistrationListener listener) {
+    private void registerDeviceWithGcm(final PushParameters parameters, final RegistrationListener listener) {
         Logger.i("Initiating device registration with GCM.");
         final GcmRegistrationApiRequest gcmRegistrationApiRequest = gcmRegistrationApiRequestProvider.getRequest();
         gcmRegistrationApiRequest.startRegistration(parameters.getGcmSenderId(), new GcmRegistrationListener() {
@@ -429,7 +429,7 @@ public class RegistrationEngine {
     private void registerUpdateDeviceWithPCFPush(String gcmDeviceRegistrationId,
                                                  String pcfPushDeviceRegistrationId,
                                                  Set<String> savedTags,
-                                                 RegistrationParameters parameters,
+                                                 PushParameters parameters,
                                                  RegistrationListener listener) {
 
         Logger.i("Initiating update device registration with PCF Push.");
@@ -441,7 +441,7 @@ public class RegistrationEngine {
                 getPCFPushUpdateRegistrationListener(parameters, listener));
     }
 
-    private PCFPushRegistrationListener getPCFPushUpdateRegistrationListener(final RegistrationParameters parameters, final RegistrationListener listener) {
+    private PCFPushRegistrationListener getPCFPushUpdateRegistrationListener(final PushParameters parameters, final RegistrationListener listener) {
         return new PCFPushRegistrationListener() {
 
             @Override
@@ -490,7 +490,7 @@ public class RegistrationEngine {
 
     private void registerNewDeviceWithPCFPush(final String gcmDeviceRegistrationId,
                                               Set<String> savedTags,
-                                              RegistrationParameters parameters,
+                                              PushParameters parameters,
                                               RegistrationListener listener) {
 
         Logger.i("Initiating new device registration with PCF Push.");
@@ -498,7 +498,7 @@ public class RegistrationEngine {
         PCFPushRegistrationApiRequest.startNewDeviceRegistration(gcmDeviceRegistrationId, savedTags, parameters, getPCFPushNewRegistrationListener(parameters, listener));
     }
 
-    private PCFPushRegistrationListener getPCFPushNewRegistrationListener(final RegistrationParameters parameters, final RegistrationListener listener) {
+    private PCFPushRegistrationListener getPCFPushNewRegistrationListener(final PushParameters parameters, final RegistrationListener listener) {
         return new PCFPushRegistrationListener() {
 
             @Override

@@ -13,7 +13,7 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
-import io.pivotal.android.push.RegistrationParameters;
+import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceResponseData;
 import io.pivotal.android.push.util.ApiRequestImpl;
 import io.pivotal.android.push.util.Const;
@@ -28,14 +28,14 @@ public class PCFPushGetGeofenceUpdatesApiRequest extends ApiRequestImpl {
     }
 
     public void getGeofenceUpdates(long timestamp,
-                                   RegistrationParameters parameters,
+                                   PushParameters parameters,
                                    PCFPushGetGeofenceUpdatesListener listener) {
 
         verifyArguments(timestamp, parameters, listener);
         handleRequest(timestamp, parameters, listener);
     }
 
-    private void verifyArguments(long timestamp, RegistrationParameters parameters, PCFPushGetGeofenceUpdatesListener listener) {
+    private void verifyArguments(long timestamp, PushParameters parameters, PCFPushGetGeofenceUpdatesListener listener) {
         if (timestamp < 0) {
             throw new IllegalArgumentException("timestamp must be non-negative");
         }
@@ -47,7 +47,7 @@ public class PCFPushGetGeofenceUpdatesApiRequest extends ApiRequestImpl {
         }
     }
 
-    private void handleRequest(long timestamp, RegistrationParameters parameters, PCFPushGetGeofenceUpdatesListener listener) {
+    private void handleRequest(long timestamp, PushParameters parameters, PCFPushGetGeofenceUpdatesListener listener) {
         OutputStream outputStream = null;
         try {
             final URL url = getURL(timestamp, parameters);
@@ -116,7 +116,7 @@ public class PCFPushGetGeofenceUpdatesApiRequest extends ApiRequestImpl {
     }
 
     private URL getURL(long timestamp,
-                       RegistrationParameters parameters) throws MalformedURLException {
+                       PushParameters parameters) throws MalformedURLException {
 
         return new URL(parameters.getServiceUrl() + "/" + Const.PCF_PUSH_GEOFENCE_UPDATE_REQUEST_ENDPOINT  + "?" + Const.PCF_PUSH_GEOFENCE_UPDATE_REQUEST_TIMESTAMP + "=" + timestamp);
     }
