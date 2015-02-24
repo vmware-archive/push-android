@@ -100,8 +100,11 @@ public class FakeHttpURLConnection extends HttpURLConnection {
 
     @Override
     public InputStream getInputStream() throws IOException {
-        final ByteArrayInputStream inputStream = new ByteArrayInputStream(responseData.getBytes());
-        return inputStream;
+        if (responseData != null) {
+            return new ByteArrayInputStream(responseData.getBytes());
+        } else {
+            return null;
+        }
     }
 
     @Override

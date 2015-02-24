@@ -10,12 +10,12 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import io.pivotal.android.push.backend.PCFPushRegistrationApiRequest;
-import io.pivotal.android.push.backend.PCFPushRegistrationApiRequestImpl;
-import io.pivotal.android.push.backend.PCFPushRegistrationApiRequestProvider;
-import io.pivotal.android.push.backend.PCFPushUnregisterDeviceApiRequest;
-import io.pivotal.android.push.backend.PCFPushUnregisterDeviceApiRequestImpl;
-import io.pivotal.android.push.backend.PCFPushUnregisterDeviceApiRequestProvider;
+import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequest;
+import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestImpl;
+import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestProvider;
+import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequest;
+import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestImpl;
+import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestProvider;
 import io.pivotal.android.push.gcm.GcmProvider;
 import io.pivotal.android.push.gcm.GcmRegistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmRegistrationApiRequestImpl;

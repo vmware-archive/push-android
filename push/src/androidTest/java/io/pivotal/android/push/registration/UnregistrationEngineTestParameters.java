@@ -12,8 +12,8 @@ import java.util.HashSet;
 import java.util.Set;
 
 import io.pivotal.android.push.RegistrationParameters;
-import io.pivotal.android.push.backend.FakePCFPushUnregisterDeviceApiRequest;
-import io.pivotal.android.push.backend.PCFPushUnregisterDeviceApiRequestProvider;
+import io.pivotal.android.push.backend.api.FakePCFPushUnregisterDeviceApiRequest;
+import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestProvider;
 import io.pivotal.android.push.gcm.FakeGcmProvider;
 import io.pivotal.android.push.gcm.FakeGcmUnregistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;

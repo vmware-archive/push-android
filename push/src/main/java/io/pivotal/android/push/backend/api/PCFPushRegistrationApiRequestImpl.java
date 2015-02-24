@@ -1,11 +1,10 @@
 /*
  * Copyright (C) 2014 Pivotal Software, Inc. All rights reserved.
  */
-package io.pivotal.android.push.backend;
+package io.pivotal.android.push.backend.api;
 
 import android.content.Context;
 import android.os.Build;
-import android.util.Base64;
 
 import com.google.gson.Gson;
 
@@ -264,11 +263,6 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
 
         final TagsHelper tagsHelper = new TagsHelper(savedTags, parameters.getTags());
         return new PCFPushApiRegistrationPutRequestData.Tags(tagsHelper.getSubscribeTags(), tagsHelper.getUnsubscribeTags());
-    }
-
-    public static String getBasicAuthorizationValue(RegistrationParameters parameters) {
-        final String stringToEncode = parameters.getPlatformUuid() + ":" + parameters.getPlatformSecret();
-        return "Basic  " + Base64.encodeToString(stringToEncode.getBytes(), Base64.DEFAULT | Base64.NO_WRAP);
     }
 
     @Override

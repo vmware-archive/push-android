@@ -1,13 +1,15 @@
 /*
  * Copyright (C) 2014 Pivotal Software, Inc. All rights reserved.
  */
-package io.pivotal.android.push.backend;
+package io.pivotal.android.push.backend.api;
 
 import android.test.AndroidTestCase;
 
 import java.io.IOException;
 
 import io.pivotal.android.push.RegistrationParameters;
+import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestImpl;
+import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceListener;
 import io.pivotal.android.push.util.DelayedLoop;
 import io.pivotal.android.push.util.FakeHttpURLConnection;
 import io.pivotal.android.push.util.FakeNetworkWrapper;
@@ -25,7 +27,7 @@ public class PCFPushUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
     private RegistrationParameters parameters;
     private FakeNetworkWrapper networkWrapper;
     private DelayedLoop delayedLoop;
-    private PCFPushUnregisterDeviceListener PCFPushUnregisterDeviceListener;
+    private io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceListener PCFPushUnregisterDeviceListener;
 
     @Override
     protected void setUp() throws Exception {

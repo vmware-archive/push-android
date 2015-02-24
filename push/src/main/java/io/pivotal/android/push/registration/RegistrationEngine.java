@@ -8,9 +8,9 @@ import android.content.Context;
 import java.util.Set;
 
 import io.pivotal.android.push.RegistrationParameters;
-import io.pivotal.android.push.backend.PCFPushRegistrationApiRequest;
-import io.pivotal.android.push.backend.PCFPushRegistrationApiRequestProvider;
-import io.pivotal.android.push.backend.PCFPushRegistrationListener;
+import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequest;
+import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestProvider;
+import io.pivotal.android.push.backend.api.PCFPushRegistrationListener;
 import io.pivotal.android.push.gcm.GcmProvider;
 import io.pivotal.android.push.gcm.GcmRegistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmRegistrationApiRequestProvider;

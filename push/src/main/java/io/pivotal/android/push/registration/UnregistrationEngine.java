@@ -6,9 +6,9 @@ package io.pivotal.android.push.registration;
 import android.content.Context;
 
 import io.pivotal.android.push.RegistrationParameters;
-import io.pivotal.android.push.backend.PCFPushUnregisterDeviceApiRequest;
-import io.pivotal.android.push.backend.PCFPushUnregisterDeviceApiRequestProvider;
-import io.pivotal.android.push.backend.PCFPushUnregisterDeviceListener;
+import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequest;
+import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestProvider;
+import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceListener;
 import io.pivotal.android.push.gcm.GcmProvider;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;

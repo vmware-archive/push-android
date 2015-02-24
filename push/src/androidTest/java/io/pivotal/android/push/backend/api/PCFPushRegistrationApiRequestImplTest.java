@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2014 Pivotal Software, Inc. All rights reserved.
  */
-package io.pivotal.android.push.backend;
+package io.pivotal.android.push.backend.api;
 
 import android.test.AndroidTestCase;
 
@@ -15,6 +15,7 @@ import java.util.Set;
 import io.pivotal.android.push.RegistrationParameters;
 import io.pivotal.android.push.model.api.PCFPushApiRegistrationPostRequestData;
 import io.pivotal.android.push.model.api.PCFPushApiRegistrationPutRequestData;
+import io.pivotal.android.push.util.ApiRequestImpl;
 import io.pivotal.android.push.util.DelayedLoop;
 import io.pivotal.android.push.util.FakeHttpURLConnection;
 import io.pivotal.android.push.util.FakeNetworkWrapper;
@@ -272,7 +273,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
     }
 
     public void testAuthorization() {
-        final String base64encodedAuthorization = PCFPushRegistrationApiRequestImpl.getBasicAuthorizationValue(getParameters());
+        final String base64encodedAuthorization = ApiRequestImpl.getBasicAuthorizationValue(getParameters());
         assertEquals("Basic  " + TEST_BASE64_ENCODED_AUTHORIZATION, base64encodedAuthorization);
     }
 

@@ -9,8 +9,8 @@ import android.test.AndroidTestCase;
 import java.util.Set;
 
 import io.pivotal.android.push.RegistrationParameters;
-import io.pivotal.android.push.backend.PCFPushRegistrationApiRequestProvider;
-import io.pivotal.android.push.backend.FakePCFPushRegistrationApiRequest;
+import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestProvider;
+import io.pivotal.android.push.backend.api.FakePCFPushRegistrationApiRequest;
 import io.pivotal.android.push.gcm.FakeGcmProvider;
 import io.pivotal.android.push.gcm.FakeGcmRegistrationApiRequest;
 import io.pivotal.android.push.gcm.FakeGcmUnregistrationApiRequest;

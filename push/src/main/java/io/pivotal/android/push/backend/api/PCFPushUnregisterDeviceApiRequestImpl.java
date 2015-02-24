@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2014 Pivotal Software, Inc. All rights reserved.
  */
-package io.pivotal.android.push.backend;
+package io.pivotal.android.push.backend.api;
 
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -31,7 +31,7 @@ public class PCFPushUnregisterDeviceApiRequestImpl extends ApiRequestImpl implem
             final URL url = new URL(parameters.getServiceUrl() + "/" + Const.PCF_PUSH_REGISTRATION_REQUEST_ENDPOINT + "/" + pcfPushDeviceRegistrationId);
             final HttpURLConnection urlConnection = getHttpURLConnection(url);
             urlConnection.setRequestMethod("DELETE");
-            urlConnection.addRequestProperty("Authorization", PCFPushRegistrationApiRequestImpl.getBasicAuthorizationValue(parameters));
+            urlConnection.addRequestProperty("Authorization", ApiRequestImpl.getBasicAuthorizationValue(parameters));
             urlConnection.connect();
 
             final int statusCode = urlConnection.getResponseCode();

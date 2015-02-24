@@ -3,12 +3,16 @@
  */
 package io.pivotal.android.push.util;
 
+import android.util.Base64;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
+
+import io.pivotal.android.push.RegistrationParameters;
 
 public class ApiRequestImpl {
 
@@ -17,6 +21,11 @@ public class ApiRequestImpl {
     protected ApiRequestImpl(NetworkWrapper networkWrapper) {
         verifyArguments(networkWrapper);
         saveArguments(networkWrapper);
+    }
+
+    public static String getBasicAuthorizationValue(RegistrationParameters parameters) {
+        final String stringToEncode = parameters.getPlatformUuid() + ":" + parameters.getPlatformSecret();
+        return "Basic  " + Base64.encodeToString(stringToEncode.getBytes(), Base64.DEFAULT | Base64.NO_WRAP);
     }
 
     private void verifyArguments(NetworkWrapper networkWrapper) {
