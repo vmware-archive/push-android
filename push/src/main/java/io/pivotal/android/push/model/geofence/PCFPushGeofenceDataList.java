@@ -31,7 +31,7 @@ public class PCFPushGeofenceDataList extends LongSparseArray<PCFPushGeofenceData
         return changed;
     }
 
-    public boolean filteredAddAll(Iterable<PCFPushGeofenceData> i, Filter filter) {
+    public boolean addFiltered(Iterable<PCFPushGeofenceData> i, Filter filter) {
         if (i == null || filter == null) {
             return false;
         }

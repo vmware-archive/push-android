@@ -40,7 +40,7 @@ public class PCFPushGeofenceDataListTest extends AndroidTestCase {
     }
 
     public void testFilteredAddAllNullList() {
-        final boolean changed = model.filteredAddAll(null, new PCFPushGeofenceDataList.Filter() {
+        final boolean changed = model.addFiltered(null, new PCFPushGeofenceDataList.Filter() {
             @Override
             public boolean filterItem(PCFPushGeofenceData item) {
                 return true;
@@ -52,7 +52,7 @@ public class PCFPushGeofenceDataListTest extends AndroidTestCase {
 
     public void testFilteredAddAllEmptyList() {
         final PCFPushGeofenceDataList emptyList = new PCFPushGeofenceDataList();
-        final boolean changed = model.filteredAddAll(emptyList, new PCFPushGeofenceDataList.Filter() {
+        final boolean changed = model.addFiltered(emptyList, new PCFPushGeofenceDataList.Filter() {
             @Override
             public boolean filterItem(PCFPushGeofenceData item) {
                 return true;
@@ -64,14 +64,14 @@ public class PCFPushGeofenceDataListTest extends AndroidTestCase {
 
     public void testFilteredAddAllNullFilter() throws IOException {
         final PCFPushGeofenceDataList populatedList = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_three_items.json");
-        final boolean changed = model.filteredAddAll(populatedList, null);
+        final boolean changed = model.addFiltered(populatedList, null);
         assertFalse(changed);
         assertEquals(0, model.size());
     }
 
     public void testFilteredAddAllWithFilterThatAddsEverything() throws IOException {
         final PCFPushGeofenceDataList populatedList = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_three_items.json");
-        final boolean changed = model.filteredAddAll(populatedList, new PCFPushGeofenceDataList.Filter() {
+        final boolean changed = model.addFiltered(populatedList, new PCFPushGeofenceDataList.Filter() {
             @Override
             public boolean filterItem(PCFPushGeofenceData item) {
                 return true;
@@ -83,7 +83,7 @@ public class PCFPushGeofenceDataListTest extends AndroidTestCase {
 
     public void testFilteredAddAllWithFilterThatAddsNothing() throws IOException {
         final PCFPushGeofenceDataList populatedList = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_three_items.json");
-        final boolean changed = model.filteredAddAll(populatedList, new PCFPushGeofenceDataList.Filter() {
+        final boolean changed = model.addFiltered(populatedList, new PCFPushGeofenceDataList.Filter() {
             @Override
             public boolean filterItem(PCFPushGeofenceData item) {
                 return false;
@@ -95,7 +95,7 @@ public class PCFPushGeofenceDataListTest extends AndroidTestCase {
 
     public void testFilteredAddAllWithFilterThatItemsWithOddIds() throws IOException {
         final PCFPushGeofenceDataList populatedList = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_three_items.json");
-        final boolean changed = model.filteredAddAll(populatedList, new PCFPushGeofenceDataList.Filter() {
+        final boolean changed = model.addFiltered(populatedList, new PCFPushGeofenceDataList.Filter() {
             @Override
             public boolean filterItem(PCFPushGeofenceData item) {
                 return item.getId() % 2 == 1;

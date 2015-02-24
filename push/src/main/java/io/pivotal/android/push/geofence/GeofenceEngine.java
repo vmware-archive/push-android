@@ -69,7 +69,7 @@ public class GeofenceEngine {
     }
 
     private void addStoredGeofencesThatWereNotDeleted(PCFPushGeofenceDataList requiredGeofences, PCFPushGeofenceDataList storedGeofences, final PCFPushGeofenceResponseData responseData) {
-        requiredGeofences.filteredAddAll(storedGeofences, new PCFPushGeofenceDataList.Filter() {
+        requiredGeofences.addFiltered(storedGeofences, new PCFPushGeofenceDataList.Filter() {
             @Override
             public boolean filterItem(PCFPushGeofenceData item) {
                 return isItemNotDeleted(item);
@@ -82,7 +82,7 @@ public class GeofenceEngine {
     }
 
     private void addValidGeofencesFromUpdate(PCFPushGeofenceDataList requiredGeofences, List<PCFPushGeofenceData> newGeofences) {
-        requiredGeofences.filteredAddAll(newGeofences, new PCFPushGeofenceDataList.Filter() {
+        requiredGeofences.addFiltered(newGeofences, new PCFPushGeofenceDataList.Filter() {
 
             @Override
             public boolean filterItem(PCFPushGeofenceData item) {
