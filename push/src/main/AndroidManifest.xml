@@ -14,6 +14,10 @@
             android:name="io.pivotal.android.push.service.GcmService"
             android:exported="false"/>
 
+        <service
+            android:name="io.pivotal.android.push.service.GeofenceService"
+            android:exported="false"/>
+
     </application>
 
 </manifest>

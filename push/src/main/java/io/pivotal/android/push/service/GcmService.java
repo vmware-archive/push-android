@@ -13,8 +13,8 @@ import io.pivotal.android.push.receiver.GcmBroadcastReceiver;
 import io.pivotal.android.push.util.Logger;
 
 public class GcmService extends IntentService {
+
     public static final String KEY_MESSAGE = "message";
-    public static final String KEY_MESSAGE_UUID = "msg_uuid";
 
     public GcmService() {
         super("GcmService");
@@ -29,7 +29,7 @@ public class GcmService extends IntentService {
                 onReceive(intent);
             }
         } finally {
-            if (intent != null) {
+            if (intent != null && !isGeofenceUpdate(intent)) {
                 GcmBroadcastReceiver.completeWakefulIntent(intent);
             }
         }
@@ -41,12 +41,15 @@ public class GcmService extends IntentService {
         final Bundle extras = intent.getExtras();
 
         if (extras != null && !extras.isEmpty()) {
-            handleMessage(extras, messageType);
+            handleMessage(intent, extras, messageType);
         }
     }
 
-    private void handleMessage(Bundle extras, String messageType) {
-        if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
+    private void handleMessage(Intent intent, Bundle extras, String messageType) {
+        if (isGeofenceUpdate(intent)) {
+            handleGeofenceUpdate(intent);
+
+        } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
             onReceiveMessage(extras);
 
         } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
@@ -55,6 +58,22 @@ public class GcmService extends IntentService {
         } else if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
             onReceiveMessageSendError(extras);
         }
+    }
+
+    private void handleGeofenceUpdate(Intent intent) {
+        final Intent geofenceServiceIntent = new Intent(getBaseContext(), GeofenceService.class);
+        geofenceServiceIntent.replaceExtras(intent);
+        getBaseContext().startService(geofenceServiceIntent);
+    }
+
+    private boolean isGeofenceUpdate(Intent intent) {
+        final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
+        final String messageType = gcm.getMessageType(intent);
+        final Bundle extras = intent.getExtras();
+        return extras != null &&
+            extras.containsKey(GeofenceService.GEOFENCE_AVAILABLE) &&
+            extras.getBoolean(GeofenceService.GEOFENCE_AVAILABLE) &&
+            GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType);
     }
 
     public void onReceiveMessage(final Bundle payload) {}

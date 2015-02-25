@@ -3,10 +3,12 @@
  */
 package io.pivotal.android.push.service;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 import android.test.AndroidTestCase;
+import android.test.mock.MockContext;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
@@ -25,50 +27,67 @@ public class GcmServiceTest extends AndroidTestCase {
     }
 
     public void testHandleNullIntent() throws InterruptedException {
-        final FakeService service = startService(FakeService.class);
+        final FakeGcmService service = startService(FakeGcmService.class);
         service.onHandleIntent(null);
         service.assertMessageReceived(false);
+        service.assertMessageSendError(false);
+        service.assertMessageDeleted(false);
         service.onDestroy();
     }
 
     public void testHandleEmptyIntent() throws InterruptedException {
-        final Intent intent = new Intent(getContext(), FakeService.class);
-
-        final FakeService service = startService(FakeService.class);
+        final Intent intent = new Intent(getContext(), FakeGcmService.class);
+        final FakeGcmService service = startService(FakeGcmService.class);
         service.onHandleIntent(intent);
         service.assertMessageReceived(false);
+        service.assertMessageSendError(false);
+        service.assertMessageDeleted(false);
         service.onDestroy();
     }
 
     public void testMessageReceived() throws InterruptedException {
         final Intent intent = createMessageReceivedIntent(TEST_MESSAGE);
-
-        final FakeService service = startService(FakeService.class);
+        final FakeGcmService service = startService(FakeGcmService.class);
         service.onHandleIntent(intent);
         service.assertMessageContent(TEST_MESSAGE);
+        service.assertMessageSendError(false);
+        service.assertMessageDeleted(false);
         service.onDestroy();
     }
 
     public void testMessageDeleted() throws InterruptedException {
         final Intent intent = createMessageDeletedIntent();
-
-        final FakeService service = startService(FakeService.class);
+        final FakeGcmService service = startService(FakeGcmService.class);
         service.onHandleIntent(intent);
+        service.assertMessageSendError(false);
         service.assertMessageDeleted(true);
         service.onDestroy();
     }
 
     public void testMessageSendError() throws InterruptedException {
         final Intent intent = createMessageSendErrorIntent();
-
-        final FakeService service = startService(FakeService.class);
+        final FakeGcmService service = startService(FakeGcmService.class);
         service.onHandleIntent(intent);
         service.assertMessageSendError(true);
+        service.assertMessageDeleted(false);
         service.onDestroy();
     }
 
+    public void testReceivesGeofenceUpdateSilentPush() throws InterruptedException {
+        final FakeContext context = new FakeContext(getContext());
+        final Intent intent = createGeofenceUpdateSilentPushIntent(context);
+        final FakeGcmService service = startService(FakeGcmService.class, context);
+        service.onHandleIntent(intent);
+        service.assertMessageSendError(false);
+        service.assertMessageDeleted(false);
+        service.onDestroy();
+        assertEquals(GeofenceService.class.getCanonicalName(), context.getStartedServiceIntent().getComponent().getClassName());
+        assertEquals(getContext().getPackageName(), context.getStartedServiceIntent().getComponent().getPackageName());
+        assertTrue(context.getStartedServiceIntent().getExtras().getBoolean(GeofenceService.GEOFENCE_AVAILABLE));
+    }
+
     private Intent createMessageReceivedIntent(final String message) {
-        final Intent intent = new Intent(getContext(), FakeService.class);
+        final Intent intent = new Intent(getContext(), FakeGcmService.class);
         intent.setAction("com.google.android.c2dm.intent.RECEIVE");
         intent.putExtra("message_type", GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE);
         intent.putExtra(GcmService.KEY_MESSAGE, message);
@@ -76,24 +95,36 @@ public class GcmServiceTest extends AndroidTestCase {
     }
 
     private Intent createMessageDeletedIntent() {
-        final Intent intent = new Intent(getContext(), FakeService.class);
+        final Intent intent = new Intent(getContext(), FakeGcmService.class);
         intent.setAction("com.google.android.c2dm.intent.RECEIVE");
         intent.putExtra("message_type", GoogleCloudMessaging.MESSAGE_TYPE_DELETED);
         return intent;
     }
 
     private Intent createMessageSendErrorIntent() {
-        final Intent intent = new Intent(getContext(), FakeService.class);
+        final Intent intent = new Intent(getContext(), FakeGcmService.class);
         intent.setAction("com.google.android.c2dm.intent.RECEIVE");
         intent.putExtra("message_type", GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR);
         return intent;
     }
 
-    private <T extends FakeService> T startService(final Class<T> klass) {
+    private Intent createGeofenceUpdateSilentPushIntent(final Context context) {
+        final Intent intent = new Intent(context, FakeGcmService.class);
+        intent.setAction("com.google.android.c2dm.intent.RECEIVE");
+        intent.putExtra("message_type", GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE);
+        intent.putExtra(GeofenceService.GEOFENCE_AVAILABLE, true);
+        return intent;
+    }
+
+    private <T extends FakeGcmService> T startService(final Class<T> klass) {
+        return startService(klass, getContext());
+    }
+
+    private <T extends FakeGcmService> T startService(final Class<T> klass, final Context context) {
         try {
             final Object object = klass.newInstance();
             final T service = klass.cast(object);
-            service.attachBaseContext(getContext());
+            service.attachBaseContext(context);
             service.onCreate();
             return service;
         } catch (Exception e) {
@@ -101,7 +132,38 @@ public class GcmServiceTest extends AndroidTestCase {
         }
     }
 
-    private static final class FakeService extends GcmService {
+    private final class FakeContext extends MockContext {
+
+        private final Context context;
+        private Intent startedServiceIntent;
+
+        private FakeContext(Context context) {
+            this.context = context;
+        }
+
+        @Override
+        public Context getApplicationContext() {
+            return this;
+        }
+
+        @Override
+        public String getPackageName() {
+            return context.getPackageName();
+        }
+
+        @Override
+        public ComponentName startService(Intent service) {
+            startedServiceIntent = service;
+            final ComponentName componentName = service.getComponent();
+            return componentName;
+        }
+
+        public Intent getStartedServiceIntent() {
+            return startedServiceIntent;
+        }
+    }
+
+    private static final class FakeGcmService extends GcmService {
 
         private boolean messageDeleted = false;
         private boolean messageSendError = false;
@@ -109,7 +171,7 @@ public class GcmServiceTest extends AndroidTestCase {
 
         private Bundle bundle;
 
-        public FakeService() {
+        public FakeGcmService() {
             super();
         }
 
