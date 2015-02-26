@@ -55,9 +55,9 @@ public class UnregistrationEngineTestParameters {
         final FakePushPreferencesProvider pushPreferencesProvider;
 
         if (startingPCFPushDeviceRegistrationIdInPrefs == null) {
-            pushPreferencesProvider = new FakePushPreferencesProvider(null, startingPCFPushDeviceRegistrationIdInPrefs, -1, null, null, null, null, null, null, null);
+            pushPreferencesProvider = new FakePushPreferencesProvider(null, startingPCFPushDeviceRegistrationIdInPrefs, -1, null, null, null, null, null, null, null, 0);
         } else {
-            pushPreferencesProvider = new FakePushPreferencesProvider(GCM_DEVICE_ID_IN_PREFS, startingPCFPushDeviceRegistrationIdInPrefs, APP_VERSION_IN_PREFS, GCM_SENDER_ID_IN_PREFS, PLATFORM_UUID_IN_PREFS, PLATFORM_SECRET_IN_PREFS, DEVICE_ALIAS_IN_PREFS, PACKAGE_NAME_IN_PREFS, SERVICE_URL_IN_PREFS, TAGS_IN_PREFS);
+            pushPreferencesProvider = new FakePushPreferencesProvider(GCM_DEVICE_ID_IN_PREFS, startingPCFPushDeviceRegistrationIdInPrefs, APP_VERSION_IN_PREFS, GCM_SENDER_ID_IN_PREFS, PLATFORM_UUID_IN_PREFS, PLATFORM_SECRET_IN_PREFS, DEVICE_ALIAS_IN_PREFS, PACKAGE_NAME_IN_PREFS, SERVICE_URL_IN_PREFS, TAGS_IN_PREFS, 0);
         }
 
         final FakeGcmUnregistrationApiRequest gcmUnregistrationApiRequest = new FakeGcmUnregistrationApiRequest(gcmProvider);

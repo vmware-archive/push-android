@@ -16,16 +16,6 @@ public class GcmServiceTest extends AndroidTestCase {
 
     private static final String TEST_MESSAGE = "some fancy message";
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-    }
-
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
     public void testHandleNullIntent() throws InterruptedException {
         final FakeGcmService service = startService(FakeGcmService.class);
         service.onHandleIntent(null);
@@ -75,7 +65,7 @@ public class GcmServiceTest extends AndroidTestCase {
 
     public void testReceivesGeofenceUpdateSilentPush() throws InterruptedException {
         final FakeContext context = new FakeContext(getContext());
-        final Intent intent = createGeofenceUpdateSilentPushIntent(context);
+        final Intent intent = GeofenceServiceTest.createGeofenceUpdateSilentPushIntent(context, FakeGcmService.class);
         final FakeGcmService service = startService(FakeGcmService.class, context);
         service.onHandleIntent(intent);
         service.assertMessageSendError(false);
@@ -105,14 +95,6 @@ public class GcmServiceTest extends AndroidTestCase {
         final Intent intent = new Intent(getContext(), FakeGcmService.class);
         intent.setAction("com.google.android.c2dm.intent.RECEIVE");
         intent.putExtra("message_type", GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR);
-        return intent;
-    }
-
-    private Intent createGeofenceUpdateSilentPushIntent(final Context context) {
-        final Intent intent = new Intent(context, FakeGcmService.class);
-        intent.setAction("com.google.android.c2dm.intent.RECEIVE");
-        intent.putExtra("message_type", GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE);
-        intent.putExtra(GeofenceService.GEOFENCE_AVAILABLE, true);
         return intent;
     }
 

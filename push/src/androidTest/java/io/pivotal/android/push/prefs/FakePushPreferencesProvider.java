@@ -17,6 +17,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     private String serviceUrl;
     private Set<String> tags;
     private int appVersion;
+    private long lastGeofenceUpdate;
     private boolean wasGcmDeviceRegistrationIdSaved = false;
     private boolean wasPCFPushDeviceRegistrationIdSaved = false;
     private boolean wasAppVersionSaved = false;
@@ -27,6 +28,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     private boolean wasPackageNameSaved = false;
     private boolean wasServiceUrlSaved = false;
     private boolean wasTagsSaved = false;
+    private boolean wasLastGeofenceUpdateSaved = false;
 
     public FakePushPreferencesProvider() {
     }
@@ -40,7 +42,8 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
                                        String deviceAliasToLoad,
                                        String packageNameToLoad,
                                        String serviceUrlToLoad,
-                                       Set<String> tagsToLoad) {
+                                       Set<String> tagsToLoad,
+                                       long lastGeofenceUpdateToLoad) {
 
         this.gcmDeviceRegistrationId = gcmDeviceRegistrationIdToLoad;
         this.pcfPushDeviceRegistrationId = pcfPushDeviceRegistrationIdToLoad;
@@ -51,7 +54,8 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
         this.deviceAlias = deviceAliasToLoad;
         this.packageName = packageNameToLoad;
         this.serviceUrl = serviceUrlToLoad;
-        tags = tagsToLoad;
+        this.lastGeofenceUpdate = lastGeofenceUpdateToLoad;
+        this.tags = tagsToLoad;
     }
 
     @Override
@@ -97,6 +101,11 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     @Override
     public String getServiceUrl() {
         return serviceUrl;
+    }
+
+    @Override
+    public long getLastGeofenceUpdate() {
+        return lastGeofenceUpdate;
     }
 
     @Override
@@ -164,6 +173,12 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
         wasTagsSaved = true;
     }
 
+    @Override
+    public void setLastGeofenceUpdate(long timestamp) {
+        this.lastGeofenceUpdate = timestamp;
+        wasLastGeofenceUpdateSaved = true;
+    }
+
     public boolean wasGcmDeviceRegistrationIdSaved() {
         return wasGcmDeviceRegistrationIdSaved;
     }
@@ -202,5 +217,9 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
 
     public boolean wereTagsSaved() {
         return wasTagsSaved;
+    }
+
+    public boolean wasLastGeofenceUpdateSaved() {
+        return wasLastGeofenceUpdateSaved;
     }
 }

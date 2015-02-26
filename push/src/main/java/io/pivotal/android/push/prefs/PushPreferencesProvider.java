@@ -48,4 +48,8 @@ public interface PushPreferencesProvider {
     Set<String> getTags();
 
     void setTags(Set<String> tags);
+
+    long getLastGeofenceUpdate();
+
+    void setLastGeofenceUpdate(long timestamp);
 }

@@ -29,7 +29,7 @@ public class GcmService extends IntentService {
                 onReceive(intent);
             }
         } finally {
-            if (intent != null && !isGeofenceUpdate(intent)) {
+            if (intent != null && !GeofenceService.isGeofenceUpdate(this, intent)) {
                 GcmBroadcastReceiver.completeWakefulIntent(intent);
             }
         }
@@ -46,7 +46,7 @@ public class GcmService extends IntentService {
     }
 
     private void handleMessage(Intent intent, Bundle extras, String messageType) {
-        if (isGeofenceUpdate(intent)) {
+        if (GeofenceService.isGeofenceUpdate(this, intent)) {
             handleGeofenceUpdate(intent);
 
         } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
@@ -64,16 +64,6 @@ public class GcmService extends IntentService {
         final Intent geofenceServiceIntent = new Intent(getBaseContext(), GeofenceService.class);
         geofenceServiceIntent.replaceExtras(intent);
         getBaseContext().startService(geofenceServiceIntent);
-    }
-
-    private boolean isGeofenceUpdate(Intent intent) {
-        final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
-        final String messageType = gcm.getMessageType(intent);
-        final Bundle extras = intent.getExtras();
-        return extras != null &&
-            extras.containsKey(GeofenceService.GEOFENCE_AVAILABLE) &&
-            extras.getBoolean(GeofenceService.GEOFENCE_AVAILABLE) &&
-            GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType);
     }
 
     public void onReceiveMessage(final Bundle payload) {}

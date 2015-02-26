@@ -3,10 +3,8 @@
  */
 package io.pivotal.android.push.prefs;
 
-import android.annotation.TargetApi;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.Build;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -30,6 +28,7 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
     private static final String PROPERTY_PACKAGE_NAME = "package_name";
     private static final String PROPERTY_SERVICE_URL = "base_server_url";
     private static final String PROPERTY_TAGS = "tags";
+    private static final String PROPERTY_GEOFENCE_UPDATE = "geofence_update";
 
     private final Context context;
 
@@ -171,6 +170,19 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
         final SharedPreferences prefs = getSharedPreferences();
         final SharedPreferences.Editor editor = prefs.edit();
         editor.putStringSet(PROPERTY_TAGS, tags);
+        editor.commit();
+    }
+
+    @Override
+    public long getLastGeofenceUpdate() {
+        return getSharedPreferences().getLong(PROPERTY_GEOFENCE_UPDATE, 0);
+    }
+
+    @Override
+    public void setLastGeofenceUpdate(long timestamp) {
+        final SharedPreferences prefs = getSharedPreferences();
+        final SharedPreferences.Editor editor = prefs.edit();
+        editor.putLong(PROPERTY_GEOFENCE_UPDATE, timestamp);
         editor.commit();
     }
 }
