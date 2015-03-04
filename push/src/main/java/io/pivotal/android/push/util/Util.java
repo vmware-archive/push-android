@@ -7,8 +7,14 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 
+import com.google.gson.Gson;
+
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.List;
+import java.util.Map;
 
 public class Util {
 
@@ -63,6 +69,39 @@ public class Util {
                     Logger.w("Was not able to save " + idType + " to filesystem. This error is not-fatal. " + e.getLocalizedMessage());
                 }
             }
+        }
+    }
+
+    public static void saveJsonMapToFilesystem(Context context, List<Map<String, String>> map) {
+        if (DebugUtil.getInstance(context).isDebuggable()) {
+            int res = context.checkCallingOrSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE");
+            if (res == PackageManager.PERMISSION_GRANTED) {
+                FileWriter writer = null;
+                try {
+                    final File externalFilesDir = context.getExternalFilesDir(null);
+                    if (externalFilesDir == null) {
+                        Logger.d("Was not able to get the externalFilesDir");
+                        return;
+                    }
+                    final File dir = new File(externalFilesDir.getAbsolutePath() + File.separator + "pushlib");
+                    if (!dir.exists()) {
+                        dir.mkdir();
+                    }
+                    final File file = new File(dir, "geofences.json");
+                    writer = new FileWriter(file);
+                    new Gson().toJson(map, writer);
+                    Logger.d("Saved geofences to file: " + file.getAbsolutePath());
+                } catch (Exception e) {
+                    Logger.w("Was not able to save geofences to filesystem. This error is not-fatal. " + e.getLocalizedMessage());
+                } finally {
+                    if (writer != null) {
+                        try {
+                            writer.close();
+                        } catch (IOException e) {}
+                    }
+                }
+            }
+
         }
     }
 }

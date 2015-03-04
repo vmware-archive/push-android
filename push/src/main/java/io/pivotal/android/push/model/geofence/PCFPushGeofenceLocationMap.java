@@ -28,6 +28,17 @@ public class PCFPushGeofenceLocationMap extends HashMap<String, PCFPushGeofenceL
         public PCFPushGeofenceLocation getLocation() {
             return location;
         }
+
+        /**
+         * Returns the geofence data object associated with this particular geofence location
+         *
+         * @param list A list of known PCFPushGeofenceData objects
+         *
+         * @return the PCFPusgGeofenceData object that matches the geofence ID in this location.
+         */
+        public PCFPushGeofenceData getGeofenceData(PCFPushGeofenceDataList list) {
+            return list.get(geofenceId);
+        }
     }
 
     public void addAll(PCFPushGeofenceDataList list) {
@@ -55,14 +66,18 @@ public class PCFPushGeofenceLocationMap extends HashMap<String, PCFPushGeofenceL
     }
 
     private static long getGeofenceId(String key) {
-        return Long.parseLong(key.split("_")[0]);
-    }
-
-    private static long getLocationId(String key) {
         return Long.parseLong(key.split("_")[1]);
     }
 
+    private static long getLocationId(String key) {
+        return Long.parseLong(key.split("_")[2]);
+    }
+
+    public static String getAndroidRequestId(LocationEntry entry) {
+        return getAndroidRequestId(entry.getGeofenceId(), entry.getLocationId());
+    }
+
     public static String getAndroidRequestId(long geofenceId, long locationId) {
-        return String.format("%d_%d", geofenceId, locationId);
+        return String.format("PCF_%d_%d", geofenceId, locationId);
     }
 }

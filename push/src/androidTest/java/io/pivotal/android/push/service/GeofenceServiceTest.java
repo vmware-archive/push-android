@@ -52,7 +52,7 @@ public class GeofenceServiceTest extends AndroidTestCase {
         final Intent intent = new Intent(context, serviceClass);
         intent.setAction("com.google.android.c2dm.intent.RECEIVE");
         intent.putExtra("message_type", GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE);
-        intent.putExtra(GeofenceService.GEOFENCE_AVAILABLE, true);
+        intent.putExtra(GeofenceService.GEOFENCE_AVAILABLE, "true");
         return intent;
     }
 

@@ -247,7 +247,7 @@ public class GeofenceEngineTest extends AndroidTestCase {
 
     private void assertRegisterGeofences(PCFPushGeofenceLocationMap geofences) {
         final ArgumentCaptor<PCFPushGeofenceLocationMap> captor = ArgumentCaptor.forClass(PCFPushGeofenceLocationMap.class);
-        verify(registrar).registerGeofences(captor.capture());
+        verify(registrar).registerGeofences(captor.capture(), any(PCFPushGeofenceDataList.class));
         assertEquals(geofences, captor.getValue());
     }
 

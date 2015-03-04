@@ -73,7 +73,8 @@ public class GcmServiceTest extends AndroidTestCase {
         service.onDestroy();
         assertEquals(GeofenceService.class.getCanonicalName(), context.getStartedServiceIntent().getComponent().getClassName());
         assertEquals(getContext().getPackageName(), context.getStartedServiceIntent().getComponent().getPackageName());
-        assertTrue(context.getStartedServiceIntent().getExtras().getBoolean(GeofenceService.GEOFENCE_AVAILABLE));
+        assertTrue(context.getStartedServiceIntent().getExtras().getString(GeofenceService.GEOFENCE_AVAILABLE).equals("true"));
+        assertTrue(context.getStartedServiceIntent().getAction().equals(intent.getAction()));
     }
 
     private Intent createMessageReceivedIntent(final String message) {

@@ -53,10 +53,10 @@ public class GeofenceEngine {
 
         addValidGeofencesFromUpdate(requiredGeofences, responseData.getGeofences());
 
-        final PCFPushGeofenceLocationMap requiredGeofencesMap = new PCFPushGeofenceLocationMap();
-        requiredGeofencesMap.addAll(requiredGeofences);
+        final PCFPushGeofenceLocationMap geofencesToRegister = new PCFPushGeofenceLocationMap();
+        geofencesToRegister.addAll(requiredGeofences);
 
-        registrar.registerGeofences(requiredGeofencesMap);
+        registrar.registerGeofences(geofencesToRegister, requiredGeofences);
         store.saveRegisteredGeofences(requiredGeofences);
     }
 

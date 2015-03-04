@@ -19,6 +19,7 @@ import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
 import io.pivotal.android.push.receiver.GcmBroadcastReceiver;
 import io.pivotal.android.push.util.FileHelper;
+import io.pivotal.android.push.util.GsonUtil;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.NetworkWrapper;
 import io.pivotal.android.push.util.NetworkWrapperImpl;
@@ -26,6 +27,7 @@ import io.pivotal.android.push.util.NetworkWrapperImpl;
 public class GeofenceService extends IntentService {
 
     public static final String GEOFENCE_AVAILABLE = "pivotal.push.geofence_update_available";
+    public static final String GEOFENCE_UPDATE_JSON = "pivotal.push.geofence_update_json";
 
     private PCFPushGetGeofenceUpdatesApiRequest apiRequest;
     private GeofenceEngine geofenceEngine;
@@ -56,16 +58,21 @@ public class GeofenceService extends IntentService {
         final Bundle extras = intent.getExtras();
         return extras != null &&
                 extras.containsKey(GeofenceService.GEOFENCE_AVAILABLE) &&
-                extras.getBoolean(GeofenceService.GEOFENCE_AVAILABLE) &&
+                extras.getString(GeofenceService.GEOFENCE_AVAILABLE) != null &&
+                extras.getString(GeofenceService.GEOFENCE_AVAILABLE).equals("true") &
                 GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType);
     }
 
     @Override
     protected void onHandleIntent(Intent intent) {
-        Logger.fd("GeofenceService has received a silent push message from GCM.");
 
         try {
             if (intent != null) {
+                if (intent.getAction() != null) {
+                    Logger.d("GeofenceService has received an intent: " + intent.getAction());
+                } else {
+                    Logger.d("GeofenceService has received an intent with no action");
+                }
                 onReceive(intent);
             }
         } finally {
@@ -78,41 +85,60 @@ public class GeofenceService extends IntentService {
     private void onReceive(Intent intent) {
 
         if (isGeofenceUpdate(this, intent)) {
-            handleGeofenceUpdates();
+            handleGeofenceUpdate(intent);
         }
     }
 
-    private void handleGeofenceUpdates() {
+    private void handleGeofenceUpdate(Intent intent) {
+        Logger.d("handleGeofenceUpdate: " + intent);
 
         instantiateDependencies();
 
         final long timestamp = pushPreferencesProvider.getLastGeofenceUpdate();
 
-        // TODO - consider scheduling this request a short random time in the future in order to stagger the demand on the server.
-        apiRequest.getGeofenceUpdates(timestamp, getParameters(), new PCFPushGetGeofenceUpdatesListener() {
+        if (doesIntentProvideJson(intent)) {
 
-            @Override
-            public void onPCFPushGetGeofenceUpdatesSuccess(PCFPushGeofenceResponseData responseData) {
-                // NOTE - it may be possible that this request comes back AFTER a second request is initiated.
-                // In this case the response for the later request may be applied on top of already updated data.
-                // This might be a problem since the later request will be based on an older timestamp.
-                // We need to determine if that's a real problem.
+            Logger.d("This update provides the list of geofences.");
+            final String updateJson = intent.getStringExtra(GEOFENCE_UPDATE_JSON);
+            if (updateJson != null && !updateJson.isEmpty()) {
+                final PCFPushGeofenceResponseData responseData = GsonUtil.getGson().fromJson(updateJson, PCFPushGeofenceResponseData.class);
                 onSuccessfullyFetchedUpdates(responseData);
             }
 
-            @Override
-            public void onPCFPushGetGeofenceUpdatesFailed(String reason) {
-                // TODO - consider a retry mechanism for failed requests.
-                Logger.w("Error fetching geofence updates: " + reason);
-            }
-        });
+        } else {
+
+            Logger.d("The geofence update is available on the server.");
+
+            // TODO - consider scheduling this request a short random time in the future in order to stagger the demand on the server.
+            apiRequest.getGeofenceUpdates(timestamp, getParameters(), new PCFPushGetGeofenceUpdatesListener() {
+
+                @Override
+                public void onPCFPushGetGeofenceUpdatesSuccess(PCFPushGeofenceResponseData responseData) {
+                    // NOTE - it may be possible that this request comes back AFTER a second request is initiated.
+                    // In this case the response for the later request may be applied on top of already updated data.
+                    // This might be a problem since the later request will be based on an older timestamp.
+                    // We need to determine if that's a real problem.
+                    onSuccessfullyFetchedUpdates(responseData);
+                }
+
+                @Override
+                public void onPCFPushGetGeofenceUpdatesFailed(String reason) {
+                    // TODO - consider a retry mechanism for failed requests.
+                    Logger.w("Error fetching geofence updates: " + reason);
+                }
+            });
+        }
+    }
+
+    private boolean doesIntentProvideJson(Intent intent) {
+        return intent.hasExtra(GEOFENCE_UPDATE_JSON);
     }
 
     private void onSuccessfullyFetchedUpdates(PCFPushGeofenceResponseData responseData) {
         if (responseData != null && responseData.getGeofences() != null) {
-            Logger.i("Successfully geofence updates. Received " + responseData.getGeofences().size() + " items.");
+            Logger.i("Successfully fetched geofence updates. Received " + responseData.getGeofences().size() + " items.");
         } else {
-            Logger.i("Successfully geofence updates. Received 0 items.");
+            Logger.i("Successfully fetched geofence updates. Received 0 items.");
         }
         if (responseData != null) {
             geofenceEngine.processResponseData(responseData);
@@ -130,7 +156,7 @@ public class GeofenceService extends IntentService {
         }
         if (geofenceEngine == null) {
             final FileHelper fileHelper = new FileHelper(getApplicationContext());
-            final GeofenceRegistrar registrar = new GeofenceRegistrar();
+            final GeofenceRegistrar registrar = new GeofenceRegistrar(this);
             final GeofencePersistentStore store = new GeofencePersistentStore(this, fileHelper);
             geofenceEngine = new GeofenceEngine(registrar, store);
         }

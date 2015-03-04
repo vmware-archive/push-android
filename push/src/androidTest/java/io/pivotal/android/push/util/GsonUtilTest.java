@@ -57,7 +57,7 @@ public class GsonUtilTest extends AndroidTestCase {
         assertEquals("robs_wizard_tacos", location.getName());
         assertEquals(53.5, location.getLatitude());
         assertEquals(-91.5, location.getLongitude());
-        assertEquals(120.0, location.getRadius());
+        assertEquals(120.0f, location.getRadius());
 
         // Serialize
         final String json = GsonUtil.getGson().toJson(array, typeToken.getType());
