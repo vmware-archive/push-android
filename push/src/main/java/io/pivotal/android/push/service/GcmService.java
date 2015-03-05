@@ -13,17 +13,33 @@ import android.os.Bundle;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.location.Geofence;
-import com.google.android.gms.location.GeofencingEvent;
 
+import java.util.Map;
+
+import io.pivotal.android.push.geofence.GeofencePersistentStore;
 import io.pivotal.android.push.receiver.GcmBroadcastReceiver;
+import io.pivotal.android.push.util.FileHelper;
+import io.pivotal.android.push.util.GeofenceHelper;
 import io.pivotal.android.push.util.Logger;
 
 public class GcmService extends IntentService {
 
+    public static final String GEOFENCE_TRANSITION_KEY = "com.google.android.location.intent.extra.transition";
     public static final String KEY_MESSAGE = "message";
+
+    private GeofenceHelper helper;
+    private GeofencePersistentStore store;
 
     public GcmService() {
         super("GcmService");
+    }
+
+    /* package */ void setGeofenceHelper(GeofenceHelper helper) {
+        this.helper = helper;
+    }
+
+    /* package */ void setGeofencePersistentStore(GeofencePersistentStore store) {
+        this.store = store;
     }
 
     @Override
@@ -31,13 +47,25 @@ public class GcmService extends IntentService {
         Logger.fd("GcmService has received a push message from GCM.");
 
         try {
+
             if (intent != null) {
+                initializeDependencies(intent);
                 onReceive(intent);
             }
         } finally {
             if (intent != null && !GeofenceService.isGeofenceUpdate(this, intent)) {
                 GcmBroadcastReceiver.completeWakefulIntent(intent);
             }
+        }
+    }
+
+    private void initializeDependencies(Intent intent) {
+        if (helper == null) {
+            helper = new GeofenceHelper(intent);
+        }
+        if (store == null) {
+            final FileHelper fileHelper = new FileHelper(this);
+            store = new GeofencePersistentStore(this, fileHelper);
         }
     }
 
@@ -78,17 +106,20 @@ public class GcmService extends IntentService {
 
     private void handleGeofencingEvent(Intent intent) {
         Logger.d("handleGeofencingEvent: " + intent);
-        final GeofencingEvent event = GeofencingEvent.fromIntent(intent);
-        for (final Geofence geofence : event.getTriggeringGeofences()) {
+        for (final Geofence geofence : helper.getGeofences()) {
 
-            if (event.getGeofenceTransition() == Geofence.GEOFENCE_TRANSITION_ENTER) {
+            if (helper.getGeofenceTransition() == Geofence.GEOFENCE_TRANSITION_ENTER) {
                 Logger.i("Entered geofence " + geofence);
-                onGeofenceEnter(intent.getExtras());
+                // TODO : callback gets Map<String,String> data
+                // TODO : find payload data in persistent store for this particular event
+                onGeofenceEnter(null);
 
-            } else if (event.getGeofenceTransition() == Geofence.GEOFENCE_TRANSITION_EXIT) {
+            } else if (helper.getGeofenceTransition() == Geofence.GEOFENCE_TRANSITION_EXIT) {
 
                 Logger.i("Exited geofence " + geofence);
-                onGeofenceExit(intent.getExtras());
+                // TODO : callback gets Map<String,String> data
+                // TODO : find payload data in persistent store for this particular event
+                onGeofenceExit(null);
             }
         }
     }
@@ -99,15 +130,12 @@ public class GcmService extends IntentService {
 
     public void onReceiveMessageSendError(final Bundle payload) {}
 
-    public void onGeofenceEnter(final Bundle payload) {}
+    public void onGeofenceEnter(final Map<String, String> payload) {}
 
-    public void onGeofenceExit(final Bundle payload) {}
+    public void onGeofenceExit(final Map<String, String> payload) {}
 
-    public static boolean isGeofencingEvent(Intent intent) {
-        final GeofencingEvent geofencingEvent = GeofencingEvent.fromIntent(intent);
-        final boolean hasError = geofencingEvent.hasError();
-        final boolean isEmpty = geofencingEvent.getTriggeringGeofences() == null || geofencingEvent.getTriggeringGeofences().isEmpty();
-        return hasError || !isEmpty;
+    public boolean isGeofencingEvent(Intent intent) {
+        return (intent != null && helper.isGeofencingEvent());
     }
 
     public static Class<?> getGcmServiceClass(final Context context) {

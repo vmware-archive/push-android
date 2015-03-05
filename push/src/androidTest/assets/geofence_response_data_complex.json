@@ -25,7 +25,7 @@
                 "message": "tacos"
             },
             "expiry_time": 1142744274,
-            "trigger_type": "enter",
+            "trigger_type": "exit",
             "locations": [
                 {
                     "id": 66,
@@ -42,7 +42,7 @@
                 "message": "eat all this great stuff"
             },
             "expiry_time": 1142744274,
-            "trigger_type": "enter",
+            "trigger_type": "exit",
             "locations": [
                 {
                     "id": 66,
