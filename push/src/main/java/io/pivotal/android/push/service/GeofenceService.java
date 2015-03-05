@@ -18,6 +18,7 @@ import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
 import io.pivotal.android.push.receiver.GcmBroadcastReceiver;
+import io.pivotal.android.push.util.DebugUtil;
 import io.pivotal.android.push.util.FileHelper;
 import io.pivotal.android.push.util.GsonUtil;
 import io.pivotal.android.push.util.Logger;
@@ -94,9 +95,7 @@ public class GeofenceService extends IntentService {
 
         instantiateDependencies();
 
-        final long timestamp = pushPreferencesProvider.getLastGeofenceUpdate();
-
-        if (doesIntentProvideJson(intent)) {
+        if (doesIntentProvideJson(intent) && DebugUtil.getInstance(this).isDebuggable()) {
 
             Logger.d("This update provides the list of geofences.");
             final String updateJson = intent.getStringExtra(GEOFENCE_UPDATE_JSON);
@@ -107,6 +106,8 @@ public class GeofenceService extends IntentService {
 
         } else {
 
+            final long timestamp = pushPreferencesProvider.getLastGeofenceUpdate();
+
             Logger.d("The geofence update is available on the server.");
 
             // TODO - consider scheduling this request a short random time in the future in order to stagger the demand on the server.
@@ -114,10 +115,6 @@ public class GeofenceService extends IntentService {
 
                 @Override
                 public void onPCFPushGetGeofenceUpdatesSuccess(PCFPushGeofenceResponseData responseData) {
-                    // NOTE - it may be possible that this request comes back AFTER a second request is initiated.
-                    // In this case the response for the later request may be applied on top of already updated data.
-                    // This might be a problem since the later request will be based on an older timestamp.
-                    // We need to determine if that's a real problem.
                     onSuccessfullyFetchedUpdates(responseData);
                 }
 
