@@ -56,6 +56,8 @@ public class GeofenceEngine {
         final PCFPushGeofenceLocationMap geofencesToRegister = new PCFPushGeofenceLocationMap();
         geofencesToRegister.addAll(requiredGeofences);
 
+        // TODO : Check expiry?  Expired geofences shouldn't be passed to the registrar.
+
         registrar.registerGeofences(geofencesToRegister, requiredGeofences);
         store.saveRegisteredGeofences(requiredGeofences);
     }

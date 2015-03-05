@@ -4,7 +4,6 @@ import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-import android.widget.Toast;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -26,13 +25,13 @@ import io.pivotal.android.push.model.geofence.PCFPushGeofenceDataList;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocation;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocationMap;
 import io.pivotal.android.push.service.GcmService;
+import io.pivotal.android.push.util.DebugUtil;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.Util;
 
 public class GeofenceRegistrar {
 
     public static final String GEOFENCE_UPDATE_BROADCAST = "io.pivotal.android.push.geofence.GeofenceRegistrar.Update";
-    public static final String GEOFENCES_KEY = "geofences";
 
     private final Context context;
     private GoogleApiClient googleApiClient;
@@ -42,43 +41,53 @@ public class GeofenceRegistrar {
     }
 
     public void registerGeofences(PCFPushGeofenceLocationMap geofencesToRegister, PCFPushGeofenceDataList geofenceDataList) {
-        if (geofencesToRegister == null) {
+        if (geofencesToRegister == null || geofenceDataList == null) {
             return;
         }
 
-        final List<Map<String, String>> serializableList = new LinkedList<>();
+        final List<Map<String, String>> serializableList = initializeSerializableGeofencesList();
+
         final List<Geofence> list = new ArrayList<>(geofencesToRegister.size());
         for (final PCFPushGeofenceLocationMap.LocationEntry entry : geofencesToRegister.locationEntrySet()) {
-            final Map<String, String> serializableItem = new TreeMap<>();
-            final Geofence item = makeGeofence(entry, geofenceDataList, serializableItem);
-            list.add(item);
-            serializableList.add(serializableItem);
+            list.add(makeGeofence(entry, geofenceDataList));
+            if (serializableList != null) {
+                serializableList.add(makeSerializableGeofence(entry));
+            }
         }
 
-        monitorGeofences(list);
-        Util.saveJsonMapToFilesystem(context, serializableList);
-        sendBroadcast(serializableList);
+        monitorGeofences(list, serializableList);
     }
 
-    private Geofence makeGeofence(PCFPushGeofenceLocationMap.LocationEntry entry, PCFPushGeofenceDataList geofenceDataList, Map<String, String> serializableItem) {
+    private List<Map<String, String>> initializeSerializableGeofencesList() {
+        if (DebugUtil.getInstance(context).isDebuggable()) {
+            return new LinkedList<>();
+        } else {
+            return null;
+        }
+    }
+
+    private Geofence makeGeofence(PCFPushGeofenceLocationMap.LocationEntry entry, PCFPushGeofenceDataList geofenceDataList) {
         final PCFPushGeofenceData geofenceData = entry.getGeofenceData(geofenceDataList);
         final PCFPushGeofenceLocation geofenceLocation = entry.getLocation();
 
-        // Check expiry?  Expired geofences shouldn't be passed to us.
-
-        final Geofence geofence = new Geofence.Builder()
+        return new Geofence.Builder()
                 .setCircularRegion(geofenceLocation.getLatitude(), geofenceLocation.getLongitude(), geofenceLocation.getRadius())
                 .setRequestId(PCFPushGeofenceLocationMap.getAndroidRequestId(entry))
                 .setTransitionTypes(getTransitionTypes(geofenceData.getTriggerType()))
                 .setExpirationDuration(getExpiryDuration(geofenceData.getExpiryTime()))
                 .build();
+    }
+
+    private Map<String, String> makeSerializableGeofence(PCFPushGeofenceLocationMap.LocationEntry entry) {
+        final PCFPushGeofenceLocation geofenceLocation = entry.getLocation();
+        final Map<String, String> serializableItem = new TreeMap<>();
 
         serializableItem.put("lat", String.valueOf(geofenceLocation.getLatitude()));
         serializableItem.put("long", String.valueOf(geofenceLocation.getLongitude()));
         serializableItem.put("rad", String.valueOf(geofenceLocation.getRadius()));
         serializableItem.put("name", String.valueOf(geofenceLocation.getName()));
 
-        return geofence;
+        return serializableItem;
     }
 
     private int getTransitionTypes(PCFPushGeofenceData.TriggerType triggerType) {
@@ -101,66 +110,97 @@ public class GeofenceRegistrar {
         return Math.max(0L, expiryTime.getTime() - new Date().getTime());
     }
 
-    private void monitorGeofences(final List<Geofence> geofences) {
-        if (geofences.isEmpty()) {
+    private void monitorGeofences(final List<Geofence> geofences, final List<Map<String, String>> serializableGeofences) {
+        if (geofences == null) {
             return;
         }
-
-        // TODO - remove currently monitored geofences before registering more.
 
         googleApiClient = new GoogleApiClient.Builder(context)
                 .addApi(LocationServices.API)
                 .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+
                     @Override
                     public void onConnected(Bundle bundle) {
-                        Toast.makeText(context, "GoogleApiClient Connected", Toast.LENGTH_SHORT).show();
+                        Logger.i("GoogleApiClient connected.");
 
                         final Class<?> gcmServiceClass = GcmService.getGcmServiceClass(context);
                         final Intent intent = new Intent(context, gcmServiceClass);
                         final PendingIntent pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-                        PendingResult<Status> result = LocationServices.GeofencingApi.addGeofences(googleApiClient, geofences, pendingIntent);
-                        result.setResultCallback(new ResultCallback<Status>() {
+                        final PendingResult<Status> removeGeofencesResult = LocationServices.GeofencingApi.removeGeofences(googleApiClient, pendingIntent);
+                        removeGeofencesResult.setResultCallback(new ResultCallback<Status>() {
+
                             @Override
                             public void onResult(Status status) {
 
-                                String toastMessage;
                                 if (status.isSuccess()) {
-                                    toastMessage = "Success: We Are Monitoring Our Fences";
-                                    Logger.i("Now monitoring for geofences");
+                                    Logger.i("Success: removed currently monitored geofences.");
                                 } else {
-                                    toastMessage = "Error: We Are NOT Monitoring Our Fences";
-                                    Logger.e("Error trying to monitor geofences. Status code: " + status.getStatusCode());
+                                    Logger.w("Was not able to remove currently monitored geofences: Status code: " + status.getStatusCode());
                                 }
-                                // TODO - remove this toast
-                                Toast.makeText(context, toastMessage, Toast.LENGTH_SHORT).show();
+
+                                if (!geofences.isEmpty()) {
+                                    final PendingResult<Status> addGeofencesResult = LocationServices.GeofencingApi.addGeofences(googleApiClient, geofences, pendingIntent);
+                                    addGeofencesResult.setResultCallback(new ResultCallback<Status>() {
+
+                                        @Override
+                                        public void onResult(Status status) {
+
+                                            if (status.isSuccess()) {
+                                                Logger.i("Success: Now monitoring for " + geofences.size() + " geofences.");
+                                            } else {
+                                                Logger.e("Error trying to monitor geofences. Status code: " + status.getStatusCode());
+                                            }
+
+                                            updateDebugGeofencesFile(serializableGeofences);
+
+                                            googleApiClient.disconnect();
+                                            googleApiClient = null;
+                                        }
+                                    });
+                                } else {
+
+                                    updateDebugGeofencesFile(serializableGeofences);
+
+                                    googleApiClient.disconnect();
+                                    googleApiClient = null;
+                                }
                             }
                         });
+
                     }
 
                     @Override
-                    public void onConnectionSuspended(int i) {
-                        // TODO - remove this toast
-                        Toast.makeText(context, "GoogleApiClient Connection Suspended", Toast.LENGTH_SHORT).show();
+                    public void onConnectionSuspended(int cause) {
+                        Logger.w("GoogleApiClient Connection Suspended: cause:" + cause);
 
+                        // TODO - what to do if the connection is suspended?
                     }
                 })
                 .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
                     @Override
                     public void onConnectionFailed(ConnectionResult connectionResult) {
-                        // TODO - remove this toast
-                        Toast.makeText(context, "GoogleApiClient Connection Failed", Toast.LENGTH_SHORT).show();
-
+                        Logger.e("GoogleApiClient Connection Failed: errorCode:" + connectionResult.getErrorCode());
+                        if (googleApiClient.isConnected()) {
+                            googleApiClient.disconnect();
+                        }
+                        googleApiClient = null;
                     }
                 })
                 .build();
 
-        googleApiClient.connect();
+        googleApiClient.blockingConnect();
     }
 
-    private void sendBroadcast(List<Map<String, String>> list) {
-        // TODO - consider adding a permission to this broadcast
-        final Intent intent = new Intent(GEOFENCE_UPDATE_BROADCAST);
-        context.sendBroadcast(intent);
+    private void updateDebugGeofencesFile(List<Map<String, String>> serializableGeofences) {
+        if (DebugUtil.getInstance(context).isDebuggable()) {
+            // If in debug mode then save the geofences to a file on the filesystem and send
+            // a broadcast so a test app is able to see the geofences.
+            Util.saveJsonMapToFilesystem(context, serializableGeofences);
+
+            // TODO - consider adding a permission to this broadcast
+            final Intent intent = new Intent(GEOFENCE_UPDATE_BROADCAST);
+            context.sendBroadcast(intent);
+        }
     }
 }
