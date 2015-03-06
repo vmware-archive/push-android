@@ -124,6 +124,8 @@ public class GeofenceRegistrar {
                         Logger.i("GoogleApiClient connected.");
 
                         final Class<?> gcmServiceClass = GcmService.getGcmServiceClass(context);
+                        Logger.i("Da Clazz: " + gcmServiceClass.getCanonicalName());
+                        Logger.i("Da Clazz: " + gcmServiceClass.toString());
                         final Intent intent = new Intent(context, gcmServiceClass);
                         final PendingIntent pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 

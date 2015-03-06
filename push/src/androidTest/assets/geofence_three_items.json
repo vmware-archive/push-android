@@ -10,16 +10,16 @@
             {
                 "id": 99,
                 "name": "robs_wizard_tacos",
-                "lat": 53.5,
-                "long": -91.5,
-                "rad": 120
+                "lat": -43.5,
+                "long": 61.5,
+                "rad": 150
             }
         ]
     },
     {
         "id": 9,
         "data": {
-            "message": "tacos"
+            "message": "pizzas"
         },
         "trigger_type": "enter_or_exit",
         "expiry_time": 1142744274,

@@ -17,6 +17,8 @@ import com.google.android.gms.location.Geofence;
 import java.util.Map;
 
 import io.pivotal.android.push.geofence.GeofencePersistentStore;
+import io.pivotal.android.push.model.geofence.PCFPushGeofenceData;
+import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocationMap;
 import io.pivotal.android.push.receiver.GcmBroadcastReceiver;
 import io.pivotal.android.push.util.FileHelper;
 import io.pivotal.android.push.util.GeofenceHelper;
@@ -69,7 +71,7 @@ public class GcmService extends IntentService {
         }
     }
 
-    public void onReceive(Intent intent) {
+    private void onReceive(Intent intent) {
         final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
         final String messageType = gcm.getMessageType(intent);
         final Bundle extras = intent.getExtras();
@@ -109,30 +111,65 @@ public class GcmService extends IntentService {
         for (final Geofence geofence : helper.getGeofences()) {
 
             if (helper.getGeofenceTransition() == Geofence.GEOFENCE_TRANSITION_ENTER) {
-                Logger.i("Entered geofence " + geofence);
-                // TODO : callback gets Map<String,String> data
-                // TODO : find payload data in persistent store for this particular event
-                onGeofenceEnter(null);
+
+                Logger.i("Entered geofence: " + geofence);
+                final Bundle data = getGeofenceBundle(geofence);
+                if (data != null) {
+                    onGeofenceEnter(data);
+                }
 
             } else if (helper.getGeofenceTransition() == Geofence.GEOFENCE_TRANSITION_EXIT) {
 
-                Logger.i("Exited geofence " + geofence);
-                // TODO : callback gets Map<String,String> data
-                // TODO : find payload data in persistent store for this particular event
-                onGeofenceExit(null);
+                Logger.i("Exited geofence: " + geofence);
+                final Bundle data = getGeofenceBundle(geofence);
+                if (data != null) {
+                    onGeofenceExit(data);
+                }
             }
         }
     }
 
+    private Bundle getGeofenceBundle(Geofence geofence) {
+        final String requestId = geofence.getRequestId();
+        if (requestId == null) {
+            Logger.e("Triggered geofence is missing a request ID: " + geofence);
+            return null;
+        }
+
+        final long geofenceId = PCFPushGeofenceLocationMap.getGeofenceId(requestId);
+        final PCFPushGeofenceData geofenceData = store.getGeofenceData(geofenceId);
+        if (geofenceData == null) {
+            Logger.e("Triggered geofence with ID " + geofenceId + " has no matching data in our persistent store.");
+            return null;
+        }
+
+        final Map<String, String> data = geofenceData.getData();
+        if (data == null) {
+            Logger.e("Triggered geofence with ID " + geofenceId + " has no message data.");
+            return null;
+        }
+
+        final Bundle result = new Bundle();
+        for (final Map.Entry<String, String> entry : data.entrySet()) {
+            result.putString(entry.getKey(), entry.getValue());
+        }
+        return result;
+    }
+
+    // Intended to be overridden by application
     public void onReceiveMessage(final Bundle payload) {}
 
+    // Intended to be overridden by application
     public void onReceiveMessageDeleted(final Bundle payload) {}
 
+    // Intended to be overridden by application
     public void onReceiveMessageSendError(final Bundle payload) {}
 
-    public void onGeofenceEnter(final Map<String, String> payload) {}
+    // Intended to be overridden by application
+    public void onGeofenceEnter(final Bundle payload) {}
 
-    public void onGeofenceExit(final Map<String, String> payload) {}
+    // Intended to be overridden by application
+    public void onGeofenceExit(final Bundle payload) {}
 
     public boolean isGeofencingEvent(Intent intent) {
         return (intent != null && helper.isGeofencingEvent());

@@ -25,6 +25,7 @@ import io.pivotal.android.push.util.Logger;
 public class GeofencePersistentStore {
 
     public static final String GEOFENCE_PERSISTENT_STORE_FILE_PREFIX = "pivotal.push.geofence.";
+
     private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
 
     private final Context context;
@@ -82,6 +83,19 @@ public class GeofencePersistentStore {
         }
     }
 
+    public PCFPushGeofenceData getGeofenceData(long id) {
+
+        lock.readLock().lock();
+
+        try {
+
+            return getFromFile(GEOFENCE_PERSISTENT_STORE_FILE_PREFIX + id + ".json");
+
+        } finally {
+            lock.readLock().unlock();
+        }
+    }
+
     private String[] getFiles() {
         final File filesDir = context.getFilesDir();
 
@@ -94,25 +108,10 @@ public class GeofencePersistentStore {
     }
 
     private void addFile(PCFPushGeofenceDataList result, String filename) {
-        Reader reader = null;
-        try {
-            reader = fileHelper.getReader(filename);
-            final PCFPushGeofenceData geofence = gson.fromJson(reader, PCFPushGeofenceData.class);
+        final PCFPushGeofenceData geofence = getFromFile(filename);
 
-            if (geofence != null) {
-                result.put(geofence.getId(), geofence);
-            }
-
-        } catch (FileNotFoundException e) {
-            Logger.w("File not found: '" + filename + "', error: " + e.getLocalizedMessage());
-        } catch (JsonSyntaxException e) {
-            Logger.w("Bad/Corrupted Json found: '" + filename + "', error: " + e.getLocalizedMessage());
-        } finally {
-            if (reader != null) {
-                try {
-                    reader.close();
-                } catch (IOException e) {}
-            }
+        if (geofence != null) {
+            result.put(geofence.getId(), geofence);
         }
     }
 
@@ -120,6 +119,27 @@ public class GeofencePersistentStore {
         for (final String filename : files) {
             context.deleteFile(filename);
         }
+    }
+
+    private PCFPushGeofenceData getFromFile(final String filename) {
+        Reader reader = null;
+        try {
+            reader = fileHelper.getReader(filename);
+            return gson.fromJson(reader, PCFPushGeofenceData.class);
+
+        } catch (FileNotFoundException e) {
+            Logger.w("File not found: '" + filename + "', error: " + e.getLocalizedMessage());
+        } catch (JsonSyntaxException e) {
+            Logger.w("Bad/corrupted Json found: '" + filename + "', error: " + e.getLocalizedMessage());
+        } finally {
+            if (reader != null) {
+                try {
+                    reader.close();
+                } catch (IOException e) {}
+            }
+        }
+
+        return null;
     }
 
     private void writeFile(PCFPushGeofenceData geofence, String filename) {

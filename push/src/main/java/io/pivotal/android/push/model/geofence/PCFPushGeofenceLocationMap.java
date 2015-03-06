@@ -65,11 +65,13 @@ public class PCFPushGeofenceLocationMap extends HashMap<String, PCFPushGeofenceL
         return locationEntries;
     }
 
-    private static long getGeofenceId(String key) {
+    public static long getGeofenceId(String key) {
+//        TODO - there is a possibility of an ArrayIndexOutOfBoundsException here if the key is malformed or null - make this code less brittle, please.
         return Long.parseLong(key.split("_")[1]);
     }
 
-    private static long getLocationId(String key) {
+    public static long getLocationId(String key) {
+//        TODO - there is a possibility of an ArrayIndexOutOfBoundsException here if the key is malformed or null - make this code less brittle, please.
         return Long.parseLong(key.split("_")[2]);
     }
 
