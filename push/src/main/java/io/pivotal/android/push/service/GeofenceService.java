@@ -7,20 +7,15 @@ import android.os.Bundle;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 
-import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.geofence.PCFPushGetGeofenceUpdatesApiRequest;
-import io.pivotal.android.push.backend.geofence.PCFPushGetGeofenceUpdatesListener;
 import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofencePersistentStore;
 import io.pivotal.android.push.geofence.GeofenceRegistrar;
-import io.pivotal.android.push.model.geofence.PCFPushGeofenceResponseData;
-import io.pivotal.android.push.prefs.Pivotal;
+import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
 import io.pivotal.android.push.receiver.GcmBroadcastReceiver;
-import io.pivotal.android.push.util.DebugUtil;
 import io.pivotal.android.push.util.FileHelper;
-import io.pivotal.android.push.util.GsonUtil;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.NetworkWrapper;
 import io.pivotal.android.push.util.NetworkWrapperImpl;
@@ -86,60 +81,10 @@ public class GeofenceService extends IntentService {
     private void onReceive(Intent intent) {
 
         if (isGeofenceUpdate(this, intent)) {
-            handleGeofenceUpdate(intent);
-        }
-    }
-
-    private void handleGeofenceUpdate(Intent intent) {
-        Logger.d("handleGeofenceUpdate: " + intent);
-
-        instantiateDependencies();
-
-        if (doesIntentProvideJson(intent) && DebugUtil.getInstance(this).isDebuggable()) {
-
-            Logger.d("This update provides the list of geofences.");
-            final String updateJson = intent.getStringExtra(GEOFENCE_UPDATE_JSON);
-            if (updateJson != null && !updateJson.isEmpty()) {
-                final PCFPushGeofenceResponseData responseData = GsonUtil.getGson().fromJson(updateJson, PCFPushGeofenceResponseData.class);
-                onSuccessfullyFetchedUpdates(responseData);
-            }
-
-        } else {
-
+            instantiateDependencies();
+            final GeofenceUpdater updater = new GeofenceUpdater(this, apiRequest, geofenceEngine, pushPreferencesProvider);
             final long timestamp = pushPreferencesProvider.getLastGeofenceUpdate();
-
-            Logger.d("The geofence update is available on the server.");
-
-            // TODO - consider scheduling this request a short random time in the future in order to stagger the demand on the server.
-            apiRequest.getGeofenceUpdates(timestamp, getParameters(), new PCFPushGetGeofenceUpdatesListener() {
-
-                @Override
-                public void onPCFPushGetGeofenceUpdatesSuccess(PCFPushGeofenceResponseData responseData) {
-                    onSuccessfullyFetchedUpdates(responseData);
-                }
-
-                @Override
-                public void onPCFPushGetGeofenceUpdatesFailed(String reason) {
-                    // TODO - consider a retry mechanism for failed requests.
-                    Logger.w("Error fetching geofence updates: " + reason);
-                }
-            });
-        }
-    }
-
-    private boolean doesIntentProvideJson(Intent intent) {
-        return intent.hasExtra(GEOFENCE_UPDATE_JSON);
-    }
-
-    private void onSuccessfullyFetchedUpdates(PCFPushGeofenceResponseData responseData) {
-        if (responseData != null && responseData.getGeofences() != null) {
-            Logger.i("Successfully fetched geofence updates. Received " + responseData.getGeofences().size() + " items.");
-        } else {
-            Logger.i("Successfully fetched geofence updates. Received 0 items.");
-        }
-        if (responseData != null) {
-            geofenceEngine.processResponseData(responseData);
-            pushPreferencesProvider.setLastGeofenceUpdate(responseData.getLastModified() == null ? 0 : responseData.getLastModified().getTime());
+            updater.startGeofenceUpdate(intent, timestamp, null);
         }
     }
 
@@ -159,11 +104,4 @@ public class GeofenceService extends IntentService {
         }
     }
 
-    private PushParameters getParameters() {
-        final String gcmSenderId = Pivotal.getGcmSenderId();
-        final String platformUuid = Pivotal.getPlatformUuid();
-        final String platformSecret = Pivotal.getPlatformSecret();
-        final String serviceUrl = Pivotal.getServiceUrl();
-        return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, null, null);
-    }
 }

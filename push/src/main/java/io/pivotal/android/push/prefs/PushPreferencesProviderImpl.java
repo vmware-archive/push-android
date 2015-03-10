@@ -9,6 +9,8 @@ import android.content.SharedPreferences;
 import java.util.HashSet;
 import java.util.Set;
 
+import io.pivotal.android.push.geofence.GeofenceEngine;
+
 /**
  * Saves preferences to the SharedPreferences on the filesystem.
  */
@@ -175,7 +177,7 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
 
     @Override
     public long getLastGeofenceUpdate() {
-        return getSharedPreferences().getLong(PROPERTY_GEOFENCE_UPDATE, 0);
+        return getSharedPreferences().getLong(PROPERTY_GEOFENCE_UPDATE, GeofenceEngine.NEVER_UPDATED_GEOFENCES);
     }
 
     @Override

@@ -18,6 +18,8 @@ import io.pivotal.android.push.gcm.GcmRegistrationListener;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
 import io.pivotal.android.push.gcm.GcmUnregistrationListener;
+import io.pivotal.android.push.geofence.GeofenceEngine;
+import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.version.VersionProvider;
@@ -63,6 +65,7 @@ public class RegistrationEngine {
     private GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider;
     private GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider;
     private PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider;
+    private GeofenceUpdater geofenceUpdater;
     private VersionProvider versionProvider;
     private String packageName;
     private String previousGcmDeviceRegistrationId = null;
@@ -85,6 +88,7 @@ public class RegistrationEngine {
      * @param gcmUnregistrationApiRequestProvider  Some object that can provide GCMUnregistrationApiRequest objects.
      * @param pcfPushRegistrationApiRequestProvider  Some object that can provide PCFPushRegistrationApiRequest objects.
      * @param versionProvider  Some object that can provide the application version.
+     * @param geofenceUpdater
      */
     public RegistrationEngine(Context context,
                               String packageName,
@@ -93,7 +97,8 @@ public class RegistrationEngine {
                               GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
                               GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                               PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
-                              VersionProvider versionProvider) {
+                              VersionProvider versionProvider,
+                              GeofenceUpdater geofenceUpdater) {
 
         verifyArguments(context,
                 packageName,
@@ -102,7 +107,8 @@ public class RegistrationEngine {
                 gcmRegistrationApiRequestProvider,
                 gcmUnregistrationApiRequestProvider,
                 pcfPushRegistrationApiRequestProvider,
-                versionProvider);
+                versionProvider,
+                geofenceUpdater);
 
         saveArguments(context,
                 packageName,
@@ -111,7 +117,8 @@ public class RegistrationEngine {
                 gcmRegistrationApiRequestProvider,
                 gcmUnregistrationApiRequestProvider,
                 pcfPushRegistrationApiRequestProvider,
-                versionProvider);
+                versionProvider,
+                geofenceUpdater);
     }
 
     private void verifyArguments(Context context,
@@ -121,7 +128,8 @@ public class RegistrationEngine {
                                  GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
                                  GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                  PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
-                                 VersionProvider versionProvider) {
+                                 VersionProvider versionProvider,
+                                 GeofenceUpdater geofenceUpdater) {
 
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
@@ -147,6 +155,9 @@ public class RegistrationEngine {
         if (versionProvider == null) {
             throw new IllegalArgumentException("versionProvider may not be null");
         }
+        if (geofenceUpdater == null) {
+            throw new IllegalArgumentException("geofenceUpdater may not be null");
+        }
     }
 
     private void saveArguments(Context context,
@@ -156,7 +167,8 @@ public class RegistrationEngine {
                                GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
                                GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
-                               VersionProvider versionProvider) {
+                               VersionProvider versionProvider,
+                               GeofenceUpdater geofenceUpdater) {
 
         this.context = context;
         this.packageName = packageName;
@@ -166,6 +178,7 @@ public class RegistrationEngine {
         this.gcmUnregistrationApiRequestProvider = gcmUnregistrationApiRequestProvider;
         this.pcfPushRegistrationApiRequestProvider = pcfPushRegistrationApiRequestProvider;
         this.versionProvider = versionProvider;
+        this.geofenceUpdater = geofenceUpdater;
         this.previousGcmDeviceRegistrationId = pushPreferencesProvider.getGcmDeviceRegistrationId();
         this.previousPCFPushDeviceRegistrationId = pushPreferencesProvider.getPCFPushDeviceRegistrationId();
         this.previousGcmSenderId = pushPreferencesProvider.getGcmSenderId();
@@ -212,6 +225,9 @@ public class RegistrationEngine {
 
         } else if (isPCFPushNewRegistrationRequired(parameters)) {
             registerNewDeviceWithPCFPush(previousGcmDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
+
+        } else if (isGeofenceUpdateRequired()) {
+            updateGeofences(listener);
 
         } else {
             Logger.v("Already registered with GCM and PCF Push");
@@ -350,6 +366,10 @@ public class RegistrationEngine {
         final boolean isPreviousServiceUrlEmpty = previousServiceUrl == null;
         final boolean isServiceUrlUpdated = (isPreviousServiceUrlEmpty && parameters.getServiceUrl() != null) || !parameters.getServiceUrl().equals(previousServiceUrl);
         return isServiceUrlUpdated;
+    }
+
+    private boolean isGeofenceUpdateRequired() {
+        return pushPreferencesProvider.getLastGeofenceUpdate() == GeofenceEngine.NEVER_UPDATED_GEOFENCES;
     }
 
     private void unregisterDeviceWithGcm(final PushParameters parameters, final RegistrationListener listener) {
@@ -529,9 +549,7 @@ public class RegistrationEngine {
                 pushPreferencesProvider.setTags(parameters.getTags());
                 Logger.v("Saving tags: " + parameters.getTags());
 
-                if (listener != null) {
-                    listener.onRegistrationComplete();
-                }
+                updateGeofences(listener);
             }
 
             @Override
@@ -544,6 +562,28 @@ public class RegistrationEngine {
                 }
             }
         };
+    }
+
+    // TODO - write test to ensure that geofences can't be updated unless there's a serviceUrl ?
+    private void updateGeofences(final RegistrationListener listener) {
+
+        // TODO - reset the geofence persistent store
+        geofenceUpdater.startGeofenceUpdate(null, 0L, new GeofenceUpdater.GeofenceUpdaterListener() {
+
+            @Override
+            public void onSuccess() {
+                if (listener != null) {
+                    listener.onRegistrationComplete();
+                }
+            }
+
+            @Override
+            public void onFailure(String reason) {
+                if (listener != null) {
+                    listener.onRegistrationFailed(reason);
+                }
+            }
+        });
     }
 
     private void clearPCFPushRegistrationPreferences() {

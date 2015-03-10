@@ -14,11 +14,7 @@ import io.pivotal.android.push.model.geofence.PCFPushGeofenceResponseData;
 import io.pivotal.android.push.util.ModelUtil;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class GeofenceEngineTest extends AndroidTestCase {
 
@@ -45,32 +41,44 @@ public class GeofenceEngineTest extends AndroidTestCase {
         putLocation(ONE_ITEM_GEOFENCE_MAP, ONE_ITEM_GEOFENCE_LIST.first(), 0);
     }
 
-    public void testNullResponseData() {
-        engine.processResponseData(null);
+    public void testNullResponseDataWithNoTimestamp() {
+        engine.processResponseData(0L, null);
+        verify(registrar, times(1)).reset();
+        verify(store, times(1)).reset();
+        verifyNoMoreInteractions(registrar);
+        verifyNoMoreInteractions(store);
+    }
+
+    public void testNullResponseDataWithATimestamp() {
+        engine.processResponseData(50L, null);
         verifyZeroInteractions(registrar);
         verifyZeroInteractions(store);
     }
 
     public void testEmptyResponseDataWithNoCurrentlyRegisteredGeofences() throws IOException {
         final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_empty.json");
-        when(store.getCurrentlyRegisteredGeofences()).thenReturn(EMPTY_GEOFENCE_LIST);
-        engine.processResponseData(updateData);
-        verifyZeroInteractions(registrar);
-        verify(store, never()).saveRegisteredGeofences(any(PCFPushGeofenceDataList.class));
+        engine.processResponseData(0L, updateData);
+        verify(registrar, times(1)).reset();
+        verify(store, times(1)).reset();
+        verifyNoMoreInteractions(registrar);
+        verifyNoMoreInteractions(store);
     }
 
-    public void testEmptyResponseDataWithOneCurrentlyRegisteredGeofence() throws IOException {
+    public void testEmptyResponseDataWithOneCurrentlyRegisteredGeofenceWithATimestamp() throws IOException {
         final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_empty.json");
         when(store.getCurrentlyRegisteredGeofences()).thenReturn(ONE_ITEM_GEOFENCE_LIST);
-        engine.processResponseData(updateData);
+        engine.processResponseData(50L, updateData);
         assertRegisterGeofences(ONE_ITEM_GEOFENCE_MAP);
         assertSaveRegisteredGeofences(ONE_ITEM_GEOFENCE_LIST);
+
+        verify(registrar, never()).reset();
+        verify(store, never()).reset();
     }
 
-    public void testOneNewItemWithNoCurrentlyRegisteredGeofences() throws IOException {
+    public void testOneNewItemWithNoCurrentlyRegisteredGeofencesWithNoTimestamp() throws IOException {
         final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_one_item.json");
         when(store.getCurrentlyRegisteredGeofences()).thenReturn(EMPTY_GEOFENCE_LIST);
-        engine.processResponseData(updateData);
+        engine.processResponseData(0L, updateData);
 
         final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
         putLocation(expectedMap, updateData.getGeofences().get(0), 0);
@@ -81,12 +89,53 @@ public class GeofenceEngineTest extends AndroidTestCase {
         expectedList.addAll(updateData.getGeofences());
         assertEquals(1, expectedList.size());
         assertSaveRegisteredGeofences(expectedList);
+
+        verify(registrar, times(1)).reset();
+        verify(store, times(1)).reset();
     }
 
-    public void testOneNewItemWithOneCurrentlyRegisteredGeofence() throws IOException {
+    public void testOneNewItemWithNoCurrentlyRegisteredGeofencesWithATimestamp() throws IOException {
+        final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_one_item.json");
+        when(store.getCurrentlyRegisteredGeofences()).thenReturn(EMPTY_GEOFENCE_LIST);
+        engine.processResponseData(50L, updateData);
+
+        final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
+        putLocation(expectedMap, updateData.getGeofences().get(0), 0);
+        assertEquals(1, expectedMap.size());
+        assertRegisterGeofences(expectedMap);
+
+        final PCFPushGeofenceDataList expectedList = new PCFPushGeofenceDataList();
+        expectedList.addAll(updateData.getGeofences());
+        assertEquals(1, expectedList.size());
+        assertSaveRegisteredGeofences(expectedList);
+
+        verify(registrar, never()).reset();
+        verify(store, never()).reset();
+    }
+
+    public void testOneNewItemWithOneCurrentlyRegisteredGeofenceWithNoTimestamp() throws IOException {
         final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_one_item.json");
         when(store.getCurrentlyRegisteredGeofences()).thenReturn(ONE_ITEM_GEOFENCE_LIST);
-        engine.processResponseData(updateData);
+        engine.processResponseData(0L, updateData);
+
+        final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
+        putLocation(expectedMap, updateData.getGeofences().get(0), 0);
+        assertEquals(1, expectedMap.size());
+        assertRegisterGeofences(expectedMap);
+
+        final PCFPushGeofenceDataList expectedList = new PCFPushGeofenceDataList();
+        expectedList.addAll(updateData.getGeofences());
+        assertEquals(1, expectedList.size());
+        assertSaveRegisteredGeofences(expectedList);
+
+        verify(registrar, times(1)).reset();
+        verify(store, times(1)).reset();
+    }
+
+    public void testOneNewItemWithOneCurrentlyRegisteredGeofenceWithATimestamp() throws IOException {
+        final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_one_item.json");
+        when(store.getCurrentlyRegisteredGeofences()).thenReturn(ONE_ITEM_GEOFENCE_LIST);
+        engine.processResponseData(50L, updateData);
 
         final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
         putLocation(expectedMap, ONE_ITEM_GEOFENCE_LIST.first(), 0);
@@ -99,35 +148,70 @@ public class GeofenceEngineTest extends AndroidTestCase {
         expectedList.addAll(updateData.getGeofences());
         assertEquals(2, expectedList.size());
         assertSaveRegisteredGeofences(expectedList);
+
+        verify(registrar, never()).reset();
+        verify(store, never()).reset();
     }
 
-    public void testDeleteOneItemThatDoesExist() throws IOException {
+    public void testDeleteOneItemThatDoesExistWithNoTimestamp() throws IOException {
         final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_delete_one.json");
         when(store.getCurrentlyRegisteredGeofences()).thenReturn(ONE_ITEM_GEOFENCE_LIST);
-        engine.processResponseData(updateData);
+        engine.processResponseData(0L, updateData);
+        verify(registrar, times(1)).reset();
+        verify(store, times(1)).reset();
+        verifyNoMoreInteractions(registrar);
+    }
+
+    public void testDeleteOneItemThatDoesExistWithATimestamp() throws IOException {
+        final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_delete_one.json");
+        when(store.getCurrentlyRegisteredGeofences()).thenReturn(ONE_ITEM_GEOFENCE_LIST);
+        engine.processResponseData(50L, updateData);
         assertRegisterGeofences(EMPTY_GEOFENCE_MAP);
         assertSaveRegisteredGeofences(EMPTY_GEOFENCE_LIST);
+        verify(registrar, never()).reset();
+        verify(store, never()).reset();
     }
 
-    public void testDeleteOneItemThatDoesNotExistWithEmptyStore() throws IOException {
+    public void testDeleteOneItemThatDoesNotExistWithEmptyStoreWithNoTimestamp() throws IOException {
         final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_delete_one.json");
         when(store.getCurrentlyRegisteredGeofences()).thenReturn(EMPTY_GEOFENCE_LIST);
-        engine.processResponseData(updateData);
+        engine.processResponseData(0L, updateData);
+        verify(registrar, times(1)).reset();
+        verify(store, times(1)).reset();
+        verifyNoMoreInteractions(registrar);
+    }
+
+    public void testDeleteOneItemThatDoesNotExistWithEmptyStoreWithATimestamp() throws IOException {
+        final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_delete_one.json");
+        when(store.getCurrentlyRegisteredGeofences()).thenReturn(EMPTY_GEOFENCE_LIST);
+        engine.processResponseData(50L, updateData);
         verifyZeroInteractions(registrar);
         verify(store, never()).saveRegisteredGeofences(any(PCFPushGeofenceDataList.class));
+        verify(store, never()).reset();
     }
 
-    public void testDeleteOneItemThatDoesNotExistWithSavedItems() throws IOException {
+    public void testDeleteOneItemThatDoesNotExistWithSavedItemsWithNoTimestamp() throws IOException {
         final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_delete_one_other.json");
         when(store.getCurrentlyRegisteredGeofences()).thenReturn(ONE_ITEM_GEOFENCE_LIST);
-        engine.processResponseData(updateData);
+        engine.processResponseData(0L, updateData);
+        verify(registrar, times(1)).reset();
+        verify(store, times(1)).reset();
+        verifyNoMoreInteractions(registrar);
+    }
+
+    public void testDeleteOneItemThatDoesNotExistWithSavedItemsWithATimestamp() throws IOException {
+        final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_delete_one_other.json");
+        when(store.getCurrentlyRegisteredGeofences()).thenReturn(ONE_ITEM_GEOFENCE_LIST);
+        engine.processResponseData(50L, updateData);
         assertRegisterGeofences(ONE_ITEM_GEOFENCE_MAP);
         assertSaveRegisteredGeofences(ONE_ITEM_GEOFENCE_LIST);
+        verify(registrar, never()).reset();
+        verify(store, never()).reset();
     }
 
-    public void testUpdateOneItemWithNoItemsCurrentlyRegistered() throws IOException {
+    public void testUpdateOneItemWithNoItemsCurrentlyRegisteredWithNoTimestamp() throws IOException {
         final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_one_item.json");
-        engine.processResponseData(updateData);
+        engine.processResponseData(0L, updateData);
 
         final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
         putLocation(expectedMap, updateData.getGeofences().get(0), 0);
@@ -138,12 +222,51 @@ public class GeofenceEngineTest extends AndroidTestCase {
         expectedList.addAll(updateData.getGeofences());
         assertEquals(1, expectedList.size());
         assertSaveRegisteredGeofences(expectedList);
+
+        verify(registrar, times(1)).reset();
+        verify(store, times(1)).reset();
     }
 
-    public void testUpdateOneItemThatIsCurrentlyRegistered() throws IOException {
+    public void testUpdateOneItemWithNoItemsCurrentlyRegisteredWithATimestamp() throws IOException {
+        final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_one_item.json");
+        engine.processResponseData(50L, updateData);
+
+        final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
+        putLocation(expectedMap, updateData.getGeofences().get(0), 0);
+        assertEquals(1, expectedMap.size());
+        assertRegisterGeofences(expectedMap);
+
+        final PCFPushGeofenceDataList expectedList = new PCFPushGeofenceDataList();
+        expectedList.addAll(updateData.getGeofences());
+        assertEquals(1, expectedList.size());
+        assertSaveRegisteredGeofences(expectedList);
+
+        verify(registrar, never()).reset();
+        verify(store, never()).reset();
+    }
+
+    public void testUpdateOneItemThatIsCurrentlyRegisteredWithNoTimestamp() throws IOException {
+        final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_one_other_item.json");
+        engine.processResponseData(0L, updateData);
+
+        final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
+        putLocation(expectedMap, updateData.getGeofences().get(0), 0);
+        assertEquals(1, expectedMap.size());
+        assertRegisterGeofences(expectedMap);
+
+        final PCFPushGeofenceDataList expectedList = new PCFPushGeofenceDataList();
+        expectedList.addAll(updateData.getGeofences());
+        assertEquals(1, expectedList.size());
+        assertSaveRegisteredGeofences(expectedList);
+
+        verify(registrar, times(1)).reset();
+        verify(store, times(1)).reset();
+    }
+
+    public void testUpdateOneItemThatIsCurrentlyRegisteredWithATimestamp() throws IOException {
         final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_one_other_item.json");
         when(store.getCurrentlyRegisteredGeofences()).thenReturn(ONE_ITEM_GEOFENCE_LIST);
-        engine.processResponseData(updateData);
+        engine.processResponseData(50L, updateData);
 
         final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
         putLocation(expectedMap, updateData.getGeofences().get(0), 0);
@@ -154,12 +277,33 @@ public class GeofenceEngineTest extends AndroidTestCase {
         expectedList.addAll(updateData.getGeofences());
         assertEquals(1, expectedList.size());
         assertSaveRegisteredGeofences(expectedList);
+
+        verify(registrar, never()).reset();
+        verify(store, never()).reset();
     }
 
-    public void testUpdateOneItemThatIsNotCurrentlyRegisteredWhenOneOtherItemIsAlreadySaved() throws IOException {
+    public void testUpdateOneItemThatIsNotCurrentlyRegisteredWhenOneOtherItemIsAlreadySavedWithNoTimestamp() throws IOException {
+        final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_one_item.json");
+        engine.processResponseData(0L, updateData);
+
+        final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
+        putLocation(expectedMap, updateData.getGeofences().get(0), 0);
+        assertEquals(1, expectedMap.size());
+        assertRegisterGeofences(expectedMap);
+
+        final PCFPushGeofenceDataList expectedList = new PCFPushGeofenceDataList();
+        expectedList.addAll(updateData.getGeofences());
+        assertEquals(1, expectedList.size());
+        assertSaveRegisteredGeofences(expectedList);
+
+        verify(registrar, times(1)).reset();
+        verify(store, times(1)).reset();
+    }
+
+    public void testUpdateOneItemThatIsNotCurrentlyRegisteredWhenOneOtherItemIsAlreadySavedWithATimestamp() throws IOException {
         final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_one_item.json");
         when(store.getCurrentlyRegisteredGeofences()).thenReturn(ONE_ITEM_GEOFENCE_LIST);
-        engine.processResponseData(updateData);
+        engine.processResponseData(50L, updateData);
 
         final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
         putLocation(expectedMap, updateData.getGeofences().get(0), 0);
@@ -172,12 +316,14 @@ public class GeofenceEngineTest extends AndroidTestCase {
         expectedList.addAll(ONE_ITEM_GEOFENCE_LIST);
         assertEquals(2, expectedList.size());
         assertSaveRegisteredGeofences(expectedList);
+
+        verify(registrar, never()).reset();
+        verify(store, never()).reset();
     }
 
-    public void testUpdateSomeItemsAndDeleteSomeItemsWhenNoneCurrentlyStored() throws IOException {
+    public void testUpdateSomeItemsAndDeleteSomeItemsWhenNoneCurrentlyStoredWithNoTimestamp() throws IOException {
         final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_complex.json");
-        when(store.getCurrentlyRegisteredGeofences()).thenReturn(EMPTY_GEOFENCE_LIST);
-        engine.processResponseData(updateData);
+        engine.processResponseData(0L, updateData);
 
         final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
         putLocation(expectedMap, updateData.getGeofences().get(0), 0);
@@ -192,12 +338,60 @@ public class GeofenceEngineTest extends AndroidTestCase {
         expectedList.addAll(updateData.getGeofences());
         assertEquals(3, expectedList.size());
         assertSaveRegisteredGeofences(expectedList);
+
+        verify(registrar, times(1)).reset();
+        verify(store, times(1)).reset();
     }
 
-    public void testUpdateSomeItemsAndDeleteSomeItemsWhenSomeItemsAreCurrentlyStored() throws IOException {
+    public void testUpdateSomeItemsAndDeleteSomeItemsWhenNoneCurrentlyStoredWithATimestamp() throws IOException {
+        final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_complex.json");
+        when(store.getCurrentlyRegisteredGeofences()).thenReturn(EMPTY_GEOFENCE_LIST);
+        engine.processResponseData(50L, updateData);
+
+        final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
+        putLocation(expectedMap, updateData.getGeofences().get(0), 0);
+        putLocation(expectedMap, updateData.getGeofences().get(1), 0);
+        putLocation(expectedMap, updateData.getGeofences().get(2), 0);
+        putLocation(expectedMap, updateData.getGeofences().get(2), 1);
+        putLocation(expectedMap, updateData.getGeofences().get(2), 2);
+        assertEquals(5, expectedMap.size());
+        assertRegisterGeofences(expectedMap);
+
+        final PCFPushGeofenceDataList expectedList = new PCFPushGeofenceDataList();
+        expectedList.addAll(updateData.getGeofences());
+        assertEquals(3, expectedList.size());
+        assertSaveRegisteredGeofences(expectedList);
+
+        verify(registrar, never()).reset();
+        verify(store, never()).reset();
+    }
+
+    public void testUpdateSomeItemsAndDeleteSomeItemsWhenSomeItemsAreCurrentlyStoredWithNoTimestamp() throws IOException {
+        final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_complex.json");
+        engine.processResponseData(0L, updateData);
+
+        final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
+        putLocation(expectedMap, updateData.getGeofences().get(0), 0); // ID 5  -- got added
+        putLocation(expectedMap, updateData.getGeofences().get(1), 0); // ID 10 -- got added
+        putLocation(expectedMap, updateData.getGeofences().get(2), 0); // ID 44 -- got added (1st location)
+        putLocation(expectedMap, updateData.getGeofences().get(2), 1); // ID 44 -- got added (2nd location)
+        putLocation(expectedMap, updateData.getGeofences().get(2), 2); // ID 44 -- got added (3rd location)
+        assertEquals(5, expectedMap.size());
+        assertRegisterGeofences(expectedMap);
+
+        final PCFPushGeofenceDataList expectedList = new PCFPushGeofenceDataList();
+        expectedList.addAll(updateData.getGeofences());
+        assertEquals(3, expectedList.size());
+        assertSaveRegisteredGeofences(expectedList);
+
+        verify(registrar, times(1)).reset();
+        verify(store, times(1)).reset();
+    }
+
+    public void testUpdateSomeItemsAndDeleteSomeItemsWhenSomeItemsAreCurrentlyStoredWithATimestamp() throws IOException {
         final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_complex.json");
         when(store.getCurrentlyRegisteredGeofences()).thenReturn(ONE_ITEM_GEOFENCE_LIST);
-        engine.processResponseData(updateData);
+        engine.processResponseData(50L, updateData);
 
         final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
         putLocation(expectedMap, ONE_ITEM_GEOFENCE_LIST.get(7L), 0);   // ID 7  -- was kept. Note that ID 9 was deleted.
@@ -214,12 +408,37 @@ public class GeofenceEngineTest extends AndroidTestCase {
         expectedList.addAll(updateData.getGeofences());
         assertEquals(4, expectedList.size());
         assertSaveRegisteredGeofences(expectedList);
+
+        verify(registrar, never()).reset();
+        verify(store, never()).reset();
     }
 
-    public void testUpdateSomeItemsAndDeleteSomeItemsWhenSomeMoreItemsAreCurrentlyStored() throws IOException {
+    public void testUpdateSomeItemsAndDeleteSomeItemsWhenSomeMoreItemsAreCurrentlyStoredWithNoTimestamp() throws IOException {
+        final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_complex.json");
+        engine.processResponseData(0L, updateData);
+
+        final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
+        putLocation(expectedMap, updateData.getGeofences().get(0), 0); // ID 5  -- got added
+        putLocation(expectedMap, updateData.getGeofences().get(1), 0); // ID 10 -- got added
+        putLocation(expectedMap, updateData.getGeofences().get(2), 0); // ID 44 -- got added (1st location)
+        putLocation(expectedMap, updateData.getGeofences().get(2), 1); // ID 44 -- got added (2nd location)
+        putLocation(expectedMap, updateData.getGeofences().get(2), 2); // ID 44 -- got added (3rd location)
+        assertEquals(5, expectedMap.size());
+        assertRegisterGeofences(expectedMap);
+
+        final PCFPushGeofenceDataList expectedList = new PCFPushGeofenceDataList();
+        expectedList.addAll(updateData.getGeofences());
+        assertEquals(3, expectedList.size());
+        assertSaveRegisteredGeofences(expectedList);
+
+        verify(registrar, times(1)).reset();
+        verify(store, times(1)).reset();
+    }
+
+    public void testUpdateSomeItemsAndDeleteSomeItemsWhenSomeMoreItemsAreCurrentlyStoredWithATimestamp() throws IOException {
         final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_complex.json");
         when(store.getCurrentlyRegisteredGeofences()).thenReturn(THREE_ITEM_GEOFENCE_LIST);
-        engine.processResponseData(updateData);
+        engine.processResponseData(50L, updateData);
 
         final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
         putLocation(expectedMap, THREE_ITEM_GEOFENCE_LIST.get(7L), 0); // ID 7  -- was kept. Note that ID 9 was deleted.
@@ -236,11 +455,14 @@ public class GeofenceEngineTest extends AndroidTestCase {
         expectedList.addAll(updateData.getGeofences());
         assertEquals(4, expectedList.size());
         assertSaveRegisteredGeofences(expectedList);
+
+        verify(registrar, never()).reset();
+        verify(store, never()).reset();
     }
 
     public void testCullsItemsWithInsufficientData() throws IOException {
         final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_all_items_culled.json");
-        engine.processResponseData(updateData);
+        engine.processResponseData(50L, updateData);
         assertRegisterGeofences(EMPTY_GEOFENCE_MAP);
         assertSaveRegisteredGeofences(EMPTY_GEOFENCE_LIST);
     }

@@ -9,6 +9,8 @@ import io.pivotal.android.push.model.geofence.PCFPushGeofenceResponseData;
 
 public class GeofenceEngine {
 
+    public static final long NEVER_UPDATED_GEOFENCES = -1L;
+
     private GeofenceRegistrar registrar;
     private GeofencePersistentStore store;
 
@@ -31,15 +33,27 @@ public class GeofenceEngine {
         this.store = store;
     }
 
-    public void processResponseData(PCFPushGeofenceResponseData responseData) {
+    public void processResponseData(final long lastUpdatedTimestamp, final PCFPushGeofenceResponseData responseData) {
+
+        // If the last updated lastUpdatedTimestamp is zero then we need to reset our stored data.
+        if (lastUpdatedTimestamp == 0L) {
+            store.reset();
+            registrar.reset();
+        }
 
         if (responseData == null) {
             return;
         }
 
-        final PCFPushGeofenceDataList storedGeofences = store.getCurrentlyRegisteredGeofences();
+        final PCFPushGeofenceDataList storedGeofences;
 
-        if (isEmptyUpdate(responseData, storedGeofences)) {
+        if (lastUpdatedTimestamp != 0L) {
+            storedGeofences = store.getCurrentlyRegisteredGeofences();
+        } else {
+            storedGeofences = new PCFPushGeofenceDataList();
+        }
+
+        if (!hasDataToPersist(responseData, storedGeofences)) {
             return;
         }
 
@@ -62,8 +76,9 @@ public class GeofenceEngine {
         store.saveRegisteredGeofences(requiredGeofences);
     }
 
-    private boolean isEmptyUpdate(PCFPushGeofenceResponseData responseData, PCFPushGeofenceDataList storedGeofences) {
-        return storedGeofences != null && storedGeofences.size() == 0 && (responseData.getGeofences() == null || responseData.getGeofences().size() == 0);
+    private boolean hasDataToPersist(PCFPushGeofenceResponseData responseData, PCFPushGeofenceDataList storedGeofences) {
+        return (storedGeofences != null && storedGeofences.size() > 0) ||
+               (responseData.getGeofences() != null && responseData.getGeofences().size() > 0);
     }
 
     private boolean areDeletedGeofences(PCFPushGeofenceResponseData responseData) {

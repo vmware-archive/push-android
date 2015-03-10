@@ -5,6 +5,8 @@ package io.pivotal.android.push.prefs;
 
 import java.util.Set;
 
+import io.pivotal.android.push.geofence.GeofenceEngine;
+
 public class FakePushPreferencesProvider implements PushPreferencesProvider {
 
     private String gcmDeviceRegistrationId;
@@ -17,7 +19,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     private String serviceUrl;
     private Set<String> tags;
     private int appVersion;
-    private long lastGeofenceUpdate;
+    private long lastGeofenceUpdate = GeofenceEngine.NEVER_UPDATED_GEOFENCES;
     private boolean wasGcmDeviceRegistrationIdSaved = false;
     private boolean wasPCFPushDeviceRegistrationIdSaved = false;
     private boolean wasAppVersionSaved = false;

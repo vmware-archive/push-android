@@ -16,6 +16,7 @@ import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestProvider
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequest;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestImpl;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestProvider;
+import io.pivotal.android.push.backend.geofence.PCFPushGetGeofenceUpdatesApiRequest;
 import io.pivotal.android.push.gcm.GcmProvider;
 import io.pivotal.android.push.gcm.GcmRegistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmRegistrationApiRequestImpl;
@@ -24,6 +25,10 @@ import io.pivotal.android.push.gcm.GcmUnregistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestImpl;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
 import io.pivotal.android.push.gcm.RealGcmProvider;
+import io.pivotal.android.push.geofence.GeofenceEngine;
+import io.pivotal.android.push.geofence.GeofencePersistentStore;
+import io.pivotal.android.push.geofence.GeofenceRegistrar;
+import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
@@ -32,6 +37,7 @@ import io.pivotal.android.push.registration.RegistrationListener;
 import io.pivotal.android.push.registration.SubscribeToTagsListener;
 import io.pivotal.android.push.registration.UnregistrationEngine;
 import io.pivotal.android.push.registration.UnregistrationListener;
+import io.pivotal.android.push.util.FileHelper;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.NetworkWrapper;
 import io.pivotal.android.push.util.NetworkWrapperImpl;
@@ -127,6 +133,12 @@ public class Push {
         final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(dummyPCFPushRegistrationApiRequest);
         final VersionProvider versionProvider = new VersionProviderImpl(context);
         final PushParameters parameters = getPushParameters(deviceAlias, tags);
+        final PCFPushGetGeofenceUpdatesApiRequest geofenceUpdatesApiRequest = new PCFPushGetGeofenceUpdatesApiRequest(networkWrapper);
+        final GeofenceRegistrar geofenceRegistrar = new GeofenceRegistrar(context);
+        final FileHelper fileHelper = new FileHelper(context);
+        final GeofencePersistentStore geofencePersistentStore = new GeofencePersistentStore(context, fileHelper);
+        final GeofenceEngine geofenceEngine = new GeofenceEngine(geofenceRegistrar, geofencePersistentStore);
+        final GeofenceUpdater geofenceUpdater = new GeofenceUpdater(context, geofenceUpdatesApiRequest, geofenceEngine, pushPreferencesProvider);
 
         verifyRegistrationArguments(parameters);
 
@@ -135,7 +147,16 @@ public class Push {
             @Override
             public void run() {
                 try {
-                    final RegistrationEngine registrationEngine = new RegistrationEngine(context, context.getPackageName(), gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, PCFPushRegistrationApiRequestProvider, versionProvider);
+                    final RegistrationEngine registrationEngine = new RegistrationEngine(context,
+                            context.getPackageName(),
+                            gcmProvider,
+                            pushPreferencesProvider,
+                            gcmRegistrationApiRequestProvider,
+                            gcmUnregistrationApiRequestProvider,
+                            PCFPushRegistrationApiRequestProvider,
+                            versionProvider,
+                            geofenceUpdater);
+
                     registrationEngine.registerDevice(parameters, listener);
                 } catch (Exception e) {
                     Logger.ex("Push SDK registration failed", e);

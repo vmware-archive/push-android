@@ -40,6 +40,12 @@ public class GeofenceRegistrar {
         this.context = context;
     }
 
+    public void reset() {
+        final List<Geofence> emptyGeofencesToRegister = new LinkedList<>();
+        final List<Map<String, String>> emptySerializableGeofences = new LinkedList<>();
+        monitorGeofences(emptyGeofencesToRegister, emptySerializableGeofences);
+    }
+
     public void registerGeofences(PCFPushGeofenceLocationMap geofencesToRegister, PCFPushGeofenceDataList geofenceDataList) {
         if (geofencesToRegister == null || geofenceDataList == null) {
             return;
@@ -124,8 +130,6 @@ public class GeofenceRegistrar {
                         Logger.i("GoogleApiClient connected.");
 
                         final Class<?> gcmServiceClass = GcmService.getGcmServiceClass(context);
-                        Logger.i("Da Clazz: " + gcmServiceClass.getCanonicalName());
-                        Logger.i("Da Clazz: " + gcmServiceClass.toString());
                         final Intent intent = new Intent(context, gcmServiceClass);
                         final PendingIntent pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
@@ -138,6 +142,7 @@ public class GeofenceRegistrar {
                                 if (status.isSuccess()) {
                                     Logger.i("Success: removed currently monitored geofences.");
                                 } else {
+                                    // TODO : report this error somehow
                                     Logger.w("Was not able to remove currently monitored geofences: Status code: " + status.getStatusCode());
                                 }
 
@@ -151,6 +156,7 @@ public class GeofenceRegistrar {
                                             if (status.isSuccess()) {
                                                 Logger.i("Success: Now monitoring for " + geofences.size() + " geofences.");
                                             } else {
+                                                // TODO : report this error somehow
                                                 Logger.e("Error trying to monitor geofences. Status code: " + status.getStatusCode());
                                             }
 

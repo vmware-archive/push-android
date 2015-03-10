@@ -38,6 +38,21 @@ public class GeofencePersistentStore {
         this.fileHelper = fileHelper;
     }
 
+    public void reset() {
+
+        lock.writeLock().lock();
+
+        Logger.i("Deleting all stored geofences.");
+
+        try {
+
+            deleteFiles(Arrays.asList(getFiles()));
+
+        } finally {
+            lock.writeLock().unlock();
+        }
+    }
+
     public PCFPushGeofenceDataList getCurrentlyRegisteredGeofences() {
 
         lock.readLock().lock();

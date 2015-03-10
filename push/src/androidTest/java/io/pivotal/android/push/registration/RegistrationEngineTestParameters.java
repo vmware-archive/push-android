@@ -4,22 +4,30 @@
 package io.pivotal.android.push.registration;
 
 import android.content.Context;
+import android.content.Intent;
 import android.test.AndroidTestCase;
+
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 
 import java.util.Set;
 
 import io.pivotal.android.push.PushParameters;
-import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestProvider;
 import io.pivotal.android.push.backend.api.FakePCFPushRegistrationApiRequest;
+import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestProvider;
 import io.pivotal.android.push.gcm.FakeGcmProvider;
 import io.pivotal.android.push.gcm.FakeGcmRegistrationApiRequest;
 import io.pivotal.android.push.gcm.FakeGcmUnregistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmRegistrationApiRequestProvider;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
+import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.util.DelayedLoop;
 import io.pivotal.android.push.version.FakeVersionProvider;
+
+import static org.mockito.Matchers.*;
+import static org.mockito.Mockito.*;
 
 public class RegistrationEngineTestParameters {
 
@@ -61,6 +69,7 @@ public class RegistrationEngineTestParameters {
     private boolean shouldGcmDeviceRegistrationIdHaveBeenSaved = false;
     private boolean shouldGcmProviderRegisterHaveBeenCalled = false;
     private boolean shouldGcmProviderUnregisterHaveBeenCalled = false;
+    private boolean shouldGeofenceUpdateTimestampedHaveBeenCalled = false;
     private boolean shouldAppVersionHaveBeenSaved = false;
     private boolean shouldPCFPushDeviceRegistrationHaveBeenSaved = false;
     private boolean shouldPlatformUuidHaveBeenSaved = false;
@@ -74,10 +83,17 @@ public class RegistrationEngineTestParameters {
     private boolean shouldPackageNameHaveBeenSaved = false;
     private boolean shouldServiceUrlHaveBeenSaved = false;
     private boolean shouldRegistrationHaveSucceeded = true;
+    private boolean shouldGeofenceUpdateBeSuccessful = true;
+    private boolean wasGeofenceUpdateTimestampCalled = false;
 
     private int appVersionInPrefs = PushPreferencesProvider.NO_SAVED_VERSION;
     private int currentAppVersion = PushPreferencesProvider.NO_SAVED_VERSION;
     private int finalAppVersionInPrefs = PushPreferencesProvider.NO_SAVED_VERSION;
+
+    private long geofenceUpdateTimestampInPrefs = 0L;
+    private long geofenceUpdateTimestampToServer = 0L;
+    private long geofenceUpdateTimestampFromServer = 0L;
+    private long finalGeofenceUpdateTimestampInPrefs = 0L;
 
     public RegistrationEngineTestParameters(Context context) {
         this.context = context;
@@ -87,7 +103,7 @@ public class RegistrationEngineTestParameters {
     public void run() {
 
         final FakeGcmProvider gcmProvider = new FakeGcmProvider(gcmDeviceRegistrationIdFromServer, !shouldGcmDeviceRegistrationBeSuccessful, !shouldGcmDeviceUnregistrationBeSuccessful);
-        final FakePushPreferencesProvider pushPreferencesProvider = new FakePushPreferencesProvider(gcmDeviceRegistrationIdInPrefs, pcfPushDeviceRegistrationIdInPrefs, appVersionInPrefs, gcmSenderIdInPrefs, platformUuidInPrefs, platformSecretInPrefs, deviceAliasInPrefs, packageNameInPrefs, serviceUrlInPrefs, tagsInPrefs, 0);
+        final FakePushPreferencesProvider pushPreferencesProvider = new FakePushPreferencesProvider(gcmDeviceRegistrationIdInPrefs, pcfPushDeviceRegistrationIdInPrefs, appVersionInPrefs, gcmSenderIdInPrefs, platformUuidInPrefs, platformSecretInPrefs, deviceAliasInPrefs, packageNameInPrefs, serviceUrlInPrefs, tagsInPrefs, geofenceUpdateTimestampInPrefs);
         final FakeGcmRegistrationApiRequest gcmRegistrationApiRequest = new FakeGcmRegistrationApiRequest(gcmProvider);
         final GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider = new GcmRegistrationApiRequestProvider(gcmRegistrationApiRequest);
         final FakeGcmUnregistrationApiRequest gcmUnregistrationApiRequest = new FakeGcmUnregistrationApiRequest(gcmProvider);
@@ -95,8 +111,36 @@ public class RegistrationEngineTestParameters {
         final FakeVersionProvider versionProvider = new FakeVersionProvider(currentAppVersion);
         final FakePCFPushRegistrationApiRequest fakePCFPushRegistrationApiRequest = new FakePCFPushRegistrationApiRequest(pcfPushDeviceRegistrationIdFromServer, shouldPCFPushDeviceRegistrationBeSuccessful);
         final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(fakePCFPushRegistrationApiRequest);
-        final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, PCFPushRegistrationApiRequestProvider, versionProvider);
+        final GeofenceUpdater geofenceUpdater = mock(GeofenceUpdater.class);
+        final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, PCFPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater);
         final PushParameters parameters = new PushParameters(gcmSenderIdFromUser, platformUuidFromUser, platformSecretFromUser, serviceUrlFromUser, deviceAliasFromUser, tagsFromUser);
+
+        if (shouldGeofenceUpdateBeSuccessful) {
+            doAnswer(new Answer<Void>() {
+
+                @Override
+                public Void answer(InvocationOnMock invocation) throws Throwable {
+                    wasGeofenceUpdateTimestampCalled = true;
+                    pushPreferencesProvider.setLastGeofenceUpdate(geofenceUpdateTimestampFromServer);
+                    final GeofenceUpdater.GeofenceUpdaterListener listener = (GeofenceUpdater.GeofenceUpdaterListener) invocation.getArguments()[2];
+                    listener.onSuccess();
+                    return null;
+                }
+
+            }).when(geofenceUpdater).startGeofenceUpdate(any(Intent.class), eq(geofenceUpdateTimestampToServer), any(GeofenceUpdater.GeofenceUpdaterListener.class));
+        } else {
+            doAnswer(new Answer<Void>() {
+
+                @Override
+                public Void answer(InvocationOnMock invocation) throws Throwable {
+                    wasGeofenceUpdateTimestampCalled = true;
+                    final GeofenceUpdater.GeofenceUpdaterListener listener = (GeofenceUpdater.GeofenceUpdaterListener) invocation.getArguments()[2];
+                    listener.onFailure("Fake request failed fakely");
+                    return null;
+                }
+
+            }).when(geofenceUpdater).startGeofenceUpdate(any(Intent.class), eq(geofenceUpdateTimestampToServer), any(GeofenceUpdater.GeofenceUpdaterListener.class));
+        }
 
         engine.registerDevice(parameters, new RegistrationListener() {
 
@@ -135,6 +179,7 @@ public class RegistrationEngineTestParameters {
         AndroidTestCase.assertEquals(shouldPackageNameHaveBeenSaved, pushPreferencesProvider.isWasPackageNameSaved());
         AndroidTestCase.assertEquals(shouldServiceUrlHaveBeenSaved, pushPreferencesProvider.wasServiceUrlSaved());
         AndroidTestCase.assertEquals(shouldTagsHaveBeenSaved, pushPreferencesProvider.wereTagsSaved());
+        AndroidTestCase.assertEquals(shouldGeofenceUpdateTimestampedHaveBeenCalled, wasGeofenceUpdateTimestampCalled);
         AndroidTestCase.assertEquals(finalGcmDeviceRegistrationIdInPrefs, pushPreferencesProvider.getGcmDeviceRegistrationId());
         AndroidTestCase.assertEquals(finalPCFPushDeviceRegistrationIdInPrefs, pushPreferencesProvider.getPCFPushDeviceRegistrationId());
         AndroidTestCase.assertEquals(finalGcmSenderIdInPrefs, pushPreferencesProvider.getGcmSenderId());
@@ -145,13 +190,14 @@ public class RegistrationEngineTestParameters {
         AndroidTestCase.assertEquals(finalAppVersionInPrefs, pushPreferencesProvider.getAppVersion());
         AndroidTestCase.assertEquals(finalPackageNameInPrefs, pushPreferencesProvider.getPackageName());
         AndroidTestCase.assertEquals(finalTagsInPrefs, pushPreferencesProvider.getTags());
+        AndroidTestCase.assertEquals(finalGeofenceUpdateTimestampInPrefs, pushPreferencesProvider.getLastGeofenceUpdate());
     }
 
-    public RegistrationEngineTestParameters setupPackageName(String inPrefs, String fromUser, String finalValue, boolean shouldHaveBeenSaved) {
+    public RegistrationEngineTestParameters setupPackageName(String inPrefs, String fromUser, String finalValue) {
         packageNameInPrefs = inPrefs;
         packageNameFromUser = fromUser;
         finalPackageNameInPrefs = finalValue;
-        shouldPackageNameHaveBeenSaved = shouldHaveBeenSaved;
+        shouldPackageNameHaveBeenSaved = true;
         return this;
     }
 
@@ -228,6 +274,16 @@ public class RegistrationEngineTestParameters {
         return this;
     }
 
+    public RegistrationEngineTestParameters setupGeofenceUpdateTimestamp(long inPrefs, long toServer, long fromServer, long finalValue, boolean shouldBeSuccessful, boolean wasCalled) {
+        geofenceUpdateTimestampInPrefs = inPrefs;
+        geofenceUpdateTimestampToServer = toServer;
+        geofenceUpdateTimestampFromServer = fromServer;
+        shouldGeofenceUpdateBeSuccessful = shouldBeSuccessful;
+        finalGeofenceUpdateTimestampInPrefs = finalValue;
+        shouldGeofenceUpdateTimestampedHaveBeenCalled = wasCalled;
+        return this;
+    }
+
     public RegistrationEngineTestParameters setupGcmUnregisterDevice(boolean shouldHaveBeenCalled, boolean shouldBeSuccessful) {
         shouldGcmProviderUnregisterHaveBeenCalled = shouldHaveBeenCalled;
         shouldGcmDeviceUnregistrationBeSuccessful = shouldBeSuccessful;
@@ -275,4 +331,5 @@ public class RegistrationEngineTestParameters {
         shouldPCFPushDeviceRegistrationHaveBeenSaved = b;
         return this;
     }
+
 }
