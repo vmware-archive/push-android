@@ -24,6 +24,7 @@ public class GeofenceEngineTest extends AndroidTestCase {
 
     private PCFPushGeofenceDataList ONE_ITEM_GEOFENCE_LIST;
     private PCFPushGeofenceDataList THREE_ITEM_GEOFENCE_LIST;
+    private PCFPushGeofenceDataList THREE_ITEM_GEOFENCE2_LIST;
     private PCFPushGeofenceLocationMap ONE_ITEM_GEOFENCE_MAP;
     private GeofenceEngine engine;
     private GeofenceRegistrar registrar;
@@ -41,6 +42,7 @@ public class GeofenceEngineTest extends AndroidTestCase {
         engine = new GeofenceEngine(registrar, store, timeProvider);
         ONE_ITEM_GEOFENCE_LIST = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_one_item.json");
         THREE_ITEM_GEOFENCE_LIST = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_three_items.json");
+        THREE_ITEM_GEOFENCE2_LIST = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_three_items2.json");
         ONE_ITEM_GEOFENCE_MAP = new PCFPushGeofenceLocationMap();
         putLocation(ONE_ITEM_GEOFENCE_MAP, ONE_ITEM_GEOFENCE_LIST.first(), 0);
     }
@@ -526,13 +528,66 @@ public class GeofenceEngineTest extends AndroidTestCase {
         engine.processResponseData(50L, updateData);
 
         final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
-        putLocation(expectedMap, THREE_ITEM_GEOFENCE_LIST.get(7L), 0); // ID 7 was kept since it is not expired. the others should be culled.
-        assertEquals(1, expectedMap.size());
+        putLocation(expectedMap, THREE_ITEM_GEOFENCE_LIST.get(7L), 0); // ID 7 and ID 44 was kept since it is not expired. the other should be culled.
+        putLocation(expectedMap, THREE_ITEM_GEOFENCE_LIST.get(44L), 0); // ID 7 and ID 44 was kept since it is not expired. the other should be culled.
+        putLocation(expectedMap, THREE_ITEM_GEOFENCE_LIST.get(44L), 1); // ID 7 and ID 44 was kept since it is not expired. the other should be culled.
+        assertEquals(3, expectedMap.size());
         assertRegisterGeofences(expectedMap);
 
         final PCFPushGeofenceDataList expectedList = new PCFPushGeofenceDataList();
         expectedList.put(7L, THREE_ITEM_GEOFENCE_LIST.get(7L));
-        assertEquals(1, expectedList.size());
+        expectedList.put(44L, THREE_ITEM_GEOFENCE_LIST.get(44L));
+        assertEquals(2, expectedList.size());
+        assertSaveRegisteredGeofences(expectedList);
+
+        verify(registrar, never()).reset();
+        verify(store, never()).reset();
+    }
+
+    public void testCullsStoredAndUpdatedItemsThatHaveExpired() throws IOException {
+        timeProvider = mock(TimeProvider.class);
+        when(timeProvider.currentTimeMillis()).thenReturn(991142744274L);
+        engine = new GeofenceEngine(registrar, store, timeProvider);
+
+        final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_complex.json");
+        when(store.getCurrentlyRegisteredGeofences()).thenReturn(THREE_ITEM_GEOFENCE_LIST);
+        engine.processResponseData(50L, updateData);
+
+        final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
+        putLocation(expectedMap, updateData.getGeofences().get(0), 0); // ID 5 was added since it is not expired. the others should be culled.
+        putLocation(expectedMap, THREE_ITEM_GEOFENCE_LIST.get(7L), 0); // ID 7 was kept since it is not expired. the others should be culled.
+        assertEquals(2, expectedMap.size());
+        assertRegisterGeofences(expectedMap);
+
+        final PCFPushGeofenceDataList expectedList = new PCFPushGeofenceDataList();
+        expectedList.put(5L, updateData.getGeofences().get(0));
+        expectedList.put(7L, THREE_ITEM_GEOFENCE_LIST.get(7L));
+        assertEquals(2, expectedList.size());
+        assertSaveRegisteredGeofences(expectedList);
+
+        verify(registrar, never()).reset();
+        verify(store, never()).reset();
+    }
+
+    public void testKeepsStoredItemsThatExpiredButReceivedNotExpiredUpdates() throws IOException {
+        timeProvider = mock(TimeProvider.class);
+        when(timeProvider.currentTimeMillis()).thenReturn(991142744274L);
+        engine = new GeofenceEngine(registrar, store, timeProvider);
+
+        final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_complex.json");
+        when(store.getCurrentlyRegisteredGeofences()).thenReturn(THREE_ITEM_GEOFENCE2_LIST);
+        engine.processResponseData(50L, updateData);
+
+        final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
+        putLocation(expectedMap, updateData.getGeofences().get(0), 0); // ID 5 was added since it is not expired. the others should be culled.
+        putLocation(expectedMap, THREE_ITEM_GEOFENCE2_LIST.get(11L), 0); // ID 11 was kept since it is not expired. the others should be culled.
+        assertEquals(2, expectedMap.size());
+        assertRegisterGeofences(expectedMap);
+
+        final PCFPushGeofenceDataList expectedList = new PCFPushGeofenceDataList();
+        expectedList.put(5L, updateData.getGeofences().get(0));
+        expectedList.put(11L, THREE_ITEM_GEOFENCE2_LIST.get(11L));
+        assertEquals(2, expectedList.size());
         assertSaveRegisteredGeofences(expectedList);
 
         verify(registrar, never()).reset();

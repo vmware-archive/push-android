@@ -59,15 +59,16 @@ public final class PCFPushGeofenceData {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        PCFPushGeofenceData that = (PCFPushGeofenceData) o;
+        PCFPushGeofenceData other = (PCFPushGeofenceData) o;
 
-        if (id != that.id) return false;
-        if (data != null ? !data.equals(that.data) : that.data != null) return false;
-        if (expiryTime != null ? !expiryTime.equals(that.expiryTime) : that.expiryTime != null)
+        if (id != other.id) return false;
+        if (data != null ? !data.equals(other.data) : other.data != null) return false;
+        if (expiryTime != null ? !expiryTime.equals(other.expiryTime) : other.expiryTime != null)
             return false;
-        if (locations != null ? !locations.equals(that.locations) : that.locations != null)
+        if (locations != null ? !locations.equals(other.locations) : other.locations != null)
             return false;
-        if (tags != null ? !tags.equals(that.tags) : that.tags != null) return false;
+        if (tags != null ? !tags.equals(other.tags) : other.tags != null) return false;
+        if (triggerType != other.triggerType) return false;
 
         return true;
     }
@@ -79,6 +80,7 @@ public final class PCFPushGeofenceData {
         result = 31 * result + (locations != null ? locations.hashCode() : 0);
         result = 31 * result + (data != null ? data.hashCode() : 0);
         result = 31 * result + (tags != null ? tags.hashCode() : 0);
+        result = 31 * result + (triggerType != null ? triggerType.hashCode() : 0);
         return result;
     }
 }

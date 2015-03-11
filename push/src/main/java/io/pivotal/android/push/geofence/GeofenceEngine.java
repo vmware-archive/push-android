@@ -66,7 +66,7 @@ public class GeofenceEngine {
 
         final PCFPushGeofenceDataList requiredGeofences = new PCFPushGeofenceDataList();
 
-        addStoredGeofencesThatWereNotDeletedOrExpired(requiredGeofences, storedGeofences, responseData);
+        addValidGeofencesFromStore(requiredGeofences, storedGeofences, responseData);
 
         addValidGeofencesFromUpdate(requiredGeofences, responseData.getGeofences());
 
@@ -82,14 +82,24 @@ public class GeofenceEngine {
                (responseData.getGeofences() != null && responseData.getGeofences().size() > 0);
     }
 
-    private void addStoredGeofencesThatWereNotDeletedOrExpired(PCFPushGeofenceDataList requiredGeofences, PCFPushGeofenceDataList storedGeofences, final PCFPushGeofenceResponseData responseData) {
+    private void addValidGeofencesFromStore(final PCFPushGeofenceDataList requiredGeofences, final PCFPushGeofenceDataList storedGeofences, final PCFPushGeofenceResponseData responseData) {
         requiredGeofences.addFiltered(storedGeofences, new PCFPushGeofenceDataList.Filter() {
 
             @Override
-            public boolean filterItem(PCFPushGeofenceData item) {
-                return !isDeletedItem(item, responseData) && !isExpiredItem(item);
+            public boolean filterItem(final PCFPushGeofenceData item) {
+                return !isDeletedItem(item, responseData) && !isExpiredItem(item) && !isUpdatedItem(item, responseData);
             }
         });
+    }
+
+    private boolean isUpdatedItem(PCFPushGeofenceData item, PCFPushGeofenceResponseData responseData) {
+        if (item == null || responseData == null || responseData.getGeofences() == null) {
+            return false;
+        }
+        for (PCFPushGeofenceData data : responseData.getGeofences()) {
+            if (data.getId() == item.getId()) return true;
+        }
+        return false;
     }
 
     private boolean isDeletedItem(PCFPushGeofenceData item, PCFPushGeofenceResponseData responseData) {
