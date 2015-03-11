@@ -41,6 +41,7 @@ import io.pivotal.android.push.util.FileHelper;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.NetworkWrapper;
 import io.pivotal.android.push.util.NetworkWrapperImpl;
+import io.pivotal.android.push.util.TimeProvider;
 import io.pivotal.android.push.version.VersionProvider;
 import io.pivotal.android.push.version.VersionProviderImpl;
 
@@ -136,8 +137,9 @@ public class Push {
         final PCFPushGetGeofenceUpdatesApiRequest geofenceUpdatesApiRequest = new PCFPushGetGeofenceUpdatesApiRequest(networkWrapper);
         final GeofenceRegistrar geofenceRegistrar = new GeofenceRegistrar(context);
         final FileHelper fileHelper = new FileHelper(context);
+        final TimeProvider timeProvider = new TimeProvider();
         final GeofencePersistentStore geofencePersistentStore = new GeofencePersistentStore(context, fileHelper);
-        final GeofenceEngine geofenceEngine = new GeofenceEngine(geofenceRegistrar, geofencePersistentStore);
+        final GeofenceEngine geofenceEngine = new GeofenceEngine(geofenceRegistrar, geofencePersistentStore, timeProvider);
         final GeofenceUpdater geofenceUpdater = new GeofenceUpdater(context, geofenceUpdatesApiRequest, geofenceEngine, pushPreferencesProvider);
 
         verifyRegistrationArguments(parameters);

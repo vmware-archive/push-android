@@ -19,6 +19,7 @@ import io.pivotal.android.push.util.FileHelper;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.NetworkWrapper;
 import io.pivotal.android.push.util.NetworkWrapperImpl;
+import io.pivotal.android.push.util.TimeProvider;
 
 public class GeofenceService extends IntentService {
 
@@ -100,7 +101,8 @@ public class GeofenceService extends IntentService {
             final FileHelper fileHelper = new FileHelper(getApplicationContext());
             final GeofenceRegistrar registrar = new GeofenceRegistrar(this);
             final GeofencePersistentStore store = new GeofencePersistentStore(this, fileHelper);
-            geofenceEngine = new GeofenceEngine(registrar, store);
+            final TimeProvider timeProvider = new TimeProvider();
+            geofenceEngine = new GeofenceEngine(registrar, store, timeProvider);
         }
     }
 

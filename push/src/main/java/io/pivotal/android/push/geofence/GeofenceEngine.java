@@ -6,6 +6,8 @@ import io.pivotal.android.push.model.geofence.PCFPushGeofenceData;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceDataList;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocationMap;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceResponseData;
+import io.pivotal.android.push.util.Logger;
+import io.pivotal.android.push.util.TimeProvider;
 
 public class GeofenceEngine {
 
@@ -13,24 +15,29 @@ public class GeofenceEngine {
 
     private GeofenceRegistrar registrar;
     private GeofencePersistentStore store;
+    private TimeProvider timeProvider;
 
-    public GeofenceEngine(GeofenceRegistrar registrar, GeofencePersistentStore store) {
-        verifyArguments(registrar, store);
-        saveArguments(registrar, store);
+    public GeofenceEngine(GeofenceRegistrar registrar, GeofencePersistentStore store, TimeProvider timeProvider) {
+        verifyArguments(registrar, store, timeProvider);
+        saveArguments(registrar, store, timeProvider);
     }
 
-    private void verifyArguments(GeofenceRegistrar geofenceRegistrar, GeofencePersistentStore store) {
+    private void verifyArguments(GeofenceRegistrar geofenceRegistrar, GeofencePersistentStore store, TimeProvider timeProvider) {
         if (geofenceRegistrar == null) {
             throw new IllegalArgumentException("registrar may not be null");
         }
         if (store == null) {
             throw new IllegalArgumentException("store may not be null");
         }
+        if (timeProvider == null) {
+            throw new IllegalArgumentException("timeProvider may not be null");
+        }
     }
 
-    private void saveArguments(GeofenceRegistrar registrar, GeofencePersistentStore store) {
+    private void saveArguments(GeofenceRegistrar registrar, GeofencePersistentStore store, TimeProvider timeProvider) {
         this.registrar = registrar;
         this.store = store;
+        this.timeProvider = timeProvider;
     }
 
     public void processResponseData(final long lastUpdatedTimestamp, final PCFPushGeofenceResponseData responseData) {
@@ -59,18 +66,12 @@ public class GeofenceEngine {
 
         final PCFPushGeofenceDataList requiredGeofences = new PCFPushGeofenceDataList();
 
-        if (areDeletedGeofences(responseData)) {
-            addStoredGeofencesThatWereNotDeleted(requiredGeofences, storedGeofences, responseData);
-        } else {
-            requiredGeofences.addAll(storedGeofences);
-        }
+        addStoredGeofencesThatWereNotDeletedOrExpired(requiredGeofences, storedGeofences, responseData);
 
         addValidGeofencesFromUpdate(requiredGeofences, responseData.getGeofences());
 
         final PCFPushGeofenceLocationMap geofencesToRegister = new PCFPushGeofenceLocationMap();
         geofencesToRegister.addAll(requiredGeofences);
-
-        // TODO : Check expiry?  Expired geofences shouldn't be passed to the registrar.
 
         registrar.registerGeofences(geofencesToRegister, requiredGeofences);
         store.saveRegisteredGeofences(requiredGeofences);
@@ -81,21 +82,18 @@ public class GeofenceEngine {
                (responseData.getGeofences() != null && responseData.getGeofences().size() > 0);
     }
 
-    private boolean areDeletedGeofences(PCFPushGeofenceResponseData responseData) {
-        return responseData.getDeletedGeofenceIds() != null && responseData.getDeletedGeofenceIds().size() > 0;
-    }
-
-    private void addStoredGeofencesThatWereNotDeleted(PCFPushGeofenceDataList requiredGeofences, PCFPushGeofenceDataList storedGeofences, final PCFPushGeofenceResponseData responseData) {
+    private void addStoredGeofencesThatWereNotDeletedOrExpired(PCFPushGeofenceDataList requiredGeofences, PCFPushGeofenceDataList storedGeofences, final PCFPushGeofenceResponseData responseData) {
         requiredGeofences.addFiltered(storedGeofences, new PCFPushGeofenceDataList.Filter() {
+
             @Override
             public boolean filterItem(PCFPushGeofenceData item) {
-                return isItemNotDeleted(item);
-            }
-
-            private boolean isItemNotDeleted(PCFPushGeofenceData item) {
-                return !responseData.getDeletedGeofenceIds().contains(item.getId());
+                return !isDeletedItem(item, responseData) && !isExpiredItem(item);
             }
         });
+    }
+
+    private boolean isDeletedItem(PCFPushGeofenceData item, PCFPushGeofenceResponseData responseData) {
+        return responseData.getDeletedGeofenceIds() != null && responseData.getDeletedGeofenceIds().contains(item.getId());
     }
 
     private void addValidGeofencesFromUpdate(PCFPushGeofenceDataList requiredGeofences, List<PCFPushGeofenceData> newGeofences) {
@@ -107,11 +105,21 @@ public class GeofenceEngine {
             }
 
             private boolean isItemValid(PCFPushGeofenceData item) {
+                if (isExpiredItem(item)) return false;
                 if (item.getLocations() == null || item.getLocations().size() <= 0) return false;
                 if (item.getData() == null || item.getData().size() <= 0) return false;
                 if (item.getTriggerType() == null) return false;
                 return true;
             }
         });
+    }
+
+    private boolean isExpiredItem(PCFPushGeofenceData item) {
+        if (item.getExpiryTime() == null) return true;
+        if (item.getExpiryTime().getTime() <= timeProvider.currentTimeMillis()) {
+            Logger.i("Geofence with ID " + item.getId() + " has expired.");
+            return true;
+        }
+        return false;
     }
 }
