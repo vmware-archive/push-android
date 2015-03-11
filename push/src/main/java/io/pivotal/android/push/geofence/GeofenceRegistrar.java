@@ -57,7 +57,7 @@ public class GeofenceRegistrar {
         for (final PCFPushGeofenceLocationMap.LocationEntry entry : geofencesToRegister.locationEntrySet()) {
             list.add(makeGeofence(entry, geofenceDataList));
             if (serializableList != null) {
-                serializableList.add(makeSerializableGeofence(entry));
+                serializableList.add(makeSerializableGeofence(entry, entry.getGeofenceData(geofenceDataList).getExpiryTime()));
             }
         }
 
@@ -84,7 +84,7 @@ public class GeofenceRegistrar {
                 .build();
     }
 
-    private Map<String, String> makeSerializableGeofence(PCFPushGeofenceLocationMap.LocationEntry entry) {
+    private Map<String, String> makeSerializableGeofence(PCFPushGeofenceLocationMap.LocationEntry entry, Date expiry) {
         final PCFPushGeofenceLocation geofenceLocation = entry.getLocation();
         final Map<String, String> serializableItem = new TreeMap<>();
 
@@ -92,6 +92,7 @@ public class GeofenceRegistrar {
         serializableItem.put("long", String.valueOf(geofenceLocation.getLongitude()));
         serializableItem.put("rad", String.valueOf(geofenceLocation.getRadius()));
         serializableItem.put("name", String.valueOf(geofenceLocation.getName()));
+        serializableItem.put("expiry", String.valueOf(expiry.getTime()));
 
         return serializableItem;
     }
