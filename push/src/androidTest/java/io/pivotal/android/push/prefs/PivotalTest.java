@@ -24,7 +24,7 @@ public class PivotalTest extends AndroidTestCase {
         properties.setProperty(key, value);
 
         Pivotal.setProperties(properties);
-        assertEquals(value, Pivotal.get(key));
+        assertEquals(value, Pivotal.get(getContext(), key));
     }
 
     public void testGetFails() {
@@ -36,7 +36,7 @@ public class PivotalTest extends AndroidTestCase {
         Pivotal.setProperties(properties);
 
         try {
-            assertEquals(value, Pivotal.get(key));
+            assertEquals(value, Pivotal.get(getContext(), key));
             fail();
         } catch (final IllegalStateException e) {
             assertNotNull(e);
@@ -44,18 +44,18 @@ public class PivotalTest extends AndroidTestCase {
     }
 
     public void testGetPlatformUuid() {
-        assertEquals("test_platform_uuid", Pivotal.getPlatformUuid());
+        assertEquals("test_platform_uuid", Pivotal.getPlatformUuid(getContext()));
     }
 
     public void testGetPlatformSecret() {
-        assertEquals("test_platform_secret", Pivotal.getPlatformSecret());
+        assertEquals("test_platform_secret", Pivotal.getPlatformSecret(getContext()));
     }
 
     public void testGetGcmSenderId() {
-        assertEquals("test_gcm_sender_id", Pivotal.getGcmSenderId());
+        assertEquals("test_gcm_sender_id", Pivotal.getGcmSenderId(getContext()));
     }
 
     public void testGetServiceUrl() {
-        assertEquals("http://example.com", Pivotal.getServiceUrl());
+        assertEquals("http://example.com", Pivotal.getServiceUrl(getContext()));
     }
 }

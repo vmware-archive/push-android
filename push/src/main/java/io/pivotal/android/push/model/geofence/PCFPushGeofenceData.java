@@ -63,10 +63,8 @@ public final class PCFPushGeofenceData {
 
         if (id != other.id) return false;
         if (data != null ? !data.equals(other.data) : other.data != null) return false;
-        if (expiryTime != null ? !expiryTime.equals(other.expiryTime) : other.expiryTime != null)
-            return false;
-        if (locations != null ? !locations.equals(other.locations) : other.locations != null)
-            return false;
+        if (expiryTime != null ? !expiryTime.equals(other.expiryTime) : other.expiryTime != null) return false;
+        if (locations != null ? !locations.equals(other.locations) : other.locations != null) return false;
         if (tags != null ? !tags.equals(other.tags) : other.tags != null) return false;
         if (triggerType != other.triggerType) return false;
 

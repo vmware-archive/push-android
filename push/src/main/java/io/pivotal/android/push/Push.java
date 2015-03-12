@@ -169,10 +169,10 @@ public class Push {
     }
 
     private PushParameters getPushParameters(String deviceAlias, Set<String> tags) {
-        final String gcmSenderId = Pivotal.getGcmSenderId();
-        final String platformUuid = Pivotal.getPlatformUuid();
-        final String platformSecret = Pivotal.getPlatformSecret();
-        final String serviceUrl = Pivotal.getServiceUrl();
+        final String gcmSenderId = Pivotal.getGcmSenderId(context);
+        final String platformUuid = Pivotal.getPlatformUuid(context);
+        final String platformSecret = Pivotal.getPlatformSecret(context);
+        final String serviceUrl = Pivotal.getServiceUrl(context);
         return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, deviceAlias, tags);
     }
 

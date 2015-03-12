@@ -3,6 +3,7 @@
  */
 package io.pivotal.android.push.prefs;
 
+import android.content.Context;
 import android.text.TextUtils;
 
 import java.io.IOException;
@@ -24,9 +25,9 @@ public class Pivotal {
 
     private static Properties sProperties;
 
-    /* package */ static Properties getProperties() {
+    /* package */ static Properties getProperties(Context context) {
         if (sProperties == null) {
-            sProperties = loadProperties();
+            sProperties = loadProperties(context);
         }
         return sProperties;
     }
@@ -35,50 +36,55 @@ public class Pivotal {
         sProperties = properties;
     }
 
-    private static Properties loadProperties() {
+    private static Properties loadProperties(Context context) {
+        Exception thrownException = null;
         for (final String path : LOCATIONS) {
             try {
-                return loadProperties(path);
+                return loadProperties(context, path);
             } catch (final Exception e) {
-                // Swallow exception
+                thrownException = e;
             }
         }
-        throw new IllegalStateException("Could not find pivotal.properties file.");
+        if (thrownException == null) {
+            throw new IllegalStateException("Could not find pivotal.properties file.");
+        } else {
+            throw new IllegalStateException("Could not find pivotal.properties file. " + thrownException.getLocalizedMessage(), thrownException);
+        }
     }
 
-    private static Properties loadProperties(final String path) throws IOException {
+    private static Properties loadProperties(Context context, final String path) throws IOException {
         final Properties properties = new Properties();
-        properties.load(getInputStream(path));
+        final InputStream inputStream = getInputStream(context, path);
+        properties.load(inputStream);
         return properties;
     }
 
-    private static InputStream getInputStream(final String path) {
-        final Thread currentThread = Thread.currentThread();
-        final ClassLoader loader = currentThread.getContextClassLoader();
+    private static InputStream getInputStream(Context context, final String path) throws IOException {
+        final ClassLoader loader = context.getClassLoader();
         return loader.getResourceAsStream(path);
     }
 
-    /* package */ static String get(final String key) {
-        final String value = getProperties().getProperty(key);
+    /* package */ static String get(Context context, final String key) {
+        final String value = getProperties(context).getProperty(key);
         if (TextUtils.isEmpty(value)) {
             throw new IllegalStateException("'" + key + "' not found in pivotal.properties");
         }
         return value;
     }
 
-    public static String getPlatformUuid() {
-        return get(Keys.PLATFORM_UUID);
+    public static String getPlatformUuid(Context context) {
+        return get(context, Keys.PLATFORM_UUID);
     }
 
-    public static String getPlatformSecret() {
-        return get(Keys.PLATFORM_SECRET);
+    public static String getPlatformSecret(Context context) {
+        return get(context, Keys.PLATFORM_SECRET);
     }
 
-    public static String getGcmSenderId() {
-        return get(Keys.GCM_SENDER_ID);
+    public static String getGcmSenderId(Context context) {
+        return get(context, Keys.GCM_SENDER_ID);
     }
 
-    public static String getServiceUrl() {
-        return get(Keys.SERVICE_URL);
+    public static String getServiceUrl(Context context) {
+        return get(context, Keys.SERVICE_URL);
     }
 }
