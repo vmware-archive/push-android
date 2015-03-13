@@ -14,11 +14,15 @@ import android.os.Bundle;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.location.Geofence;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import io.pivotal.android.push.geofence.GeofencePersistentStore;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceData;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocationMap;
+import io.pivotal.android.push.prefs.PushPreferencesProvider;
+import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
 import io.pivotal.android.push.receiver.GcmBroadcastReceiver;
 import io.pivotal.android.push.util.FileHelper;
 import io.pivotal.android.push.util.GeofenceHelper;
@@ -31,6 +35,7 @@ public class GcmService extends IntentService {
 
     private GeofenceHelper helper;
     private GeofencePersistentStore store;
+    private PushPreferencesProvider preferences;
 
     public GcmService() {
         super("GcmService");
@@ -42,6 +47,10 @@ public class GcmService extends IntentService {
 
     /* package */ void setGeofencePersistentStore(GeofencePersistentStore store) {
         this.store = store;
+    }
+
+    /* package */ void setPushPreferencesProvider(PushPreferencesProvider preferences) {
+        this.preferences = preferences;
     }
 
     @Override
@@ -68,6 +77,9 @@ public class GcmService extends IntentService {
         if (store == null) {
             final FileHelper fileHelper = new FileHelper(this);
             store = new GeofencePersistentStore(this, fileHelper);
+        }
+        if (preferences == null) {
+            preferences = new PushPreferencesProviderImpl(this);
         }
     }
 
@@ -108,12 +120,14 @@ public class GcmService extends IntentService {
 
     private void handleGeofencingEvent(Intent intent) {
         Logger.d("handleGeofencingEvent: " + intent);
+        final Set<String> subscribedTags = preferences.getTags();
+
         for (final Geofence geofence : helper.getGeofences()) {
 
             if (helper.getGeofenceTransition() == Geofence.GEOFENCE_TRANSITION_ENTER) {
 
                 Logger.i("Entered geofence: " + geofence);
-                final Bundle data = getGeofenceBundle(geofence);
+                final Bundle data = getGeofenceBundle(geofence, subscribedTags);
                 if (data != null) {
                     onGeofenceEnter(data);
                 }
@@ -121,7 +135,7 @@ public class GcmService extends IntentService {
             } else if (helper.getGeofenceTransition() == Geofence.GEOFENCE_TRANSITION_EXIT) {
 
                 Logger.i("Exited geofence: " + geofence);
-                final Bundle data = getGeofenceBundle(geofence);
+                final Bundle data = getGeofenceBundle(geofence, subscribedTags);
                 if (data != null) {
                     onGeofenceExit(data);
                 }
@@ -129,7 +143,7 @@ public class GcmService extends IntentService {
         }
     }
 
-    private Bundle getGeofenceBundle(Geofence geofence) {
+    private Bundle getGeofenceBundle(Geofence geofence, Set<String> subscribedTags) {
         final String requestId = geofence.getRequestId();
         if (requestId == null) {
             Logger.e("Triggered geofence is missing a request ID: " + geofence);
@@ -140,6 +154,11 @@ public class GcmService extends IntentService {
         final PCFPushGeofenceData geofenceData = store.getGeofenceData(geofenceId);
         if (geofenceData == null) {
             Logger.e("Triggered geofence with ID " + geofenceId + " has no matching data in our persistent store.");
+            return null;
+        }
+
+        if (!isSubcribedToTag(geofenceData, subscribedTags)) {
+            Logger.i("This geofence is for a tag that the user has not subscribed to.");
             return null;
         }
 
@@ -154,6 +173,25 @@ public class GcmService extends IntentService {
             result.putString(entry.getKey(), entry.getValue());
         }
         return result;
+    }
+
+    private boolean isSubcribedToTag(PCFPushGeofenceData geofenceData, Set<String> subscribedTags) {
+        final List<String> tags = geofenceData.getTags();
+        if (tags == null || tags.isEmpty()) {
+            return true;
+        }
+
+        if (subscribedTags == null || subscribedTags.isEmpty()) {
+            return false;
+        }
+
+        for (final String subscribedTag : subscribedTags) {
+            if (tags.contains(subscribedTag)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     // Intended to be overridden by application

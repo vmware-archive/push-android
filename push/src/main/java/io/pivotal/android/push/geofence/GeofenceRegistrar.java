@@ -1,5 +1,6 @@
 package io.pivotal.android.push.geofence;
 
+import android.app.Application;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
@@ -7,8 +8,6 @@ import android.os.Bundle;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.PendingResult;
-import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationServices;
@@ -33,11 +32,15 @@ public class GeofenceRegistrar {
 
     public static final String GEOFENCE_UPDATE_BROADCAST = "io.pivotal.android.push.geofence.GeofenceRegistrar.Update";
 
-    private final Context context;
-    private GoogleApiClient googleApiClient;
+    private static final Object lock = new Object();
+    private Context context;
 
     public GeofenceRegistrar(Context context) {
-        this.context = context;
+        if (context instanceof Application) {
+            this.context = context;
+        } else {
+            this.context = context.getApplicationContext();
+        }
     }
 
     public void reset() {
@@ -118,87 +121,75 @@ public class GeofenceRegistrar {
     }
 
     private void monitorGeofences(final List<Geofence> geofences, final List<Map<String, String>> serializableGeofences) {
+
         if (geofences == null) {
             return;
         }
 
-        googleApiClient = new GoogleApiClient.Builder(context)
-                .addApi(LocationServices.API)
-                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+        Logger.i("Connecting to GoogleApiClient.");
 
-                    @Override
-                    public void onConnected(Bundle bundle) {
-                        Logger.i("GoogleApiClient connected.");
+        final GoogleApiClient googleApiClient = new GoogleApiClient.Builder(context)
+            .addApi(LocationServices.API)
+            .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
 
-                        final Class<?> gcmServiceClass = GcmService.getGcmServiceClass(context);
-                        final Intent intent = new Intent(context, gcmServiceClass);
-                        final PendingIntent pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+                @Override
+                public void onConnected(Bundle bundle) {
+                    Logger.i("GoogleApiClient connected.");
+                }
 
-                        final PendingResult<Status> removeGeofencesResult = LocationServices.GeofencingApi.removeGeofences(googleApiClient, pendingIntent);
-                        removeGeofencesResult.setResultCallback(new ResultCallback<Status>() {
+                @Override
+                public void onConnectionSuspended(int cause) {
+                    Logger.w("GoogleApiClient Connection Suspended: cause:" + cause);
 
-                            @Override
-                            public void onResult(Status status) {
+                    // TODO - what to do if the connection is suspended?
+                }
+            })
+            .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                @Override
+                public void onConnectionFailed(ConnectionResult connectionResult) {
+                    Logger.e("GoogleApiClient Connection Failed: errorCode:" + connectionResult.getErrorCode());
+                }
+            })
+            .build();
 
-                                if (status.isSuccess()) {
-                                    Logger.i("Success: removed currently monitored geofences.");
-                                } else {
-                                    // TODO : report this error somehow
-                                    Logger.w("Was not able to remove currently monitored geofences: Status code: " + status.getStatusCode());
-                                }
+        synchronized (lock) {
+            final ConnectionResult connectionResult = googleApiClient.blockingConnect();
+            if (connectionResult.isSuccess()) {
+                handleMonitorGeofences(geofences, serializableGeofences, googleApiClient);
+            }
+            googleApiClient.disconnect();
+        }
+    }
 
-                                if (!geofences.isEmpty()) {
-                                    final PendingResult<Status> addGeofencesResult = LocationServices.GeofencingApi.addGeofences(googleApiClient, geofences, pendingIntent);
-                                    addGeofencesResult.setResultCallback(new ResultCallback<Status>() {
+    private void handleMonitorGeofences(final List<Geofence> geofences, final List<Map<String, String>> serializableGeofences, final GoogleApiClient googleApiClient) {
+        final Class<?> gcmServiceClass = GcmService.getGcmServiceClass(context);
+        final Intent intent = new Intent(context, gcmServiceClass);
+        final PendingIntent pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-                                        @Override
-                                        public void onResult(Status status) {
+        final Status removeGeofencesStatus = LocationServices.GeofencingApi.removeGeofences(googleApiClient, pendingIntent).await();
 
-                                            if (status.isSuccess()) {
-                                                Logger.i("Success: Now monitoring for " + geofences.size() + " geofences.");
-                                            } else {
-                                                // TODO : report this error somehow
-                                                Logger.e("Error trying to monitor geofences. Status code: " + status.getStatusCode());
-                                            }
+        if (removeGeofencesStatus.isSuccess()) {
+            Logger.i("Success: removed currently monitored geofences.");
+        } else {
+            // TODO : report this error somehow
+            Logger.w("Was not able to remove currently monitored geofences: Status code: " + removeGeofencesStatus.getStatusCode());
+        }
 
-                                            updateDebugGeofencesFile(serializableGeofences);
+        if (!geofences.isEmpty()) {
+            final Status addGeofencesStatus = LocationServices.GeofencingApi.addGeofences(googleApiClient, geofences, pendingIntent).await();
 
-                                            googleApiClient.disconnect();
-                                            googleApiClient = null;
-                                        }
-                                    });
-                                } else {
+            if (addGeofencesStatus.isSuccess()) {
+                Logger.i("Success: Now monitoring for " + geofences.size() + " geofences.");
+            } else {
+                // TODO : report this error somehow
+                Logger.e("Error trying to monitor geofences. Status code: " + addGeofencesStatus.getStatusCode());
+            }
 
-                                    updateDebugGeofencesFile(serializableGeofences);
+        } else {
+            Logger.i("Geofences to monitor is empty. Exiting.");
+        }
 
-                                    googleApiClient.disconnect();
-                                    googleApiClient = null;
-                                }
-                            }
-                        });
-
-                    }
-
-                    @Override
-                    public void onConnectionSuspended(int cause) {
-                        Logger.w("GoogleApiClient Connection Suspended: cause:" + cause);
-
-                        // TODO - what to do if the connection is suspended?
-                    }
-                })
-                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-                    @Override
-                    public void onConnectionFailed(ConnectionResult connectionResult) {
-                        Logger.e("GoogleApiClient Connection Failed: errorCode:" + connectionResult.getErrorCode());
-                        if (googleApiClient.isConnected()) {
-                            googleApiClient.disconnect();
-                        }
-                        googleApiClient = null;
-                    }
-                })
-                .build();
-
-        googleApiClient.blockingConnect();
+        updateDebugGeofencesFile(serializableGeofences);
     }
 
     private void updateDebugGeofencesFile(List<Map<String, String>> serializableGeofences) {

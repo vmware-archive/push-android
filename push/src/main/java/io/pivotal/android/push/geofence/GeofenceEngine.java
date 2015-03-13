@@ -73,6 +73,7 @@ public class GeofenceEngine {
         final PCFPushGeofenceLocationMap geofencesToRegister = new PCFPushGeofenceLocationMap();
         geofencesToRegister.addAll(requiredGeofences);
 
+        Logger.i("GeofenceEngine: going to register " + geofencesToRegister.size() + " geofences.");
         registrar.registerGeofences(geofencesToRegister, requiredGeofences);
         store.saveRegisteredGeofences(requiredGeofences);
     }

@@ -89,10 +89,10 @@ public class Push {
     }
 
     private void saveArguments(Context context) {
-        if (!(context instanceof Application)) {
-            this.context = context.getApplicationContext();
-        } else {
+        if (context instanceof Application) {
             this.context = context;
+        } else {
+            this.context = context.getApplicationContext();
         }
     }
 
