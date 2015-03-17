@@ -58,4 +58,8 @@ public class PivotalTest extends AndroidTestCase {
     public void testGetServiceUrl() {
         assertEquals("http://example.com", Pivotal.getServiceUrl(getContext()));
     }
+
+    public void testGetGeofencesEnabled() {
+        assertEquals(true, Pivotal.getGeofencesEnabled(getContext()));
+    }
 }

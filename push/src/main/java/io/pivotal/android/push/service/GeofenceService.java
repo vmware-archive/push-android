@@ -12,6 +12,7 @@ import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofencePersistentStore;
 import io.pivotal.android.push.geofence.GeofenceRegistrar;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
+import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
 import io.pivotal.android.push.receiver.GcmBroadcastReceiver;
@@ -64,7 +65,7 @@ public class GeofenceService extends IntentService {
     protected void onHandleIntent(Intent intent) {
 
         try {
-            if (intent != null) {
+            if (intent != null && Pivotal.getGeofencesEnabled(this))  {
                 if (intent.getAction() != null) {
                     Logger.d("GeofenceService has received an intent: " + intent.getAction());
                 } else {

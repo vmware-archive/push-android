@@ -14,6 +14,7 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
+import java.util.Properties;
 
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.geofence.PCFPushGetGeofenceUpdatesApiRequest;
@@ -21,6 +22,7 @@ import io.pivotal.android.push.backend.geofence.PCFPushGetGeofenceUpdatesListene
 import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceResponseData;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
+import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.util.ModelUtil;
 
 import static org.mockito.Mockito.*;
@@ -40,6 +42,7 @@ public class GeofenceServiceTest extends AndroidTestCase {
         service = startService();
         service.setGeofenceEngine(geofenceEngine);
         service.setGetGeofenceUpdatesApiRequest(apiRequest);
+        Pivotal.setProperties(getPropertiesWithGeofencesEnabled("true"));
     }
 
     @Override
@@ -67,6 +70,19 @@ public class GeofenceServiceTest extends AndroidTestCase {
         service.onHandleIntent(intent);
         verifyZeroInteractions(geofenceEngine);
         verifyZeroInteractions(apiRequest);
+    }
+
+    public void testGeofencesDisabled() throws IOException {
+        Pivotal.setProperties(getPropertiesWithGeofencesEnabled("false"));
+        final Intent intent = GeofenceServiceTest.createGeofenceUpdateSilentPushIntent(getContext(), FakeGeofenceService.class);
+        final FakePushPreferencesProvider preferences = getPreferencesForTimestamp(1337L);
+
+        service.setPushPreferencesProvider(preferences);
+        service.onHandleIntent(intent);
+
+        verifyZeroInteractions(apiRequest);
+        verifyZeroInteractions(geofenceEngine);
+        assertFalse(preferences.wasLastGeofenceUpdateSaved());
     }
 
     public void testFetchesUpdateSuccessfullyWithEmptyResponse() throws IOException {
@@ -149,9 +165,23 @@ public class GeofenceServiceTest extends AndroidTestCase {
         assertEquals(1337L, preferences.getLastGeofenceUpdate());
     }
 
+    private FakePushPreferencesProvider getPreferencesForTimestamp(long timestamp) {
+        return new FakePushPreferencesProvider("", "", 0, "", "", "", "", "", "", null, timestamp, false);
+    }
+
+    private Properties getPropertiesWithGeofencesEnabled(String geofencesEnabled) {
+        final Properties properties = new Properties();
+        properties.setProperty(Pivotal.Keys.SERVICE_URL, "http://some.url");
+        properties.setProperty(Pivotal.Keys.GCM_SENDER_ID, "fake_sender_id");
+        properties.setProperty(Pivotal.Keys.PLATFORM_UUID, "fake_platform_uuid");
+        properties.setProperty(Pivotal.Keys.PLATFORM_SECRET, "fake_platform_secret");
+        properties.setProperty(Pivotal.Keys.GEOFENCES_ENABLED, geofencesEnabled);
+        return properties;
+    }
+
     private FakeGeofenceService startService() {
         try {
-            final FakeGeofenceService service = new FakeGeofenceService();
+            final FakeGeofenceService service = new FakeGeofenceService(getContext());
             service.attachBaseContext(getContext());
             service.onCreate();
             return service;
@@ -163,18 +193,21 @@ public class GeofenceServiceTest extends AndroidTestCase {
 
     private static final class FakeGeofenceService extends GeofenceService {
 
-        public FakeGeofenceService() {
+        private final Context context;
+
+        public FakeGeofenceService(Context context) {
             super();
+            this.context = context;
         }
 
         @Override
         public void attachBaseContext(final Context base) {
             super.attachBaseContext(base);
         }
-    }
 
-    private FakePushPreferencesProvider getPreferencesForTimestamp(long timestamp) {
-        return new FakePushPreferencesProvider("", "", 0, "", "", "", "", "", "", null, timestamp);
+        @Override
+        public ClassLoader getClassLoader() {
+            return context.getClassLoader();
+        }
     }
-
 }

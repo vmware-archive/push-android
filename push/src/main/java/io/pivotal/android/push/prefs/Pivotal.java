@@ -12,11 +12,12 @@ import java.util.Properties;
 
 public class Pivotal {
 
-    private static final class Keys {
-        private static final String SERVICE_URL = "pivotal.push.serviceUrl";
-        private static final String GCM_SENDER_ID = "pivotal.push.gcmSenderId";
-        private static final String PLATFORM_UUID = "pivotal.push.platformUuid";
-        private static final String PLATFORM_SECRET = "pivotal.push.platformSecret";
+    public static final class Keys {
+        public static final String SERVICE_URL = "pivotal.push.serviceUrl";
+        public static final String GCM_SENDER_ID = "pivotal.push.gcmSenderId";
+        public static final String PLATFORM_UUID = "pivotal.push.platformUuid";
+        public static final String PLATFORM_SECRET = "pivotal.push.platformSecret";
+        public static final String GEOFENCES_ENABLED = "pivotal.push.geofencesEnabled";
     }
 
     private static final String[] LOCATIONS = {
@@ -32,7 +33,7 @@ public class Pivotal {
         return sProperties;
     }
 
-    /* package */ static void setProperties(final Properties properties) {
+    public static void setProperties(final Properties properties) {
         sProperties = properties;
     }
 
@@ -86,5 +87,9 @@ public class Pivotal {
 
     public static String getServiceUrl(Context context) {
         return get(context, Keys.SERVICE_URL);
+    }
+
+    public static boolean getGeofencesEnabled(Context context) {
+        return Boolean.parseBoolean(get(context, Keys.GEOFENCES_ENABLED));
     }
 }

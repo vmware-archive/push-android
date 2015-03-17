@@ -72,6 +72,14 @@ public class GeofenceUpdater {
         }
     }
 
+    public void clearGeofences(GeofenceUpdaterListener listener) {
+        geofenceEngine.processResponseData(0L, null);
+        pushPreferencesProvider.setLastGeofenceUpdate(GeofenceEngine.NEVER_UPDATED_GEOFENCES);
+        if (listener != null) {
+            listener.onSuccess();
+        }
+    }
+
     private void onSuccessfullyFetchedUpdates(final long timestamp, final PCFPushGeofenceResponseData responseData, final GeofenceUpdaterListener listener) {
         if (responseData != null && responseData.getGeofences() != null) {
             Logger.i("Successfully fetched geofence updates. Received " + responseData.getGeofences().size() + " items.");
@@ -103,6 +111,7 @@ public class GeofenceUpdater {
         final String platformUuid = Pivotal.getPlatformUuid(context);
         final String platformSecret = Pivotal.getPlatformSecret(context);
         final String serviceUrl = Pivotal.getServiceUrl(context);
-        return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, null, null);
+        final boolean areGeofencesEnabled = Pivotal.getGeofencesEnabled(context);
+        return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, null, null, areGeofencesEnabled);
     }
 }

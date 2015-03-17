@@ -17,27 +17,34 @@ public class PushParameters {
     private final String serviceUrl;
     private final String deviceAlias;
     private final Set<String> tags;
+    private final boolean areGeofencesEnabled;
 
     /**
      * Sets up parameters used by the Pivotal CF Mobile Services Push SDK
      * @param gcmSenderId    The "sender ID" or "project ID", as defined by the Google Cloud Messaging.  May not be null or empty.
-     *                       You can find it on the Google Cloud Console (https://cloud.google.com) for your project.
+     *                       You can find it on the Google Cloud Console (https://cloud.google.com) for your project.  See
+     *                       the "pivotal.push.gcmSenderId" property.
      * @param platformUuid   The "platform", as defined by Pivotal CF Mobile Services Push Services for your platform.  May not be null or empty.
+     *                       See the "pivotal.push.platformUuid" property.
      * @param platformSecret The "platform secret", as defined by Pivotal CF Mobile Services Push Services for your platform.  May not be null or empty.
+     *                       See the pivotal.push.platformSecret property.
      * @param serviceUrl     The Pivotal CF Mobile Services server used to provide push and related analytics services.
+     *                       See the pivotal.push.serviceUrl" property.
      * @param deviceAlias    A developer-defined "device alias" which can be used to designate this device, or class.
      *                       of devices, in push or notification campaigns. May not be set to `null`. May be set to empty.
      * @param tags           A set of tags to register to.  You should always register all tags that you want to listen to, even if you have
      *                       already subscribed to them.  If you exclude any subscribed tags in a registration request, then those tags
      *                       will be unsubscribed.
+     * @param areGeofencesEnabled  Are geofences available (see the "pivotal.push.geofencesEnabled" property).
      */
-    public PushParameters(String gcmSenderId, String platformUuid, String platformSecret, String serviceUrl, String deviceAlias, Set<String> tags) {
+    public PushParameters(String gcmSenderId, String platformUuid, String platformSecret, String serviceUrl, String deviceAlias, Set<String> tags, boolean areGeofencesEnabled) {
         this.gcmSenderId = gcmSenderId;
         this.platformUuid = platformUuid;
         this.platformSecret = platformSecret;
         this.serviceUrl = serviceUrl;
         this.deviceAlias = deviceAlias;
         this.tags = tags;
+        this.areGeofencesEnabled = areGeofencesEnabled;
     }
 
     public String getGcmSenderId() {
@@ -62,6 +69,10 @@ public class PushParameters {
 
     public Set<String> getTags() {
         return tags != null ? tags : new HashSet<String>();
+    }
+
+    public boolean areGeofencesEnabled() {
+        return areGeofencesEnabled;
     }
 
     @Override
@@ -137,18 +148,18 @@ public class PushParameters {
             return false;
         }
 
-        return true;
+        return areGeofencesEnabled != other.areGeofencesEnabled;
     }
 
     @Override
     public int hashCode() {
-        int result = 17;
-        result = (result * 31) + (gcmSenderId == null ? 0 : gcmSenderId.hashCode());
-        result = (result * 31) + (platformUuid == null ? 0 : platformUuid.hashCode());
-        result = (result * 31) + (platformSecret == null ? 0 : platformSecret.hashCode());
-        result = (result * 31) + (serviceUrl == null ? 0 : serviceUrl.hashCode());
-        result = (result * 31) + (deviceAlias == null ? 0 : deviceAlias.hashCode());
-        result = (result * 31) + (tags == null ? 0 : tags.hashCode());
+        int result = gcmSenderId != null ? gcmSenderId.hashCode() : 0;
+        result = 31 * result + (platformUuid != null ? platformUuid.hashCode() : 0);
+        result = 31 * result + (platformSecret != null ? platformSecret.hashCode() : 0);
+        result = 31 * result + (serviceUrl != null ? serviceUrl.hashCode() : 0);
+        result = 31 * result + (deviceAlias != null ? deviceAlias.hashCode() : 0);
+        result = 31 * result + (tags != null ? tags.hashCode() : 0);
+        result = 31 * result + (areGeofencesEnabled ? 1 : 0);
         return result;
     }
 }

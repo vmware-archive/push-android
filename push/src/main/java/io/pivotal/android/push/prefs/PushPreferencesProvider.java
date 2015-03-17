@@ -52,4 +52,8 @@ public interface PushPreferencesProvider {
     long getLastGeofenceUpdate();
 
     void setLastGeofenceUpdate(long timestamp);
+
+    boolean areGeofencesEnabled();
+
+    void setAreGeofencesEnabled(boolean areGeofencesEnabled);
 }

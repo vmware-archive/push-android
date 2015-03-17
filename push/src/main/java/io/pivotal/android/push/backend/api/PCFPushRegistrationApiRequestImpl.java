@@ -60,7 +60,8 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
                                            PCFPushRegistrationListener listener) {
 
         verifyNewRegistrationArguments(gcmDeviceRegistrationId, parameters, listener);
-        handleRequest(gcmDeviceRegistrationId, null, savedTags, parameters, listener, false);
+        final boolean isUpdate = false;
+        handleRequest(gcmDeviceRegistrationId, null, savedTags, parameters, listener, isUpdate);
     }
 
     @Override
@@ -71,7 +72,8 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
                                               PCFPushRegistrationListener listener) {
 
         verifyUpdateRegistrationArguments(gcmDeviceRegistrationId, pcfPushDeviceRegistrationId, parameters, listener);
-        handleRequest(gcmDeviceRegistrationId, pcfPushDeviceRegistrationId, savedTags, parameters, listener, true);
+        final boolean isUpdate = true;
+        handleRequest(gcmDeviceRegistrationId, pcfPushDeviceRegistrationId, savedTags, parameters, listener, isUpdate);
     }
 
     private void verifyNewRegistrationArguments(String gcmDeviceRegistrationId,

@@ -20,6 +20,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     private Set<String> tags;
     private int appVersion;
     private long lastGeofenceUpdate = GeofenceEngine.NEVER_UPDATED_GEOFENCES;
+    private boolean areGeofencesEnabled;
     private boolean wasGcmDeviceRegistrationIdSaved = false;
     private boolean wasPCFPushDeviceRegistrationIdSaved = false;
     private boolean wasAppVersionSaved = false;
@@ -31,6 +32,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     private boolean wasServiceUrlSaved = false;
     private boolean wasTagsSaved = false;
     private boolean wasLastGeofenceUpdateSaved = false;
+    private boolean wasAreGeofencesEnabledSaved = false;
 
     public FakePushPreferencesProvider() {
     }
@@ -45,7 +47,8 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
                                        String packageNameToLoad,
                                        String serviceUrlToLoad,
                                        Set<String> tagsToLoad,
-                                       long lastGeofenceUpdateToLoad) {
+                                       long lastGeofenceUpdateToLoad,
+                                       boolean areGeofencesEnabled) {
 
         this.gcmDeviceRegistrationId = gcmDeviceRegistrationIdToLoad;
         this.pcfPushDeviceRegistrationId = pcfPushDeviceRegistrationIdToLoad;
@@ -57,6 +60,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
         this.packageName = packageNameToLoad;
         this.serviceUrl = serviceUrlToLoad;
         this.lastGeofenceUpdate = lastGeofenceUpdateToLoad;
+        this.areGeofencesEnabled = areGeofencesEnabled;
         this.tags = tagsToLoad;
     }
 
@@ -113,6 +117,11 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     @Override
     public Set<String> getTags() {
         return tags;
+    }
+
+    @Override
+    public boolean areGeofencesEnabled() {
+        return areGeofencesEnabled;
     }
 
     @Override
@@ -181,6 +190,12 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
         wasLastGeofenceUpdateSaved = true;
     }
 
+    @Override
+    public void setAreGeofencesEnabled(boolean areGeofencesEnabled) {
+        this.areGeofencesEnabled = areGeofencesEnabled;
+        wasAreGeofencesEnabledSaved = true;
+    }
+
     public boolean wasGcmDeviceRegistrationIdSaved() {
         return wasGcmDeviceRegistrationIdSaved;
     }
@@ -223,5 +238,9 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
 
     public boolean wasLastGeofenceUpdateSaved() {
         return wasLastGeofenceUpdateSaved;
+    }
+
+    public boolean wasAreGeofencesEnabledSaved() {
+        return wasAreGeofencesEnabledSaved;
     }
 }

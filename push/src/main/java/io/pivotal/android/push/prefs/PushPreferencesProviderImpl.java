@@ -31,6 +31,7 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
     private static final String PROPERTY_SERVICE_URL = "base_server_url";
     private static final String PROPERTY_TAGS = "tags";
     private static final String PROPERTY_GEOFENCE_UPDATE = "geofence_update";
+    private static final String PROPERTY_ARE_GEOFENCES_ENABLED = "are_geofences_enabled";
 
     private final Context context;
 
@@ -185,6 +186,19 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
         final SharedPreferences prefs = getSharedPreferences();
         final SharedPreferences.Editor editor = prefs.edit();
         editor.putLong(PROPERTY_GEOFENCE_UPDATE, timestamp);
+        editor.commit();
+    }
+
+    @Override
+    public boolean areGeofencesEnabled() {
+        return getSharedPreferences().getBoolean(PROPERTY_ARE_GEOFENCES_ENABLED, false);
+    }
+
+    @Override
+    public void setAreGeofencesEnabled(boolean areGeofencesEnabled) {
+        final SharedPreferences prefs = getSharedPreferences();
+        final SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(PROPERTY_ARE_GEOFENCES_ENABLED, areGeofencesEnabled);
         editor.commit();
     }
 }

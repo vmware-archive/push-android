@@ -21,6 +21,7 @@ import java.util.Set;
 import io.pivotal.android.push.geofence.GeofencePersistentStore;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceData;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocationMap;
+import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
 import io.pivotal.android.push.receiver.GcmBroadcastReceiver;
@@ -55,7 +56,7 @@ public class GcmService extends IntentService {
 
     @Override
     protected final void onHandleIntent(Intent intent) {
-        Logger.fd("GcmService has received a push message from GCM.");
+        Logger.fd("GcmService has received an event.");
 
         try {
 
@@ -94,19 +95,31 @@ public class GcmService extends IntentService {
     }
 
     private void handleMessage(Intent intent, Bundle extras, String messageType) {
+        final boolean areGeofencesEnabled = Pivotal.getGeofencesEnabled(this) && preferences.areGeofencesEnabled();
         if (GeofenceService.isGeofenceUpdate(this, intent)) {
-            handleGeofenceUpdate(intent);
+            if (areGeofencesEnabled) {
+                handleGeofenceUpdate(intent);
+            } else {
+                Logger.i("Ignoring message. Geofences are disabled.");
+            }
 
         } else if (isGeofencingEvent(intent)) {
-            handleGeofencingEvent(intent);
+            if (areGeofencesEnabled) {
+                handleGeofencingEvent(intent);
+            } else {
+                Logger.i("Ignoring message. Geofences are disabled.");
+            }
 
         } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
+            Logger.i("GcmService has received a push message.");
             onReceiveMessage(extras);
 
         } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
+            Logger.i("GcmService has received a DELETED push message.");
             onReceiveMessageDeleted(extras);
 
         } else if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
+            Logger.e("GcmService has received an ERROR push message.");
             onReceiveMessageSendError(extras);
         }
     }
