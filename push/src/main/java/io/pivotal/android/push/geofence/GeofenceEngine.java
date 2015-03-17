@@ -4,6 +4,7 @@ import java.util.List;
 
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceData;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceDataList;
+import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocation;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocationMap;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceResponseData;
 import io.pivotal.android.push.util.Logger;
@@ -64,18 +65,32 @@ public class GeofenceEngine {
             return;
         }
 
-        final PCFPushGeofenceDataList requiredGeofences = new PCFPushGeofenceDataList();
-
-        addValidGeofencesFromStore(requiredGeofences, storedGeofences, responseData);
-
-        addValidGeofencesFromUpdate(requiredGeofences, responseData.getGeofences());
-
+        final PCFPushGeofenceDataList geofencesToStore = new PCFPushGeofenceDataList();
         final PCFPushGeofenceLocationMap geofencesToRegister = new PCFPushGeofenceLocationMap();
-        geofencesToRegister.addAll(requiredGeofences);
+        addValidGeofencesFromStore(geofencesToStore, storedGeofences, responseData);
+        addValidGeofencesFromUpdate(geofencesToStore, responseData.getGeofences());
+        geofencesToRegister.addAll(geofencesToStore);
 
         Logger.i("GeofenceEngine: going to register " + geofencesToRegister.size() + " geofences.");
-        registrar.registerGeofences(geofencesToRegister, requiredGeofences);
-        store.saveRegisteredGeofences(requiredGeofences);
+        registrar.registerGeofences(geofencesToRegister, geofencesToStore);
+        store.saveRegisteredGeofences(geofencesToStore);
+    }
+
+    public void clearLocations(final PCFPushGeofenceLocationMap locationsToClear) {
+
+        if (locationsToClear == null || locationsToClear.size() == 0) {
+            return;
+        }
+
+        final PCFPushGeofenceDataList storedGeofences = store.getCurrentlyRegisteredGeofences();
+        final PCFPushGeofenceDataList geofencesToStore = new PCFPushGeofenceDataList();
+        final PCFPushGeofenceLocationMap geofencesToRegister = new PCFPushGeofenceLocationMap();
+
+        filterClearedLocations(locationsToClear, storedGeofences, geofencesToStore, geofencesToRegister);
+
+        Logger.i("GeofenceEngine: going to register " + geofencesToRegister.size() + " geofences.");
+        registrar.registerGeofences(geofencesToRegister, geofencesToStore);
+        store.saveRegisteredGeofences(geofencesToStore);
     }
 
     private boolean hasDataToPersist(PCFPushGeofenceResponseData responseData, PCFPushGeofenceDataList storedGeofences) {
@@ -107,6 +122,15 @@ public class GeofenceEngine {
         return responseData.getDeletedGeofenceIds() != null && responseData.getDeletedGeofenceIds().contains(item.getId());
     }
 
+    private boolean isExpiredItem(PCFPushGeofenceData item) {
+        if (item.getExpiryTime() == null) return true;
+        if (item.getExpiryTime().getTime() <= timeProvider.currentTimeMillis()) {
+            Logger.i("Geofence with ID " + item.getId() + " has expired.");
+            return true;
+        }
+        return false;
+    }
+
     private void addValidGeofencesFromUpdate(PCFPushGeofenceDataList requiredGeofences, List<PCFPushGeofenceData> newGeofences) {
         requiredGeofences.addFiltered(newGeofences, new PCFPushGeofenceDataList.Filter() {
 
@@ -125,12 +149,49 @@ public class GeofenceEngine {
         });
     }
 
-    private boolean isExpiredItem(PCFPushGeofenceData item) {
-        if (item.getExpiryTime() == null) return true;
-        if (item.getExpiryTime().getTime() <= timeProvider.currentTimeMillis()) {
-            Logger.i("Geofence with ID " + item.getId() + " has expired.");
-            return true;
-        }
-        return false;
+    private void filterClearedLocations(final PCFPushGeofenceLocationMap locationsToClear,
+                                        PCFPushGeofenceDataList storedGeofences,
+                                        final PCFPushGeofenceDataList geofencesToStore,
+                                        final PCFPushGeofenceLocationMap geofencesToRegister) {
+
+        geofencesToRegister.addFiltered(storedGeofences, new PCFPushGeofenceLocationMap.Filter() {
+
+            @Override
+            public boolean filterItem(PCFPushGeofenceData item, PCFPushGeofenceLocation location) {
+
+                if (item == null || location == null) {
+                    return false;
+                }
+
+                final String requestId = getRequestId(item, location);
+
+                if (shouldKeepLocation(requestId)) {
+                    keepLocation(item, location, requestId);
+                    return true;
+                }
+                return false;
+            }
+
+            private String getRequestId(PCFPushGeofenceData item, PCFPushGeofenceLocation location) {
+                return PCFPushGeofenceLocationMap.getAndroidRequestId(item.getId(), location.getId());
+            }
+
+            private boolean shouldKeepLocation(String requestId) {
+                return !locationsToClear.containsKey(requestId);
+            }
+
+            private void keepLocation(PCFPushGeofenceData item, PCFPushGeofenceLocation location, String requestId) {
+
+                if (geofencesToStore.get(item.getId()) == null) {
+                    final PCFPushGeofenceData newCopyWithoutLocations = item.newCopyWithoutLocations();
+                    newCopyWithoutLocations.getLocations().add(location);
+                    geofencesToStore.put(item.getId(), newCopyWithoutLocations);
+                } else {
+                    geofencesToStore.get(item.getId()).getLocations().add(location);
+                }
+
+                geofencesToRegister.put(requestId, location);
+            }
+        });
     }
 }

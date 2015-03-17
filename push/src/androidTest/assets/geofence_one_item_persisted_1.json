@@ -5,6 +5,7 @@
     },
     "expiry_time": 1142744274,
     "trigger_type": "exit",
+    "tags":["MONDAY", "FRIDAY"],
     "locations": [
         {
             "id": 66,

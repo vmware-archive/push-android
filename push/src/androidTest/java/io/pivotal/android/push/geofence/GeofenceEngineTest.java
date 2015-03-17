@@ -24,7 +24,7 @@ public class GeofenceEngineTest extends AndroidTestCase {
 
     private PCFPushGeofenceDataList ONE_ITEM_GEOFENCE_LIST;
     private PCFPushGeofenceDataList THREE_ITEM_GEOFENCE_LIST;
-    private PCFPushGeofenceDataList FOUR_ITEM_GEOFENCE_LIST;
+    private PCFPushGeofenceDataList FIVE_ITEM_GEOFENCE_LIST;
     private PCFPushGeofenceLocationMap ONE_ITEM_GEOFENCE_MAP;
     private GeofenceEngine engine;
     private GeofenceRegistrar registrar;
@@ -42,7 +42,7 @@ public class GeofenceEngineTest extends AndroidTestCase {
         engine = new GeofenceEngine(registrar, store, timeProvider);
         ONE_ITEM_GEOFENCE_LIST = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_one_item.json");
         THREE_ITEM_GEOFENCE_LIST = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_three_items.json");
-        FOUR_ITEM_GEOFENCE_LIST = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_four_items.json");
+        FIVE_ITEM_GEOFENCE_LIST = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_five_items.json");
         ONE_ITEM_GEOFENCE_MAP = new PCFPushGeofenceLocationMap();
         putLocation(ONE_ITEM_GEOFENCE_MAP, ONE_ITEM_GEOFENCE_LIST.first(), 0);
     }
@@ -575,19 +575,146 @@ public class GeofenceEngineTest extends AndroidTestCase {
         engine = new GeofenceEngine(registrar, store, timeProvider);
 
         final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_complex.json");
-        when(store.getCurrentlyRegisteredGeofences()).thenReturn(FOUR_ITEM_GEOFENCE_LIST);
+        when(store.getCurrentlyRegisteredGeofences()).thenReturn(FIVE_ITEM_GEOFENCE_LIST);
         engine.processResponseData(50L, updateData);
 
         final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
         putLocation(expectedMap, updateData.getGeofences().get(0), 0); // ID 5 was added since it is not expired. the others should be culled.
-        putLocation(expectedMap, FOUR_ITEM_GEOFENCE_LIST.get(11L), 0); // ID 11 was kept since it is not expired. the others should be culled.
+        putLocation(expectedMap, FIVE_ITEM_GEOFENCE_LIST.get(11L), 0); // ID 11 was kept since it is not expired. the others should be culled.
         assertEquals(2, expectedMap.size());
         assertRegisterGeofences(expectedMap);
 
         final PCFPushGeofenceDataList expectedList = new PCFPushGeofenceDataList();
         expectedList.put(5L, updateData.getGeofences().get(0));
-        expectedList.put(11L, FOUR_ITEM_GEOFENCE_LIST.get(11L));
+        expectedList.put(11L, FIVE_ITEM_GEOFENCE_LIST.get(11L));
         assertEquals(2, expectedList.size());
+        assertSaveRegisteredGeofences(expectedList);
+
+        verify(registrar, never()).reset();
+        verify(store, never()).reset();
+    }
+
+    public void testClearNullLocation() throws IOException {
+        engine.clearLocations(null);
+        verifyZeroInteractions(registrar);
+        verifyZeroInteractions(store);
+    }
+
+    public void testClearEmptyLocations() throws IOException {
+        final PCFPushGeofenceLocationMap emptyList = new PCFPushGeofenceLocationMap();
+        engine.clearLocations(emptyList);
+        verifyZeroInteractions(registrar);
+        verifyZeroInteractions(store);
+    }
+
+    public void testClearOneLocation() throws IOException {
+        when(store.getCurrentlyRegisteredGeofences()).thenReturn(FIVE_ITEM_GEOFENCE_LIST);
+        final PCFPushGeofenceLocationMap locations = new PCFPushGeofenceLocationMap();
+        putLocation(locations, FIVE_ITEM_GEOFENCE_LIST.get(5L), 0);
+        engine.clearLocations(locations);
+
+        final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
+        putLocation(expectedMap, FIVE_ITEM_GEOFENCE_LIST.get(11L), 0);
+        putLocation(expectedMap, FIVE_ITEM_GEOFENCE_LIST.get(44L), 0);
+        putLocation(expectedMap, FIVE_ITEM_GEOFENCE_LIST.get(44L), 1);
+        putLocation(expectedMap, FIVE_ITEM_GEOFENCE_LIST.get(49L), 0);
+        putLocation(expectedMap, FIVE_ITEM_GEOFENCE_LIST.get(49L), 1);
+        putLocation(expectedMap, FIVE_ITEM_GEOFENCE_LIST.get(51L), 0);
+        assertEquals(6, expectedMap.size());
+        assertRegisterGeofences(expectedMap);
+
+        final PCFPushGeofenceDataList expectedList = new PCFPushGeofenceDataList();
+        expectedList.put(11L, FIVE_ITEM_GEOFENCE_LIST.get(11L));
+        expectedList.put(44L, FIVE_ITEM_GEOFENCE_LIST.get(44L));
+        expectedList.put(49L, FIVE_ITEM_GEOFENCE_LIST.get(49L));
+        expectedList.put(51L, FIVE_ITEM_GEOFENCE_LIST.get(51L));
+        assertEquals(4, expectedList.size());
+        assertSaveRegisteredGeofences(expectedList);
+
+        verify(registrar, never()).reset();
+        verify(store, never()).reset();
+    }
+
+    public void testClearTwoLocations() throws IOException {
+        when(store.getCurrentlyRegisteredGeofences()).thenReturn(FIVE_ITEM_GEOFENCE_LIST);
+        final PCFPushGeofenceLocationMap locations = new PCFPushGeofenceLocationMap();
+        putLocation(locations, FIVE_ITEM_GEOFENCE_LIST.get(11L), 0);
+        putLocation(locations, FIVE_ITEM_GEOFENCE_LIST.get(44L), 0);
+        engine.clearLocations(locations);
+
+        final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
+        putLocation(expectedMap, FIVE_ITEM_GEOFENCE_LIST.get(5L), 0);
+        putLocation(expectedMap, FIVE_ITEM_GEOFENCE_LIST.get(44L), 1);
+        putLocation(expectedMap, FIVE_ITEM_GEOFENCE_LIST.get(49L), 0);
+        putLocation(expectedMap, FIVE_ITEM_GEOFENCE_LIST.get(49L), 1);
+        putLocation(expectedMap, FIVE_ITEM_GEOFENCE_LIST.get(51L), 0);
+        assertEquals(5, expectedMap.size());
+        assertRegisterGeofences(expectedMap);
+
+        final PCFPushGeofenceDataList expectedList = new PCFPushGeofenceDataList();
+        FIVE_ITEM_GEOFENCE_LIST.get(44L).getLocations().remove(0);
+        expectedList.put(5L, FIVE_ITEM_GEOFENCE_LIST.get(5L));
+        expectedList.put(44L, FIVE_ITEM_GEOFENCE_LIST.get(44L));
+        expectedList.put(49L, FIVE_ITEM_GEOFENCE_LIST.get(49L));
+        expectedList.put(51L, FIVE_ITEM_GEOFENCE_LIST.get(51L));
+        assertEquals(4, expectedList.size());
+        assertSaveRegisteredGeofences(expectedList);
+
+        verify(registrar, never()).reset();
+        verify(store, never()).reset();
+    }
+
+    public void testClearSixLocations() throws IOException {
+        when(store.getCurrentlyRegisteredGeofences()).thenReturn(FIVE_ITEM_GEOFENCE_LIST);
+        final PCFPushGeofenceLocationMap locations = new PCFPushGeofenceLocationMap();
+        putLocation(locations, FIVE_ITEM_GEOFENCE_LIST.get(5L), 0);
+        putLocation(locations, FIVE_ITEM_GEOFENCE_LIST.get(11L), 0);
+        putLocation(locations, FIVE_ITEM_GEOFENCE_LIST.get(44L), 0);
+        putLocation(locations, FIVE_ITEM_GEOFENCE_LIST.get(44L), 1);
+        putLocation(locations, FIVE_ITEM_GEOFENCE_LIST.get(49L), 1);
+        putLocation(locations, FIVE_ITEM_GEOFENCE_LIST.get(51L), 0);
+        engine.clearLocations(locations);
+
+        final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
+        putLocation(expectedMap, FIVE_ITEM_GEOFENCE_LIST.get(49L), 0);
+        assertEquals(1, expectedMap.size());
+        assertRegisterGeofences(expectedMap);
+
+        final PCFPushGeofenceDataList expectedList = new PCFPushGeofenceDataList();
+        FIVE_ITEM_GEOFENCE_LIST.get(49L).getLocations().remove(1);
+        expectedList.put(49L, FIVE_ITEM_GEOFENCE_LIST.get(49L));
+        assertEquals(1, expectedList.size());
+        assertSaveRegisteredGeofences(expectedList);
+
+        verify(registrar, never()).reset();
+        verify(store, never()).reset();
+    }
+
+    public void testClearLocationsThatDoNotExist() throws IOException {
+        when(store.getCurrentlyRegisteredGeofences()).thenReturn(FIVE_ITEM_GEOFENCE_LIST);
+        final PCFPushGeofenceLocationMap locations = new PCFPushGeofenceLocationMap();
+        putLocation(locations, THREE_ITEM_GEOFENCE_LIST.get(7L), 0);
+        putLocation(locations, THREE_ITEM_GEOFENCE_LIST.get(9L), 0);
+        engine.clearLocations(locations);
+
+        final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
+        putLocation(expectedMap, FIVE_ITEM_GEOFENCE_LIST.get(5L), 0);
+        putLocation(expectedMap, FIVE_ITEM_GEOFENCE_LIST.get(11L), 0);
+        putLocation(expectedMap, FIVE_ITEM_GEOFENCE_LIST.get(44L), 0);
+        putLocation(expectedMap, FIVE_ITEM_GEOFENCE_LIST.get(44L), 1);
+        putLocation(expectedMap, FIVE_ITEM_GEOFENCE_LIST.get(49L), 0);
+        putLocation(expectedMap, FIVE_ITEM_GEOFENCE_LIST.get(49L), 1);
+        putLocation(expectedMap, FIVE_ITEM_GEOFENCE_LIST.get(51L), 0);
+        assertEquals(7, expectedMap.size());
+        assertRegisterGeofences(expectedMap);
+
+        final PCFPushGeofenceDataList expectedList = new PCFPushGeofenceDataList();
+        expectedList.put(5L, FIVE_ITEM_GEOFENCE_LIST.get(5L));
+        expectedList.put(11L, FIVE_ITEM_GEOFENCE_LIST.get(11L));
+        expectedList.put(44L, FIVE_ITEM_GEOFENCE_LIST.get(44L));
+        expectedList.put(49L, FIVE_ITEM_GEOFENCE_LIST.get(49L));
+        expectedList.put(51L, FIVE_ITEM_GEOFENCE_LIST.get(51L));
+        assertEquals(5, expectedList.size());
         assertSaveRegisteredGeofences(expectedList);
 
         verify(registrar, never()).reset();

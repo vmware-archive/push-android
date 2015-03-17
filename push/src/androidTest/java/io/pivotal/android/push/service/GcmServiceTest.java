@@ -62,7 +62,7 @@ public class GcmServiceTest extends AndroidTestCase {
         System.setProperty("dexmaker.dexcache", mContext.getCacheDir().getPath());
         helper = mock(GeofenceHelper.class);
         store = mock(GeofencePersistentStore.class);
-        GEOFENCE_DATA_LIST = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_four_items.json");
+        GEOFENCE_DATA_LIST = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_five_items.json");
         Pivotal.setProperties(getPropertiesWithGeofencesEnabled("true"));
     }
 

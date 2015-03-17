@@ -2,7 +2,9 @@ package io.pivotal.android.push.model.geofence;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -52,6 +54,36 @@ public final class PCFPushGeofenceData {
 
     public TriggerType getTriggerType() {
         return triggerType;
+    }
+
+    public boolean hasLocationWithId(long locationId) {
+        if (locations == null) {
+            return false;
+        }
+
+        for (PCFPushGeofenceLocation location : locations) {
+            if (location.getId() == locationId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public PCFPushGeofenceData newCopyWithoutLocations() {
+        final PCFPushGeofenceData newItem = new PCFPushGeofenceData();
+        newItem.id = id;
+        newItem.triggerType = triggerType;
+        if (expiryTime != null) {
+            newItem.expiryTime = new Date(expiryTime.getTime());
+        }
+        if (data != null) {
+            newItem.data = new HashMap<>(data);
+        }
+        if (tags != null) {
+            newItem.tags = new ArrayList<>(tags);
+        }
+        newItem.locations = new ArrayList<>();
+        return newItem;
     }
 
     @Override

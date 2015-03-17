@@ -46,6 +46,20 @@ public class PCFPushGeofenceDataList extends LongSparseArray<PCFPushGeofenceData
         return changed;
     }
 
+    public void removeLocation(PCFPushGeofenceData item, PCFPushGeofenceLocation location) {
+
+        if (item == null || location == null) {
+            return;
+        }
+
+        if (item.getLocations() != null && item.getLocations().contains(location)) {
+            item.getLocations().remove(location);
+            if (item.getLocations().size() == 0) {
+                remove(item.getId());
+            }
+        }
+    }
+
     @Override
     public Iterator<PCFPushGeofenceData> iterator() {
         return new Iterator<PCFPushGeofenceData>() {

@@ -6,6 +6,10 @@ import java.util.Set;
 
 public class PCFPushGeofenceLocationMap extends HashMap<String, PCFPushGeofenceLocation> {
 
+    public interface Filter {
+        public boolean filterItem(PCFPushGeofenceData item, PCFPushGeofenceLocation location);
+    }
+
     public static class LocationEntry {
         private final long geofenceId;
         private final long locationId;
@@ -41,17 +45,43 @@ public class PCFPushGeofenceLocationMap extends HashMap<String, PCFPushGeofenceL
         }
     }
 
-    public void addAll(PCFPushGeofenceDataList list) {
-        if (list != null) {
-            for (final PCFPushGeofenceData geofence : list) {
-                if (geofence != null && geofence.getLocations() != null) {
-                    for (final PCFPushGeofenceLocation location : geofence.getLocations()) {
+    public int addAll(PCFPushGeofenceDataList list) {
+        if (list == null) {
+            return 0;
+        }
+
+        int itemsAdded = 0;
+        for (final PCFPushGeofenceData geofence : list) {
+            if (geofence != null && geofence.getLocations() != null) {
+                for (final PCFPushGeofenceLocation location : geofence.getLocations()) {
+                    final String id = getAndroidRequestId(geofence.getId(), location.getId());
+                    this.put(id, location);
+                    itemsAdded += 1;
+                }
+            }
+        }
+        return itemsAdded;
+    }
+
+    public int addFiltered(PCFPushGeofenceDataList list, Filter filter) {
+
+        if (list == null || filter == null) {
+            return 0;
+        }
+
+        int itemsAdded = 0;
+        for (final PCFPushGeofenceData geofence : list) {
+            if (geofence.getLocations() != null) {
+                for (final PCFPushGeofenceLocation location : geofence.getLocations()) {
+                    if (filter.filterItem(geofence, location)) {
                         final String id = getAndroidRequestId(geofence.getId(), location.getId());
                         this.put(id, location);
+                        itemsAdded += 1;
                     }
                 }
             }
         }
+        return itemsAdded;
     }
 
     public Set<LocationEntry> locationEntrySet() {

@@ -153,6 +153,72 @@ public class PCFPushGeofenceDataListTest extends AndroidTestCase {
         assertFalse(i.hasNext());
     }
 
+    public void testRemoveNullLocation() throws IOException {
+        final PCFPushGeofenceDataList list = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_three_items.json");
+        assertEquals(3, list.size());
+        list.removeLocation(null, null);
+        assertEquals(3, list.size());
+    }
+
+    public void testRemoveLocationFromItemWithTwoLocations() throws IOException {
+        final PCFPushGeofenceDataList list = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_three_items.json");
+
+        final PCFPushGeofenceData item1 = list.get(44L);
+        final PCFPushGeofenceLocation location1 = item1.getLocations().get(0);
+        assertEquals(3, list.size());
+        assertNotNull(location1);
+        list.removeLocation(item1, location1);
+        assertEquals(3, list.size());
+        assertNotNull(list.get(7L));
+        assertNotNull(list.get(9L));
+        assertNotNull(list.get(44L));
+        assertEquals(1, list.get(44L).getLocations().size());
+        assertEquals(1, list.get(7L).getLocations().size());
+        assertEquals(1, list.get(9L).getLocations().size());
+        assertEquals(1, list.get(44L).getLocations().size());
+
+        final PCFPushGeofenceLocation location2 = item1.getLocations().get(0);
+        assertNotNull(location2);
+        list.removeLocation(item1, location2);
+        assertEquals(2, list.size());
+        assertNotNull(list.get(7L));
+        assertNotNull(list.get(9L));
+        assertNull(list.get(44L));
+        assertEquals(1, list.get(7L).getLocations().size());
+        assertEquals(1, list.get(9L).getLocations().size());
+    }
+
+    public void testRemoveLocationFromItemWithOnlyOneLocation() throws IOException {
+        final PCFPushGeofenceDataList list = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_three_items.json");
+        final PCFPushGeofenceData item = list.get(7L);
+        final PCFPushGeofenceLocation location = item.getLocations().get(0);
+        assertEquals(3, list.size());
+        assertNotNull(location);
+        list.removeLocation(item, location);
+        assertEquals(2, list.size());
+        assertNull(list.get(7L));
+        assertNotNull(list.get(9L));
+        assertNotNull(list.get(44L));
+        assertEquals(1, list.get(9L).getLocations().size());
+        assertEquals(2, list.get(44L).getLocations().size());
+    }
+
+    public void testRemoveInvalidLocation() throws IOException {
+        final PCFPushGeofenceDataList list = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_three_items.json");
+        final PCFPushGeofenceData item = list.get(7L);
+        final PCFPushGeofenceLocation location = list.get(9L).getLocations().get(0);
+        assertEquals(3, list.size());
+        assertNotNull(location);
+        list.removeLocation(item, location);
+        assertEquals(3, list.size());
+        assertNotNull(list.get(7L));
+        assertNotNull(list.get(9L));
+        assertNotNull(list.get(44L));
+        assertEquals(1, list.get(7L).getLocations().size());
+        assertEquals(1, list.get(9L).getLocations().size());
+        assertEquals(2, list.get(44L).getLocations().size());
+    }
+
     public void testAssertEquals() throws IOException {
         final PCFPushGeofenceDataList populatedList1 = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_three_items.json");
         final PCFPushGeofenceDataList populatedList2 = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_one_item.json");
