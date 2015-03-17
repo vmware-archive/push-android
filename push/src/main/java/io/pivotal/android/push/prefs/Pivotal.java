@@ -65,7 +65,7 @@ public class Pivotal {
         return loader.getResourceAsStream(path);
     }
 
-    /* package */ static String get(Context context, final String key) {
+    /* package */ static String getRequiredProperty(Context context, final String key) {
         final String value = getProperties(context).getProperty(key);
         if (TextUtils.isEmpty(value)) {
             throw new IllegalStateException("'" + key + "' not found in pivotal.properties");
@@ -73,23 +73,27 @@ public class Pivotal {
         return value;
     }
 
+    /* package */ static String getOptionalProperty(Context context, final String key, String defaultValue) {
+        return getProperties(context).getProperty(key, defaultValue);
+    }
+
     public static String getPlatformUuid(Context context) {
-        return get(context, Keys.PLATFORM_UUID);
+        return getRequiredProperty(context, Keys.PLATFORM_UUID);
     }
 
     public static String getPlatformSecret(Context context) {
-        return get(context, Keys.PLATFORM_SECRET);
+        return getRequiredProperty(context, Keys.PLATFORM_SECRET);
     }
 
     public static String getGcmSenderId(Context context) {
-        return get(context, Keys.GCM_SENDER_ID);
+        return getRequiredProperty(context, Keys.GCM_SENDER_ID);
     }
 
     public static String getServiceUrl(Context context) {
-        return get(context, Keys.SERVICE_URL);
+        return getRequiredProperty(context, Keys.SERVICE_URL);
     }
 
     public static boolean getGeofencesEnabled(Context context) {
-        return Boolean.parseBoolean(get(context, Keys.GEOFENCES_ENABLED));
+        return Boolean.parseBoolean(getOptionalProperty(context, Keys.GEOFENCES_ENABLED, "false"));
     }
 }

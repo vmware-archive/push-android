@@ -24,7 +24,7 @@ public class PivotalTest extends AndroidTestCase {
         properties.setProperty(key, value);
 
         Pivotal.setProperties(properties);
-        assertEquals(value, Pivotal.get(getContext(), key));
+        assertEquals(value, Pivotal.getRequiredProperty(getContext(), key));
     }
 
     public void testGetFails() {
@@ -36,7 +36,7 @@ public class PivotalTest extends AndroidTestCase {
         Pivotal.setProperties(properties);
 
         try {
-            assertEquals(value, Pivotal.get(getContext(), key));
+            assertEquals(value, Pivotal.getRequiredProperty(getContext(), key));
             fail();
         } catch (final IllegalStateException e) {
             assertNotNull(e);
