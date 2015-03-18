@@ -84,6 +84,16 @@ public class PCFPushGeofenceLocationMap extends HashMap<String, PCFPushGeofenceL
         return itemsAdded;
     }
 
+    public void putLocation(PCFPushGeofenceData geofence, int locationIndex) {
+        final PCFPushGeofenceLocation location = geofence.getLocations().get(locationIndex);
+        putLocation(geofence, location);
+    }
+
+    public void putLocation(PCFPushGeofenceData geofence, PCFPushGeofenceLocation location) {
+        final String androidRequestId = PCFPushGeofenceLocationMap.getAndroidRequestId(geofence.getId(), location.getId());
+        put(androidRequestId, location);
+    }
+
     public Set<LocationEntry> locationEntrySet() {
         final Set<LocationEntry> locationEntries = new HashSet<>();
         for (final Entry<String, PCFPushGeofenceLocation> entry : entrySet()) {

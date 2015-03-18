@@ -18,8 +18,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofencePersistentStore;
+import io.pivotal.android.push.geofence.GeofenceRegistrar;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceData;
+import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocation;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocationMap;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
@@ -28,6 +31,7 @@ import io.pivotal.android.push.receiver.GcmBroadcastReceiver;
 import io.pivotal.android.push.util.FileHelper;
 import io.pivotal.android.push.util.GeofenceHelper;
 import io.pivotal.android.push.util.Logger;
+import io.pivotal.android.push.util.TimeProvider;
 
 public class GcmService extends IntentService {
 
@@ -35,6 +39,7 @@ public class GcmService extends IntentService {
     public static final String KEY_MESSAGE = "message";
 
     private GeofenceHelper helper;
+    private GeofenceEngine engine;
     private GeofencePersistentStore store;
     private PushPreferencesProvider preferences;
 
@@ -44,6 +49,10 @@ public class GcmService extends IntentService {
 
     /* package */ void setGeofenceHelper(GeofenceHelper helper) {
         this.helper = helper;
+    }
+
+    /* package */ void setGeofenceEngine(GeofenceEngine engine) {
+        this.engine = engine;
     }
 
     /* package */ void setGeofencePersistentStore(GeofencePersistentStore store) {
@@ -78,6 +87,11 @@ public class GcmService extends IntentService {
         if (store == null) {
             final FileHelper fileHelper = new FileHelper(this);
             store = new GeofencePersistentStore(this, fileHelper);
+        }
+        if (engine == null) {
+            final GeofenceRegistrar registrar = new GeofenceRegistrar(this);
+            final TimeProvider timeProvider = new TimeProvider();
+            engine = new GeofenceEngine(registrar, store, timeProvider);
         }
         if (preferences == null) {
             preferences = new PushPreferencesProviderImpl(this);
@@ -133,45 +147,63 @@ public class GcmService extends IntentService {
 
     private void handleGeofencingEvent(Intent intent) {
         Logger.d("handleGeofencingEvent: " + intent);
+        final PCFPushGeofenceLocationMap locationsToClear = new PCFPushGeofenceLocationMap();
         final Set<String> subscribedTags = preferences.getTags();
 
         for (final Geofence geofence : helper.getGeofences()) {
+            processGeofence(locationsToClear, subscribedTags, geofence);
+        }
 
-            if (helper.getGeofenceTransition() == Geofence.GEOFENCE_TRANSITION_ENTER) {
-
-                Logger.i("Entered geofence: " + geofence);
-                final Bundle data = getGeofenceBundle(geofence, subscribedTags);
-                if (data != null) {
-                    onGeofenceEnter(data);
-                }
-
-            } else if (helper.getGeofenceTransition() == Geofence.GEOFENCE_TRANSITION_EXIT) {
-
-                Logger.i("Exited geofence: " + geofence);
-                final Bundle data = getGeofenceBundle(geofence, subscribedTags);
-                if (data != null) {
-                    onGeofenceExit(data);
-                }
-            }
+        if (!locationsToClear.isEmpty()) {
+            engine.clearLocations(locationsToClear);
         }
     }
 
-    private Bundle getGeofenceBundle(Geofence geofence, Set<String> subscribedTags) {
+    private void processGeofence(PCFPushGeofenceLocationMap locationsToClear, Set<String> subscribedTags, Geofence geofence) {
         final String requestId = geofence.getRequestId();
         if (requestId == null) {
             Logger.e("Triggered geofence is missing a request ID: " + geofence);
-            return null;
+            return;
         }
 
         final long geofenceId = PCFPushGeofenceLocationMap.getGeofenceId(requestId);
         final PCFPushGeofenceData geofenceData = store.getGeofenceData(geofenceId);
         if (geofenceData == null) {
             Logger.e("Triggered geofence with ID " + geofenceId + " has no matching data in our persistent store.");
-            return null;
+            return;
         }
 
+        final Bundle bundleData = getGeofenceBundle(geofenceId, subscribedTags, geofenceData);
+        if (bundleData == null) {
+            return;
+        }
+
+        if (helper.getGeofenceTransition() == Geofence.GEOFENCE_TRANSITION_ENTER) {
+
+            try {
+                Logger.i("Entered geofence: " + geofence);
+                onGeofenceEnter(bundleData);
+            } catch (Exception e) {
+                Logger.ex("Caught exception in user code", e);
+            }
+
+        } else if (helper.getGeofenceTransition() == Geofence.GEOFENCE_TRANSITION_EXIT) {
+
+            try {
+                Logger.i("Exited geofence: " + geofence);
+                onGeofenceExit(bundleData);
+            } catch (Exception e) {
+                Logger.ex("Caught exception in user code", e);
+            }
+        }
+
+        addLocationToClear(locationsToClear, requestId, geofenceData);
+    }
+
+    private Bundle getGeofenceBundle(long geofenceId, Set<String> subscribedTags, PCFPushGeofenceData geofenceData) {
+
         if (!isSubcribedToTag(geofenceData, subscribedTags)) {
-            Logger.i("This geofence is for a tag that the user has not subscribed to.");
+            Logger.i("Geofence (ID " + geofenceId + ") is for a tag that the user has not subscribed to.");
             return null;
         }
 
@@ -185,6 +217,7 @@ public class GcmService extends IntentService {
         for (final Map.Entry<String, String> entry : data.entrySet()) {
             result.putString(entry.getKey(), entry.getValue());
         }
+
         return result;
     }
 
@@ -205,6 +238,14 @@ public class GcmService extends IntentService {
         }
 
         return false;
+    }
+
+    private void addLocationToClear(PCFPushGeofenceLocationMap locationsToClear, String requestId, PCFPushGeofenceData geofenceData) {
+        final long locationId = PCFPushGeofenceLocationMap.getLocationId(requestId);
+        final PCFPushGeofenceLocation location = geofenceData.getLocationWithId(locationId);
+        if (location != null) {
+            locationsToClear.putLocation(geofenceData, location);
+        }
     }
 
     // Intended to be overridden by application

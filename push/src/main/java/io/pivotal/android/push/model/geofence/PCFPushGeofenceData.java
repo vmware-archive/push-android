@@ -56,17 +56,17 @@ public final class PCFPushGeofenceData {
         return triggerType;
     }
 
-    public boolean hasLocationWithId(long locationId) {
+    public PCFPushGeofenceLocation getLocationWithId(long locationId) {
         if (locations == null) {
-            return false;
+            return null;
         }
 
         for (PCFPushGeofenceLocation location : locations) {
             if (location.getId() == locationId) {
-                return true;
+                return location;
             }
         }
-        return false;
+        return null;
     }
 
     public PCFPushGeofenceData newCopyWithoutLocations() {

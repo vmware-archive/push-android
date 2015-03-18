@@ -21,8 +21,10 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
+import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofencePersistentStore;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceDataList;
+import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocationMap;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
@@ -55,6 +57,7 @@ public class GcmServiceTest extends AndroidTestCase {
 
     private GeofenceHelper helper;
     private GeofencePersistentStore store;
+    private GeofenceEngine engine;
 
     @Override
     protected void setUp() throws Exception {
@@ -62,6 +65,7 @@ public class GcmServiceTest extends AndroidTestCase {
         System.setProperty("dexmaker.dexcache", mContext.getCacheDir().getPath());
         helper = mock(GeofenceHelper.class);
         store = mock(GeofencePersistentStore.class);
+        engine = mock(GeofenceEngine.class);
         GEOFENCE_DATA_LIST = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_five_items.json");
         Pivotal.setProperties(getPropertiesWithGeofencesEnabled("true"));
     }
@@ -170,6 +174,8 @@ public class GcmServiceTest extends AndroidTestCase {
     public void testReceivesGeofenceEnterEvent() throws Exception {
         final Intent intent = createGeofenceTransitionEventIntent(getContext(), Geofence.GEOFENCE_TRANSITION_ENTER);
         final FakeGcmService service = startService(FakeGcmService.class, getContext(), getPreferences(true));
+        final PCFPushGeofenceLocationMap expectedLocationsToClear = new PCFPushGeofenceLocationMap();
+        expectedLocationsToClear.putLocation(GEOFENCE_DATA_LIST.get(5L), 0);
         when(helper.isGeofencingEvent()).thenReturn(true);
         when(helper.getGeofenceTransition()).thenReturn(Geofence.GEOFENCE_TRANSITION_ENTER);
         when(helper.getGeofences()).thenReturn(GEOFENCE_LIST_ENTER);
@@ -181,7 +187,9 @@ public class GcmServiceTest extends AndroidTestCase {
         service.assertTimesGeofenceExited(0);
         service.assertGeofenceEnteredContainsMessage("tacos");
         service.onDestroy();
+        verify(engine, times(1)).clearLocations(eq(expectedLocationsToClear));
         verify(store, times(1)).getGeofenceData(eq(5L));
+        verifyNoMoreInteractions(engine);
         verifyNoMoreInteractions(store);
     }
 
@@ -197,6 +205,7 @@ public class GcmServiceTest extends AndroidTestCase {
         service.assertTimesGeofenceEntered(0);
         service.assertTimesGeofenceExited(0);
         service.onDestroy();
+        verifyZeroInteractions(engine);
         verifyZeroInteractions(store);
     }
 
@@ -214,12 +223,15 @@ public class GcmServiceTest extends AndroidTestCase {
         service.assertTimesGeofenceExited(0);
         service.onDestroy();
         verify(store, times(1)).getGeofenceData(eq(5L));
+        verifyZeroInteractions(engine);
         verifyNoMoreInteractions(store);
     }
 
     public void testReceivesGeofenceExitEvent() throws Exception {
         final Intent intent = createGeofenceTransitionEventIntent(getContext(), Geofence.GEOFENCE_TRANSITION_EXIT);
         final FakeGcmService service = startService(FakeGcmService.class, getContext(), getPreferences(true));
+        final PCFPushGeofenceLocationMap expectedLocationsToClear = new PCFPushGeofenceLocationMap();
+        expectedLocationsToClear.putLocation(GEOFENCE_DATA_LIST.get(11L), 0);
         when(helper.isGeofencingEvent()).thenReturn(true);
         when(helper.getGeofenceTransition()).thenReturn(Geofence.GEOFENCE_TRANSITION_EXIT);
         when(helper.getGeofences()).thenReturn(GEOFENCE_LIST_EXIT_1);
@@ -231,8 +243,10 @@ public class GcmServiceTest extends AndroidTestCase {
         service.assertTimesGeofenceExited(1);
         service.assertGeofenceExitedContainsMessage("pizzas");
         service.onDestroy();
+        verify(engine, times(1)).clearLocations(eq(expectedLocationsToClear));
         verify(store, times(1)).getGeofenceData(eq(11L));
         verifyNoMoreInteractions(store);
+        verifyNoMoreInteractions(engine);
     }
 
     public void testReceivesGeofenceExitEventWithGeofencesDisabled() throws Exception {
@@ -248,6 +262,7 @@ public class GcmServiceTest extends AndroidTestCase {
         service.assertTimesGeofenceEntered(0);
         service.assertTimesGeofenceExited(0);
         service.onDestroy();
+        verifyZeroInteractions(engine);
         verifyZeroInteractions(store);
     }
 
@@ -266,11 +281,14 @@ public class GcmServiceTest extends AndroidTestCase {
         service.onDestroy();
         verify(store, times(1)).getGeofenceData(eq(11L));
         verifyNoMoreInteractions(store);
+        verifyZeroInteractions(engine);
     }
 
     public void testReceivesGeofenceExitEventMultipleWithEmptySubscribedTags() throws Exception {
         final Intent intent = createGeofenceTransitionEventIntent(getContext(), Geofence.GEOFENCE_TRANSITION_EXIT);
         final FakeGcmService service = startService(FakeGcmService.class, getContext(), getPreferences(true));
+        final PCFPushGeofenceLocationMap expectedLocationsToClear = new PCFPushGeofenceLocationMap();
+        expectedLocationsToClear.putLocation(GEOFENCE_DATA_LIST.get(11L), 0);
         setupMultipleEvents();
         service.onHandleIntent(intent);
         service.assertMessageSendError(false);
@@ -282,11 +300,17 @@ public class GcmServiceTest extends AndroidTestCase {
         service.assertGeofenceExitedDoesNotContainMessage("gelato");
         service.onDestroy();
         verifyMultipleEvents();
+        verify(engine, times(1)).clearLocations(eq(expectedLocationsToClear));
+        verifyNoMoreInteractions(engine);
     }
 
     public void testReceivesGeofenceExitEventMultipleWithSubscribedTag1() throws Exception {
         final Intent intent = createGeofenceTransitionEventIntent(getContext(), Geofence.GEOFENCE_TRANSITION_EXIT);
         final FakeGcmService service = startService(FakeGcmService.class, getContext(), getPreferences(true, "TAG_1"));
+        final PCFPushGeofenceLocationMap expectedLocationsToClear = new PCFPushGeofenceLocationMap();
+        expectedLocationsToClear.putLocation(GEOFENCE_DATA_LIST.get(11L), 0);
+        expectedLocationsToClear.putLocation(GEOFENCE_DATA_LIST.get(44L), 0);
+        expectedLocationsToClear.putLocation(GEOFENCE_DATA_LIST.get(44L), 1);
         setupMultipleEvents();
         service.onHandleIntent(intent);
         service.assertMessageSendError(false);
@@ -298,6 +322,8 @@ public class GcmServiceTest extends AndroidTestCase {
         service.assertGeofenceExitedDoesNotContainMessage("gelato");
         service.onDestroy();
         verifyMultipleEvents();
+        verify(engine, times(1)).clearLocations(eq(expectedLocationsToClear));
+        verifyNoMoreInteractions(engine);
     }
 
     private void setupMultipleEvents() {
@@ -385,6 +411,7 @@ public class GcmServiceTest extends AndroidTestCase {
             final T service = klass.cast(object);
             service.setGeofenceHelper(helper);
             service.setGeofencePersistentStore(store);
+            service.setGeofenceEngine(engine);
             service.setPushPreferencesProvider(preferences);
             service.attachBaseContext(context);
             service.onCreate();
