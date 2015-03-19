@@ -13,6 +13,7 @@ import io.pivotal.android.push.service.GeofenceService;
 import io.pivotal.android.push.util.DebugUtil;
 import io.pivotal.android.push.util.GsonUtil;
 import io.pivotal.android.push.util.Logger;
+import io.pivotal.android.push.version.GeofenceStatus;
 
 public class GeofenceUpdater {
 
@@ -46,8 +47,13 @@ public class GeofenceUpdater {
             Logger.d("This update provides the list of geofences.");
             final String updateJson = intent.getStringExtra(GeofenceService.GEOFENCE_UPDATE_JSON);
             if (updateJson != null && !updateJson.isEmpty()) {
-                final PCFPushGeofenceResponseData responseData = GsonUtil.getGson().fromJson(updateJson, PCFPushGeofenceResponseData.class);
-                onSuccessfullyFetchedUpdates(timestamp, responseData, listener);
+                try {
+                    final PCFPushGeofenceResponseData responseData = GsonUtil.getGson().fromJson(updateJson, PCFPushGeofenceResponseData.class);
+                    onSuccessfullyFetchedUpdates(timestamp, responseData, listener);
+                } catch (Exception e) {
+                    Logger.ex("Error parsing geofence update in push message", e);
+                    onFailedToFetchUpdates("Error parsing geofence update in push message: " + e.getLocalizedMessage(), listener);
+                }
             } else {
                 onFailedToFetchUpdates("Expected intent to provide geofence update JSON but none was provided.", listener);
             }
@@ -65,7 +71,8 @@ public class GeofenceUpdater {
                 @Override
                 public void onPCFPushGetGeofenceUpdatesFailed(final String reason) {
                     // TODO - consider a retry mechanism for failed requests.
-                    Logger.w("Error fetching geofence updates: " + reason);
+                    final String message = "Error fetching geofence updates: " + reason;
+                    Logger.w(message);
                     onFailedToFetchUpdates(reason, listener);
                 }
             });
@@ -87,7 +94,6 @@ public class GeofenceUpdater {
             Logger.i("Successfully fetched geofence updates. Received 0 items.");
         }
         if (responseData != null) {
-            // TODO - pass a listener to geofence engine to see if an error happens
             geofenceEngine.processResponseData(timestamp, responseData);
             pushPreferencesProvider.setLastGeofenceUpdate(responseData.getLastModified() == null ? 0 : responseData.getLastModified().getTime());
             if (listener != null) {
@@ -97,6 +103,9 @@ public class GeofenceUpdater {
     }
 
     private void onFailedToFetchUpdates(final String reason, final GeofenceUpdaterListener listener) {
+        final GeofenceStatus previousStatus = GeofenceStatusUtil.loadGeofenceStatus(context);
+        final GeofenceStatus newStatus = new GeofenceStatus(true, reason, previousStatus.getNumberCurrentlyMonitoringGeofences());
+        GeofenceStatusUtil.saveGeofenceStatusAndSendBroadcast(context, newStatus);
         if (listener != null) {
             listener.onFailure(reason);
         }

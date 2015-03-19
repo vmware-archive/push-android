@@ -71,7 +71,7 @@ public class PCFPushGetGeofenceUpdatesApiRequest extends ApiRequestImpl {
 
         } catch (Exception e) {
             Logger.ex("PCF Push get geofence updates request failed", e);
-            listener.onPCFPushGetGeofenceUpdatesFailed(e.getLocalizedMessage());
+            listener.onPCFPushGetGeofenceUpdatesFailed(e.getClass().getCanonicalName() + " " + e.getLocalizedMessage());
         }
 
         finally {

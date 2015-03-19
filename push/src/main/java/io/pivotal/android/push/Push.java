@@ -28,6 +28,7 @@ import io.pivotal.android.push.gcm.RealGcmProvider;
 import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofencePersistentStore;
 import io.pivotal.android.push.geofence.GeofenceRegistrar;
+import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
@@ -42,6 +43,7 @@ import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.NetworkWrapper;
 import io.pivotal.android.push.util.NetworkWrapperImpl;
 import io.pivotal.android.push.util.TimeProvider;
+import io.pivotal.android.push.version.GeofenceStatus;
 import io.pivotal.android.push.version.VersionProvider;
 import io.pivotal.android.push.version.VersionProviderImpl;
 
@@ -54,6 +56,8 @@ import io.pivotal.android.push.version.VersionProviderImpl;
  * be attempted again the next time the registration method is called.
  */
 public class Push {
+
+    public static final String GEOFENCE_UPDATE_BROADCAST = "io.pivotal.android.push.geofence.UPDATE";
 
     private static Push instance;
 
@@ -311,5 +315,12 @@ public class Push {
      */
     public static String getVersion() {
         return BuildConfig.VERSION_NAME;
+    }
+
+    /**
+     * @return the current geofence monitoring status
+     */
+    public GeofenceStatus getGeofenceStatus() {
+        return GeofenceStatusUtil.loadGeofenceStatus(context);
     }
 }

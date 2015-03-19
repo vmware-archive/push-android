@@ -27,10 +27,10 @@ import io.pivotal.android.push.service.GcmService;
 import io.pivotal.android.push.util.DebugUtil;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.Util;
+import io.pivotal.android.push.version.GeofenceStatus;
 
 public class GeofenceRegistrar {
 
-    public static final String GEOFENCE_UPDATE_BROADCAST = "io.pivotal.android.push.geofence.GeofenceRegistrar.Update";
 
     private static final Object lock = new Object();
     private Context context;
@@ -141,7 +141,7 @@ public class GeofenceRegistrar {
                 public void onConnectionSuspended(int cause) {
                     Logger.w("GoogleApiClient Connection Suspended: cause:" + cause);
 
-                    // TODO - what to do if the connection is suspended?
+                    // TODO - what to do if the connection is suspended? - Google seems to suggest that the connection will be automatically reestablished so we might not need to do anything special at all.
                 }
             })
             .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
@@ -156,6 +156,11 @@ public class GeofenceRegistrar {
             final ConnectionResult connectionResult = googleApiClient.blockingConnect();
             if (connectionResult.isSuccess()) {
                 handleMonitorGeofences(geofences, serializableGeofences, googleApiClient);
+            } else {
+                final String errorReason = "GoogleApiClient.blockingConnect returned status " + connectionResult.getErrorCode();
+                Logger.e(errorReason);
+                final GeofenceStatus geofenceStatus = new GeofenceStatus(true, errorReason, 0);
+                GeofenceStatusUtil.saveGeofenceStatusAndSendBroadcast(context, geofenceStatus);
             }
             googleApiClient.disconnect();
         }
@@ -168,10 +173,11 @@ public class GeofenceRegistrar {
 
         final Status removeGeofencesStatus = LocationServices.GeofencingApi.removeGeofences(googleApiClient, pendingIntent).await();
 
+        GeofenceStatus resultantStatus;
+
         if (removeGeofencesStatus.isSuccess()) {
             Logger.i("Success: removed currently monitored geofences.");
         } else {
-            // TODO : report this error somehow
             Logger.w("Was not able to remove currently monitored geofences: Status code: " + removeGeofencesStatus.getStatusCode());
         }
 
@@ -180,16 +186,19 @@ public class GeofenceRegistrar {
 
             if (addGeofencesStatus.isSuccess()) {
                 Logger.i("Success: Now monitoring for " + geofences.size() + " geofences.");
+                resultantStatus = new GeofenceStatus(false, null, geofences.size());
             } else {
-                // TODO : report this error somehow
-                Logger.e("Error trying to monitor geofences. Status code: " + addGeofencesStatus.getStatusCode());
+                Logger.e("Error trying to monitor geofences. Status: " + addGeofencesStatus.getStatusCode());
+                resultantStatus = new GeofenceStatus(true, "LocationServices.GeofencingApi returned status " + addGeofencesStatus.getStatusCode(), 0);
             }
 
         } else {
             Logger.i("Geofences to monitor is empty. Exiting.");
+            resultantStatus = GeofenceStatus.emptyStatus();
         }
 
         updateDebugGeofencesFile(serializableGeofences);
+        GeofenceStatusUtil.saveGeofenceStatusAndSendBroadcast(context, resultantStatus);
     }
 
     private void updateDebugGeofencesFile(List<Map<String, String>> serializableGeofences) {
@@ -197,10 +206,6 @@ public class GeofenceRegistrar {
             // If in debug mode then save the geofences to a file on the filesystem and send
             // a broadcast so a test app is able to see the geofences.
             Util.saveJsonMapToFilesystem(context, serializableGeofences);
-
-            // TODO - consider adding a permission to this broadcast
-            final Intent intent = new Intent(GEOFENCE_UPDATE_BROADCAST);
-            context.sendBroadcast(intent);
         }
     }
 }

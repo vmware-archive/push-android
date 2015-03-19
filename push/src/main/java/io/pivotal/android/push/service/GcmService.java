@@ -173,7 +173,7 @@ public class GcmService extends IntentService {
             return;
         }
 
-        final Bundle bundleData = getGeofenceBundle(geofenceId, subscribedTags, geofenceData);
+        final Bundle bundleData = getGeofenceBundle(geofenceId, requestId, subscribedTags, geofenceData);
         if (bundleData == null) {
             return;
         }
@@ -200,7 +200,7 @@ public class GcmService extends IntentService {
         addLocationToClear(locationsToClear, requestId, geofenceData);
     }
 
-    private Bundle getGeofenceBundle(long geofenceId, Set<String> subscribedTags, PCFPushGeofenceData geofenceData) {
+    private Bundle getGeofenceBundle(long geofenceId, String requestId, Set<String> subscribedTags, PCFPushGeofenceData geofenceData) {
 
         if (!isSubcribedToTag(geofenceData, subscribedTags)) {
             Logger.i("Geofence (ID " + geofenceId + ") is for a tag that the user has not subscribed to.");
@@ -213,12 +213,13 @@ public class GcmService extends IntentService {
             return null;
         }
 
-        final Bundle result = new Bundle();
+        final Bundle bundle = new Bundle();
         for (final Map.Entry<String, String> entry : data.entrySet()) {
-            result.putString(entry.getKey(), entry.getValue());
+            bundle.putString(entry.getKey(), entry.getValue());
         }
+        bundle.putString("PCF_GEOFENCE_ID", requestId);
 
-        return result;
+        return bundle;
     }
 
     private boolean isSubcribedToTag(PCFPushGeofenceData geofenceData, Set<String> subscribedTags) {
