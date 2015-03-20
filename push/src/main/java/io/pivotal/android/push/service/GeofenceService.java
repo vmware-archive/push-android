@@ -63,6 +63,7 @@ public class GeofenceService extends IntentService {
 
     @Override
     protected void onHandleIntent(Intent intent) {
+        Logger.setup(this);
 
         try {
             if (intent != null && Pivotal.getGeofencesEnabled(this))  {

@@ -65,7 +65,6 @@ public class GeofenceEngineTest extends AndroidTestCase {
         } catch (IllegalArgumentException e) {}
     }
 
-
     public void testRequiresTimeProvider() {
         try {
             engine = new GeofenceEngine(registrar, store, null);
@@ -721,6 +720,31 @@ public class GeofenceEngineTest extends AndroidTestCase {
 
         verify(registrar, never()).reset();
         verify(store, never()).reset();
+    }
+
+    public void testReregisterNoLocations() {
+        when(store.getCurrentlyRegisteredGeofences()).thenReturn(EMPTY_GEOFENCE_LIST);
+        engine.reregisterCurrentLocations();
+        assertRegisterGeofences(EMPTY_GEOFENCE_MAP);
+        verify(store, never()).saveRegisteredGeofences(any(PCFPushGeofenceDataList.class));
+        verify(store, never()).reset();
+        verify(registrar, never()).reset();
+    }
+
+    public void testReregisterSomeLocations() {
+        when(store.getCurrentlyRegisteredGeofences()).thenReturn(THREE_ITEM_GEOFENCE_LIST);
+        engine.reregisterCurrentLocations();
+
+        final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
+        expectedMap.putLocation(THREE_ITEM_GEOFENCE_LIST.get(7L), 0);
+        expectedMap.putLocation(THREE_ITEM_GEOFENCE_LIST.get(9L), 0);
+        expectedMap.putLocation(THREE_ITEM_GEOFENCE_LIST.get(44L), 0);
+        expectedMap.putLocation(THREE_ITEM_GEOFENCE_LIST.get(44L), 1);
+
+        assertRegisterGeofences(expectedMap);
+        verify(store, never()).saveRegisteredGeofences(any(PCFPushGeofenceDataList.class));
+        verify(store, never()).reset();
+        verify(registrar, never()).reset();
     }
 
     private void assertRegisterGeofences(PCFPushGeofenceLocationMap geofences) {

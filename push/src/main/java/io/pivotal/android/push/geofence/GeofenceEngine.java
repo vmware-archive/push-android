@@ -76,6 +76,13 @@ public class GeofenceEngine {
         store.saveRegisteredGeofences(geofencesToStore);
     }
 
+    public void reregisterCurrentLocations() {
+        final PCFPushGeofenceDataList geofenceDataList = store.getCurrentlyRegisteredGeofences();
+        final PCFPushGeofenceLocationMap geofencesToRegister = new PCFPushGeofenceLocationMap();
+        geofencesToRegister.addAll(geofenceDataList);
+        registrar.registerGeofences(geofencesToRegister, geofenceDataList);
+    }
+
     public void clearLocations(final PCFPushGeofenceLocationMap locationsToClear) {
 
         if (locationsToClear == null || locationsToClear.size() == 0) {

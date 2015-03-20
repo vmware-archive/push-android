@@ -65,6 +65,7 @@ public class GcmService extends IntentService {
 
     @Override
     protected final void onHandleIntent(Intent intent) {
+        Logger.setup(this);
         Logger.fd("GcmService has received an event.");
 
         try {

@@ -18,6 +18,16 @@
             android:name="io.pivotal.android.push.service.GeofenceService"
             android:exported="false"/>
 
+        <receiver
+            android:name="io.pivotal.android.push.receiver.BootCompletedReceiver"
+            android:enabled="true"
+            android:permission="android.permission.RECEIVE_BOOT_COMPLETED" >
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </receiver>
+
     </application>
 
 </manifest>
