@@ -260,6 +260,7 @@ public class GeofenceEngineTest extends AndroidTestCase {
 
     public void testUpdateOneItemWithNoItemsCurrentlyRegisteredWithATimestamp() throws IOException {
         final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_one_item.json");
+        when(store.getCurrentlyRegisteredGeofences()).thenReturn(EMPTY_GEOFENCE_LIST);
         engine.processResponseData(50L, updateData);
 
         final PCFPushGeofenceLocationMap expectedMap = new PCFPushGeofenceLocationMap();
