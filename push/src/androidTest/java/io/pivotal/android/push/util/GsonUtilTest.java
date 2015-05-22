@@ -84,7 +84,7 @@ public class GsonUtilTest extends AndroidTestCase {
 
         final PCFPushGeofenceData item2 = array.get(9L);
         assertNotNull(item2);
-        assertEquals(PCFPushGeofenceData.TriggerType.ENTER_OR_EXIT, item2.getTriggerType());
+        assertEquals(PCFPushGeofenceData.TriggerType.EXIT, item2.getTriggerType());
         assertEquals(1, item2.getLocations().size());
 
         final PCFPushGeofenceData item3 = array.get(44L);
@@ -123,7 +123,6 @@ public class GsonUtilTest extends AndroidTestCase {
         assertEquals(null, deserializeTriggerType(null));
         assertEquals(PCFPushGeofenceData.TriggerType.ENTER, deserializeTriggerType("enter"));
         assertEquals(PCFPushGeofenceData.TriggerType.EXIT, deserializeTriggerType("exit"));
-        assertEquals(PCFPushGeofenceData.TriggerType.ENTER_OR_EXIT, deserializeTriggerType("enter_or_exit"));
     }
 
     public void testDeserializeBadTriggerTypes() {
@@ -141,7 +140,6 @@ public class GsonUtilTest extends AndroidTestCase {
         assertEquals("{\"trigger_type\":null}", serializeTriggerType(null));
         assertEquals("{\"trigger_type\":\"enter\"}", serializeTriggerType(PCFPushGeofenceData.TriggerType.ENTER));
         assertEquals("{\"trigger_type\":\"exit\"}", serializeTriggerType(PCFPushGeofenceData.TriggerType.EXIT));
-        assertEquals("{\"trigger_type\":\"enter_or_exit\"}", serializeTriggerType(PCFPushGeofenceData.TriggerType.ENTER_OR_EXIT));
     }
 
     private String serializeTestClass(DateTestClass testClass) {

@@ -106,8 +106,6 @@ public class GeofenceRegistrar {
                 return Geofence.GEOFENCE_TRANSITION_ENTER;
             case EXIT:
                 return Geofence.GEOFENCE_TRANSITION_EXIT;
-            case ENTER_OR_EXIT:
-                return Geofence.GEOFENCE_TRANSITION_ENTER | Geofence.GEOFENCE_TRANSITION_EXIT;
             default:
                 return 0;
         }

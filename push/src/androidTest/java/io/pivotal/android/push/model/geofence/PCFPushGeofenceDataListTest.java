@@ -144,7 +144,7 @@ public class PCFPushGeofenceDataListTest extends AndroidTestCase {
 
         final PCFPushGeofenceData item2 = i.next();
         assertEquals(9L, item2.getId());
-        assertEquals(PCFPushGeofenceData.TriggerType.ENTER_OR_EXIT, item2.getTriggerType());
+        assertEquals(PCFPushGeofenceData.TriggerType.EXIT, item2.getTriggerType());
         assertTrue(i.hasNext());
 
         final PCFPushGeofenceData item3 = i.next();

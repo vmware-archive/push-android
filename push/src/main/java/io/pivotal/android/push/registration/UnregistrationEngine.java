@@ -187,7 +187,7 @@ public class UnregistrationEngine {
                 if (shouldClearGeofences()) {
                     geofenceUpdater.clearGeofences(getClearGeofencesListener(listener));
                 } else if (listener != null) {
-                    listener.onUnregistrationComplete();;
+                    listener.onUnregistrationComplete();
                 }
             }
 

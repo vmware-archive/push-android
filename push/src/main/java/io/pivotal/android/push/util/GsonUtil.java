@@ -82,9 +82,6 @@ public class GsonUtil {
                 case EXIT:
                     out.value("exit");
                     break;
-                case ENTER_OR_EXIT:
-                    out.value("enter_or_exit");
-                    break;
             }
         }
 
@@ -95,17 +92,15 @@ public class GsonUtil {
                 return null;
             }
             if (in.peek() != JsonToken.STRING) {
-                throw new IOException("Parsing PCFPushGeofenceData. Expected JsonToken.STRING");
+                throw new IOException("Parsing PCFPushGeofenceData. Expected JsonToken.STRING.");
             }
             final String value = in.nextString();
             if (value.equals("enter")) {
                 return PCFPushGeofenceData.TriggerType.ENTER;
             } else if (value.equals("exit")) {
                 return PCFPushGeofenceData.TriggerType.EXIT;
-            } else if (value.equals("enter_or_exit")) {
-                return PCFPushGeofenceData.TriggerType.ENTER_OR_EXIT;
             } else {
-                throw new IOException("Parsing PCFPushGeofenceData. Unexpected string '" + value + "'. Must be one of {'enter', 'exit', 'enter_or_exit'}.");
+                throw new IOException("Parsing PCFPushGeofenceData. Unexpected string '" + value + "'. Must be 'enter' or 'exit'.");
             }
         }
     }
@@ -116,10 +111,10 @@ public class GsonUtil {
 
         public PCFPushGeofenceDataListTypeAdapter() {
 
-            final Type triggerTypeType = new TypeToken<PCFPushGeofenceData.TriggerType>(){}.getType();
+            final Type triggerType = new TypeToken<PCFPushGeofenceData.TriggerType>(){}.getType();
 
             this.gson = new GsonBuilder()
-                    .registerTypeAdapter(triggerTypeType, new TriggerTypeAdapter())
+                    .registerTypeAdapter(triggerType, new TriggerTypeAdapter())
                     .registerTypeAdapter(Date.class, dateSerializer)
                     .registerTypeAdapter(Date.class, dateDeserializer)
                     .create();

@@ -10,8 +10,8 @@ import java.util.Map;
 
 public final class PCFPushGeofenceData {
 
-    public static enum TriggerType {
-        ENTER, EXIT, ENTER_OR_EXIT
+    public enum TriggerType {
+        ENTER, EXIT
     }
 
     @SerializedName("id")
