@@ -24,7 +24,7 @@ public final class PCFPushGeofenceData {
     private List<PCFPushGeofenceLocation> locations;
 
     @SerializedName("data")
-    private Map<String, String> data;
+    private PCFPushGeofencePayload payload;
 
     @SerializedName("tags")
     private List<String> tags;
@@ -48,8 +48,8 @@ public final class PCFPushGeofenceData {
         return tags;
     }
 
-    public Map<String, String> getData() {
-        return data;
+    public PCFPushGeofencePayload getPayload() {
+        return payload;
     }
 
     public TriggerType getTriggerType() {
@@ -76,8 +76,8 @@ public final class PCFPushGeofenceData {
         if (expiryTime != null) {
             newItem.expiryTime = new Date(expiryTime.getTime());
         }
-        if (data != null) {
-            newItem.data = new HashMap<>(data);
+        if (payload != null) {
+            newItem.payload = new PCFPushGeofencePayload(payload);
         }
         if (tags != null) {
             newItem.tags = new ArrayList<>(tags);
@@ -94,7 +94,7 @@ public final class PCFPushGeofenceData {
         PCFPushGeofenceData other = (PCFPushGeofenceData) o;
 
         if (id != other.id) return false;
-        if (data != null ? !data.equals(other.data) : other.data != null) return false;
+        if (payload != null ? !payload.equals(other.payload) : other.payload != null) return false;
         if (expiryTime != null ? !expiryTime.equals(other.expiryTime) : other.expiryTime != null) return false;
         if (locations != null ? !locations.equals(other.locations) : other.locations != null) return false;
         if (tags != null ? !tags.equals(other.tags) : other.tags != null) return false;
@@ -108,7 +108,7 @@ public final class PCFPushGeofenceData {
         int result = (int) (id ^ (id >>> 32));
         result = 31 * result + (expiryTime != null ? expiryTime.hashCode() : 0);
         result = 31 * result + (locations != null ? locations.hashCode() : 0);
-        result = 31 * result + (data != null ? data.hashCode() : 0);
+        result = 31 * result + (payload != null ? payload.hashCode() : 0);
         result = 31 * result + (tags != null ? tags.hashCode() : 0);
         result = 31 * result + (triggerType != null ? triggerType.hashCode() : 0);
         return result;

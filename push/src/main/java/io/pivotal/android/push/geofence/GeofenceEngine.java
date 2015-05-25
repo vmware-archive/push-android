@@ -149,7 +149,7 @@ public class GeofenceEngine {
             private boolean isItemValid(PCFPushGeofenceData item) {
                 if (isExpiredItem(item)) return false;
                 if (item.getLocations() == null || item.getLocations().size() <= 0) return false;
-                if (item.getData() == null || item.getData().size() <= 0) return false;
+                if (item.getPayload() == null || item.getPayload().getAndroid() == null || item.getPayload().getAndroid().size() <= 0) return false;
                 if (item.getTriggerType() == null) return false;
                 return true;
             }

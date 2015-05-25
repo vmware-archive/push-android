@@ -208,9 +208,14 @@ public class GcmService extends IntentService {
             return null;
         }
 
-        final Map<String, String> data = geofenceData.getData();
+        if (geofenceData.getPayload() == null) {
+            Logger.e("Triggered geofence with ID " + geofenceId + " has no message payload.");
+            return null;
+        }
+
+        final Map<String, String> data = geofenceData.getPayload().getAndroid();
         if (data == null) {
-            Logger.e("Triggered geofence with ID " + geofenceId + " has no message data.");
+            Logger.e("Triggered geofence with ID " + geofenceId + " has no Android message payload.");
             return null;
         }
 

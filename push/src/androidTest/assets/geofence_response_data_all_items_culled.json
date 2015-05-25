@@ -19,7 +19,7 @@
         {
             "id": 5,
             "data": {
-                "message": "i have no trigger_type"
+                "android":{"message": "i have no trigger_type"}
             },
             "expiry_time": 1424309210305,
             "locations": [
@@ -35,7 +35,7 @@
         {
             "id": 10,
             "data": {
-                "message": "i have an empty locations array"
+                "android":{"message": "i have an empty locations array"}
             },
             "expiry_time": 1142744274,
             "trigger_type": "enter",
@@ -44,7 +44,7 @@
         {
             "id": 44,
             "data": {
-                "message": "i have no locations array at all"
+                "android":{"message": "i have no locations array at all"}
             },
             "expiry_time": 1142744274,
             "trigger_type": "exit"
