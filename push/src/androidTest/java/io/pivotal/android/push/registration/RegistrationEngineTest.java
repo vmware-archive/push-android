@@ -65,6 +65,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     private VersionProvider versionProvider;
     private FakeGcmProvider gcmProvider;
     private GeofenceUpdater geofenceUpdater;
+    private GeofenceEngine geofenceEngine;
     private Semaphore semaphore = new Semaphore(0);
 
     @Override
@@ -80,6 +81,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
         versionProvider = new FakeVersionProvider(10);
         pcfPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(new FakePCFPushRegistrationApiRequest(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1));
         geofenceUpdater = mock(GeofenceUpdater.class);
+        geofenceEngine = mock(GeofenceEngine.class);
 
         doAnswer(new Answer<Void>(){
 
@@ -95,7 +97,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullContext() {
         try {
-            new RegistrationEngine(null, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater);
+            new RegistrationEngine(null, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -104,7 +106,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullPackageName() {
         try {
-            new RegistrationEngine(getContext(), null, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater);
+            new RegistrationEngine(getContext(), null, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -113,7 +115,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullGcmProvider() {
         try {
-            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, null, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater);
+            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, null, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -122,7 +124,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullPushPreferencesProvider() {
         try {
-            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, null, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater);
+            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, null, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -131,7 +133,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullGcmRegistrationApiRequestProvider() {
         try {
-            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, null, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater);
+            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, null, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -140,7 +142,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullGcmUnregistrationApiRequestProvider() {
         try {
-            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, null, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater);
+            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, null, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -149,7 +151,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullPCFPushRegisterDeviceApiRequestProvider() {
         try {
-            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, null, versionProvider, geofenceUpdater);
+            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, null, versionProvider, geofenceUpdater, geofenceEngine);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -158,7 +160,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullVersionProvider() {
         try {
-            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, null, geofenceUpdater);
+            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, null, geofenceUpdater, geofenceEngine);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -167,7 +169,16 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullGeofenceUpdater() {
         try {
-            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, null);
+            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, null, geofenceEngine);
+            fail("should not have succeeded");
+        } catch (IllegalArgumentException e) {
+            // success
+        }
+    }
+
+    public void testNullGeofenceEngine() {
+        try {
+            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, null);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -176,7 +187,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullParameters() {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater);
+            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
             engine.registerDevice(null, getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -186,7 +197,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullSenderId() {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater);
+            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
             engine.registerDevice(new PushParameters(null, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, null, true), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -196,7 +207,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullPlatformUuid() {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater);
+            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
             engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, null, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, null, true), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -206,7 +217,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullPlatformSecret() {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater);
+            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
             engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, null, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, null, true), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -215,20 +226,20 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testNullDeviceAlias() throws InterruptedException {
-        final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater);
+        final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
         engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, null, null, true), getListenerForRegistration(true));
         semaphore.acquire();
     }
 
     public void testEmptyDeviceAlias() throws InterruptedException {
-        final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater);
+        final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
         engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, "", null, true), getListenerForRegistration(true));
         semaphore.acquire();
     }
 
     public void testEmptyServiceUrl() throws InterruptedException {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater);
+            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
             engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, null, TEST_DEVICE_ALIAS_1, null, true), getListenerForRegistration(true));
             semaphore.acquire();
             fail("should not have succeeded");
@@ -239,7 +250,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testGooglePlayServicesNotAvailable() throws InterruptedException {
         gcmProvider.setIsGooglePlayServicesInstalled(false);
-        final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater);
+        final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
         final PushParameters parameters = new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, null, true);
         engine.registerDevice(parameters, getListenerForRegistration(false));
         semaphore.acquire();
@@ -266,6 +277,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -291,6 +303,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -316,6 +329,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -341,6 +355,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(false);
         testParams.run();
     }
@@ -366,6 +381,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(false);
         testParams.run();
     }
@@ -391,6 +407,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(false);
         testParams.run();
     }
@@ -416,6 +433,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -441,6 +459,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -466,6 +485,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -491,6 +511,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -516,6 +537,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -541,6 +563,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -566,6 +589,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -591,6 +615,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(true)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -616,6 +641,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -641,6 +667,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -666,6 +693,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -691,6 +719,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(false);
         testParams.run();
     }
@@ -716,6 +745,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(false);
         testParams.run();
     }
@@ -741,6 +771,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(false);
         testParams.run();
     }
@@ -766,6 +797,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -791,6 +823,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -816,6 +849,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -841,6 +875,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -866,6 +901,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(false);
         testParams.run();
     }
@@ -891,6 +927,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(false);
         testParams.run();
     }
@@ -916,6 +953,33 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(false)
+                .setShouldRegistrationHaveSucceeded(false);
+        testParams.run();
+    }
+
+    public void testUpdateRegistrationWithTagsFailed() {
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+                .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, null, null)
+                .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, null, true)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, null, true)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, null, true)
+                .setupTags(TEST_TAGS1, TEST_TAGS2, null, true)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, null, true)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setupGeofenceUpdateTimestamp(1337L, 1337L, NOT_USED, 1337L, true, false, false)
+                .setupAreGeofencesEnabled(true, true, true, false)
+                .setupGcmUnregisterDevice(false, false)
+                .setupAppVersion(1, 2, 2)
+                .setShouldAppVersionHaveBeenSaved(true)
+                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
+                .setShouldGcmProviderRegisterHaveBeenCalled(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(true)
                 .setShouldRegistrationHaveSucceeded(false);
         testParams.run();
     }
@@ -941,6 +1005,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -967,6 +1032,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -992,6 +1058,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -1017,6 +1084,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -1042,6 +1110,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(false);
         testParams.run();
     }
@@ -1067,6 +1136,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(false);
         testParams.run();
     }
@@ -1092,6 +1162,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -1117,6 +1188,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -1142,6 +1214,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -1167,6 +1240,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -1192,6 +1266,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -1217,6 +1292,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -1242,6 +1318,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -1267,6 +1344,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -1292,6 +1370,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(true)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -1317,6 +1396,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -1342,6 +1422,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -1367,6 +1448,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -1392,6 +1474,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(false);
         testParams.run();
     }
@@ -1417,6 +1500,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -1442,6 +1526,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -1467,6 +1552,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(false);
         testParams.run();
     }
@@ -1492,6 +1578,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -1517,6 +1604,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(false);
         testParams.run();
     }
@@ -1542,6 +1630,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
@@ -1567,6 +1656,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
                 .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
                 .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }

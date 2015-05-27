@@ -20,6 +20,7 @@ import io.pivotal.android.push.gcm.FakeGcmRegistrationApiRequest;
 import io.pivotal.android.push.gcm.FakeGcmUnregistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmRegistrationApiRequestProvider;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
+import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
@@ -90,6 +91,7 @@ public class RegistrationEngineTestParameters {
     private boolean shouldClearGeofencesHaveBeenCalled = false;
     private boolean wasGeofenceUpdateTimestampCalled = false;
     private boolean wasClearGeofencesCalled = false;
+    private int numberOfGeofenceReregistrations = 0;
 
     private int appVersionInPrefs = PushPreferencesProvider.NO_SAVED_VERSION;
     private int currentAppVersion = PushPreferencesProvider.NO_SAVED_VERSION;
@@ -117,7 +119,8 @@ public class RegistrationEngineTestParameters {
         final FakePCFPushRegistrationApiRequest fakePCFPushRegistrationApiRequest = new FakePCFPushRegistrationApiRequest(pcfPushDeviceRegistrationIdFromServer, shouldPCFPushDeviceRegistrationBeSuccessful);
         final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(fakePCFPushRegistrationApiRequest);
         final GeofenceUpdater geofenceUpdater = mock(GeofenceUpdater.class);
-        final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, PCFPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater);
+        final GeofenceEngine geofenceEngine = mock(GeofenceEngine.class);
+        final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, PCFPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
         final PushParameters parameters = new PushParameters(gcmSenderIdFromUser, platformUuidFromUser, platformSecretFromUser, serviceUrlFromUser, deviceAliasFromUser, tagsFromUser, areGeofencesEnabledFromUser);
 
         doAnswer(new Answer<Void>() {
@@ -205,6 +208,7 @@ public class RegistrationEngineTestParameters {
         AndroidTestCase.assertEquals(finalTagsInPrefs, pushPreferencesProvider.getTags());
         AndroidTestCase.assertEquals(finalGeofenceUpdateTimestampInPrefs, pushPreferencesProvider.getLastGeofenceUpdate());
         AndroidTestCase.assertEquals(finalAreGeofencesEnabled, pushPreferencesProvider.areGeofencesEnabled());
+        verify(geofenceEngine, times(numberOfGeofenceReregistrations)).reregisterCurrentLocations();
     }
 
     public RegistrationEngineTestParameters setupPackageName(String inPrefs, String fromUser, String finalValue) {
@@ -355,4 +359,8 @@ public class RegistrationEngineTestParameters {
         return this;
     }
 
+    public RegistrationEngineTestParameters setShouldGeofencesHaveBeenReregistered(boolean b) {
+        numberOfGeofenceReregistrations = b ? 1 : 0;
+        return this;
+    }
 }

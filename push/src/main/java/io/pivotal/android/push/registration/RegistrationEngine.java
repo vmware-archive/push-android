@@ -66,6 +66,7 @@ public class RegistrationEngine {
     private GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider;
     private PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider;
     private GeofenceUpdater geofenceUpdater;
+    private GeofenceEngine geofenceEngine;
     private VersionProvider versionProvider;
     private String packageName;
     private String previousGcmDeviceRegistrationId = null;
@@ -89,6 +90,7 @@ public class RegistrationEngine {
      * @param pcfPushRegistrationApiRequestProvider  Some object that can provide PCFPushRegistrationApiRequest objects.
      * @param versionProvider  Some object that can provide the application version.
      * @param geofenceUpdater
+     * @param geofenceEngine
      */
     public RegistrationEngine(Context context,
                               String packageName,
@@ -98,7 +100,8 @@ public class RegistrationEngine {
                               GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                               PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
                               VersionProvider versionProvider,
-                              GeofenceUpdater geofenceUpdater) {
+                              GeofenceUpdater geofenceUpdater,
+                              GeofenceEngine geofenceEngine) {
 
         verifyArguments(context,
                 packageName,
@@ -108,7 +111,8 @@ public class RegistrationEngine {
                 gcmUnregistrationApiRequestProvider,
                 pcfPushRegistrationApiRequestProvider,
                 versionProvider,
-                geofenceUpdater);
+                geofenceUpdater,
+                geofenceEngine);
 
         saveArguments(context,
                 packageName,
@@ -118,7 +122,8 @@ public class RegistrationEngine {
                 gcmUnregistrationApiRequestProvider,
                 pcfPushRegistrationApiRequestProvider,
                 versionProvider,
-                geofenceUpdater);
+                geofenceUpdater,
+                geofenceEngine);
     }
 
     private void verifyArguments(Context context,
@@ -129,7 +134,8 @@ public class RegistrationEngine {
                                  GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                  PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
                                  VersionProvider versionProvider,
-                                 GeofenceUpdater geofenceUpdater) {
+                                 GeofenceUpdater geofenceUpdater,
+                                 GeofenceEngine geofenceEngine) {
 
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
@@ -158,6 +164,9 @@ public class RegistrationEngine {
         if (geofenceUpdater == null) {
             throw new IllegalArgumentException("geofenceUpdater may not be null");
         }
+        if (geofenceEngine == null) {
+            throw new IllegalArgumentException("geofenceEngine may not be null");
+        }
     }
 
     private void saveArguments(Context context,
@@ -168,7 +177,8 @@ public class RegistrationEngine {
                                GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
                                VersionProvider versionProvider,
-                               GeofenceUpdater geofenceUpdater) {
+                               GeofenceUpdater geofenceUpdater,
+                               GeofenceEngine geofenceEngine) {
 
         this.context = context;
         this.packageName = packageName;
@@ -179,6 +189,7 @@ public class RegistrationEngine {
         this.pcfPushRegistrationApiRequestProvider = pcfPushRegistrationApiRequestProvider;
         this.versionProvider = versionProvider;
         this.geofenceUpdater = geofenceUpdater;
+        this.geofenceEngine = geofenceEngine;
         this.previousGcmDeviceRegistrationId = pushPreferencesProvider.getGcmDeviceRegistrationId();
         this.previousPCFPushDeviceRegistrationId = pushPreferencesProvider.getPCFPushDeviceRegistrationId();
         this.previousGcmSenderId = pushPreferencesProvider.getGcmSenderId();
@@ -379,6 +390,14 @@ public class RegistrationEngine {
         return false;
     }
 
+    private boolean areGeofencesAvailable(PushParameters parameters) {
+        if (parameters.areGeofencesEnabled() && pushPreferencesProvider.getLastGeofenceUpdate() != GeofenceEngine.NEVER_UPDATED_GEOFENCES) {
+            Logger.v("Geofences are available.");
+            return true;
+        }
+        return false;
+    }
+
     private boolean isClearGeofencesRequired(PushParameters parameters) {
         if (!parameters.areGeofencesEnabled() && pushPreferencesProvider.getLastGeofenceUpdate() != GeofenceEngine.NEVER_UPDATED_GEOFENCES) {
             Logger.v("Geofences are now disabled and the current configuration needs to be cleared.");
@@ -444,7 +463,7 @@ public class RegistrationEngine {
                 if (isPCFPushUpdateRegistrationRequired(gcmDeviceRegistrationId, parameters) && !isServiceUrlUpdated) {
                     registerUpdateDeviceWithPCFPush(gcmDeviceRegistrationId, previousPCFPushDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
 
-                }  else if (isNewGcmDeviceRegistrationId || isServiceUrlUpdated) {
+                } else if (isNewGcmDeviceRegistrationId || isServiceUrlUpdated) {
                     registerNewDeviceWithPCFPush(gcmDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
 
                 } else if (isGeofenceUpdateRequired(parameters)) {
@@ -501,6 +520,11 @@ public class RegistrationEngine {
                     return;
                 }
 
+                if (haveTagsBeenUpdated(parameters) && areGeofencesAvailable(parameters)) {
+                    Logger.i("Tags have been updated - reregistering current geofences.");
+                    geofenceEngine.reregisterCurrentLocations();
+                }
+
                 Logger.i("Saving PCF Push device registration ID: " + pcfPushDeviceRegistrationId);
                 pushPreferencesProvider.setPCFPushDeviceRegistrationId(pcfPushDeviceRegistrationId);
 
@@ -525,6 +549,11 @@ public class RegistrationEngine {
 
             @Override
             public void onPCFPushRegistrationFailed(String reason) {
+
+                if (haveTagsBeenUpdated(parameters) && areGeofencesAvailable(parameters)) {
+                    Logger.i("Tags have been updated - reregistering current geofences.");
+                    geofenceEngine.reregisterCurrentLocations();
+                }
 
                 clearPCFPushRegistrationPreferences();
 

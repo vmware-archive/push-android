@@ -161,7 +161,8 @@ public class Push {
                             gcmUnregistrationApiRequestProvider,
                             PCFPushRegistrationApiRequestProvider,
                             versionProvider,
-                            geofenceUpdater);
+                            geofenceUpdater,
+                            geofenceEngine);
 
                     registrationEngine.registerDevice(parameters, listener);
                 } catch (Exception e) {
