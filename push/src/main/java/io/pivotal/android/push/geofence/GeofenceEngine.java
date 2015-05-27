@@ -110,7 +110,10 @@ public class GeofenceEngine {
 
             @Override
             public boolean filterItem(final PCFPushGeofenceData item) {
-                return !isDeletedItem(item, responseData) && !isExpiredItem(item) && !isUpdatedItem(item, responseData);
+                return !isDeletedItem(item, responseData) &&
+                       !isExpiredItem(item) &&
+                       !isUpdatedItem(item, responseData) &&
+                        areLocationsValid(item);
             }
         });
     }
@@ -138,6 +141,24 @@ public class GeofenceEngine {
         return false;
     }
 
+    private boolean areLocationsValid(PCFPushGeofenceData item) {
+        if (item.getLocations() == null || item.getLocations().size() <= 0) {
+            return false;
+        }
+        for (final PCFPushGeofenceLocation location : item.getLocations()) {
+            if (location.getLatitude() < -90.0 || location.getLatitude() > 90.0) {
+                return false;
+            }
+            if (location.getLongitude() < -180.0 || location.getLongitude() > 180.0) {
+                return false;
+            }
+            if (location.getRadius() < 10.0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     private void addValidGeofencesFromUpdate(PCFPushGeofenceDataList requiredGeofences, List<PCFPushGeofenceData> newGeofences) {
         requiredGeofences.addFiltered(newGeofences, new PCFPushGeofenceDataList.Filter() {
 
@@ -148,7 +169,7 @@ public class GeofenceEngine {
 
             private boolean isItemValid(PCFPushGeofenceData item) {
                 if (isExpiredItem(item)) return false;
-                if (item.getLocations() == null || item.getLocations().size() <= 0) return false;
+                if (!areLocationsValid(item)) return false;
                 if (item.getPayload() == null || item.getPayload().getAndroid() == null || item.getPayload().getAndroid().size() <= 0) return false;
                 if (item.getTriggerType() == null) return false;
                 return true;
