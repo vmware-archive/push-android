@@ -2,13 +2,10 @@ package io.pivotal.android.push.geofence;
 
 import android.test.AndroidTestCase;
 
-import com.google.gson.reflect.TypeToken;
-
 import org.mockito.ArgumentCaptor;
 
 import java.io.IOException;
 
-import io.pivotal.android.push.model.geofence.PCFPushGeofenceData;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceDataList;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocationMap;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceResponseData;
@@ -600,9 +597,7 @@ public class GeofenceEngineTest extends AndroidTestCase {
     }
 
     public void testCullsStoredItemsWithBadLocations() throws IOException {
-        final PCFPushGeofenceData storedItem = ModelUtil.getJson(getContext(), "geofence_one_item_persisted_4_bad.json", new TypeToken<PCFPushGeofenceData>(){});
-        final PCFPushGeofenceDataList storedItems = new PCFPushGeofenceDataList();
-        storedItems.put(4L, storedItem);
+        final PCFPushGeofenceDataList storedItems = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_one_item_bad_radius.json");
         when(store.getCurrentlyRegisteredGeofences()).thenReturn(storedItems);
         engine.processResponseData(50L, new PCFPushGeofenceResponseData());
         assertRegisterGeofences(new PCFPushGeofenceLocationMap());
@@ -610,7 +605,7 @@ public class GeofenceEngineTest extends AndroidTestCase {
         verify(registrar, never()).reset();
         verify(store, never()).reset();
     }
-    
+
     public void testClearNullLocation() throws IOException {
         engine.clearLocations(null);
         verifyZeroInteractions(registrar);
