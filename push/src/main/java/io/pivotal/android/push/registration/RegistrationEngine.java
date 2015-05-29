@@ -82,15 +82,15 @@ public class RegistrationEngine {
      *
      * All the parameters are required.  None may be null.
      * @param context  A context
-     * @param packageName
+     * @param packageName  The currenly application package name.
      * @param gcmProvider  Some object that can provide the GCM services.
      * @param pushPreferencesProvider  Some object that can provide persistent storage for push preferences.
      * @param gcmRegistrationApiRequestProvider  Some object that can provide GCMRegistrationApiRequest objects.
      * @param gcmUnregistrationApiRequestProvider  Some object that can provide GCMUnregistrationApiRequest objects.
      * @param pcfPushRegistrationApiRequestProvider  Some object that can provide PCFPushRegistrationApiRequest objects.
      * @param versionProvider  Some object that can provide the application version.
-     * @param geofenceUpdater
-     * @param geofenceEngine
+     * @param geofenceUpdater  Some object that can be used to download geofence updates from the server.
+     * @param geofenceEngine  Some object that can be used to register geofences.
      */
     public RegistrationEngine(Context context,
                               String packageName,
@@ -410,6 +410,7 @@ public class RegistrationEngine {
         Logger.i("GCM Sender ID has been changed. Unregistering sender ID with GCM.");
         final GcmUnregistrationApiRequest gcmUnregistrationApiRequest = gcmUnregistrationApiRequestProvider.getRequest();
         gcmUnregistrationApiRequest.startUnregistration(new GcmUnregistrationListener() {
+
             @Override
             public void onGcmUnregistrationComplete() {
                 pushPreferencesProvider.setGcmDeviceRegistrationId(null);
@@ -637,7 +638,6 @@ public class RegistrationEngine {
     // TODO - write test to ensure that geofences can't be updated unless there's a serviceUrl ?
     private void updateGeofences(final RegistrationListener listener) {
 
-        // TODO - reset the geofence persistent store
         geofenceUpdater.startGeofenceUpdate(null, 0L, new GeofenceUpdater.GeofenceUpdaterListener() {
 
             @Override

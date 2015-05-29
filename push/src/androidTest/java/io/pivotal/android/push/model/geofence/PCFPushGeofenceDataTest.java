@@ -21,7 +21,7 @@ public class PCFPushGeofenceDataTest extends AndroidTestCase {
         assertEquals(2, copy.getTags().size());
         assertEquals("MONDAY", copy.getTags().get(0));
         assertEquals("FRIDAY", copy.getTags().get(1));
-        assertEquals(PCFPushGeofenceData.TriggerType.EXIT, copy.getTriggerType());
+        assertEquals("exit", copy.getTriggerType());
         assertEquals(0, copy.getLocations().size());
     }
 }

@@ -100,14 +100,13 @@ public class GeofenceRegistrar {
         return serializableItem;
     }
 
-    private int getTransitionTypes(PCFPushGeofenceData.TriggerType triggerType) {
-        switch (triggerType) {
-            case ENTER:
-                return Geofence.GEOFENCE_TRANSITION_ENTER;
-            case EXIT:
-                return Geofence.GEOFENCE_TRANSITION_EXIT;
-            default:
-                return 0;
+    private int getTransitionTypes(String triggerType) {
+        if (triggerType.equalsIgnoreCase("enter")) {
+            return Geofence.GEOFENCE_TRANSITION_ENTER;
+        } else if (triggerType.equalsIgnoreCase("exit")) {
+            return Geofence.GEOFENCE_TRANSITION_EXIT;
+        } else {
+            return 0;
         }
     }
 

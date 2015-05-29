@@ -35,11 +35,9 @@ public class GsonUtil {
     private static GsonBuilder getBuilder() {
 
         final Type longSparseArrayType = new TypeToken<PCFPushGeofenceDataList>(){}.getType();
-        final Type triggerTypeType = new TypeToken<PCFPushGeofenceData.TriggerType>(){}.getType();
 
         return new GsonBuilder()
                 .registerTypeAdapter(longSparseArrayType, new PCFPushGeofenceDataListTypeAdapter())
-                .registerTypeAdapter(triggerTypeType, new TriggerTypeAdapter())
                 .registerTypeAdapter(Date.class, dateDeserializer)
                 .registerTypeAdapter(Date.class, dateSerializer);
     }
@@ -65,56 +63,13 @@ public class GsonUtil {
         }
     };
 
-    private static class TriggerTypeAdapter extends TypeAdapter<PCFPushGeofenceData.TriggerType> {
-
-        @Override
-        public void write(JsonWriter out, PCFPushGeofenceData.TriggerType value) throws IOException {
-
-            if (value == null) {
-                out.nullValue();
-                return;
-            }
-
-            switch(value) {
-                case ENTER:
-                    out.value("enter");
-                    break;
-                case EXIT:
-                    out.value("exit");
-                    break;
-            }
-        }
-
-        @Override
-        public PCFPushGeofenceData.TriggerType read(JsonReader in) throws IOException {
-            if (in.peek() == JsonToken.NULL) {
-                in.nextNull();
-                return null;
-            }
-            if (in.peek() != JsonToken.STRING) {
-                throw new IOException("Parsing PCFPushGeofenceData. Expected JsonToken.STRING.");
-            }
-            final String value = in.nextString();
-            if (value.equals("enter")) {
-                return PCFPushGeofenceData.TriggerType.ENTER;
-            } else if (value.equals("exit")) {
-                return PCFPushGeofenceData.TriggerType.EXIT;
-            } else {
-                throw new IOException("Parsing PCFPushGeofenceData. Unexpected string '" + value + "'. Must be 'enter' or 'exit'.");
-            }
-        }
-    }
-
     private static class PCFPushGeofenceDataListTypeAdapter extends TypeAdapter<PCFPushGeofenceDataList> {
 
         final Gson gson;
 
         public PCFPushGeofenceDataListTypeAdapter() {
 
-            final Type triggerType = new TypeToken<PCFPushGeofenceData.TriggerType>(){}.getType();
-
             this.gson = new GsonBuilder()
-                    .registerTypeAdapter(triggerType, new TriggerTypeAdapter())
                     .registerTypeAdapter(Date.class, dateSerializer)
                     .registerTypeAdapter(Date.class, dateDeserializer)
                     .create();

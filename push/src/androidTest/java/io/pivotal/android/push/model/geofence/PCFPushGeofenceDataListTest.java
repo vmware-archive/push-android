@@ -139,17 +139,17 @@ public class PCFPushGeofenceDataListTest extends AndroidTestCase {
         final PCFPushGeofenceData item1 = i.next();
         assertEquals(7L, item1.getId());
         assertEquals(7L, list.first().getId());
-        assertEquals(PCFPushGeofenceData.TriggerType.ENTER, item1.getTriggerType());
+        assertEquals("enter", item1.getTriggerType());
         assertTrue(i.hasNext());
 
         final PCFPushGeofenceData item2 = i.next();
         assertEquals(9L, item2.getId());
-        assertEquals(PCFPushGeofenceData.TriggerType.EXIT, item2.getTriggerType());
+        assertEquals("exit", item2.getTriggerType());
         assertTrue(i.hasNext());
 
         final PCFPushGeofenceData item3 = i.next();
         assertEquals(44L, item3.getId());
-        assertEquals(PCFPushGeofenceData.TriggerType.EXIT, item3.getTriggerType());
+        assertEquals("exit", item3.getTriggerType());
         assertFalse(i.hasNext());
     }
 

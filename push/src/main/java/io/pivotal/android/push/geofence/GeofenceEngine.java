@@ -147,12 +147,15 @@ public class GeofenceEngine {
         }
         for (final PCFPushGeofenceLocation location : item.getLocations()) {
             if (location.getLatitude() < -90.0 || location.getLatitude() > 90.0) {
+                Logger.w(String.format("Filtering out item %d with bad latitude %f", item.getId(), location.getLatitude()));
                 return false;
             }
             if (location.getLongitude() < -180.0 || location.getLongitude() > 180.0) {
+                Logger.w(String.format("Filtering out item %d with bad longitude %f", item.getId(), location.getLongitude()));
                 return false;
             }
             if (location.getRadius() < 10.0) {
+                Logger.w(String.format("Filtering out item %d with bad radius %f", item.getId(), location.getRadius()));
                 return false;
             }
         }
@@ -168,10 +171,27 @@ public class GeofenceEngine {
             }
 
             private boolean isItemValid(PCFPushGeofenceData item) {
-                if (isExpiredItem(item)) return false;
+                if (item.getExpiryTime() == null) {
+                    Logger.w(String.format("Filtering out item %d with no expiry time", item.getId()));
+                    return false;
+                }
+                if (isExpiredItem(item)) {
+                    Logger.w(String.format("Filtering out item %d with elapsed expiry time %d", item.getId(), item.getExpiryTime().getTime()));
+                    return false;
+                }
                 if (!areLocationsValid(item)) return false;
-                if (item.getPayload() == null || item.getPayload().getAndroid() == null || item.getPayload().getAndroid().size() <= 0) return false;
-                if (item.getTriggerType() == null) return false;
+                if (item.getPayload() == null || item.getPayload().getAndroid() == null || item.getPayload().getAndroid().size() <= 0) {
+                    Logger.w(String.format("Filtering out item %d with no payload", item.getId()));
+                    return false;
+                }
+                if (item.getTriggerType() == null) {
+                    Logger.w(String.format("Filtering out item %d with no trigger type", item.getId()));
+                    return false;
+                }
+                if (!(item.getTriggerType().equalsIgnoreCase("enter") || item.getTriggerType().equalsIgnoreCase("exit"))) {
+                    Logger.w(String.format("Filtering out item %d with invalid trigger type '%s'", item.getId(), item.getTriggerType()));
+                    return false;
+                }
                 return true;
             }
         });

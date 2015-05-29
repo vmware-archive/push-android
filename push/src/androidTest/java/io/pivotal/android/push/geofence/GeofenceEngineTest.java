@@ -490,6 +490,16 @@ public class GeofenceEngineTest extends AndroidTestCase {
         verify(store, never()).reset();
     }
 
+    public void testUpdateBadTriggerType() throws IOException {
+        final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_one_item_bad_trigger.json");
+        when(store.getCurrentlyRegisteredGeofences()).thenReturn(ONE_ITEM_GEOFENCE_LIST);
+        engine.processResponseData(50L, updateData);
+        assertRegisterGeofences(new PCFPushGeofenceLocationMap());
+        assertSaveRegisteredGeofences(new PCFPushGeofenceDataList());
+        verify(registrar, never()).reset();
+        verify(store, never()).reset();
+    }
+
     public void testCullsItemsWithInsufficientData() throws IOException {
         final PCFPushGeofenceResponseData updateData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_all_items_culled.json");
         engine.processResponseData(50L, updateData);

@@ -4,15 +4,9 @@ import com.google.gson.annotations.SerializedName;
 
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 public final class PCFPushGeofenceData {
-
-    public enum TriggerType {
-        ENTER, EXIT
-    }
 
     @SerializedName("id")
     private long id;
@@ -30,7 +24,7 @@ public final class PCFPushGeofenceData {
     private List<String> tags;
 
     @SerializedName("trigger_type")
-    private TriggerType triggerType;
+    private String triggerType;
 
     public long getId() {
         return id;
@@ -52,7 +46,7 @@ public final class PCFPushGeofenceData {
         return payload;
     }
 
-    public TriggerType getTriggerType() {
+    public String getTriggerType() {
         return triggerType;
     }
 
