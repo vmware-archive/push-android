@@ -4,6 +4,7 @@
 package io.pivotal.android.push.registration;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 
 import java.util.Set;
 
@@ -237,9 +238,12 @@ public class RegistrationEngine {
         } else if (isPCFPushNewRegistrationRequired(parameters)) {
             registerNewDeviceWithPCFPush(previousGcmDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
 
+        // TODO - test that permission is available
+        // TODO - set geofence status is geofences are enabled but there is no permission for them
         } else if (isGeofenceUpdateRequired(parameters)) {
             updateGeofences(listener);
 
+        // TODO - test that permission is available
         } else if (isClearGeofencesRequired(parameters)) {
             clearGeofences(listener);
 
@@ -383,15 +387,17 @@ public class RegistrationEngine {
     }
 
     private boolean isGeofenceUpdateRequired(PushParameters parameters) {
-        if (parameters.areGeofencesEnabled() && pushPreferencesProvider.getLastGeofenceUpdate() == GeofenceEngine.NEVER_UPDATED_GEOFENCES) {
-            Logger.v("A geofence update is required in order to download the current geofence configuration.");
+        // TODO - write test to verify that permission is available before registering for geofences
+        if (isPermissionForGeofences() && parameters.areGeofencesEnabled() && pushPreferencesProvider.getLastGeofenceUpdate() == GeofenceEngine.NEVER_UPDATED_GEOFENCES) {
+            Logger.i("A geofence update is required in order to download the current geofence configuration.");
             return true;
         }
         return false;
     }
 
     private boolean areGeofencesAvailable(PushParameters parameters) {
-        if (parameters.areGeofencesEnabled() && pushPreferencesProvider.getLastGeofenceUpdate() != GeofenceEngine.NEVER_UPDATED_GEOFENCES) {
+        // TODO - write test to verify that geofences are *not* cleared if permission is taken away AND they are disabled
+        if (isPermissionForGeofences() && parameters.areGeofencesEnabled() && pushPreferencesProvider.getLastGeofenceUpdate() != GeofenceEngine.NEVER_UPDATED_GEOFENCES) {
             Logger.v("Geofences are available.");
             return true;
         }
@@ -404,6 +410,12 @@ public class RegistrationEngine {
             return true;
         }
         return false;
+    }
+
+    private boolean isPermissionForGeofences() {
+        final int accessGpsPermission = context.checkCallingOrSelfPermission("android.permission.ACCESS_FINE_LOCATION");
+        final int receiveBootPermission = context.checkCallingOrSelfPermission("android.permission.RECEIVE_BOOT_COMPLETED");
+        return (accessGpsPermission == PackageManager.PERMISSION_GRANTED) && (receiveBootPermission == PackageManager.PERMISSION_GRANTED);
     }
 
     private void unregisterDeviceWithGcm(final PushParameters parameters, final RegistrationListener listener) {
@@ -467,9 +479,12 @@ public class RegistrationEngine {
                 } else if (isNewGcmDeviceRegistrationId || isServiceUrlUpdated) {
                     registerNewDeviceWithPCFPush(gcmDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
 
+                // TODO - test is permission is available
+                // TODO - set geofence status is geofences are enabled but there is no permission for them
                 } else if (isGeofenceUpdateRequired(parameters)) {
                     updateGeofences(listener);
 
+                // TODO - test that permission is available
                 } else if (isClearGeofencesRequired(parameters)) {
                     clearGeofences(listener);
 
@@ -537,9 +552,11 @@ public class RegistrationEngine {
                 pushPreferencesProvider.setTags(parameters.getTags());
                 Logger.v("Saving tags: " + parameters.getTags());
 
+                // TODO - write test to verify that geofences are only updated if there is permission
                 if (isGeofenceUpdateRequired(parameters)) {
                     updateGeofences(listener);
 
+                // TODO - write test to verify that geofences are only cleared if there is permission
                 } else if (isClearGeofencesRequired(parameters)) {
                     clearGeofences(listener);
 
@@ -606,9 +623,11 @@ public class RegistrationEngine {
                 pushPreferencesProvider.setTags(parameters.getTags());
                 Logger.v("Saving tags: " + parameters.getTags());
 
-                if (parameters.areGeofencesEnabled()) {
+                // TODO - write test to verify that permission is available for geofences after a new registration
+                if (isPermissionForGeofences() && parameters.areGeofencesEnabled()) {
                     updateGeofences(listener);
 
+                // TODO - write test to verify that geofences can only be cleared if permission is available
                 } else if (isClearGeofencesRequired(parameters)) {
                     clearGeofences(listener);
 

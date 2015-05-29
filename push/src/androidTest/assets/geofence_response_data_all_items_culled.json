@@ -173,6 +173,23 @@
             },
             "expiry_time": 1142744274,
             "trigger_type": "exit"
+        },
+        {
+          "id": 13,
+          "data": {
+            "i have no android":""
+          },
+          "expiry_time": 1142744274,
+          "trigger_type": "enter",
+          "locations": [
+              {
+                "id": 90,
+                "name": "ernsts_wants_crepes",
+                "lat": 3.5,
+                "long": 61.5,
+                "rad": 1000
+              }
+          ]
         }
     ]
 }

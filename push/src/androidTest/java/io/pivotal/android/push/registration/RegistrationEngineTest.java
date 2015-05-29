@@ -3,7 +3,9 @@
  */
 package io.pivotal.android.push.registration;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.test.AndroidTestCase;
 
 import org.mockito.invocation.InvocationOnMock;
@@ -31,10 +33,12 @@ import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.version.FakeVersionProvider;
 import io.pivotal.android.push.version.VersionProvider;
 
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class RegistrationEngineTest extends AndroidTestCase {
 
@@ -67,6 +71,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     private GeofenceUpdater geofenceUpdater;
     private GeofenceEngine geofenceEngine;
     private Semaphore semaphore = new Semaphore(0);
+    private Context context;
 
     @Override
     protected void setUp() throws Exception {
@@ -82,8 +87,11 @@ public class RegistrationEngineTest extends AndroidTestCase {
         pcfPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(new FakePCFPushRegistrationApiRequest(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1));
         geofenceUpdater = mock(GeofenceUpdater.class);
         geofenceEngine = mock(GeofenceEngine.class);
+        context = mock(Context.class);
 
-        doAnswer(new Answer<Void>(){
+        when(context.checkCallingOrSelfPermission(anyString())).thenReturn(PackageManager.PERMISSION_GRANTED);
+
+        doAnswer(new Answer<Void>() {
 
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
@@ -106,7 +114,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullPackageName() {
         try {
-            new RegistrationEngine(getContext(), null, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
+            new RegistrationEngine(context, null, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -115,7 +123,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullGcmProvider() {
         try {
-            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, null, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
+            new RegistrationEngine(context, TEST_PACKAGE_NAME, null, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -124,7 +132,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullPushPreferencesProvider() {
         try {
-            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, null, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
+            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, null, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -133,7 +141,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullGcmRegistrationApiRequestProvider() {
         try {
-            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, null, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
+            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, null, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -142,7 +150,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullGcmUnregistrationApiRequestProvider() {
         try {
-            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, null, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
+            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, null, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -151,7 +159,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullPCFPushRegisterDeviceApiRequestProvider() {
         try {
-            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, null, versionProvider, geofenceUpdater, geofenceEngine);
+            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, null, versionProvider, geofenceUpdater, geofenceEngine);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -160,7 +168,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullVersionProvider() {
         try {
-            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, null, geofenceUpdater, geofenceEngine);
+            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, null, geofenceUpdater, geofenceEngine);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -169,7 +177,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullGeofenceUpdater() {
         try {
-            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, null, geofenceEngine);
+            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, null, geofenceEngine);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -178,7 +186,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullGeofenceEngine() {
         try {
-            new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, null);
+            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, null);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -187,7 +195,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullParameters() {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
+            final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
             engine.registerDevice(null, getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -197,7 +205,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullSenderId() {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
+            final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
             engine.registerDevice(new PushParameters(null, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, null, true), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -207,7 +215,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullPlatformUuid() {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
+            final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
             engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, null, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, null, true), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -217,7 +225,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullPlatformSecret() {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
+            final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
             engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, null, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, null, true), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -226,20 +234,20 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testNullDeviceAlias() throws InterruptedException {
-        final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
+        final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
         engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, null, null, true), getListenerForRegistration(true));
         semaphore.acquire();
     }
 
     public void testEmptyDeviceAlias() throws InterruptedException {
-        final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
+        final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
         engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, "", null, true), getListenerForRegistration(true));
         semaphore.acquire();
     }
 
     public void testEmptyServiceUrl() throws InterruptedException {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
+            final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
             engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, null, TEST_DEVICE_ALIAS_1, null, true), getListenerForRegistration(true));
             semaphore.acquire();
             fail("should not have succeeded");
@@ -250,14 +258,14 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testGooglePlayServicesNotAvailable() throws InterruptedException {
         gcmProvider.setIsGooglePlayServicesInstalled(false);
-        final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
+        final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
         final PushParameters parameters = new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, null, true);
         engine.registerDevice(parameters, getListenerForRegistration(false));
         semaphore.acquire();
     }
 
     public void testSuccessfulInitialRegistration() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(null, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(null, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -283,7 +291,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testSuccessfulInitialRegistrationWithGeofencesDisabled() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(null, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(null, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -309,7 +317,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testSuccessfulInitialRegistrationWithTags() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(null, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(null, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -335,7 +343,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testFailedInitialGcmRegistration() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(null, null, null)
                 .setupPCFPushDeviceRegistrationId(null, null, null)
                 .setupGcmSenderId(null, TEST_GCM_SENDER_ID_1, null, false)
@@ -361,7 +369,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testInitialGcmRegistrationPassedButInitialPCFPushRegistrationFailed() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(null, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(null, null, null)
                 .setupGcmSenderId(null, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -387,7 +395,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testInitialGcmRegistrationPassedButServerReturnedNullPCFPushRegistrationId() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(null, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationIdWithNullFromServer(null, null)
                 .setupGcmSenderId(null, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -413,7 +421,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testWasAlreadyRegisteredWithGcmAndPCFPush() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
@@ -439,7 +447,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testWasAlreadyRegisteredAndGeofencesAreNowEnabled() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
@@ -465,7 +473,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testWasAlreadyRegisteredAndGeofencesAreNowDisabled() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
@@ -491,7 +499,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testWasAlreadyRegisteredIncludingTagsWithGcmAndPCFPush() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
@@ -517,7 +525,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testWasAlreadyRegisteredWithGcmAndPCFPushAndThePlatformSecretIsChanged() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
@@ -543,7 +551,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testWasAlreadyRegisteredWithGcmAndPCFPushAndTheDeviceAliasIsChanged() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
@@ -569,7 +577,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testWasAlreadyRegisteredWithGcmAndPCFPushAndThePlatformUuidIsChanged() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
@@ -595,7 +603,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testWasAlreadyRegisteredWithGcmAndPCFPushAndTheTagsAreChanged() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
@@ -621,7 +629,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testWasAlreadyRegisteredWithGcmAndPCFPushAndTheServiceUrlIsChanged() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
@@ -647,7 +655,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testWasAlreadyRegisteredWithGcmButNotPCFPushAndPCFPushRegistrationSucceeds() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, null, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
@@ -673,7 +681,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testWasAlreadyRegisteredWithGcmButNotPCFPushAndPCFPushRegistrationSucceedsWithTags() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, null, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
@@ -699,7 +707,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testWasAlreadyRegisteredWithGcmButNotPCFPushAndPCFPushRegistrationFails() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, null, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(null, null, null)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
@@ -725,7 +733,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testWasAlreadyRegisteredWithGcmButNotPCFPushAndPCFPushRegistrationFailsWithTags() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, null, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(null, null, null)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
@@ -751,7 +759,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testWasAlreadyRegisteredWithGcmButNotPCFPushAndServerReturnsNullPCFPushRegistrationId() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, null, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationIdWithNullFromServer(null, null)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
@@ -777,7 +785,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testAppUpdatedAndSameGcmRegistrationIdWasReturned() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -803,7 +811,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testAppUpdatedAndSameGcmRegistrationIdWasReturnedAndGeofencesAreNowEnabled() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -829,7 +837,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testAppUpdatedAndSameGcmRegistrationIdWasReturnedAndGeofencesAreNowDisabled() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -855,7 +863,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testAppUpdatedToLesserVersionAndSameGcmRegistrationIdWasReturned() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -881,7 +889,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testAppUpdatedAndGcmReregistrationFailed() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, null, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
@@ -907,7 +915,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testAppUpdatedAndGcmReregistrationReturnedNewIdButPCFPushReregistrationFailed() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, null, null)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -933,7 +941,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testAppUpdatedAndGcmReregistrationReturnedNewIdButServerReturnsNullPCFPushRegistrationId() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setupPCFPushDeviceRegistrationIdWithNullFromServer(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, null)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -959,7 +967,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testUpdateRegistrationWithTagsFailed() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, null, null)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -985,7 +993,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testAppUpdatedAndDifferentGcmRegistrationIdWasReturned() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -1012,7 +1020,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
 
     public void testAppUpdatedAndDifferentGcmRegistrationIdWasReturnedAndGeofencesAreNowDisabled() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -1038,7 +1046,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testAppUpdatedAndDifferentGcmRegistrationIdWasReturnedAndGeofencesAreNowEnabled() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -1064,7 +1072,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testAppUpdatedAndDifferentGcmRegistrationIdWasReturnedAndTheresANewPCFPushServerUrlToo() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -1090,7 +1098,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testAppUpdatedAndDifferentGcmRegistrationIdWasReturnedAndTheresANewPCFPushServerUrlTooAndPCFPushRegistrationFails() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, null, null)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -1116,7 +1124,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testAppUpdatedAndDifferentGcmRegistrationIdWasReturnedAndTheresANewPCFPushServerUrlTooAndTheServerReturnsANullPCFPushRegistrationId() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setupPCFPushDeviceRegistrationIdWithNullFromServer(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, null)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -1142,7 +1150,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testAppUpdatedAndDifferentGcmRegistrationIdWasReturnedButPlatformUuidFromPreviousRegistrationWasNotSaved() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -1168,7 +1176,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testAppUpdatedAndDifferentGcmRegistrationIdWasReturnedButPCFPushRegistrationIdWasNotSaved() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setupPCFPushDeviceRegistrationId(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -1194,7 +1202,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testAppUpdatedAndDifferentGcmRegistrationIdWasReturnedButPCFPushRegistrationIdWasNotSavedAndGeofencesAreDisabled() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setupPCFPushDeviceRegistrationId(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -1220,7 +1228,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testAppUpdatedAndDifferentGcmRegistrationIdWasReturnedButPCFPushRegistrationIdWasNotSavedAndGeofencesAreNowEnabled() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setupPCFPushDeviceRegistrationId(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -1246,7 +1254,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testAppUpdatedAndDifferentGcmRegistrationIdWasReturnedButPCFPushRegistrationIdWasNotSavedAndGeofencesAreNowDisabled() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setupPCFPushDeviceRegistrationId(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -1272,7 +1280,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testAppUpdatedAndDifferentGcmRegistrationIdWasReturnedAndUnregisterFailed() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -1298,7 +1306,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testPlatformSecretUpdatedAndUnregisterFailed() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
@@ -1324,7 +1332,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testDeviceAliasUpdatedAndUnregisterFailed() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
@@ -1350,7 +1358,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testTagsUpdatedAndUnregisterFailed() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
@@ -1376,7 +1384,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testPlatformUuidUpdatedAndUnregisterFailed() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
@@ -1402,7 +1410,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testAppUpdatedToLesserVersionAndDifferentGcmRegistrationIdWasReturned() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -1428,7 +1436,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testSenderIdUpdatedAndGcmUnregistrationFailsAndThenGcmReturnsANewRegistrationId() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_2, TEST_GCM_SENDER_ID_2, true)
@@ -1454,7 +1462,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testSenderIdUpdatedAndGcmUnregistrationFailsAndThenGcmRegistrationFailsToo() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, null, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_2, TEST_GCM_SENDER_ID_1, false)
@@ -1480,7 +1488,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testSenderIdUpdatedAndGcmReturnedNewGcmDeviceRegistrationId() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_2, TEST_GCM_SENDER_ID_2, true)
@@ -1506,7 +1514,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testSenderIdUpdatedAndGcmReturnedOldGcmDeviceRegistrationId() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_2, TEST_GCM_SENDER_ID_2, true)
@@ -1532,7 +1540,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testSenderIdUpdatedAndGcmReregistrationFails() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, null, null)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_2, null, true)
@@ -1558,7 +1566,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testSenderIdUpdatedAndGcmReturnedNewGcmDeviceRegistrationIdButPCFPushReregistrationFails() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_2, TEST_GCM_SENDER_ID_2, true)
@@ -1584,7 +1592,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testSuccessfulInitialRegistrationButFailsToGetGeofences() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(null, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(null, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
@@ -1610,7 +1618,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testSuccessfullyRegisteredButNeedsToUpdateGeofences() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
@@ -1636,7 +1644,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testSuccessfullyRegisteredWithNoGeofencesAndGeofencesAreDisabled() {
-        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(getContext())
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters(context)
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
