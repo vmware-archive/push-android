@@ -239,11 +239,9 @@ public class RegistrationEngine {
             registerNewDeviceWithPCFPush(previousGcmDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
 
         // TODO - test that permission is available
-        // TODO - set geofence status is geofences are enabled but there is no permission for them
         } else if (isGeofenceUpdateRequired(parameters)) {
             updateGeofences(listener);
 
-        // TODO - test that permission is available
         } else if (isClearGeofencesRequired(parameters)) {
             clearGeofences(listener);
 
@@ -405,7 +403,7 @@ public class RegistrationEngine {
     }
 
     private boolean isClearGeofencesRequired(PushParameters parameters) {
-        if (!parameters.areGeofencesEnabled() && pushPreferencesProvider.getLastGeofenceUpdate() != GeofenceEngine.NEVER_UPDATED_GEOFENCES) {
+        if ((!isPermissionForGeofences() && parameters.areGeofencesEnabled()) || (!parameters.areGeofencesEnabled() && pushPreferencesProvider.getLastGeofenceUpdate() != GeofenceEngine.NEVER_UPDATED_GEOFENCES)) {
             Logger.v("Geofences are now disabled and the current configuration needs to be cleared.");
             return true;
         }
@@ -479,12 +477,10 @@ public class RegistrationEngine {
                 } else if (isNewGcmDeviceRegistrationId || isServiceUrlUpdated) {
                     registerNewDeviceWithPCFPush(gcmDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
 
-                // TODO - test is permission is available
-                // TODO - set geofence status is geofences are enabled but there is no permission for them
+                    // TODO - set geofence status is geofences are enabled but there is no permission for them
                 } else if (isGeofenceUpdateRequired(parameters)) {
                     updateGeofences(listener);
 
-                // TODO - test that permission is available
                 } else if (isClearGeofencesRequired(parameters)) {
                     clearGeofences(listener);
 
@@ -495,6 +491,11 @@ public class RegistrationEngine {
 
             @Override
             public void onGcmRegistrationFailed(String reason) {
+
+                if (isClearGeofencesRequired(parameters)) {
+                    clearGeofences(listener);
+                }
+
                 if (listener != null) {
                     listener.onRegistrationFailed(reason);
                 }
@@ -568,7 +569,10 @@ public class RegistrationEngine {
             @Override
             public void onPCFPushRegistrationFailed(String reason) {
 
-                if (haveTagsBeenUpdated(parameters) && areGeofencesAvailable(parameters)) {
+                if (isClearGeofencesRequired(parameters)) {
+                    clearGeofences(listener);
+
+                } else if (haveTagsBeenUpdated(parameters) && areGeofencesAvailable(parameters)) {
                     Logger.i("Tags have been updated - reregistering current geofences.");
                     geofenceEngine.reregisterCurrentLocations();
                 }
@@ -677,24 +681,51 @@ public class RegistrationEngine {
     }
 
     private void clearGeofences(final RegistrationListener listener) {
-        geofenceUpdater.clearGeofences(new GeofenceUpdater.GeofenceUpdaterListener() {
 
-            @Override
-            public void onSuccess() {
-                pushPreferencesProvider.setAreGeofencesEnabled(false);
-                pushPreferencesProvider.setLastGeofenceUpdate(GeofenceEngine.NEVER_UPDATED_GEOFENCES);
-                if (listener != null) {
-                    listener.onRegistrationComplete();
-                }
-            }
+        if (isPermissionForGeofences()) {
 
-            @Override
-            public void onFailure(String reason) {
-                if (listener != null) {
-                    listener.onRegistrationFailed(reason);
+            geofenceUpdater.clearGeofencesFromMonitorAndStore(new GeofenceUpdater.GeofenceUpdaterListener() {
+
+                @Override
+                public void onSuccess() {
+                    pushPreferencesProvider.setAreGeofencesEnabled(false);
+                    pushPreferencesProvider.setLastGeofenceUpdate(GeofenceEngine.NEVER_UPDATED_GEOFENCES);
+                    if (listener != null) {
+                        listener.onRegistrationComplete();
+                    }
                 }
-            }
-        });
+
+                @Override
+                public void onFailure(String reason) {
+                    if (listener != null) {
+                        listener.onRegistrationFailed(reason);
+                    }
+                }
+            });
+
+        } else {
+
+            geofenceUpdater.clearGeofencesFromStoreOnly(new GeofenceUpdater.GeofenceUpdaterListener() {
+
+                // TODO - update GeofenceStatus?
+
+                @Override
+                public void onSuccess() {
+                    pushPreferencesProvider.setLastGeofenceUpdate(GeofenceEngine.NEVER_UPDATED_GEOFENCES);
+                    pushPreferencesProvider.setAreGeofencesEnabled(false);
+                    if (listener != null) {
+                        listener.onRegistrationComplete();
+                    }
+                }
+
+                @Override
+                public void onFailure(String reason) {
+                    if (listener != null) {
+                        listener.onRegistrationFailed(reason);
+                    }
+                }
+            });
+        }
     }
 
     private void clearPCFPushRegistrationPreferences() {

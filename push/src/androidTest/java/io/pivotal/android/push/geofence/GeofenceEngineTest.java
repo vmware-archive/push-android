@@ -768,6 +768,12 @@ public class GeofenceEngineTest extends AndroidTestCase {
         verify(registrar, never()).reset();
     }
 
+    public void testResetStore() {
+        engine.resetStore();
+        verify(store, times(1)).reset();
+        verify(registrar, never()).reset();
+    }
+
     private void assertRegisterGeofences(PCFPushGeofenceLocationMap geofences) {
         final ArgumentCaptor<PCFPushGeofenceLocationMap> captor = ArgumentCaptor.forClass(PCFPushGeofenceLocationMap.class);
         verify(registrar).registerGeofences(captor.capture(), any(PCFPushGeofenceDataList.class));

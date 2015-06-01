@@ -79,9 +79,16 @@ public class GeofenceUpdater {
         }
     }
 
-    public void clearGeofences(GeofenceUpdaterListener listener) {
+    public void clearGeofencesFromMonitorAndStore(GeofenceUpdaterListener listener) {
         geofenceEngine.processResponseData(0L, null);
         pushPreferencesProvider.setLastGeofenceUpdate(GeofenceEngine.NEVER_UPDATED_GEOFENCES);
+        if (listener != null) {
+            listener.onSuccess();
+        }
+    }
+
+    public void clearGeofencesFromStoreOnly(GeofenceUpdaterListener listener) {
+        geofenceEngine.resetStore();
         if (listener != null) {
             listener.onSuccess();
         }

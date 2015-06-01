@@ -5,6 +5,7 @@ package io.pivotal.android.push.registration;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.test.AndroidTestCase;
 
 import org.mockito.invocation.InvocationOnMock;
@@ -88,9 +89,12 @@ public class RegistrationEngineTestParameters {
     private boolean shouldRegistrationHaveSucceeded = true;
     private boolean shouldGeofenceUpdateBeSuccessful = true;
     private boolean shouldAreGeofencesEnabledHaveBeenSaved = false;
-    private boolean shouldClearGeofencesHaveBeenCalled = false;
+    private boolean shouldClearGeofencesFromMonitorAndStoreHaveBeenCalled = false;
+    private boolean shouldClearGeofencesFromStoreOnlyHaveBeenCalled = false;
+    private boolean shouldHavePermissionForGeofences = true;
     private boolean wasGeofenceUpdateTimestampCalled = false;
-    private boolean wasClearGeofencesCalled = false;
+    private boolean wasClearGeofencesFromMonitorAndStoreCalled = false;
+    private boolean wasClearGeofencesFromStoreOnlyCalled = false;
     private int numberOfGeofenceReregistrations = 0;
 
     private int appVersionInPrefs = PushPreferencesProvider.NO_SAVED_VERSION;
@@ -102,12 +106,18 @@ public class RegistrationEngineTestParameters {
     private long geofenceUpdateTimestampFromServer = 0L;
     private long finalGeofenceUpdateTimestampInPrefs = 0L;
 
-    public RegistrationEngineTestParameters(Context context) {
-        this.context = context;
+    public RegistrationEngineTestParameters() {
+        this.context = mock(Context.class);
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
     }
 
     public void run() {
+
+        if (shouldHavePermissionForGeofences) {
+            when(context.checkCallingOrSelfPermission(anyString())).thenReturn(PackageManager.PERMISSION_GRANTED);
+        } else {
+            when(context.checkCallingOrSelfPermission(anyString())).thenReturn(PackageManager.PERMISSION_DENIED);
+        }
 
         final FakeGcmProvider gcmProvider = new FakeGcmProvider(gcmDeviceRegistrationIdFromServer, !shouldGcmDeviceRegistrationBeSuccessful, !shouldGcmDeviceUnregistrationBeSuccessful);
         final FakePushPreferencesProvider pushPreferencesProvider = new FakePushPreferencesProvider(gcmDeviceRegistrationIdInPrefs, pcfPushDeviceRegistrationIdInPrefs, appVersionInPrefs, gcmSenderIdInPrefs, platformUuidInPrefs, platformSecretInPrefs, deviceAliasInPrefs, packageNameInPrefs, serviceUrlInPrefs, tagsInPrefs, geofenceUpdateTimestampInPrefs, areGeofencesEnabledInPrefs);
@@ -144,7 +154,7 @@ public class RegistrationEngineTestParameters {
 
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
-                wasClearGeofencesCalled = true;
+                wasClearGeofencesFromMonitorAndStoreCalled = true;
                 final GeofenceUpdater.GeofenceUpdaterListener listener = (GeofenceUpdater.GeofenceUpdaterListener) invocation.getArguments()[0];
                 if (shouldGeofenceUpdateBeSuccessful) {
                     listener.onSuccess();
@@ -154,7 +164,23 @@ public class RegistrationEngineTestParameters {
                 return null;
             }
 
-        }).when(geofenceUpdater).clearGeofences(any(GeofenceUpdater.GeofenceUpdaterListener.class));
+        }).when(geofenceUpdater).clearGeofencesFromMonitorAndStore(any(GeofenceUpdater.GeofenceUpdaterListener.class));
+
+        doAnswer(new Answer<Void>() {
+
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                wasClearGeofencesFromStoreOnlyCalled = true;
+                final GeofenceUpdater.GeofenceUpdaterListener listener = (GeofenceUpdater.GeofenceUpdaterListener) invocation.getArguments()[0];
+                if (shouldGeofenceUpdateBeSuccessful) {
+                    listener.onSuccess();
+                } else {
+                    listener.onFailure("Fake clear failed fakely"); // TODO - note that clear geofences doesn't fail
+                }
+                return null;
+            }
+
+        }).when(geofenceUpdater).clearGeofencesFromStoreOnly(any(GeofenceUpdater.GeofenceUpdaterListener.class));
 
         engine.registerDevice(parameters, new RegistrationListener() {
 
@@ -195,7 +221,8 @@ public class RegistrationEngineTestParameters {
         AndroidTestCase.assertEquals(shouldTagsHaveBeenSaved, pushPreferencesProvider.wereTagsSaved());
         AndroidTestCase.assertEquals(shouldAreGeofencesEnabledHaveBeenSaved, pushPreferencesProvider.wasAreGeofencesEnabledSaved());
         AndroidTestCase.assertEquals(shouldGeofenceUpdateTimestampedHaveBeenCalled, wasGeofenceUpdateTimestampCalled);
-        AndroidTestCase.assertEquals(shouldClearGeofencesHaveBeenCalled, wasClearGeofencesCalled);
+        AndroidTestCase.assertEquals(shouldClearGeofencesFromMonitorAndStoreHaveBeenCalled, wasClearGeofencesFromMonitorAndStoreCalled);
+        AndroidTestCase.assertEquals(shouldClearGeofencesFromStoreOnlyHaveBeenCalled, wasClearGeofencesFromStoreOnlyCalled);
         AndroidTestCase.assertEquals(finalGcmDeviceRegistrationIdInPrefs, pushPreferencesProvider.getGcmDeviceRegistrationId());
         AndroidTestCase.assertEquals(finalPCFPushDeviceRegistrationIdInPrefs, pushPreferencesProvider.getPCFPushDeviceRegistrationId());
         AndroidTestCase.assertEquals(finalGcmSenderIdInPrefs, pushPreferencesProvider.getGcmSenderId());
@@ -292,14 +319,22 @@ public class RegistrationEngineTestParameters {
         return this;
     }
 
-    public RegistrationEngineTestParameters setupGeofenceUpdateTimestamp(long inPrefs, long toServer, long fromServer, long finalValue, boolean shouldBeSuccessful, boolean wasGeofenceUpdateCalled, boolean wasClearGeofencesCalled) {
+    public RegistrationEngineTestParameters setupGeofenceUpdateTimestamp(long inPrefs,
+                                                                         long toServer,
+                                                                         long fromServer,
+                                                                         long finalValue,
+                                                                         boolean shouldBeSuccessful,
+                                                                         boolean wasGeofenceUpdateCalled,
+                                                                         boolean wasClearGeofencesFromMonitorAndStoreCalled,
+                                                                         boolean wasClearGeofencesFromStoreOnlyCalled) {
         geofenceUpdateTimestampInPrefs = inPrefs;
         geofenceUpdateTimestampToServer = toServer;
         geofenceUpdateTimestampFromServer = fromServer;
         shouldGeofenceUpdateBeSuccessful = shouldBeSuccessful;
         finalGeofenceUpdateTimestampInPrefs = finalValue;
         shouldGeofenceUpdateTimestampedHaveBeenCalled = wasGeofenceUpdateCalled;
-        shouldClearGeofencesHaveBeenCalled = wasClearGeofencesCalled;
+        shouldClearGeofencesFromMonitorAndStoreHaveBeenCalled = wasClearGeofencesFromMonitorAndStoreCalled;
+        shouldClearGeofencesFromStoreOnlyHaveBeenCalled = wasClearGeofencesFromStoreOnlyCalled;
         return this;
     }
 
@@ -361,6 +396,11 @@ public class RegistrationEngineTestParameters {
 
     public RegistrationEngineTestParameters setShouldGeofencesHaveBeenReregistered(boolean b) {
         numberOfGeofenceReregistrations = b ? 1 : 0;
+        return this;
+    }
+
+    public RegistrationEngineTestParameters setShouldHavePermissionForGeofences(boolean b) {
+        shouldHavePermissionForGeofences = b;
         return this;
     }
 }

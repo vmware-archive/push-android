@@ -166,7 +166,7 @@ public class UnregistrationEngine {
             PCFPushUnregisterDeviceApiRequest.startUnregisterDevice(pcfPushDeviceRegistrationId, parameters, getPCFPushUnregisterDeviceListener(listener));
         } else {
             if (shouldClearGeofences()) {
-                geofenceUpdater.clearGeofences(getClearGeofencesListener(listener));
+                geofenceUpdater.clearGeofencesFromMonitorAndStore(getClearGeofencesListener(listener));
             } else {
                 Logger.i("Not currently registered with PCF Push.  Unregistration is not required.");
                 if (listener != null) {
@@ -185,7 +185,7 @@ public class UnregistrationEngine {
                 clearPCFPushRegistrationPreferences();
 
                 if (shouldClearGeofences()) {
-                    geofenceUpdater.clearGeofences(getClearGeofencesListener(listener));
+                    geofenceUpdater.clearGeofencesFromMonitorAndStore(getClearGeofencesListener(listener));
                 } else if (listener != null) {
                     listener.onUnregistrationComplete();
                 }
@@ -196,7 +196,7 @@ public class UnregistrationEngine {
                 if (shouldClearGeofences()) {
                     isUnregistrationSuccessful = false;
                     unregistrationFailureReason = reason;
-                    geofenceUpdater.clearGeofences(getClearGeofencesListener(listener));
+                    geofenceUpdater.clearGeofencesFromMonitorAndStore(getClearGeofencesListener(listener));
                 } else if (listener != null) {
                     listener.onUnregistrationFailed(reason);
                 }

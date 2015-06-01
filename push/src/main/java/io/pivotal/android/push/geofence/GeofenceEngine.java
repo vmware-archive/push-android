@@ -100,6 +100,11 @@ public class GeofenceEngine {
         store.saveRegisteredGeofences(geofencesToStore);
     }
 
+    public void resetStore() {
+        Logger.i("GeofenceEngine: going to reset the geofence store.");
+        store.reset();
+    }
+
     private boolean hasDataToPersist(PCFPushGeofenceResponseData responseData, PCFPushGeofenceDataList storedGeofences) {
         return (storedGeofences != null && storedGeofences.size() > 0) ||
                (responseData.getGeofences() != null && responseData.getGeofences().size() > 0);

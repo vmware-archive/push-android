@@ -85,7 +85,7 @@ public class UnregistrationEngineTestParameters {
                 return null;
             }
 
-        }).when(geofenceUpdater).clearGeofences(any(GeofenceUpdater.GeofenceUpdaterListener.class));
+        }).when(geofenceUpdater).clearGeofencesFromMonitorAndStore(any(GeofenceUpdater.GeofenceUpdaterListener.class));
 
         if (startingPCFPushDeviceRegistrationIdInPrefs == null) {
             pushPreferencesProvider = new FakePushPreferencesProvider(null, startingPCFPushDeviceRegistrationIdInPrefs, -1, null, null, null, null, null, null, null, lastGeofenceUpdateTimeInPrefs, areGeofencesEnabledInPrefs);
@@ -168,11 +168,11 @@ public class UnregistrationEngineTestParameters {
                 AndroidTestCase.assertEquals(lastGeofenceUpdateTimeInPrefs, pushPreferencesProvider.getLastGeofenceUpdate());
                 AndroidTestCase.assertTrue(pushPreferencesProvider.areGeofencesEnabled());
             }
-            verify(geofenceUpdater, times(1)).clearGeofences(any(GeofenceUpdater.GeofenceUpdaterListener.class));
+            verify(geofenceUpdater, times(1)).clearGeofencesFromMonitorAndStore(any(GeofenceUpdater.GeofenceUpdaterListener.class));
         } else { // clear geofences should not have been called (i.e.: geofences are not enabled)
             AndroidTestCase.assertEquals(GeofenceEngine.NEVER_UPDATED_GEOFENCES, pushPreferencesProvider.getLastGeofenceUpdate());
             AndroidTestCase.assertFalse(pushPreferencesProvider.areGeofencesEnabled());
-            verify(geofenceUpdater, never()).clearGeofences(any(GeofenceUpdater.GeofenceUpdaterListener.class));
+            verify(geofenceUpdater, never()).clearGeofencesFromMonitorAndStore(any(GeofenceUpdater.GeofenceUpdaterListener.class));
         }
 
         AndroidTestCase.assertNull(pushPreferencesProvider.getPackageName());
