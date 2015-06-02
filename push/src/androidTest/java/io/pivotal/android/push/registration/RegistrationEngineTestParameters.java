@@ -22,14 +22,22 @@ import io.pivotal.android.push.gcm.FakeGcmUnregistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmRegistrationApiRequestProvider;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
 import io.pivotal.android.push.geofence.GeofenceEngine;
+import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.util.DelayedLoop;
 import io.pivotal.android.push.version.FakeVersionProvider;
+import io.pivotal.android.push.version.GeofenceStatus;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 public class RegistrationEngineTestParameters {
 
@@ -95,6 +103,7 @@ public class RegistrationEngineTestParameters {
     private boolean wasGeofenceUpdateTimestampCalled = false;
     private boolean wasClearGeofencesFromMonitorAndStoreCalled = false;
     private boolean wasClearGeofencesFromStoreOnlyCalled = false;
+    private boolean wasGeofenceStatusUpdated = false;
     private int numberOfGeofenceReregistrations = 0;
 
     private int appVersionInPrefs = PushPreferencesProvider.NO_SAVED_VERSION;
@@ -130,7 +139,8 @@ public class RegistrationEngineTestParameters {
         final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(fakePCFPushRegistrationApiRequest);
         final GeofenceUpdater geofenceUpdater = mock(GeofenceUpdater.class);
         final GeofenceEngine geofenceEngine = mock(GeofenceEngine.class);
-        final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, PCFPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine);
+        final GeofenceStatusUtil geofenceStatusUtil = mock(GeofenceStatusUtil.class);
+        final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, PCFPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
         final PushParameters parameters = new PushParameters(gcmSenderIdFromUser, platformUuidFromUser, platformSecretFromUser, serviceUrlFromUser, deviceAliasFromUser, tagsFromUser, areGeofencesEnabledFromUser);
 
         doAnswer(new Answer<Void>() {
@@ -182,6 +192,14 @@ public class RegistrationEngineTestParameters {
 
         }).when(geofenceUpdater).clearGeofencesFromStoreOnly(any(GeofenceUpdater.GeofenceUpdaterListener.class));
 
+        doAnswer(new Answer<Void>() {
+            @Override
+            public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
+                wasGeofenceStatusUpdated = true;
+                return null;
+            }
+        }).when(geofenceStatusUtil).saveGeofenceStatusAndSendBroadcast(any(GeofenceStatus.class));
+
         engine.registerDevice(parameters, new RegistrationListener() {
 
             @Override
@@ -223,6 +241,7 @@ public class RegistrationEngineTestParameters {
         AndroidTestCase.assertEquals(shouldGeofenceUpdateTimestampedHaveBeenCalled, wasGeofenceUpdateTimestampCalled);
         AndroidTestCase.assertEquals(shouldClearGeofencesFromMonitorAndStoreHaveBeenCalled, wasClearGeofencesFromMonitorAndStoreCalled);
         AndroidTestCase.assertEquals(shouldClearGeofencesFromStoreOnlyHaveBeenCalled, wasClearGeofencesFromStoreOnlyCalled);
+        AndroidTestCase.assertEquals(shouldClearGeofencesFromStoreOnlyHaveBeenCalled, wasGeofenceStatusUpdated);
         AndroidTestCase.assertEquals(finalGcmDeviceRegistrationIdInPrefs, pushPreferencesProvider.getGcmDeviceRegistrationId());
         AndroidTestCase.assertEquals(finalPCFPushDeviceRegistrationIdInPrefs, pushPreferencesProvider.getPCFPushDeviceRegistrationId());
         AndroidTestCase.assertEquals(finalGcmSenderIdInPrefs, pushPreferencesProvider.getGcmSenderId());

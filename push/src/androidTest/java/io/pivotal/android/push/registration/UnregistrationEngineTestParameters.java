@@ -4,6 +4,7 @@
 package io.pivotal.android.push.registration;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.test.AndroidTestCase;
 import android.test.MoreAsserts;
 
@@ -21,10 +22,13 @@ import io.pivotal.android.push.gcm.FakeGcmProvider;
 import io.pivotal.android.push.gcm.FakeGcmUnregistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
 import io.pivotal.android.push.geofence.GeofenceEngine;
+import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.util.DelayedLoop;
+import io.pivotal.android.push.version.GeofenceStatus;
 
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -32,6 +36,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 public class UnregistrationEngineTestParameters {
 
@@ -57,11 +62,13 @@ public class UnregistrationEngineTestParameters {
     private boolean areGeofencesEnabledInPrefs;
     private PushParameters parametersFromUser;
     private long lastGeofenceUpdateTimeInPrefs;
-    private boolean shouldClearGeofencesBeCalled;
+    private boolean shouldClearGeofencesFromMonitorAndStoreBeCalled;
+    private boolean shouldClearGeofencesFromStoreOnlyBeCalled;
     private boolean shouldClearGeofencesBeSuccessful;
+    private boolean shouldHavePermissionForGeofences = true;
 
-    public UnregistrationEngineTestParameters(Context context) {
-        this.context = context;
+    public UnregistrationEngineTestParameters() {
+        this.context = mock(Context.class);
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
         TAGS_IN_PREFS.addAll(Arrays.asList("BANANAS", "PAPAYAS"));
     }
@@ -71,6 +78,13 @@ public class UnregistrationEngineTestParameters {
         final FakeGcmProvider gcmProvider = new FakeGcmProvider(null, true, !shouldGcmDeviceUnregistrationBeSuccessful);
         final FakePushPreferencesProvider pushPreferencesProvider;
         final GeofenceUpdater geofenceUpdater = mock(GeofenceUpdater.class);
+        final GeofenceStatusUtil geofenceStatusUtil = mock(GeofenceStatusUtil.class);
+
+        if (shouldHavePermissionForGeofences) {
+            when(context.checkCallingOrSelfPermission(anyString())).thenReturn(PackageManager.PERMISSION_GRANTED);
+        } else {
+            when(context.checkCallingOrSelfPermission(anyString())).thenReturn(PackageManager.PERMISSION_DENIED);
+        }
 
         doAnswer(new Answer<Void>() {
 
@@ -86,6 +100,21 @@ public class UnregistrationEngineTestParameters {
             }
 
         }).when(geofenceUpdater).clearGeofencesFromMonitorAndStore(any(GeofenceUpdater.GeofenceUpdaterListener.class));
+
+        doAnswer(new Answer<Void>() {
+
+            @Override
+            public Void answer(InvocationOnMock invocation) throws Throwable {
+                final GeofenceUpdater.GeofenceUpdaterListener listener = (GeofenceUpdater.GeofenceUpdaterListener) invocation.getArguments()[0];
+                if (shouldClearGeofencesBeSuccessful) {
+                    listener.onSuccess();
+                } else {
+                    listener.onFailure("Fake clear failed fakely"); // TODO - note that clear geofences doesn't fail
+                }
+                return null;
+            }
+
+        }).when(geofenceUpdater).clearGeofencesFromStoreOnly(any(GeofenceUpdater.GeofenceUpdaterListener.class));
 
         if (startingPCFPushDeviceRegistrationIdInPrefs == null) {
             pushPreferencesProvider = new FakePushPreferencesProvider(null, startingPCFPushDeviceRegistrationIdInPrefs, -1, null, null, null, null, null, null, null, lastGeofenceUpdateTimeInPrefs, areGeofencesEnabledInPrefs);
@@ -108,7 +137,7 @@ public class UnregistrationEngineTestParameters {
         final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(gcmUnregistrationApiRequest);
         final FakePCFPushUnregisterDeviceApiRequest fakePCFPushUnregisterDeviceApiRequest = new FakePCFPushUnregisterDeviceApiRequest(shouldPCFPushDeviceUnregistrationBeSuccessful);
         final PCFPushUnregisterDeviceApiRequestProvider PCFPushUnregisterDeviceApiRequestProvider = new PCFPushUnregisterDeviceApiRequestProvider(fakePCFPushUnregisterDeviceApiRequest);
-        final UnregistrationEngine engine = new UnregistrationEngine(context, gcmProvider, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, PCFPushUnregisterDeviceApiRequestProvider, geofenceUpdater);
+        final UnregistrationEngine engine = new UnregistrationEngine(context, gcmProvider, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, PCFPushUnregisterDeviceApiRequestProvider, geofenceUpdater, geofenceStatusUtil);
 
         engine.unregisterDevice(parametersFromUser, new UnregistrationListener() {
 
@@ -160,8 +189,9 @@ public class UnregistrationEngineTestParameters {
             AndroidTestCase.assertNotNull(pushPreferencesProvider.getTags());
         }
 
-        if (shouldClearGeofencesBeCalled) {
+        if (shouldClearGeofencesFromMonitorAndStoreBeCalled) {
             if (shouldClearGeofencesBeSuccessful) {
+
                 AndroidTestCase.assertEquals(GeofenceEngine.NEVER_UPDATED_GEOFENCES, pushPreferencesProvider.getLastGeofenceUpdate());
                 AndroidTestCase.assertFalse(pushPreferencesProvider.areGeofencesEnabled());
             } else { // clear geofences not successful
@@ -169,6 +199,18 @@ public class UnregistrationEngineTestParameters {
                 AndroidTestCase.assertTrue(pushPreferencesProvider.areGeofencesEnabled());
             }
             verify(geofenceUpdater, times(1)).clearGeofencesFromMonitorAndStore(any(GeofenceUpdater.GeofenceUpdaterListener.class));
+
+        } else if (shouldClearGeofencesFromStoreOnlyBeCalled) {
+            if (shouldClearGeofencesBeSuccessful) {
+                AndroidTestCase.assertEquals(GeofenceEngine.NEVER_UPDATED_GEOFENCES, pushPreferencesProvider.getLastGeofenceUpdate());
+                AndroidTestCase.assertFalse(pushPreferencesProvider.areGeofencesEnabled());
+            } else { // clear geofences not successful
+                AndroidTestCase.assertEquals(lastGeofenceUpdateTimeInPrefs, pushPreferencesProvider.getLastGeofenceUpdate());
+                AndroidTestCase.assertTrue(pushPreferencesProvider.areGeofencesEnabled());
+            }
+            verify(geofenceStatusUtil, times(1)).saveGeofenceStatusAndSendBroadcast(any(GeofenceStatus.class));
+            verify(geofenceUpdater, times(1)).clearGeofencesFromStoreOnly(any(GeofenceUpdater.GeofenceUpdaterListener.class));
+
         } else { // clear geofences should not have been called (i.e.: geofences are not enabled)
             AndroidTestCase.assertEquals(GeofenceEngine.NEVER_UPDATED_GEOFENCES, pushPreferencesProvider.getLastGeofenceUpdate());
             AndroidTestCase.assertFalse(pushPreferencesProvider.areGeofencesEnabled());
@@ -180,6 +222,7 @@ public class UnregistrationEngineTestParameters {
         AndroidTestCase.assertFalse(gcmProvider.wasRegisterCalled());
         AndroidTestCase.assertTrue(gcmProvider.wasUnregisterCalled());
         verifyNoMoreInteractions(geofenceUpdater);
+        verifyNoMoreInteractions(geofenceStatusUtil);
     }
 
     public UnregistrationEngineTestParameters setShouldUnregistrationHaveSucceeded(boolean b) {
@@ -205,11 +248,17 @@ public class UnregistrationEngineTestParameters {
         return this;
     }
 
-    public UnregistrationEngineTestParameters setupGeofences(long lastGeofenceUpdateTime, boolean areGeofencesEnabled, boolean shouldClearGeofencesBeCalled, boolean shouldClearGeofencesBeSuccessful) {
+    public UnregistrationEngineTestParameters setupGeofences(long lastGeofenceUpdateTime, boolean areGeofencesEnabled, boolean shouldClearGeofencesFromMonitorAndStoreBeCalled, boolean shouldClearGeofencesFromStoreOnlyBeCalled, boolean shouldClearGeofencesBeSuccessful) {
         this.lastGeofenceUpdateTimeInPrefs = lastGeofenceUpdateTime;
         this.areGeofencesEnabledInPrefs = areGeofencesEnabled;
-        this.shouldClearGeofencesBeCalled = shouldClearGeofencesBeCalled;
+        this.shouldClearGeofencesFromMonitorAndStoreBeCalled = shouldClearGeofencesFromMonitorAndStoreBeCalled;
+        this.shouldClearGeofencesFromStoreOnlyBeCalled = shouldClearGeofencesFromStoreOnlyBeCalled;
         this.shouldClearGeofencesBeSuccessful = shouldClearGeofencesBeSuccessful;
+        return this;
+    }
+
+    public UnregistrationEngineTestParameters setShouldHavePermissionForGeofences(boolean b) {
+        shouldHavePermissionForGeofences = b;
         return this;
     }
 }

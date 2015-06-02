@@ -20,9 +20,11 @@ import io.pivotal.android.push.gcm.GcmUnregistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
 import io.pivotal.android.push.gcm.GcmUnregistrationListener;
 import io.pivotal.android.push.geofence.GeofenceEngine;
+import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.util.Logger;
+import io.pivotal.android.push.version.GeofenceStatus;
 import io.pivotal.android.push.version.VersionProvider;
 
 /**
@@ -69,6 +71,7 @@ public class RegistrationEngine {
     private GeofenceUpdater geofenceUpdater;
     private GeofenceEngine geofenceEngine;
     private VersionProvider versionProvider;
+    private GeofenceStatusUtil geofenceStatusUtil;
     private String packageName;
     private String previousGcmDeviceRegistrationId = null;
     private String previousPCFPushDeviceRegistrationId = null;
@@ -92,6 +95,7 @@ public class RegistrationEngine {
      * @param versionProvider  Some object that can provide the application version.
      * @param geofenceUpdater  Some object that can be used to download geofence updates from the server.
      * @param geofenceEngine  Some object that can be used to register geofences.
+     * @param geofenceStatusUtil  Some object that can be used to change the geofence status
      */
     public RegistrationEngine(Context context,
                               String packageName,
@@ -102,7 +106,8 @@ public class RegistrationEngine {
                               PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
                               VersionProvider versionProvider,
                               GeofenceUpdater geofenceUpdater,
-                              GeofenceEngine geofenceEngine) {
+                              GeofenceEngine geofenceEngine,
+                              GeofenceStatusUtil geofenceStatusUtil) {
 
         verifyArguments(context,
                 packageName,
@@ -113,7 +118,8 @@ public class RegistrationEngine {
                 pcfPushRegistrationApiRequestProvider,
                 versionProvider,
                 geofenceUpdater,
-                geofenceEngine);
+                geofenceEngine,
+                geofenceStatusUtil);
 
         saveArguments(context,
                 packageName,
@@ -124,7 +130,8 @@ public class RegistrationEngine {
                 pcfPushRegistrationApiRequestProvider,
                 versionProvider,
                 geofenceUpdater,
-                geofenceEngine);
+                geofenceEngine,
+                geofenceStatusUtil);
     }
 
     private void verifyArguments(Context context,
@@ -136,7 +143,8 @@ public class RegistrationEngine {
                                  PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
                                  VersionProvider versionProvider,
                                  GeofenceUpdater geofenceUpdater,
-                                 GeofenceEngine geofenceEngine) {
+                                 GeofenceEngine geofenceEngine,
+                                 GeofenceStatusUtil geofenceStatusUtil) {
 
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
@@ -168,6 +176,9 @@ public class RegistrationEngine {
         if (geofenceEngine == null) {
             throw new IllegalArgumentException("geofenceEngine may not be null");
         }
+        if (geofenceStatusUtil == null) {
+            throw new IllegalArgumentException("geofenceStatusUtil may not be null");
+        }
     }
 
     private void saveArguments(Context context,
@@ -179,7 +190,8 @@ public class RegistrationEngine {
                                PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
                                VersionProvider versionProvider,
                                GeofenceUpdater geofenceUpdater,
-                               GeofenceEngine geofenceEngine) {
+                               GeofenceEngine geofenceEngine,
+                               GeofenceStatusUtil geofenceStatusUtil) {
 
         this.context = context;
         this.packageName = packageName;
@@ -191,6 +203,7 @@ public class RegistrationEngine {
         this.versionProvider = versionProvider;
         this.geofenceUpdater = geofenceUpdater;
         this.geofenceEngine = geofenceEngine;
+        this.geofenceStatusUtil = geofenceStatusUtil;
         this.previousGcmDeviceRegistrationId = pushPreferencesProvider.getGcmDeviceRegistrationId();
         this.previousPCFPushDeviceRegistrationId = pushPreferencesProvider.getPCFPushDeviceRegistrationId();
         this.previousGcmSenderId = pushPreferencesProvider.getGcmSenderId();
@@ -701,12 +714,14 @@ public class RegistrationEngine {
 
             geofenceUpdater.clearGeofencesFromStoreOnly(new GeofenceUpdater.GeofenceUpdaterListener() {
 
-                // TODO - update GeofenceStatus?
-
                 @Override
                 public void onSuccess() {
+
                     pushPreferencesProvider.setLastGeofenceUpdate(GeofenceEngine.NEVER_UPDATED_GEOFENCES);
                     pushPreferencesProvider.setAreGeofencesEnabled(false);
+
+                    setGeofenceStatus();
+
                     if (listener != null) {
                         listener.onRegistrationComplete();
                     }
@@ -714,9 +729,17 @@ public class RegistrationEngine {
 
                 @Override
                 public void onFailure(String reason) {
+
+                    setGeofenceStatus();
+
                     if (listener != null) {
                         listener.onRegistrationFailed(reason);
                     }
+                }
+
+                private void setGeofenceStatus() {
+                    final GeofenceStatus status = new GeofenceStatus(true, "Permission for geofences is not available.", 0);
+                    geofenceStatusUtil.saveGeofenceStatusAndSendBroadcast(status);
                 }
             });
         }

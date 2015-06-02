@@ -19,19 +19,18 @@ public class GeofenceStatusUtil {
 
     private static final String GEOFENCE_STATUS_FILE_NAME = "pivotal.push.geofence_status.json";
     private static final ReentrantReadWriteLock lock = new ReentrantReadWriteLock();
+    private final Context context;
 
-    public static void saveGeofenceStatusAndSendBroadcast(Context context, GeofenceStatus resultantStatus) {
-        saveGeofenceStatus(context, resultantStatus);
-        sendGeofenceUpdateBroadcast(context);
+    public GeofenceStatusUtil(Context context) {
+        this.context = context;
     }
 
-    private static void sendGeofenceUpdateBroadcast(Context context) {
-        // TODO - consider adding a permission to this broadcast
-        final Intent intent = new Intent(Push.GEOFENCE_UPDATE_BROADCAST);
-        context.sendBroadcast(intent);
+    public void saveGeofenceStatusAndSendBroadcast(GeofenceStatus resultantStatus) {
+        saveGeofenceStatus(resultantStatus);
+        sendGeofenceUpdateBroadcast();
     }
 
-    public static void saveGeofenceStatus(Context context, GeofenceStatus status) {
+    public void saveGeofenceStatus(GeofenceStatus status) {
         lock.writeLock().lock();
         try {
             final FileHelper fileHelper = new FileHelper(context);
@@ -49,7 +48,13 @@ public class GeofenceStatusUtil {
         }
     }
 
-    public static GeofenceStatus loadGeofenceStatus(Context context) {
+    private void sendGeofenceUpdateBroadcast() {
+        // TODO - consider adding a permission to this broadcast
+        final Intent intent = new Intent(Push.GEOFENCE_UPDATE_BROADCAST);
+        context.sendBroadcast(intent);
+    }
+
+    public GeofenceStatus loadGeofenceStatus() {
         lock.readLock().lock();
         try {
             final FileHelper fileHelper = new FileHelper(context);

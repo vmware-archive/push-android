@@ -4,6 +4,7 @@
 package io.pivotal.android.push.registration;
 
 import android.content.Context;
+import android.content.pm.PackageManager;
 
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequest;
@@ -14,9 +15,11 @@ import io.pivotal.android.push.gcm.GcmUnregistrationApiRequest;
 import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
 import io.pivotal.android.push.gcm.GcmUnregistrationListener;
 import io.pivotal.android.push.geofence.GeofenceEngine;
+import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.util.Logger;
+import io.pivotal.android.push.version.GeofenceStatus;
 
 public class UnregistrationEngine {
 
@@ -26,9 +29,8 @@ public class UnregistrationEngine {
     private GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider;
     private PCFPushUnregisterDeviceApiRequestProvider PCFPushUnregisterDeviceApiRequestProvider;
     private GeofenceUpdater geofenceUpdater;
+    private GeofenceStatusUtil geofenceStatusUtil;
     private String previousPCFPushDeviceRegistrationId;
-    private boolean isUnregistrationSuccessful = true;
-    private String unregistrationFailureReason;
 
     /**
      * Instantiate an instance of the UnregistrationEngine.
@@ -40,34 +42,40 @@ public class UnregistrationEngine {
      * @param gcmUnregistrationApiRequestProvider  Some object that can provide GCMUnregistrationApiRequest objects.
      * @param pcfPushUnregisterDeviceApiRequestProvider  Some object that can provide PCFPushUnregisterDeviceApiRequest objects.
      * @param geofenceUpdater  Some object that can unregister geofences.
+     * @param geofenceStatusUtil  Some object that can update geofence statuses.
      */
     public UnregistrationEngine(Context context,
                                 GcmProvider gcmProvider,
                                 PushPreferencesProvider pushPreferencesProvider,
                                 GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                 PCFPushUnregisterDeviceApiRequestProvider pcfPushUnregisterDeviceApiRequestProvider,
-                                GeofenceUpdater geofenceUpdater) {
+                                GeofenceUpdater geofenceUpdater,
+                                GeofenceStatusUtil geofenceStatusUtil) {
 
         verifyArguments(context,
                 gcmProvider,
                 pushPreferencesProvider,
                 gcmUnregistrationApiRequestProvider,
                 pcfPushUnregisterDeviceApiRequestProvider,
-                geofenceUpdater);
+                geofenceUpdater,
+                geofenceStatusUtil);
 
         saveArguments(context,
                 gcmProvider,
                 pushPreferencesProvider,
                 gcmUnregistrationApiRequestProvider,
                 pcfPushUnregisterDeviceApiRequestProvider,
-                geofenceUpdater);
+                geofenceUpdater,
+                geofenceStatusUtil);
     }
 
     private void verifyArguments(Context context,
                                  GcmProvider gcmProvider,
                                  PushPreferencesProvider pushPreferencesProvider,
                                  GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
-                                 PCFPushUnregisterDeviceApiRequestProvider pcfPushUnregisterDeviceApiRequestProvider, GeofenceUpdater geofenceUpdater) {
+                                 PCFPushUnregisterDeviceApiRequestProvider pcfPushUnregisterDeviceApiRequestProvider,
+                                 GeofenceUpdater geofenceUpdater,
+                                 GeofenceStatusUtil geofenceStatusUtil) {
 
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
@@ -87,13 +95,18 @@ public class UnregistrationEngine {
         if (geofenceUpdater == null) {
             throw new IllegalArgumentException("geofenceUpdater may not be null");
         }
+        if (geofenceStatusUtil == null) {
+            throw new IllegalArgumentException("geofenceStatusUtil may not be null");
+        }
     }
 
     private void saveArguments(Context context,
                                GcmProvider gcmProvider,
                                PushPreferencesProvider pushPreferencesProvider,
                                GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
-                               PCFPushUnregisterDeviceApiRequestProvider PCFPushUnregisterDeviceApiRequestProvider, GeofenceUpdater geofenceUpdater) {
+                               PCFPushUnregisterDeviceApiRequestProvider PCFPushUnregisterDeviceApiRequestProvider,
+                               GeofenceUpdater geofenceUpdater,
+                               GeofenceStatusUtil geofenceStatusUtil) {
 
         this.context = context;
         this.gcmProvider = gcmProvider;
@@ -102,6 +115,7 @@ public class UnregistrationEngine {
         this.PCFPushUnregisterDeviceApiRequestProvider = PCFPushUnregisterDeviceApiRequestProvider;
         this.previousPCFPushDeviceRegistrationId = pushPreferencesProvider.getPCFPushDeviceRegistrationId();
         this.geofenceUpdater = geofenceUpdater;
+        this.geofenceStatusUtil = geofenceStatusUtil;
     }
 
     public void unregisterDevice(PushParameters parameters, UnregistrationListener listener) {
@@ -166,7 +180,7 @@ public class UnregistrationEngine {
             PCFPushUnregisterDeviceApiRequest.startUnregisterDevice(pcfPushDeviceRegistrationId, parameters, getPCFPushUnregisterDeviceListener(listener));
         } else {
             if (shouldClearGeofences()) {
-                geofenceUpdater.clearGeofencesFromMonitorAndStore(getClearGeofencesListener(listener));
+                clearGeofences(listener);
             } else {
                 Logger.i("Not currently registered with PCF Push.  Unregistration is not required.");
                 if (listener != null) {
@@ -185,7 +199,7 @@ public class UnregistrationEngine {
                 clearPCFPushRegistrationPreferences();
 
                 if (shouldClearGeofences()) {
-                    geofenceUpdater.clearGeofencesFromMonitorAndStore(getClearGeofencesListener(listener));
+                    clearGeofences(listener);
                 } else if (listener != null) {
                     listener.onUnregistrationComplete();
                 }
@@ -193,11 +207,12 @@ public class UnregistrationEngine {
 
             @Override
             public void onPCFPushUnregisterDeviceFailed(String reason) {
+
                 if (shouldClearGeofences()) {
-                    isUnregistrationSuccessful = false;
-                    unregistrationFailureReason = reason;
-                    geofenceUpdater.clearGeofencesFromMonitorAndStore(getClearGeofencesListener(listener));
-                } else if (listener != null) {
+                    clearGeofences(null);
+                }
+
+                if (listener != null) {
                     listener.onUnregistrationFailed(reason);
                 }
             }
@@ -217,32 +232,68 @@ public class UnregistrationEngine {
         return pushPreferencesProvider.getLastGeofenceUpdate() != GeofenceEngine.NEVER_UPDATED_GEOFENCES;
     }
 
-    private GeofenceUpdater.GeofenceUpdaterListener getClearGeofencesListener(final UnregistrationListener listener) {
-        return new GeofenceUpdater.GeofenceUpdaterListener() {
+    private boolean isPermissionForGeofences() {
+        final int accessGpsPermission = context.checkCallingOrSelfPermission("android.permission.ACCESS_FINE_LOCATION");
+        final int receiveBootPermission = context.checkCallingOrSelfPermission("android.permission.RECEIVE_BOOT_COMPLETED");
+        return (accessGpsPermission == PackageManager.PERMISSION_GRANTED) && (receiveBootPermission == PackageManager.PERMISSION_GRANTED);
+    }
 
-            @Override
-            public void onSuccess() {
+    private void clearGeofences(final UnregistrationListener listener) {
 
-                clearGeofencePreferences();
+        if (isPermissionForGeofences()) {
 
-                if (listener != null) {
-                    if (isUnregistrationSuccessful) {
+            geofenceUpdater.clearGeofencesFromMonitorAndStore(new GeofenceUpdater.GeofenceUpdaterListener() {
+
+                @Override
+                public void onSuccess() {
+
+                    clearGeofencePreferences();
+
+                    if (listener != null) {
                         listener.onUnregistrationComplete();
-                    } else {
-                        listener.onUnregistrationFailed(unregistrationFailureReason);
                     }
                 }
 
-            }
-
-            @Override
-            public void onFailure(String reason) {
-
-                if (listener != null) {
-                    listener.onUnregistrationFailed(reason);
+                @Override
+                public void onFailure(String reason) {
+                    if (listener != null) {
+                        listener.onUnregistrationFailed(reason);
+                    }
                 }
-            }
-        };
+            });
+
+        } else {
+
+            geofenceUpdater.clearGeofencesFromStoreOnly(new GeofenceUpdater.GeofenceUpdaterListener() {
+
+                @Override
+                public void onSuccess() {
+
+                    clearGeofencePreferences();
+
+                    setGeofenceStatus();
+
+                    if (listener != null) {
+                        listener.onUnregistrationComplete();
+                    }
+                }
+
+                @Override
+                public void onFailure(String reason) {
+
+                    setGeofenceStatus();
+
+                    if (listener != null) {
+                        listener.onUnregistrationFailed(reason);
+                    }
+                }
+
+                private void setGeofenceStatus() {
+                    final GeofenceStatus status = new GeofenceStatus(true, "Permission for geofences is not available.", 0);
+                    geofenceStatusUtil.saveGeofenceStatusAndSendBroadcast(status);
+                }
+            });
+        }
     }
 
     private void clearGeofencePreferences() {

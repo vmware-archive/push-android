@@ -145,6 +145,7 @@ public class Push {
         final GeofencePersistentStore geofencePersistentStore = new GeofencePersistentStore(context, fileHelper);
         final GeofenceEngine geofenceEngine = new GeofenceEngine(geofenceRegistrar, geofencePersistentStore, timeProvider);
         final GeofenceUpdater geofenceUpdater = new GeofenceUpdater(context, geofenceUpdatesApiRequest, geofenceEngine, pushPreferencesProvider);
+        final GeofenceStatusUtil geofenceStatusUtil = new GeofenceStatusUtil(context);
 
         verifyRegistrationArguments(parameters);
 
@@ -162,7 +163,8 @@ public class Push {
                             PCFPushRegistrationApiRequestProvider,
                             versionProvider,
                             geofenceUpdater,
-                            geofenceEngine);
+                            geofenceEngine,
+                            geofenceStatusUtil);
 
                     registrationEngine.registerDevice(parameters, listener);
                 } catch (Exception e) {
@@ -286,13 +288,21 @@ public class Push {
         final GeofencePersistentStore geofencePersistentStore = new GeofencePersistentStore(context, fileHelper);
         final GeofenceEngine geofenceEngine = new GeofenceEngine(geofenceRegistrar, geofencePersistentStore, timeProvider);
         final GeofenceUpdater geofenceUpdater = new GeofenceUpdater(context, geofenceUpdatesApiRequest, geofenceEngine, pushPreferencesProvider);
+        final GeofenceStatusUtil geofenceStatusUtil = new GeofenceStatusUtil(context);
 
         final Runnable runnable = new Runnable() {
 
             @Override
             public void run() {
                 try {
-                    final UnregistrationEngine unregistrationEngine = new UnregistrationEngine(context, gcmProvider, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, pcfPushUnregisterDeviceApiRequestProvider, geofenceUpdater);
+                    final UnregistrationEngine unregistrationEngine = new UnregistrationEngine(
+                            context,
+                            gcmProvider,
+                            pushPreferencesProvider,
+                            gcmUnregistrationApiRequestProvider,
+                            pcfPushUnregisterDeviceApiRequestProvider,
+                            geofenceUpdater,
+                            geofenceStatusUtil);
                     unregistrationEngine.unregisterDevice(parameters, listener);
                 } catch (Exception e) {
                     Logger.ex("Push SDK unregistration failed", e);
@@ -322,6 +332,7 @@ public class Push {
      * @return the current geofence monitoring status
      */
     public GeofenceStatus getGeofenceStatus() {
-        return GeofenceStatusUtil.loadGeofenceStatus(context);
+        final GeofenceStatusUtil geofenceStatusUtil = new GeofenceStatusUtil(context);
+        return geofenceStatusUtil.loadGeofenceStatus();
     }
 }

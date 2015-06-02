@@ -80,6 +80,7 @@ public class GeofenceUpdater {
     }
 
     public void clearGeofencesFromMonitorAndStore(GeofenceUpdaterListener listener) {
+        Logger.v("Clearing geofences from monitor and store.");
         geofenceEngine.processResponseData(0L, null);
         pushPreferencesProvider.setLastGeofenceUpdate(GeofenceEngine.NEVER_UPDATED_GEOFENCES);
         if (listener != null) {
@@ -88,6 +89,7 @@ public class GeofenceUpdater {
     }
 
     public void clearGeofencesFromStoreOnly(GeofenceUpdaterListener listener) {
+        Logger.v("Clearing geofences from store only. There are no permissions for clearing geofences from the monitor.");
         geofenceEngine.resetStore();
         if (listener != null) {
             listener.onSuccess();
@@ -110,9 +112,10 @@ public class GeofenceUpdater {
     }
 
     private void onFailedToFetchUpdates(final String reason, final GeofenceUpdaterListener listener) {
-        final GeofenceStatus previousStatus = GeofenceStatusUtil.loadGeofenceStatus(context);
+        final GeofenceStatusUtil geofenceStatusUtil = new GeofenceStatusUtil(context);
+        final GeofenceStatus previousStatus = geofenceStatusUtil.loadGeofenceStatus();
         final GeofenceStatus newStatus = new GeofenceStatus(true, reason, previousStatus.getNumberCurrentlyMonitoringGeofences());
-        GeofenceStatusUtil.saveGeofenceStatusAndSendBroadcast(context, newStatus);
+        geofenceStatusUtil.saveGeofenceStatusAndSendBroadcast(newStatus);
         if (listener != null) {
             listener.onFailure(reason);
         }

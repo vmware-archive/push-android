@@ -156,8 +156,10 @@ public class GeofenceRegistrar {
             } else {
                 final String errorReason = "GoogleApiClient.blockingConnect returned status " + connectionResult.getErrorCode();
                 Logger.e(errorReason);
+
                 final GeofenceStatus geofenceStatus = new GeofenceStatus(true, errorReason, 0);
-                GeofenceStatusUtil.saveGeofenceStatusAndSendBroadcast(context, geofenceStatus);
+                final GeofenceStatusUtil geofenceStatusUtil = new GeofenceStatusUtil(context);
+                geofenceStatusUtil.saveGeofenceStatusAndSendBroadcast(geofenceStatus);
             }
             googleApiClient.disconnect();
         }
@@ -195,7 +197,9 @@ public class GeofenceRegistrar {
         }
 
         updateDebugGeofencesFile(serializableGeofences);
-        GeofenceStatusUtil.saveGeofenceStatusAndSendBroadcast(context, resultantStatus);
+
+        final GeofenceStatusUtil geofenceStatusUtil = new GeofenceStatusUtil(context);
+        geofenceStatusUtil.saveGeofenceStatusAndSendBroadcast(resultantStatus);
     }
 
     private void updateDebugGeofencesFile(List<Map<String, String>> serializableGeofences) {
