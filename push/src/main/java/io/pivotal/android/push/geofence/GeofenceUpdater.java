@@ -61,7 +61,8 @@ public class GeofenceUpdater {
         } else {
 
             // TODO - consider scheduling this request a short random time in the future in order to stagger the demand on the server.
-            apiRequest.getGeofenceUpdates(timestamp, getParameters(), new PCFPushGetGeofenceUpdatesListener() {
+            final String deviceUuid = pushPreferencesProvider.getPCFPushDeviceRegistrationId();
+            apiRequest.getGeofenceUpdates(timestamp, deviceUuid, getParameters(), new PCFPushGetGeofenceUpdatesListener() {
 
                 @Override
                 public void onPCFPushGetGeofenceUpdatesSuccess(final PCFPushGeofenceResponseData responseData) {

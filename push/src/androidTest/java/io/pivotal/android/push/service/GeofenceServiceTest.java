@@ -29,6 +29,8 @@ import static org.mockito.Mockito.*;
 
 public class GeofenceServiceTest extends AndroidTestCase {
 
+    private static final String TEST_DEVICE_UUID = "TEST_DEVICE_UUID";
+
     private GeofenceEngine geofenceEngine;
     private PCFPushGetGeofenceUpdatesApiRequest apiRequest;
     private FakeGeofenceService service;
@@ -94,18 +96,18 @@ public class GeofenceServiceTest extends AndroidTestCase {
 
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
-                final PCFPushGetGeofenceUpdatesListener listener = (PCFPushGetGeofenceUpdatesListener) invocation.getArguments()[2];
+                final PCFPushGetGeofenceUpdatesListener listener = (PCFPushGetGeofenceUpdatesListener) invocation.getArguments()[3];
                 listener.onPCFPushGetGeofenceUpdatesSuccess(responseData);
                 return null;
             }
 
-        }).when(apiRequest).getGeofenceUpdates(eq(1337L), any(PushParameters.class), any(PCFPushGetGeofenceUpdatesListener.class));
+        }).when(apiRequest).getGeofenceUpdates(eq(1337L), eq(TEST_DEVICE_UUID), any(PushParameters.class), any(PCFPushGetGeofenceUpdatesListener.class));
 
         service.setPushPreferencesProvider(preferences);
         service.onHandleIntent(intent);
 
         verify(geofenceEngine, times(1)).processResponseData(eq(1337L), eq(responseData));
-        verify(apiRequest, times(1)).getGeofenceUpdates(eq(1337L), any(PushParameters.class), any(PCFPushGetGeofenceUpdatesListener.class));
+        verify(apiRequest, times(1)).getGeofenceUpdates(eq(1337L), eq(TEST_DEVICE_UUID), any(PushParameters.class), any(PCFPushGetGeofenceUpdatesListener.class));
         verifyNoMoreInteractions(apiRequest);
         verifyNoMoreInteractions(geofenceEngine);
         assertTrue(preferences.wasLastGeofenceUpdateSaved());
@@ -121,18 +123,18 @@ public class GeofenceServiceTest extends AndroidTestCase {
 
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
-                final PCFPushGetGeofenceUpdatesListener listener = (PCFPushGetGeofenceUpdatesListener) invocation.getArguments()[2];
+                final PCFPushGetGeofenceUpdatesListener listener = (PCFPushGetGeofenceUpdatesListener) invocation.getArguments()[3];
                 listener.onPCFPushGetGeofenceUpdatesSuccess(responseData);
                 return null;
             }
 
-        }).when(apiRequest).getGeofenceUpdates(eq(1337L), any(PushParameters.class), any(PCFPushGetGeofenceUpdatesListener.class));
+        }).when(apiRequest).getGeofenceUpdates(eq(1337L), eq(TEST_DEVICE_UUID), any(PushParameters.class), any(PCFPushGetGeofenceUpdatesListener.class));
 
         service.setPushPreferencesProvider(preferences);
         service.onHandleIntent(intent);
 
         verify(geofenceEngine, times(1)).processResponseData(eq(1337L), eq(responseData));
-        verify(apiRequest, times(1)).getGeofenceUpdates(eq(1337L), any(PushParameters.class), any(PCFPushGetGeofenceUpdatesListener.class));
+        verify(apiRequest, times(1)).getGeofenceUpdates(eq(1337L), eq(TEST_DEVICE_UUID), any(PushParameters.class), any(PCFPushGetGeofenceUpdatesListener.class));
         verifyNoMoreInteractions(apiRequest);
         verifyNoMoreInteractions(geofenceEngine);
         assertTrue(preferences.wasLastGeofenceUpdateSaved());
@@ -147,18 +149,18 @@ public class GeofenceServiceTest extends AndroidTestCase {
 
             @Override
             public Void answer(InvocationOnMock invocation) throws Throwable {
-                final PCFPushGetGeofenceUpdatesListener listener = (PCFPushGetGeofenceUpdatesListener) invocation.getArguments()[2];
+                final PCFPushGetGeofenceUpdatesListener listener = (PCFPushGetGeofenceUpdatesListener) invocation.getArguments()[3];
                 listener.onPCFPushGetGeofenceUpdatesFailed("Fake request failed fakely.");
                 return null;
             }
 
-        }).when(apiRequest).getGeofenceUpdates(eq(1337L), any(PushParameters.class), any(PCFPushGetGeofenceUpdatesListener.class));
+        }).when(apiRequest).getGeofenceUpdates(eq(1337L), eq(TEST_DEVICE_UUID), any(PushParameters.class), any(PCFPushGetGeofenceUpdatesListener.class));
 
         service.setPushPreferencesProvider(preferences);
         service.onHandleIntent(intent);
 
         verify(geofenceEngine, never()).processResponseData(eq(1337L), any(PCFPushGeofenceResponseData.class));
-        verify(apiRequest, times(1)).getGeofenceUpdates(eq(1337L), any(PushParameters.class), any(PCFPushGetGeofenceUpdatesListener.class));
+        verify(apiRequest, times(1)).getGeofenceUpdates(eq(1337L), eq(TEST_DEVICE_UUID), any(PushParameters.class), any(PCFPushGetGeofenceUpdatesListener.class));
         verifyNoMoreInteractions(apiRequest);
         verifyNoMoreInteractions(geofenceEngine);
         assertFalse(preferences.wasLastGeofenceUpdateSaved());
@@ -166,7 +168,7 @@ public class GeofenceServiceTest extends AndroidTestCase {
     }
 
     private FakePushPreferencesProvider getPreferencesForTimestamp(long timestamp) {
-        return new FakePushPreferencesProvider("", "", 0, "", "", "", "", "", "", null, timestamp, false);
+        return new FakePushPreferencesProvider("", TEST_DEVICE_UUID, 0, "", "", "", "", "", "", null, timestamp, false);
     }
 
     private Properties getPropertiesWithGeofencesEnabled(String geofencesEnabled) {

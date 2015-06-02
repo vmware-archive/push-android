@@ -28,14 +28,15 @@ public class PCFPushGetGeofenceUpdatesApiRequest extends ApiRequestImpl {
     }
 
     public void getGeofenceUpdates(long timestamp,
+                                   String deviceUuid,
                                    PushParameters parameters,
                                    PCFPushGetGeofenceUpdatesListener listener) {
 
-        verifyArguments(timestamp, parameters, listener);
-        handleRequest(timestamp, parameters, listener);
+        verifyArguments(timestamp, deviceUuid, parameters, listener);
+        handleRequest(timestamp, deviceUuid, parameters, listener);
     }
 
-    private void verifyArguments(long timestamp, PushParameters parameters, PCFPushGetGeofenceUpdatesListener listener) {
+    private void verifyArguments(long timestamp, String deviceUuid, PushParameters parameters, PCFPushGetGeofenceUpdatesListener listener) {
         if (timestamp < 0) {
             throw new IllegalArgumentException("timestamp must be non-negative");
         }
@@ -45,12 +46,15 @@ public class PCFPushGetGeofenceUpdatesApiRequest extends ApiRequestImpl {
         if (listener == null) {
             throw new IllegalArgumentException("listener may not be null");
         }
+        if (deviceUuid == null || deviceUuid.isEmpty()) {
+            throw new IllegalArgumentException("deviceUuid may not be null or empty");
+        }
     }
 
-    private void handleRequest(long timestamp, PushParameters parameters, PCFPushGetGeofenceUpdatesListener listener) {
+    private void handleRequest(long timestamp, String deviceUuid, PushParameters parameters, PCFPushGetGeofenceUpdatesListener listener) {
         OutputStream outputStream = null;
         try {
-            final URL url = getURL(timestamp, parameters);
+            final URL url = getURL(timestamp, deviceUuid, parameters);
             final HttpURLConnection urlConnection = getHttpURLConnection(url);
             urlConnection.setDoInput(true);
             urlConnection.setRequestMethod("GET");
@@ -117,8 +121,21 @@ public class PCFPushGetGeofenceUpdatesApiRequest extends ApiRequestImpl {
     }
 
     private URL getURL(long timestamp,
+                       String deviceUuid,
                        PushParameters parameters) throws MalformedURLException {
 
-        return new URL(parameters.getServiceUrl() + "/" + Const.PCF_PUSH_GEOFENCE_UPDATE_REQUEST_ENDPOINT  + "?" + Const.PCF_PUSH_GEOFENCE_UPDATE_REQUEST_TIMESTAMP + "=" + timestamp);
+        final StringBuilder builder = new StringBuilder();
+        builder.append(parameters.getServiceUrl());
+        builder.append('/');
+        builder.append(Const.PCF_PUSH_GEOFENCE_UPDATE_REQUEST_ENDPOINT);
+        builder.append('?');
+        builder.append(Const.PCF_PUSH_GEOFENCE_UPDATE_REQUEST_TIMESTAMP);
+        builder.append('=');
+        builder.append(timestamp);
+        builder.append('&');
+        builder.append(Const.PCF_PUSH_GEOFENCE_UPDATE_REQUEST_DEVICE_UUID);
+        builder.append('=');
+        builder.append(deviceUuid);
+        return new URL(builder.toString());
     }
 }
