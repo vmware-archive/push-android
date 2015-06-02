@@ -238,7 +238,6 @@ public class RegistrationEngine {
         } else if (isPCFPushNewRegistrationRequired(parameters)) {
             registerNewDeviceWithPCFPush(previousGcmDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
 
-        // TODO - test that permission is available
         } else if (isGeofenceUpdateRequired(parameters)) {
             updateGeofences(listener);
 
@@ -385,7 +384,6 @@ public class RegistrationEngine {
     }
 
     private boolean isGeofenceUpdateRequired(PushParameters parameters) {
-        // TODO - write test to verify that permission is available before registering for geofences
         if (isPermissionForGeofences() && parameters.areGeofencesEnabled() && pushPreferencesProvider.getLastGeofenceUpdate() == GeofenceEngine.NEVER_UPDATED_GEOFENCES) {
             Logger.i("A geofence update is required in order to download the current geofence configuration.");
             return true;
@@ -394,7 +392,6 @@ public class RegistrationEngine {
     }
 
     private boolean areGeofencesAvailable(PushParameters parameters) {
-        // TODO - write test to verify that geofences are *not* cleared if permission is taken away AND they are disabled
         if (isPermissionForGeofences() && parameters.areGeofencesEnabled() && pushPreferencesProvider.getLastGeofenceUpdate() != GeofenceEngine.NEVER_UPDATED_GEOFENCES) {
             Logger.v("Geofences are available.");
             return true;
@@ -477,7 +474,6 @@ public class RegistrationEngine {
                 } else if (isNewGcmDeviceRegistrationId || isServiceUrlUpdated) {
                     registerNewDeviceWithPCFPush(gcmDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
 
-                    // TODO - set geofence status is geofences are enabled but there is no permission for them
                 } else if (isGeofenceUpdateRequired(parameters)) {
                     updateGeofences(listener);
 
@@ -493,7 +489,7 @@ public class RegistrationEngine {
             public void onGcmRegistrationFailed(String reason) {
 
                 if (isClearGeofencesRequired(parameters)) {
-                    clearGeofences(listener);
+                    clearGeofences(null); // Note - skipping the callback since we want to report the failure below
                 }
 
                 if (listener != null) {
@@ -553,11 +549,9 @@ public class RegistrationEngine {
                 pushPreferencesProvider.setTags(parameters.getTags());
                 Logger.v("Saving tags: " + parameters.getTags());
 
-                // TODO - write test to verify that geofences are only updated if there is permission
                 if (isGeofenceUpdateRequired(parameters)) {
                     updateGeofences(listener);
 
-                // TODO - write test to verify that geofences are only cleared if there is permission
                 } else if (isClearGeofencesRequired(parameters)) {
                     clearGeofences(listener);
 
@@ -570,7 +564,7 @@ public class RegistrationEngine {
             public void onPCFPushRegistrationFailed(String reason) {
 
                 if (isClearGeofencesRequired(parameters)) {
-                    clearGeofences(listener);
+                    clearGeofences(null); // Note - skipping the callback since we want to report the failure below
 
                 } else if (haveTagsBeenUpdated(parameters) && areGeofencesAvailable(parameters)) {
                     Logger.i("Tags have been updated - reregistering current geofences.");
@@ -627,16 +621,13 @@ public class RegistrationEngine {
                 pushPreferencesProvider.setTags(parameters.getTags());
                 Logger.v("Saving tags: " + parameters.getTags());
 
-                // TODO - write test to verify that permission is available for geofences after a new registration
                 if (isPermissionForGeofences() && parameters.areGeofencesEnabled()) {
                     updateGeofences(listener);
 
-                // TODO - write test to verify that geofences can only be cleared if permission is available
                 } else if (isClearGeofencesRequired(parameters)) {
                     clearGeofences(listener);
 
                 } else {
-
                     pushPreferencesProvider.setAreGeofencesEnabled(false);
                     pushPreferencesProvider.setLastGeofenceUpdate(GeofenceEngine.NEVER_UPDATED_GEOFENCES);
 
@@ -651,6 +642,10 @@ public class RegistrationEngine {
 
                 clearPCFPushRegistrationPreferences();
 
+                if (isClearGeofencesRequired(parameters)) {
+                    clearGeofences(null); // Note - skipping the callback since we want to report the failure below
+                }
+
                 if (listener != null) {
                     listener.onRegistrationFailed(reason);
                 }
@@ -658,7 +653,6 @@ public class RegistrationEngine {
         };
     }
 
-    // TODO - write test to ensure that geofences can't be updated unless there's a serviceUrl ?
     private void updateGeofences(final RegistrationListener listener) {
 
         geofenceUpdater.startGeofenceUpdate(null, 0L, new GeofenceUpdater.GeofenceUpdaterListener() {

@@ -28,6 +28,7 @@ import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
 import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
+import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.version.FakeVersionProvider;
 import io.pivotal.android.push.version.VersionProvider;
@@ -1557,6 +1558,33 @@ public class RegistrationEngineTest extends AndroidTestCase {
         testParams.run();
     }
 
+    public void testAppUpdatedAndDifferentGcmRegistrationIdWasReturnedAndTheresANewPCFPushServerUrlTooAndPCFPushRegistrationFailsAndPermissionForGeofencesWasRemoved() {
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
+                .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, null, null)
+                .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, null, true)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, null, true)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, null, true)
+                .setupTags(TEST_TAGS1, TEST_TAGS1, null, true)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_2, null, true)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setupGeofenceUpdateTimestamp(1337L, NOT_USED, NOT_USED, GeofenceEngine.NEVER_UPDATED_GEOFENCES, true, false, false, true)
+                .setupAreGeofencesEnabled(true, true, false, true)
+                .setupGcmUnregisterDevice(false, false)
+                .setupAppVersion(1, 2, 2)
+                .setShouldAppVersionHaveBeenSaved(true)
+                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
+                .setShouldGcmProviderRegisterHaveBeenCalled(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
+                .setShouldHavePermissionForGeofences(false)
+                .setShouldRegistrationHaveSucceeded(false);
+        testParams.run();
+    }
+
     public void testAppUpdatedAndDifferentGcmRegistrationIdWasReturnedAndTheresANewPCFPushServerUrlTooAndTheServerReturnsANullPCFPushRegistrationId() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
                 .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
@@ -1962,190 +1990,252 @@ public class RegistrationEngineTest extends AndroidTestCase {
         testParams.run();
     }
 
-//    public void testSenderIdUpdatedAndGcmReturnedNewGcmDeviceRegistrationId() {
-//        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-//                .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
-//                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-//                .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_2, TEST_GCM_SENDER_ID_2, true)
-//                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, true)
-//                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, true)
-//                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
-//                .setupTags(TEST_TAGS1, TEST_TAGS1, TEST_TAGS1, true)
-//                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
-//                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-//                .setupGeofenceUpdateTimestamp(1337L, 1337L, NOT_USED, 1337L, true, false, false, false)
-//                .setupAreGeofencesEnabled(true, true, true, false)
-//                .setupGcmUnregisterDevice(true, true)
-//                .setupAppVersion(1, 1, 1)
-//                .setShouldAppVersionHaveBeenSaved(true)
-//                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
-//                .setShouldGcmProviderRegisterHaveBeenCalled(true)
-//                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-//                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
-//                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
-//                .setShouldGeofencesHaveBeenReregistered(false)
-//                .setShouldRegistrationHaveSucceeded(true);
-//        testParams.run();
-//    }
-//
-//    public void testSenderIdUpdatedAndGcmReturnedOldGcmDeviceRegistrationId() {
-//        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-//                .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
-//                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-//                .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_2, TEST_GCM_SENDER_ID_2, true)
-//                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, false)
-//                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, false)
-//                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
-//                .setupTags(TEST_TAGS1, TEST_TAGS1, TEST_TAGS1, false)
-//                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
-//                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-//                .setupGeofenceUpdateTimestamp(1337L, 1337L, NOT_USED, 1337L, true, false, false, false)
-//                .setupAreGeofencesEnabled(true, true, true, false)
-//                .setupGcmUnregisterDevice(true, true)
-//                .setupAppVersion(1, 1, 1)
-//                .setShouldAppVersionHaveBeenSaved(true)
-//                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
-//                .setShouldGcmProviderRegisterHaveBeenCalled(true)
-//                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
-//                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
-//                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
-//                .setShouldGeofencesHaveBeenReregistered(false)
-//                .setShouldRegistrationHaveSucceeded(true);
-//        testParams.run();
-//    }
-//
-//    public void testSenderIdUpdatedAndGcmReregistrationFails() {
-//        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-//                .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, null, null)
-//                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-//                .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_2, null, true)
-//                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, false)
-//                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, false)
-//                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
-//                .setupTags(TEST_TAGS1, TEST_TAGS1, TEST_TAGS1, false)
-//                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
-//                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-//                .setupGeofenceUpdateTimestamp(1337L, 1337L, NOT_USED, 1337L, true, false, false, false)
-//                .setupAreGeofencesEnabled(true, true, true, false)
-//                .setupGcmUnregisterDevice(true, true)
-//                .setupAppVersion(1, 1, PushPreferencesProvider.NO_SAVED_VERSION)
-//                .setShouldAppVersionHaveBeenSaved(true)
-//                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
-//                .setShouldGcmProviderRegisterHaveBeenCalled(true)
-//                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
-//                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
-//                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
-//                .setShouldGeofencesHaveBeenReregistered(false)
-//                .setShouldRegistrationHaveSucceeded(false);
-//        testParams.run();
-//    }
-//
-//    public void testSenderIdUpdatedAndGcmReturnedNewGcmDeviceRegistrationIdButPCFPushReregistrationFails() {
-//        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-//                .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
-//                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-//                .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_2, TEST_GCM_SENDER_ID_2, true)
-//                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, true)
-//                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, true)
-//                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
-//                .setupTags(TEST_TAGS1, TEST_TAGS1, TEST_TAGS1, true)
-//                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
-//                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-//                .setupGeofenceUpdateTimestamp(1337L, 1337L, NOT_USED, 1337L, true, false, false, false)
-//                .setupAreGeofencesEnabled(true, true, true, false)
-//                .setupGcmUnregisterDevice(true, true)
-//                .setupAppVersion(1, 1, 1)
-//                .setShouldAppVersionHaveBeenSaved(true)
-//                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
-//                .setShouldGcmProviderRegisterHaveBeenCalled(true)
-//                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-//                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
-//                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
-//                .setShouldGeofencesHaveBeenReregistered(false)
-//                .setShouldRegistrationHaveSucceeded(true);
-//        testParams.run();
-//    }
-//
-//    public void testSuccessfulInitialRegistrationButFailsToGetGeofences() {
-//        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-//                .setupGcmDeviceRegistrationId(null, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
-//                .setupPCFPushDeviceRegistrationId(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-//                .setupGcmSenderId(null, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
-//                .setupPlatformUuid(null, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, true)
-//                .setupPlatformSecret(null, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, true)
-//                .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
-//                .setupTags(null, null, EMPTY_SET, true)
-//                .setupServiceUrl(null, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
-//                .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-//                .setupGeofenceUpdateTimestamp(GeofenceEngine.NEVER_UPDATED_GEOFENCES, 0L, 0L, GeofenceEngine.NEVER_UPDATED_GEOFENCES, false, true, false, false)
-//                .setupAreGeofencesEnabled(false, true, false, false)
-//                .setupGcmUnregisterDevice(false, false)
-//                .setupAppVersion(1, 1, 1)
-//                .setShouldAppVersionHaveBeenSaved(true)
-//                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
-//                .setShouldGcmProviderRegisterHaveBeenCalled(true)
-//                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-//                .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
-//                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
-//                .setShouldGeofencesHaveBeenReregistered(false)
-//                .setShouldRegistrationHaveSucceeded(false);
-//        testParams.run();
-//    }
-//
-//    public void testSuccessfullyRegisteredButNeedsToUpdateGeofences() {
-//        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-//                .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
-//                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-//                .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
-//                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, false)
-//                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, false)
-//                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
-//                .setupTags(EMPTY_SET, null, EMPTY_SET, false)
-//                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
-//                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-//                .setupGeofenceUpdateTimestamp(GeofenceEngine.NEVER_UPDATED_GEOFENCES, 0L, 1337L, 1337L, true, true, false, false)
-//                .setupAreGeofencesEnabled(false, true, true, true)
-//                .setupGcmUnregisterDevice(false, false)
-//                .setupAppVersion(1, 1, 1)
-//                .setShouldAppVersionHaveBeenSaved(false)
-//                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
-//                .setShouldGcmProviderRegisterHaveBeenCalled(false)
-//                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
-//                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
-//                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
-//                .setShouldGeofencesHaveBeenReregistered(false)
-//                .setShouldRegistrationHaveSucceeded(true);
-//        testParams.run();
-//    }
-//
-//    public void testSuccessfullyRegisteredWithNoGeofencesAndGeofencesAreDisabled() {
-//        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-//                .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
-//                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-//                .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
-//                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, false)
-//                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, false)
-//                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
-//                .setupTags(EMPTY_SET, null, EMPTY_SET, false)
-//                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
-//                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-//                .setupGeofenceUpdateTimestamp(GeofenceEngine.NEVER_UPDATED_GEOFENCES, NOT_USED, NOT_USED, GeofenceEngine.NEVER_UPDATED_GEOFENCES, true, false, false, false)
-//                .setupAreGeofencesEnabled(false, false, false, false)
-//                .setupGcmUnregisterDevice(false, false)
-//                .setupAppVersion(1, 1, 1)
-//                .setShouldAppVersionHaveBeenSaved(false)
-//                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
-//                .setShouldGcmProviderRegisterHaveBeenCalled(false)
-//                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
-//                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
-//                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
-//                .setShouldGeofencesHaveBeenReregistered(false)
-//                .setShouldRegistrationHaveSucceeded(true);
-//        testParams.run();
-//    }
+    public void testSenderIdUpdatedAndGcmReturnedNewGcmDeviceRegistrationId() {
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
+                .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_2, TEST_GCM_SENDER_ID_2, true)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, true)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, true)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupTags(TEST_TAGS1, TEST_TAGS1, TEST_TAGS1, true)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setupGeofenceUpdateTimestamp(1337L, 1337L, NOT_USED, 1337L, true, false, false, false)
+                .setupAreGeofencesEnabled(true, true, true, false)
+                .setupGcmUnregisterDevice(true, true)
+                .setupAppVersion(1, 1, 1)
+                .setShouldAppVersionHaveBeenSaved(true)
+                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
+                .setShouldGcmProviderRegisterHaveBeenCalled(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(false)
+                .setShouldHavePermissionForGeofences(true)
+                .setShouldRegistrationHaveSucceeded(true);
+        testParams.run();
+    }
+
+    public void testSenderIdUpdatedAndGcmReturnedOldGcmDeviceRegistrationId() {
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
+                .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_2, TEST_GCM_SENDER_ID_2, true)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, false)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, false)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
+                .setupTags(TEST_TAGS1, TEST_TAGS1, TEST_TAGS1, false)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setupGeofenceUpdateTimestamp(1337L, 1337L, NOT_USED, 1337L, true, false, false, false)
+                .setupAreGeofencesEnabled(true, true, true, false)
+                .setupGcmUnregisterDevice(true, true)
+                .setupAppVersion(1, 1, 1)
+                .setShouldAppVersionHaveBeenSaved(true)
+                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
+                .setShouldGcmProviderRegisterHaveBeenCalled(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
+                .setShouldHavePermissionForGeofences(true)
+                .setShouldRegistrationHaveSucceeded(true);
+        testParams.run();
+    }
+
+    public void testSenderIdUpdatedAndGcmReturnedOldGcmDeviceRegistrationIdWithoutPermissionForGeofences() {
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
+                .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_2, TEST_GCM_SENDER_ID_2, true)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, false)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, false)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
+                .setupTags(TEST_TAGS1, TEST_TAGS1, TEST_TAGS1, false)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setupGeofenceUpdateTimestamp(1337L, NOT_USED, NOT_USED, GeofenceEngine.NEVER_UPDATED_GEOFENCES, true, false, false, true)
+                .setupAreGeofencesEnabled(true, true, false, true)
+                .setupGcmUnregisterDevice(true, true)
+                .setupAppVersion(1, 1, 1)
+                .setShouldAppVersionHaveBeenSaved(true)
+                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
+                .setShouldGcmProviderRegisterHaveBeenCalled(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
+                .setShouldHavePermissionForGeofences(false)
+                .setShouldRegistrationHaveSucceeded(true);
+        testParams.run();
+    }
+
+    public void testSenderIdUpdatedAndGcmReregistrationFails() {
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
+                .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, null, null)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_2, null, true)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, false)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, false)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
+                .setupTags(TEST_TAGS1, TEST_TAGS1, TEST_TAGS1, false)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setupGeofenceUpdateTimestamp(1337L, 1337L, NOT_USED, 1337L, true, false, false, false)
+                .setupAreGeofencesEnabled(true, true, true, false)
+                .setupGcmUnregisterDevice(true, true)
+                .setupAppVersion(1, 1, PushPreferencesProvider.NO_SAVED_VERSION)
+                .setShouldAppVersionHaveBeenSaved(true)
+                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
+                .setShouldGcmProviderRegisterHaveBeenCalled(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
+                .setShouldHavePermissionForGeofences(true)
+                .setShouldRegistrationHaveSucceeded(false);
+        testParams.run();
+    }
+
+    public void testSenderIdUpdatedAndGcmReturnedNewGcmDeviceRegistrationIdButPCFPushReregistrationFails() {
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
+                .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_2, TEST_GCM_SENDER_ID_2, true)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, true)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, true)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupTags(TEST_TAGS1, TEST_TAGS1, TEST_TAGS1, true)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setupGeofenceUpdateTimestamp(1337L, 1337L, NOT_USED, 1337L, true, false, false, false)
+                .setupAreGeofencesEnabled(true, true, true, false)
+                .setupGcmUnregisterDevice(true, true)
+                .setupAppVersion(1, 1, 1)
+                .setShouldAppVersionHaveBeenSaved(true)
+                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
+                .setShouldGcmProviderRegisterHaveBeenCalled(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(false)
+                .setShouldHavePermissionForGeofences(true)
+                .setShouldRegistrationHaveSucceeded(true);
+        testParams.run();
+    }
+
+    public void testSenderIdUpdatedAndGcmReturnedNewGcmDeviceRegistrationIdButPCFPushReregistrationFailsAndPermissionForGeofencesRemoved() {
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
+                .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_2, TEST_GCM_DEVICE_REGISTRATION_ID_2)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_2, TEST_GCM_SENDER_ID_2, true)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, true)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, true)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupTags(TEST_TAGS1, TEST_TAGS1, TEST_TAGS1, true)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setupGeofenceUpdateTimestamp(1337L, NOT_USED, NOT_USED, GeofenceEngine.NEVER_UPDATED_GEOFENCES, true, false, false, true)
+                .setupAreGeofencesEnabled(true, true, false, true)
+                .setupGcmUnregisterDevice(true, true)
+                .setupAppVersion(1, 1, 1)
+                .setShouldAppVersionHaveBeenSaved(true)
+                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
+                .setShouldGcmProviderRegisterHaveBeenCalled(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldGeofencesHaveBeenReregistered(false)
+                .setShouldHavePermissionForGeofences(false)
+                .setShouldRegistrationHaveSucceeded(true);
+        testParams.run();
+    }
+
+    public void testSuccessfulInitialRegistrationButFailsToGetGeofences() {
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
+                .setupGcmDeviceRegistrationId(null, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
+                .setupPCFPushDeviceRegistrationId(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupGcmSenderId(null, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, true)
+                .setupPlatformUuid(null, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, true)
+                .setupPlatformSecret(null, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, true)
+                .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupTags(null, null, EMPTY_SET, true)
+                .setupServiceUrl(null, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
+                .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setupGeofenceUpdateTimestamp(GeofenceEngine.NEVER_UPDATED_GEOFENCES, 0L, 0L, GeofenceEngine.NEVER_UPDATED_GEOFENCES, false, true, false, false)
+                .setupAreGeofencesEnabled(false, true, false, false)
+                .setupGcmUnregisterDevice(false, false)
+                .setupAppVersion(1, 1, 1)
+                .setShouldAppVersionHaveBeenSaved(true)
+                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(true)
+                .setShouldGcmProviderRegisterHaveBeenCalled(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
+                .setShouldHavePermissionForGeofences(true)
+                .setShouldRegistrationHaveSucceeded(false);
+        testParams.run();
+    }
+
+    public void testSuccessfullyRegisteredWithNoGeofencesAndGeofencesAreDisabled() {
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
+                .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, false)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, false)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
+                .setupTags(EMPTY_SET, null, EMPTY_SET, false)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setupGeofenceUpdateTimestamp(GeofenceEngine.NEVER_UPDATED_GEOFENCES, NOT_USED, NOT_USED, GeofenceEngine.NEVER_UPDATED_GEOFENCES, true, false, false, false)
+                .setupAreGeofencesEnabled(false, false, false, false)
+                .setupGcmUnregisterDevice(false, false)
+                .setupAppVersion(1, 1, 1)
+                .setShouldAppVersionHaveBeenSaved(false)
+                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
+                .setShouldGcmProviderRegisterHaveBeenCalled(false)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
+                .setShouldHavePermissionForGeofences(true)
+                .setShouldRegistrationHaveSucceeded(true);
+        testParams.run();
+    }
+
+    public void testSuccessfullyRegisteredWithNoGeofencesAndGeofencesAreDisabledAndThereIsNoPermissionForGeofences() {
+        RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
+                .setupGcmDeviceRegistrationId(TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1, TEST_GCM_DEVICE_REGISTRATION_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupGcmSenderId(TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, TEST_GCM_SENDER_ID_1, false)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, false)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, false)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
+                .setupTags(EMPTY_SET, null, EMPTY_SET, false)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setupGeofenceUpdateTimestamp(GeofenceEngine.NEVER_UPDATED_GEOFENCES, NOT_USED, NOT_USED, GeofenceEngine.NEVER_UPDATED_GEOFENCES, true, false, false, false)
+                .setupAreGeofencesEnabled(false, false, false, false)
+                .setupGcmUnregisterDevice(false, false)
+                .setupAppVersion(1, 1, 1)
+                .setShouldAppVersionHaveBeenSaved(false)
+                .setShouldGcmDeviceRegistrationIdHaveBeenSaved(false)
+                .setShouldGcmProviderRegisterHaveBeenCalled(false)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldGeofencesHaveBeenReregistered(false)
+                .setShouldHavePermissionForGeofences(false)
+                .setShouldRegistrationHaveSucceeded(true);
+        testParams.run();
+    }
 
     private RegistrationListener getListenerForRegistration(final boolean isSuccessfulRegistration) {
         return new RegistrationListener() {
+
             @Override
             public void onRegistrationComplete() {
                 assertTrue(isSuccessfulRegistration);
