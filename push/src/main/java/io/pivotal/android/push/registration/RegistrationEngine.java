@@ -245,6 +245,9 @@ public class RegistrationEngine {
                 }
             }
 
+        // TODO: If the Push Platform is changed then consider doing a DELETE at the old platform with the old GCM device ID and then a POST at the new platform.  At this time,
+        // the registration engine simply orphans the registration at the old platform and does a POST at the new platform.
+
         } else if (isPCFPushUpdateRegistrationRequired(previousGcmDeviceRegistrationId, parameters)) {
             registerUpdateDeviceWithPCFPush(previousGcmDeviceRegistrationId, previousPCFPushDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
 
@@ -342,18 +345,18 @@ public class RegistrationEngine {
     }
 
     private boolean isPCFPushNewRegistrationRequired(PushParameters parameters) {
-        final boolean isPreviousPlatformUuidEmpty = previousPlatformUuid == null || previousPlatformUuid.isEmpty();
+        final boolean isPlatformUpdated = isPlatformUpdated(parameters);
         final boolean isServiceUrlUpdated = isServiceUrlUpdated(parameters);
         if (isEmptyPreviousGcmDeviceRegistrationId()) {
             Logger.v("previousGcmDeviceRegistrationId is empty. Device registration with PCF Push will be required.");
         }
-        if (isPreviousPlatformUuidEmpty) {
-            Logger.v("previousPlatformUuid is empty. Device registration with PCF Push will be required.");
+        if (isPlatformUpdated) {
+            Logger.v("The platform uuid and/or secret is updated. Device registration with PCF Push will be required.");
         }
         if (isServiceUrlUpdated) {
             Logger.v("The serviceUrl has been updated. Device registration with PCF Push will be required.");
         }
-        return isEmptyPreviousGcmDeviceRegistrationId() || isPreviousPlatformUuidEmpty || areRegistrationParametersUpdated(parameters) || isServiceUrlUpdated;
+        return isEmptyPreviousGcmDeviceRegistrationId() || isPlatformUpdated || areRegistrationParametersUpdated(parameters) || isServiceUrlUpdated;
     }
 
     private boolean isPCFPushUpdateRegistrationRequired(String newGcmDeviceRegistrationId, PushParameters parameters) {
@@ -380,14 +383,18 @@ public class RegistrationEngine {
     }
 
     private boolean areRegistrationParametersUpdated(PushParameters parameters) {
+        final boolean isPreviousDeviceAliasEmpty = previousDeviceAlias == null || previousDeviceAlias.isEmpty();
+        final boolean isNewDeviceAliasEmpty = parameters.getDeviceAlias() == null || parameters.getDeviceAlias().isEmpty();
+        final boolean isDeviceAliasUpdated = (isPreviousDeviceAliasEmpty && !isNewDeviceAliasEmpty) || (!isPreviousDeviceAliasEmpty && isNewDeviceAliasEmpty) || (!isNewDeviceAliasEmpty && !parameters.getDeviceAlias().equals(previousDeviceAlias));
+        return isDeviceAliasUpdated;
+    }
+
+    private boolean isPlatformUpdated(PushParameters parameters) {
         final boolean isPreviousPlatformUuidEmpty = previousPlatformUuid == null || previousPlatformUuid.isEmpty();
         final boolean isPlatformUuidUpdated = (isPreviousPlatformUuidEmpty && !parameters.getPlatformUuid().isEmpty()) || !parameters.getPlatformUuid().equals(previousPlatformUuid);
         final boolean isPreviousPlatformSecretEmpty = previousPlatformSecret == null || previousPlatformSecret.isEmpty();
         final boolean isPlatformSecretUpdated = (isPreviousPlatformSecretEmpty && !parameters.getPlatformSecret().isEmpty()) || !parameters.getPlatformSecret().equals(previousPlatformSecret);
-        final boolean isPreviousDeviceAliasEmpty = previousDeviceAlias == null || previousDeviceAlias.isEmpty();
-        final boolean isNewDeviceAliasEmpty = parameters.getDeviceAlias() == null || parameters.getDeviceAlias().isEmpty();
-        final boolean isDeviceAliasUpdated = (isPreviousDeviceAliasEmpty && !isNewDeviceAliasEmpty) || (!isPreviousDeviceAliasEmpty && isNewDeviceAliasEmpty) || (!isNewDeviceAliasEmpty && !parameters.getDeviceAlias().equals(previousDeviceAlias));
-        return isDeviceAliasUpdated || isPlatformSecretUpdated || isPlatformUuidUpdated;
+        return isPlatformSecretUpdated || isPlatformUuidUpdated;
     }
 
     private boolean isServiceUrlUpdated(PushParameters parameters) {
@@ -481,10 +488,15 @@ public class RegistrationEngine {
                     Logger.v("The PCF Push serviceUrl has been updated. A new registration with the PCF Push server is required.");
                 }
 
-                if (isPCFPushUpdateRegistrationRequired(gcmDeviceRegistrationId, parameters) && !isServiceUrlUpdated) {
+                final boolean isPlatformUpdated = isPlatformUpdated(parameters);
+                if (isPlatformUpdated) {
+                    Logger.v("The PCF Push platform has been updated. A new registration with the PCF Push server is required.");
+                }
+
+                if (isPCFPushUpdateRegistrationRequired(gcmDeviceRegistrationId, parameters) && !isServiceUrlUpdated && !isPlatformUpdated) {
                     registerUpdateDeviceWithPCFPush(gcmDeviceRegistrationId, previousPCFPushDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
 
-                } else if (isNewGcmDeviceRegistrationId || isServiceUrlUpdated) {
+                } else if (isNewGcmDeviceRegistrationId || isServiceUrlUpdated || isPlatformUpdated) {
                     registerNewDeviceWithPCFPush(gcmDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
 
                 } else if (isGeofenceUpdateRequired(parameters)) {
