@@ -1,5 +1,7 @@
 package io.pivotal.android.push.version;
 
+import android.support.annotation.Nullable;
+
 public class GeofenceStatus {
 
     private final boolean isError;
@@ -8,7 +10,7 @@ public class GeofenceStatus {
 
     // TODO - add 'isEnabled'?
 
-    public GeofenceStatus(boolean isError, String errorReason, int numberCurrentlyMonitoringGeofences) {
+    public GeofenceStatus(boolean isError, @Nullable String errorReason, int numberCurrentlyMonitoringGeofences) {
         this.isError = isError;
         this.errorReason = errorReason;
         this.numberCurrentlyMonitoringGeofences = numberCurrentlyMonitoringGeofences;

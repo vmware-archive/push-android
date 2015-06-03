@@ -3,6 +3,9 @@
  */
 package io.pivotal.android.push;
 
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
+
 import java.util.HashSet;
 import java.util.Set;
 
@@ -37,7 +40,14 @@ public class PushParameters {
      *                       will be unsubscribed.
      * @param areGeofencesEnabled  Are geofences available (see the "pivotal.push.geofencesEnabled" property).
      */
-    public PushParameters(String gcmSenderId, String platformUuid, String platformSecret, String serviceUrl, String deviceAlias, Set<String> tags, boolean areGeofencesEnabled) {
+    public PushParameters(@NonNull String gcmSenderId,
+                          @NonNull String platformUuid,
+                          @NonNull String platformSecret,
+                          @NonNull String serviceUrl,
+                          @Nullable String deviceAlias,
+                          @Nullable Set<String> tags,
+                          boolean areGeofencesEnabled) {
+
         this.gcmSenderId = gcmSenderId;
         this.platformUuid = platformUuid;
         this.platformSecret = platformSecret;

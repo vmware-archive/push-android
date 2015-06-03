@@ -5,6 +5,8 @@ package io.pivotal.android.push;
 
 import android.app.Application;
 import android.content.Context;
+import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
@@ -70,7 +72,7 @@ public class Push {
      * @param context       A context object.  May not be null.
      * @return  A reference to the singleton Push object.
      */
-    public static Push getInstance(Context context) {
+    public static Push getInstance(@NonNull Context context) {
         if (instance == null) {
             instance = new Push(context);
         }
@@ -79,20 +81,20 @@ public class Push {
 
     private Context context;
 
-    private Push(Context context) {
+    private Push(@NonNull Context context) {
         verifyArguments(context);
         saveArguments(context);
 
         Logger.i("Push SDK initialized.");
     }
 
-    private void verifyArguments(Context context) {
+    private void verifyArguments(@NonNull Context context) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
     }
 
-    private void saveArguments(Context context) {
+    private void saveArguments(@NonNull Context context) {
         if (context instanceof Application) {
             this.context = context;
         } else {
@@ -110,7 +112,8 @@ public class Push {
      * @param deviceAlias Provides the device alias for registration.  This is optional and may be null
      * @param tags Provides the list of tags for registration.  This is optional and may be null.
      */
-    public void startRegistration(final String deviceAlias, final Set<String> tags) {
+    public void startRegistration(@Nullable final String deviceAlias,
+                                  @Nullable final Set<String> tags) {
         startRegistration(deviceAlias, tags, null);
     }
 
@@ -126,7 +129,10 @@ public class Push {
      * @param listener Optional listener for receiving a callback after registration finishes. This callback may
      *                 be called on a background thread.  May be null.
      */
-    public void startRegistration(final String deviceAlias, final Set<String> tags, final RegistrationListener listener) {
+    public void startRegistration(@Nullable final String deviceAlias,
+                                  @Nullable final Set<String> tags,
+                                  @Nullable final RegistrationListener listener) {
+
         final GcmProvider gcmProvider = new RealGcmProvider(context);
         final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
         final GcmRegistrationApiRequest dummyGcmRegistrationApiRequest = new GcmRegistrationApiRequestImpl(context, gcmProvider);
@@ -175,7 +181,8 @@ public class Push {
         threadPool.execute(runnable);
     }
 
-    private PushParameters getPushParameters(String deviceAlias, Set<String> tags) {
+    private PushParameters getPushParameters(@Nullable String deviceAlias,
+                                             @Nullable Set<String> tags) {
         final String gcmSenderId = Pivotal.getGcmSenderId(context);
         final String platformUuid = Pivotal.getPlatformUuid(context);
         final String platformSecret = Pivotal.getPlatformSecret(context);
@@ -184,7 +191,7 @@ public class Push {
         return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, deviceAlias, tags, areGeofencesEnabled);
     }
 
-    private void verifyRegistrationArguments(PushParameters parameters) {
+    private void verifyRegistrationArguments(@NonNull PushParameters parameters) {
         if (parameters == null) {
             throw new IllegalArgumentException("parameters may not be null");
         }
@@ -212,7 +219,7 @@ public class Push {
      *
      * @param tags Provides the list of tags the device should subscribe to. Allowed to be `null` or empty.
      */
-    public void subscribeToTags(final Set<String> tags) {
+    public void subscribeToTags(@Nullable final Set<String> tags) {
         subscribeToTags(tags, null);
     }
 
@@ -235,7 +242,8 @@ public class Push {
      *        onSubscribeToTagsFailed will be executed if subscription fails. This method may be called on a
      *                background thread.
      */
-    public void subscribeToTags(final Set<String> tags, final SubscribeToTagsListener subscribeToTagsListener) {
+    public void subscribeToTags(@Nullable final Set<String> tags,
+                                @Nullable final SubscribeToTagsListener subscribeToTagsListener) {
 
         final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
         final String deviceAlias = pushPreferencesProvider.getDeviceAlias();
@@ -270,7 +278,7 @@ public class Push {
      *
      * @param listener Optional listener for receiving a callback after un`registration finishes. This callback may
      */
-    public void startUnregistration(final UnregistrationListener listener) {
+    public void startUnregistration(@Nullable final UnregistrationListener listener) {
         final PushParameters parameters = getPushParameters(null, null);
         verifyUnregistrationArguments(parameters);
 
@@ -312,7 +320,7 @@ public class Push {
         threadPool.execute(runnable);
     }
 
-    private void verifyUnregistrationArguments(PushParameters parameters) {
+    private void verifyUnregistrationArguments(@NonNull PushParameters parameters) {
         if (parameters == null) {
             throw new IllegalArgumentException("parameters may not be null");
         }
