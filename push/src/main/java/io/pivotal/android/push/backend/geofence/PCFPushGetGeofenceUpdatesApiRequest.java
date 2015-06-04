@@ -125,17 +125,43 @@ public class PCFPushGetGeofenceUpdatesApiRequest extends ApiRequestImpl {
                        PushParameters parameters) throws MalformedURLException {
 
         final StringBuilder builder = new StringBuilder();
+
+        addUrlToRequest(parameters, builder);
+        addEndpointToRequest(builder);
+        addTimestampToRequest(timestamp, builder);
+        addDeviceUuidToRequest(deviceUuid, builder);
+        addPlatformToRequest(builder);
+
+        return new URL(builder.toString());
+    }
+
+    private void addUrlToRequest(PushParameters parameters, StringBuilder builder) {
         builder.append(parameters.getServiceUrl());
+    }
+
+    private void addEndpointToRequest(StringBuilder builder) {
         builder.append('/');
         builder.append(Const.PCF_PUSH_GEOFENCE_UPDATE_REQUEST_ENDPOINT);
+    }
+
+    private void addTimestampToRequest(long timestamp, StringBuilder builder) {
         builder.append('?');
         builder.append(Const.PCF_PUSH_GEOFENCE_UPDATE_REQUEST_TIMESTAMP);
         builder.append('=');
         builder.append(timestamp);
+    }
+
+    private void addDeviceUuidToRequest(String deviceUuid, StringBuilder builder) {
         builder.append('&');
         builder.append(Const.PCF_PUSH_GEOFENCE_UPDATE_REQUEST_DEVICE_UUID);
         builder.append('=');
         builder.append(deviceUuid);
-        return new URL(builder.toString());
+    }
+
+    private void addPlatformToRequest(StringBuilder builder) {
+        builder.append('&');
+        builder.append(Const.PCF_PUSH_GEOFENCE_UPDATE_REQUEST_PLATFORM);
+        builder.append('=');
+        builder.append(Const.PCF_PUSH_GEOFENCE_UPDATE_REQUEST_ANDROID);
     }
 }

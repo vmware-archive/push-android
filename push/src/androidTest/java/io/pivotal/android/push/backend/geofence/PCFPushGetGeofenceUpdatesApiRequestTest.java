@@ -194,6 +194,7 @@ public class PCFPushGetGeofenceUpdatesApiRequestTest extends AndroidTestCase {
                 assertEquals("GET", FakeHttpURLConnection.getReceivedHttpMethod());
                 assertTrue(FakeHttpURLConnection.getReceivedURL().toString().contains("timestamp=" + expectedTimestamp));
                 assertTrue(FakeHttpURLConnection.getReceivedURL().toString().contains("device_uuid=" + expectedDeviceUuid));
+                assertTrue(FakeHttpURLConnection.getReceivedURL().toString().contains("platform=android"));
                 delayedLoop.flagSuccess();
             }
 
@@ -203,6 +204,7 @@ public class PCFPushGetGeofenceUpdatesApiRequestTest extends AndroidTestCase {
                 assertEquals("GET", FakeHttpURLConnection.getReceivedHttpMethod());
                 assertTrue(FakeHttpURLConnection.getReceivedURL().toString().contains("timestamp=" + expectedTimestamp));
                 assertTrue(FakeHttpURLConnection.getReceivedURL().toString().contains("device_uuid=" + expectedDeviceUuid));
+                assertTrue(FakeHttpURLConnection.getReceivedURL().toString().contains("platform=android"));
                 delayedLoop.flagSuccess();
             }
         };
