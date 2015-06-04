@@ -62,7 +62,7 @@ public class PCFPushGetGeofenceUpdatesApiRequest extends ApiRequestImpl {
             urlConnection.addRequestProperty("Authorization", getBasicAuthorizationValue(parameters));
             urlConnection.connect();
 
-            Logger.v("Making network request to get updated geofences with timestamps > " + timestamp);
+            Logger.v("Making network request to get updated geofences with url: " + url.toString());
 
             final int statusCode = urlConnection.getResponseCode();
 
