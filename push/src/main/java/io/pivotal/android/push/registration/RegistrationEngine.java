@@ -356,7 +356,7 @@ public class RegistrationEngine {
         if (isServiceUrlUpdated) {
             Logger.v("The serviceUrl has been updated. Device registration with PCF Push will be required.");
         }
-        return isEmptyPreviousGcmDeviceRegistrationId() || isPlatformUpdated || areRegistrationParametersUpdated(parameters) || isServiceUrlUpdated;
+        return isEmptyPreviousGcmDeviceRegistrationId() || isPlatformUpdated || isServiceUrlUpdated;
     }
 
     private boolean isPCFPushUpdateRegistrationRequired(String newGcmDeviceRegistrationId, PushParameters parameters) {
