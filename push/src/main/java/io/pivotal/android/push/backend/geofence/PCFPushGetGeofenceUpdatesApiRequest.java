@@ -13,6 +13,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceResponseData;
 import io.pivotal.android.push.util.ApiRequestImpl;
@@ -56,6 +58,11 @@ public class PCFPushGetGeofenceUpdatesApiRequest extends ApiRequestImpl {
         try {
             final URL url = getURL(timestamp, deviceUuid, parameters);
             final HttpURLConnection urlConnection = getHttpURLConnection(url);
+
+            if (parameters.isTrustAllSslCertificates() && urlConnection instanceof HttpsURLConnection) {
+                trustAllSslCertificates((HttpsURLConnection) urlConnection);
+            }
+
             urlConnection.setDoInput(true);
             urlConnection.setRequestMethod("GET");
             // TODO - put this header field back in after the server supports authorization

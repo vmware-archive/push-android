@@ -217,7 +217,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     public void testNullSenderId() {
         try {
             final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
-            engine.registerDevice(new PushParameters(null, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, null, true), getListenerForRegistration(false));
+            engine.registerDevice(new PushParameters(null, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, null, true, false), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -227,7 +227,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     public void testNullPlatformUuid() {
         try {
             final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
-            engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, null, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, null, true), getListenerForRegistration(false));
+            engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, null, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, null, true, false), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -237,7 +237,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     public void testNullPlatformSecret() {
         try {
             final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
-            engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, null, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, null, true), getListenerForRegistration(false));
+            engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, null, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, null, true, false), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -246,20 +246,20 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullDeviceAlias() throws InterruptedException {
         final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
-        engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, null, null, true), getListenerForRegistration(true));
+        engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, null, null, true, false), getListenerForRegistration(true));
         semaphore.acquire();
     }
 
     public void testEmptyDeviceAlias() throws InterruptedException {
         final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
-        engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, "", null, true), getListenerForRegistration(true));
+        engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, "", null, true, false), getListenerForRegistration(true));
         semaphore.acquire();
     }
 
     public void testEmptyServiceUrl() throws InterruptedException {
         try {
             final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
-            engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, null, TEST_DEVICE_ALIAS_1, null, true), getListenerForRegistration(true));
+            engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, null, TEST_DEVICE_ALIAS_1, null, true, false), getListenerForRegistration(true));
             semaphore.acquire();
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -270,7 +270,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     public void testGooglePlayServicesNotAvailable() throws InterruptedException {
         gcmProvider.setIsGooglePlayServicesInstalled(false);
         final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
-        final PushParameters parameters = new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, null, true);
+        final PushParameters parameters = new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, null, true, false);
         engine.registerDevice(parameters, getListenerForRegistration(false));
         semaphore.acquire();
     }

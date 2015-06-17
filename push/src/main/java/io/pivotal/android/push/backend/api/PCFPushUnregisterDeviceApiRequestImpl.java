@@ -7,6 +7,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 
 import io.pivotal.android.push.PushParameters;
+import javax.net.ssl.HttpsURLConnection;
+
 import io.pivotal.android.push.util.ApiRequestImpl;
 import io.pivotal.android.push.util.Const;
 import io.pivotal.android.push.util.Logger;
@@ -30,6 +32,11 @@ public class PCFPushUnregisterDeviceApiRequestImpl extends ApiRequestImpl implem
             Logger.v("Making network request to the PCF Push server to unregister the device ID:" + pcfPushDeviceRegistrationId);
             final URL url = new URL(parameters.getServiceUrl() + "/" + Const.PCF_PUSH_REGISTRATION_REQUEST_ENDPOINT + "/" + pcfPushDeviceRegistrationId);
             final HttpURLConnection urlConnection = getHttpURLConnection(url);
+
+            if (parameters.isTrustAllSslCertificates() && urlConnection instanceof HttpsURLConnection) {
+                trustAllSslCertificates((HttpsURLConnection) urlConnection);
+            }
+
             urlConnection.setRequestMethod("DELETE");
             urlConnection.addRequestProperty("Authorization", ApiRequestImpl.getBasicAuthorizationValue(parameters));
             urlConnection.connect();

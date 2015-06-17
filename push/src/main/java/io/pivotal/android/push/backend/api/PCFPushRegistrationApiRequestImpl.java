@@ -18,6 +18,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Set;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.model.api.BasePCFPushApiRegistrationRequestData;
 import io.pivotal.android.push.model.api.PCFPushApiRegistrationPostRequestData;
@@ -113,6 +115,11 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
         try {
             final URL url = getURL(isUpdate, previousPCFPushDeviceRegistrationId, parameters);
             final HttpURLConnection urlConnection = getHttpURLConnection(url);
+
+            if (parameters.isTrustAllSslCertificates() && urlConnection instanceof HttpsURLConnection) {
+                trustAllSslCertificates((HttpsURLConnection) urlConnection);
+            }
+
             urlConnection.setDoOutput(true);
             urlConnection.setDoInput(true);
             urlConnection.setRequestMethod(getRequestMethod(isUpdate));

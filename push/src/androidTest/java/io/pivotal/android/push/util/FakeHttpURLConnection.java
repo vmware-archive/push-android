@@ -8,13 +8,17 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.HttpURLConnection;
 import java.net.ProtocolException;
 import java.net.URL;
+import java.security.cert.Certificate;
 import java.util.HashMap;
 import java.util.Map;
 
-public class FakeHttpURLConnection extends HttpURLConnection {
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLPeerUnverifiedException;
+import javax.net.ssl.SSLSocketFactory;
+
+public class FakeHttpURLConnection extends HttpsURLConnection {
 
     private static int responseCode;
     private static String responseData;
@@ -24,6 +28,7 @@ public class FakeHttpURLConnection extends HttpURLConnection {
     private static Map<String, String> requestProperties;
     private static URL url;
     private static ByteArrayOutputStream outputStream;
+    private static boolean didCallSetSSLSocketFactory;
 
     protected FakeHttpURLConnection(URL url) {
         super(url);
@@ -68,6 +73,7 @@ public class FakeHttpURLConnection extends HttpURLConnection {
         FakeHttpURLConnection.connectionException = null;
         FakeHttpURLConnection.outputStream = null;
         FakeHttpURLConnection.willThrowConnectionException = false;
+        FakeHttpURLConnection.didCallSetSSLSocketFactory = false;
     }
 
     @Override
@@ -118,7 +124,32 @@ public class FakeHttpURLConnection extends HttpURLConnection {
         FakeHttpURLConnection.requestProperties.put(field, newValue);
     }
 
+    @Override
+    public void setSSLSocketFactory(SSLSocketFactory sf) {
+        super.setSSLSocketFactory(sf);
+        FakeHttpURLConnection.didCallSetSSLSocketFactory = true;
+    }
+
+    @Override
+    public String getCipherSuite() {
+        return null;
+    }
+
+    @Override
+    public Certificate[] getLocalCertificates() {
+        return new Certificate[0];
+    }
+
+    @Override
+    public Certificate[] getServerCertificates() throws SSLPeerUnverifiedException {
+        return new Certificate[0];
+    }
+
     public static byte[] getRequestData() {
         return FakeHttpURLConnection.outputStream.toByteArray();
+    }
+
+    public static boolean didCallSetSSLSocketFactory() {
+        return FakeHttpURLConnection.didCallSetSSLSocketFactory;
     }
 }

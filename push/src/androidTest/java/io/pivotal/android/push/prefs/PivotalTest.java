@@ -62,4 +62,8 @@ public class PivotalTest extends AndroidTestCase {
     public void testGetGeofencesEnabled() {
         assertEquals(true, Pivotal.getGeofencesEnabled(getContext()));
     }
+
+    public void testTrustAllSslCertificates() {
+        assertTrue(Pivotal.isTrustAllSslCertificates(getContext()));
+    }
 }

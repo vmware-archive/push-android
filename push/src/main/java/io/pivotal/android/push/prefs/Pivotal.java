@@ -18,6 +18,7 @@ public class Pivotal {
         public static final String PLATFORM_UUID = "pivotal.push.platformUuid";
         public static final String PLATFORM_SECRET = "pivotal.push.platformSecret";
         public static final String GEOFENCES_ENABLED = "pivotal.push.geofencesEnabled";
+        public static final String TRUST_ALL_SSL_CERTIFICATES = "pivotal.push.trustAllSslCertificates";
     }
 
     private static final String[] LOCATIONS = {
@@ -95,5 +96,9 @@ public class Pivotal {
 
     public static boolean getGeofencesEnabled(Context context) {
         return Boolean.parseBoolean(getOptionalProperty(context, Keys.GEOFENCES_ENABLED, "false"));
+    }
+
+    public static boolean isTrustAllSslCertificates(Context context) {
+        return Boolean.parseBoolean(getOptionalProperty(context, Keys.TRUST_ALL_SSL_CERTIFICATES, "false"));
     }
 }

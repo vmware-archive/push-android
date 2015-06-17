@@ -132,6 +132,7 @@ public class GeofenceUpdater {
         final String platformSecret = Pivotal.getPlatformSecret(context);
         final String serviceUrl = Pivotal.getServiceUrl(context);
         final boolean areGeofencesEnabled = Pivotal.getGeofencesEnabled(context);
-        return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, null, null, areGeofencesEnabled);
+        final boolean isTrustAllCertificates = Pivotal.isTrustAllSslCertificates(context);
+        return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, null, null, areGeofencesEnabled, isTrustAllCertificates);
     }
 }

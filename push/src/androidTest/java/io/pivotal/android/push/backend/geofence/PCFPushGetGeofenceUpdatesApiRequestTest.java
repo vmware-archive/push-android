@@ -211,6 +211,6 @@ public class PCFPushGetGeofenceUpdatesApiRequestTest extends AndroidTestCase {
     }
 
     private PushParameters getParameters() {
-        return new PushParameters(null, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, null, null, true);
+        return new PushParameters(null, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, null, null, true, false);
     }
 }

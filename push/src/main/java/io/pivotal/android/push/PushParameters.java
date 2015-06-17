@@ -21,6 +21,7 @@ public class PushParameters {
     private final String deviceAlias;
     private final Set<String> tags;
     private final boolean areGeofencesEnabled;
+    private final boolean trustAllSslCertificates;
 
     /**
      * Sets up parameters used by the Pivotal CF Mobile Services Push SDK
@@ -34,11 +35,12 @@ public class PushParameters {
      * @param serviceUrl     The Pivotal CF Mobile Services server used to provide push and related analytics services.
      *                       See the pivotal.push.serviceUrl" property.
      * @param deviceAlias    A developer-defined "device alias" which can be used to designate this device, or class.
-     *                       of devices, in push or notification campaigns. May not be set to `null`. May be set to empty.
+*                       of devices, in push or notification campaigns. May not be set to `null`. May be set to empty.
      * @param tags           A set of tags to register to.  You should always register all tags that you want to listen to, even if you have
      *                       already subscribed to them.  If you exclude any subscribed tags in a registration request, then those tags
      *                       will be unsubscribed.
      * @param areGeofencesEnabled  Are geofences available (see the "pivotal.push.geofencesEnabled" property).
+     * @param trustAllSslCertificates  'true' if all SSL certificates should be trusted. You should use 'false' unless otherwise required.
      */
     public PushParameters(@NonNull String gcmSenderId,
                           @NonNull String platformUuid,
@@ -46,7 +48,8 @@ public class PushParameters {
                           @NonNull String serviceUrl,
                           @Nullable String deviceAlias,
                           @Nullable Set<String> tags,
-                          boolean areGeofencesEnabled) {
+                          boolean areGeofencesEnabled,
+                          boolean trustAllSslCertificates) {
 
         this.gcmSenderId = gcmSenderId;
         this.platformUuid = platformUuid;
@@ -55,6 +58,7 @@ public class PushParameters {
         this.deviceAlias = deviceAlias;
         this.tags = tags;
         this.areGeofencesEnabled = areGeofencesEnabled;
+        this.trustAllSslCertificates = trustAllSslCertificates;
     }
 
     public String getGcmSenderId() {
@@ -87,78 +91,25 @@ public class PushParameters {
 
     @Override
     public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
 
-        if (o == null) {
-            return false;
-        }
+        PushParameters that = (PushParameters) o;
 
-        if (!(o instanceof PushParameters)) {
+        if (areGeofencesEnabled != that.areGeofencesEnabled) return false;
+        if (trustAllSslCertificates != that.trustAllSslCertificates) return false;
+        if (gcmSenderId != null ? !gcmSenderId.equals(that.gcmSenderId) : that.gcmSenderId != null)
             return false;
-        }
+        if (platformUuid != null ? !platformUuid.equals(that.platformUuid) : that.platformUuid != null)
+            return false;
+        if (platformSecret != null ? !platformSecret.equals(that.platformSecret) : that.platformSecret != null)
+            return false;
+        if (serviceUrl != null ? !serviceUrl.equals(that.serviceUrl) : that.serviceUrl != null)
+            return false;
+        if (deviceAlias != null ? !deviceAlias.equals(that.deviceAlias) : that.deviceAlias != null)
+            return false;
+        return !(tags != null ? !tags.equals(that.tags) : that.tags != null);
 
-        PushParameters other = (PushParameters)o;
-        
-        if (gcmSenderId == null && other.gcmSenderId != null) {
-            return false;
-        }
-        if (gcmSenderId != null && other.gcmSenderId == null) {
-            return false;
-        }
-        if (gcmSenderId != null && other.gcmSenderId != null && !other.gcmSenderId.equals(gcmSenderId)) {
-            return false;
-        }
-
-        if (platformUuid == null && other.platformUuid != null) {
-            return false;
-        }
-        if (platformUuid != null && other.platformUuid == null) {
-            return false;
-        }
-        if (platformUuid != null && other.platformUuid != null && !other.platformUuid.equals(platformUuid)) {
-            return false;
-        }
-
-        if (platformSecret == null && other.platformSecret != null) {
-            return false;
-        }
-        if (platformSecret != null && other.platformSecret == null) {
-            return false;
-        }
-        if (platformSecret != null && other.platformSecret != null && !other.platformSecret.equals(platformSecret)) {
-            return false;
-        }
-
-        if (serviceUrl == null && other.serviceUrl != null) {
-            return false;
-        }
-        if (serviceUrl != null && other.serviceUrl == null) {
-            return false;
-        }
-        if (serviceUrl != null && other.serviceUrl != null && !other.serviceUrl.equals(serviceUrl)) {
-            return false;
-        }
-
-        if (deviceAlias == null && other.deviceAlias != null) {
-            return false;
-        }
-        if (deviceAlias != null && other.deviceAlias == null) {
-            return false;
-        }
-        if (deviceAlias != null && other.deviceAlias != null && !other.deviceAlias.equals(deviceAlias)) {
-            return false;
-        }
-
-        if (tags == null && other.tags != null) {
-            return false;
-        }
-        if (tags != null && other.tags == null) {
-            return false;
-        }
-        if (tags != null && other.tags != null && !other.tags.equals(tags)) {
-            return false;
-        }
-
-        return areGeofencesEnabled != other.areGeofencesEnabled;
     }
 
     @Override
@@ -170,6 +121,11 @@ public class PushParameters {
         result = 31 * result + (deviceAlias != null ? deviceAlias.hashCode() : 0);
         result = 31 * result + (tags != null ? tags.hashCode() : 0);
         result = 31 * result + (areGeofencesEnabled ? 1 : 0);
+        result = 31 * result + (trustAllSslCertificates ? 1 : 0);
         return result;
+    }
+
+    public boolean isTrustAllSslCertificates() {
+        return trustAllSslCertificates;
     }
 }

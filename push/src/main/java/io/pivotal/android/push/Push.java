@@ -188,7 +188,8 @@ public class Push {
         final String platformSecret = Pivotal.getPlatformSecret(context);
         final String serviceUrl = Pivotal.getServiceUrl(context);
         final boolean areGeofencesEnabled = Pivotal.getGeofencesEnabled(context);
-        return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, deviceAlias, tags, areGeofencesEnabled);
+        final boolean trustAllSslCertificates = Pivotal.isTrustAllSslCertificates(context);
+        return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, deviceAlias, tags, areGeofencesEnabled, trustAllSslCertificates);
     }
 
     private void verifyRegistrationArguments(@NonNull PushParameters parameters) {
