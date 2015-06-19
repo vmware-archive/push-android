@@ -14,6 +14,7 @@ import android.os.Bundle;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.location.Geofence;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -229,7 +230,7 @@ public class GcmService extends IntentService {
     }
 
     private boolean isSubcribedToTag(PCFPushGeofenceData geofenceData, Set<String> subscribedTags) {
-        final List<String> tags = geofenceData.getTags();
+        final List<String> tags = lowercaseTags(geofenceData.getTags());
         if (tags == null || tags.isEmpty()) {
             return true;
         }
@@ -239,12 +240,24 @@ public class GcmService extends IntentService {
         }
 
         for (final String subscribedTag : subscribedTags) {
-            if (tags.contains(subscribedTag)) {
+            if (tags.contains(subscribedTag.toLowerCase())) {
                 return true;
             }
         }
 
         return false;
+    }
+
+    private List<String> lowercaseTags(List<String> tags) {
+        if (tags == null) {
+            return null;
+        }
+
+        final List<String> lowercaseTags = new ArrayList<>(tags.size());
+        for (int i = 0; i < tags.size(); i += 1) {
+            lowercaseTags.add(i, tags.get(i).toLowerCase());
+        }
+        return lowercaseTags;
     }
 
     private void addLocationToClear(PCFPushGeofenceLocationMap locationsToClear, String requestId, PCFPushGeofenceData geofenceData) {

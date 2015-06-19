@@ -39,7 +39,7 @@
             "android":{"message": "eat all this great stuff"}
         },
         "trigger_type": "exit",
-        "tags": ["TAG_2", "TAG_1"],
+        "tags": ["TAG_2", "tag_1"],
         "expiry_time": 1142744274,
         "locations": [
             {
@@ -86,7 +86,7 @@
     {
         "id": 51,
         "trigger_type": "exit",
-        "tags": ["TAG_1"],
+        "tags": ["Tag_1"],
         "expiry_time": 1142744274,
         "locations": [
             {
