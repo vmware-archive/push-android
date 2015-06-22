@@ -1,6 +1,7 @@
 Dependencies
 ============
-Dependency | Version | Link                                  | License   | Copyright Text    
----------- | ------- | ------------------------------------- | --------- | ------------------------------
-gson       | 2.2.4   | https://code.google.com/p/google-gson | Apache2.0 | Copyright (C) 2008 Google Inc.
 
+Name                 | Version | Description                          | License           | License Text | URL                                                   | Modified | Interaction
+-------------------- | ------- | ------------------------------------ | ----------------- | ------------ | ----------------------------------------------------- | -------- | ------------------------------------
+gson                 | 2.2.4   |                                      | Apache2.0         |              | https://code.google.com/p/google-gson                 | NO       | Dynamically linked. Not distributed.
+Google Play Services | 7.5.0   |                                      | AndroidSDKLicense |              | https://developers.google.com/android/guides/overview | NO       | Dynamically linked. Not distributed.
