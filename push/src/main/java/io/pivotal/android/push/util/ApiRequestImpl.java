@@ -105,5 +105,7 @@ public class ApiRequestImpl {
 
         HttpsURLConnection httpsURLConnection = urlConnection;
         httpsURLConnection.setSSLSocketFactory(context.getSocketFactory());
+
+        Logger.w("Note: We trust all SSL certifications in PCF Push.");
     }
 }
