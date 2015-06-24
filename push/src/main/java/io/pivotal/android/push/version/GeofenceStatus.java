@@ -8,8 +8,6 @@ public class GeofenceStatus {
     private final String errorReason;
     private final int numberCurrentlyMonitoringGeofences;
 
-    // TODO - add 'isEnabled'?
-
     public GeofenceStatus(boolean isError, @Nullable String errorReason, int numberCurrentlyMonitoringGeofences) {
         this.isError = isError;
         this.errorReason = errorReason;
@@ -20,14 +18,23 @@ public class GeofenceStatus {
         return new GeofenceStatus(false, null, 0);
     }
 
+    /**
+     * Set if some kind of error happens while PCF Push tries to update or monitor geofences.
+     */
     public boolean isError() {
         return isError;
     }
 
+    /**
+     * The error reason (if there is one).
+     */
     public String getErrorReason() {
         return errorReason;
     }
 
+    /**
+     * The number of geofences currently being monitored.
+     */
     public int getNumberCurrentlyMonitoringGeofences() {
         return numberCurrentlyMonitoringGeofences;
     }

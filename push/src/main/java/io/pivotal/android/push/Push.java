@@ -338,6 +338,10 @@ public class Push {
     }
 
     /**
+     * Call this method to read the current geofence monitoring status.  If an error occurs while geofences are being updated in the background
+     * then this status object is the only way to check the status at runtime.  A BroadcastReceiver is triggered whenever this geofence status
+     * is changed.
+     *
      * @return the current geofence monitoring status
      */
     public GeofenceStatus getGeofenceStatus() {
