@@ -19,7 +19,7 @@ The library depends on the following libraries:
 
  * Google Android Application Compatibility (com.android.support:appcompat)
  * Google GSON - should be in the Maven Central repository
- * Google Play Services - should be provided in your Android SDK distribution. If you don't have iton your computer,
+ * Google Play Services - should be provided in your Android SDK distribution. If you don't have it on your computer,
                           then run the Android SDK Manager (run `android` from your command line) and install it.  You
                           should be able to find it in the "Extras" section.
 
