@@ -65,7 +65,7 @@ public class PivotalTest extends AndroidTestCase {
     }
 
     public void testGetTrustedCertificateNames() {
-        final List<String> names = Pivotal.getPinnedSSLCertificateNames(getContext());
+        final List<String> names = Pivotal.getPinnedSslCertificateNames(getContext());
         assertNotNull(names);
         assertEquals(3, names.size());
         assertTrue(names.contains("CATS"));
@@ -74,6 +74,6 @@ public class PivotalTest extends AndroidTestCase {
     }
 
     public void testTrustAllSslCertificates() {
-        assertTrue(Pivotal.isTrustAllSSLCertificates(getContext()));
+        assertTrue(Pivotal.isTrustAllSslCertificates(getContext()));
     }
 }

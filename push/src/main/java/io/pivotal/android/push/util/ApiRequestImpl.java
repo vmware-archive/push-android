@@ -108,7 +108,7 @@ public class ApiRequestImpl {
             if (parameters.isTrustAllSslCertificates()) {
                 trustAllSslCertificates((HttpsURLConnection) urlConnection);
 
-            } else if (parameters.getPinnedCertificateNames() != null && parameters.getPinnedCertificateNames().size() > 0) {
+            } else if (parameters.getPinnedSslCertificateNames() != null && parameters.getPinnedSslCertificateNames().size() > 0) {
                 trustPinnedSslCertificates(context, parameters, (HttpsURLConnection) urlConnection);
 
             } else {
@@ -228,7 +228,7 @@ public class ApiRequestImpl {
         final KeyStore keyStore = KeyStore.getInstance(keyStoreType);
         keyStore.load(null, null);
 
-        List<String> pinnedCertificateNames = parameters.getPinnedCertificateNames();
+        List<String> pinnedCertificateNames = parameters.getPinnedSslCertificateNames();
         for (int i = 0; i < pinnedCertificateNames.size(); i += 1) {
 
             String pinnedCertificateName = pinnedCertificateNames.get(i);

@@ -24,7 +24,7 @@ public class PushParameters {
     private final Set<String> tags;
     private final boolean areGeofencesEnabled;
     private final boolean trustAllSslCertificates;
-    private final List<String> pinnedCertificateNames;
+    private final List<String> pinnedSslCertificateNames;
 
     /**
      * Sets up parameters used by the Pivotal CF Mobile Services Push SDK
@@ -44,7 +44,7 @@ public class PushParameters {
 *                       will be unsubscribed.
      * @param areGeofencesEnabled  Are geofences available (see the "pivotal.push.geofencesEnabled" property).
      * @param trustAllSslCertificates  'true' if all SSL certificates should be trusted. You should use 'false' unless otherwise required.
-     * @param pinnedCertificateNames  The list of pinned SSL certificates.  May be null or empty.
+     * @param pinnedSslCertificateNames  The list of pinned SSL certificates.  May be null or empty.
      */
     public PushParameters(@NonNull String gcmSenderId,
                           @NonNull String platformUuid,
@@ -54,7 +54,7 @@ public class PushParameters {
                           @Nullable Set<String> tags,
                           boolean areGeofencesEnabled,
                           boolean trustAllSslCertificates,
-                          @Nullable List<String> pinnedCertificateNames) {
+                          @Nullable List<String> pinnedSslCertificateNames) {
 
         this.gcmSenderId = gcmSenderId;
         this.platformUuid = platformUuid;
@@ -64,7 +64,7 @@ public class PushParameters {
         this.tags = tags;
         this.areGeofencesEnabled = areGeofencesEnabled;
         this.trustAllSslCertificates = trustAllSslCertificates;
-        this.pinnedCertificateNames = pinnedCertificateNames;
+        this.pinnedSslCertificateNames = pinnedSslCertificateNames;
     }
 
     public String getGcmSenderId() {
@@ -95,8 +95,8 @@ public class PushParameters {
         return areGeofencesEnabled;
     }
 
-    public List<String> getPinnedCertificateNames() {
-        return pinnedCertificateNames != null ? Collections.unmodifiableList(pinnedCertificateNames) : null;
+    public List<String> getPinnedSslCertificateNames() {
+        return pinnedSslCertificateNames != null ? Collections.unmodifiableList(pinnedSslCertificateNames) : null;
     }
 
     public boolean isTrustAllSslCertificates() {
@@ -123,7 +123,7 @@ public class PushParameters {
         if (deviceAlias != null ? !deviceAlias.equals(that.deviceAlias) : that.deviceAlias != null)
             return false;
         if (tags != null ? !tags.equals(that.tags) : that.tags != null) return false;
-        return !(pinnedCertificateNames != null ? !pinnedCertificateNames.equals(that.pinnedCertificateNames) : that.pinnedCertificateNames != null);
+        return !(pinnedSslCertificateNames != null ? !pinnedSslCertificateNames.equals(that.pinnedSslCertificateNames) : that.pinnedSslCertificateNames != null);
 
     }
 
@@ -137,7 +137,7 @@ public class PushParameters {
         result = 31 * result + (tags != null ? tags.hashCode() : 0);
         result = 31 * result + (areGeofencesEnabled ? 1 : 0);
         result = 31 * result + (trustAllSslCertificates ? 1 : 0);
-        result = 31 * result + (pinnedCertificateNames != null ? pinnedCertificateNames.hashCode() : 0);
+        result = 31 * result + (pinnedSslCertificateNames != null ? pinnedSslCertificateNames.hashCode() : 0);
         return result;
     }
 }

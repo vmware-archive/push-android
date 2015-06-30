@@ -189,8 +189,8 @@ public class Push {
         final String platformSecret = Pivotal.getPlatformSecret(context);
         final String serviceUrl = Pivotal.getServiceUrl(context);
         final boolean areGeofencesEnabled = Pivotal.getGeofencesEnabled(context);
-        final boolean trustAllSslCertificates = Pivotal.isTrustAllSSLCertificates(context);
-        final List<String> pinnedCertificateNames = Pivotal.getPinnedSSLCertificateNames(context);
+        final boolean trustAllSslCertificates = Pivotal.isTrustAllSslCertificates(context);
+        final List<String> pinnedCertificateNames = Pivotal.getPinnedSslCertificateNames(context);
         return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, deviceAlias, tags, areGeofencesEnabled, trustAllSslCertificates, pinnedCertificateNames);
     }
 
