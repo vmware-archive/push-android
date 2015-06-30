@@ -97,7 +97,7 @@ public class GeofenceService extends IntentService {
         }
         if (apiRequest == null) {
             final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
-            apiRequest = new PCFPushGetGeofenceUpdatesApiRequest(networkWrapper);
+            apiRequest = new PCFPushGetGeofenceUpdatesApiRequest(this, networkWrapper);
         }
         if (geofenceEngine == null) {
             final FileHelper fileHelper = new FileHelper(getApplicationContext());

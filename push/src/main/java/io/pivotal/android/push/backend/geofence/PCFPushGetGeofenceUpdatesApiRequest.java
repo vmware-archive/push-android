@@ -3,6 +3,8 @@
  */
 package io.pivotal.android.push.backend.geofence;
 
+import android.content.Context;
+
 import com.google.gson.Gson;
 
 import java.io.BufferedInputStream;
@@ -12,8 +14,6 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
-
-import javax.net.ssl.HttpsURLConnection;
 
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceResponseData;
@@ -25,8 +25,8 @@ import io.pivotal.android.push.util.NetworkWrapper;
 
 public class PCFPushGetGeofenceUpdatesApiRequest extends ApiRequestImpl {
 
-    public PCFPushGetGeofenceUpdatesApiRequest(NetworkWrapper networkWrapper) {
-        super(networkWrapper);
+    public PCFPushGetGeofenceUpdatesApiRequest(Context context, NetworkWrapper networkWrapper) {
+        super(context, networkWrapper);
     }
 
     public void getGeofenceUpdates(long timestamp,
@@ -59,9 +59,7 @@ public class PCFPushGetGeofenceUpdatesApiRequest extends ApiRequestImpl {
             final URL url = getURL(timestamp, deviceUuid, parameters);
             final HttpURLConnection urlConnection = getHttpURLConnection(url);
 
-            if (parameters.isTrustAllSslCertificates() && urlConnection instanceof HttpsURLConnection) {
-                trustAllSslCertificates((HttpsURLConnection) urlConnection);
-            }
+            setupTrust(parameters, urlConnection);
 
             urlConnection.setDoInput(true);
             urlConnection.setRequestMethod("GET");

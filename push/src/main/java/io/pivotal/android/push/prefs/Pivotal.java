@@ -8,6 +8,8 @@ import android.text.TextUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Properties;
 
 public class Pivotal {
@@ -18,7 +20,8 @@ public class Pivotal {
         public static final String PLATFORM_UUID = "pivotal.push.platformUuid";
         public static final String PLATFORM_SECRET = "pivotal.push.platformSecret";
         public static final String GEOFENCES_ENABLED = "pivotal.push.geofencesEnabled";
-        public static final String TRUST_ALL_SSL_CERTIFICATES = "pivotal.push.trustAllSslCertificates";
+        public static final String TRUST_ALL_SSL_CERTIFICATES = "pivotal.push.trustAllSSLCertificates";
+        public static final String PINNED_SSL_CERTIFICATE_NAMES = "pivotal.push.pinnedSSLCertificateNames";
     }
 
     private static final String[] LOCATIONS = {
@@ -78,6 +81,24 @@ public class Pivotal {
         return getProperties(context).getProperty(key, defaultValue);
     }
 
+    /* package */ static List<String> getOptionalListProperty(Context context, String key, String defaultValue) {
+        final String property = getProperties(context).getProperty(key, defaultValue);
+        if (property == null || property.isEmpty()) {
+            return null;
+        }
+
+        final String[] properties = property.split("\\s+");
+        final List<String> result = new ArrayList<>(properties.length);
+        for (String p : properties) {
+            String s = p.trim();
+            if (!s.isEmpty()) {
+                result.add(s);
+            }
+        }
+
+        return result;
+    }
+
     public static String getPlatformUuid(Context context) {
         return getRequiredProperty(context, Keys.PLATFORM_UUID);
     }
@@ -98,7 +119,11 @@ public class Pivotal {
         return Boolean.parseBoolean(getOptionalProperty(context, Keys.GEOFENCES_ENABLED, "false"));
     }
 
-    public static boolean isTrustAllSslCertificates(Context context) {
+    public static boolean isTrustAllSSLCertificates(Context context) {
         return Boolean.parseBoolean(getOptionalProperty(context, Keys.TRUST_ALL_SSL_CERTIFICATES, "false"));
+    }
+
+    public static List<String> getPinnedSSLCertificateNames(Context context) {
+        return getOptionalListProperty(context, Keys.PINNED_SSL_CERTIFICATE_NAMES, null);
     }
 }

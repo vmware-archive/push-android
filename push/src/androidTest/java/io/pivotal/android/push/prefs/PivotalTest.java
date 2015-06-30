@@ -5,6 +5,7 @@ package io.pivotal.android.push.prefs;
 
 import android.test.AndroidTestCase;
 
+import java.util.List;
 import java.util.Properties;
 
 public class PivotalTest extends AndroidTestCase {
@@ -63,7 +64,16 @@ public class PivotalTest extends AndroidTestCase {
         assertEquals(true, Pivotal.getGeofencesEnabled(getContext()));
     }
 
+    public void testGetTrustedCertificateNames() {
+        final List<String> names = Pivotal.getPinnedSSLCertificateNames(getContext());
+        assertNotNull(names);
+        assertEquals(3, names.size());
+        assertTrue(names.contains("CATS"));
+        assertTrue(names.contains("DOGS"));
+        assertTrue(names.contains("certificate.der"));
+    }
+
     public void testTrustAllSslCertificates() {
-        assertTrue(Pivotal.isTrustAllSslCertificates(getContext()));
+        assertTrue(Pivotal.isTrustAllSSLCertificates(getContext()));
     }
 }

@@ -18,8 +18,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Set;
 
-import javax.net.ssl.HttpsURLConnection;
-
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.model.api.BasePCFPushApiRegistrationRequestData;
 import io.pivotal.android.push.model.api.PCFPushApiRegistrationPostRequestData;
@@ -37,22 +35,8 @@ import io.pivotal.android.push.util.Util;
  */
 public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements PCFPushRegistrationApiRequest {
 
-    private Context context;
-
     public PCFPushRegistrationApiRequestImpl(Context context, NetworkWrapper networkWrapper) {
-        super(networkWrapper);
-        verifyArguments(context);
-        saveArguments(context);
-    }
-
-    private void verifyArguments(Context context) {
-        if (context == null) {
-            throw new IllegalArgumentException("context may not be null");
-        }
-    }
-
-    private void saveArguments(Context context) {
-        this.context = context;
+        super(context, networkWrapper);
     }
 
     @Override
@@ -116,9 +100,7 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
             final URL url = getURL(isUpdate, previousPCFPushDeviceRegistrationId, parameters);
             final HttpURLConnection urlConnection = getHttpURLConnection(url);
 
-            if (parameters.isTrustAllSslCertificates() && urlConnection instanceof HttpsURLConnection) {
-                trustAllSslCertificates((HttpsURLConnection) urlConnection);
-            }
+            setupTrust(parameters, urlConnection);
 
             urlConnection.setDoOutput(true);
             urlConnection.setDoInput(true);

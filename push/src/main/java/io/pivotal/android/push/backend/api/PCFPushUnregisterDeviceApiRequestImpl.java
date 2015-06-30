@@ -3,11 +3,12 @@
  */
 package io.pivotal.android.push.backend.api;
 
+import android.content.Context;
+
 import java.net.HttpURLConnection;
 import java.net.URL;
 
 import io.pivotal.android.push.PushParameters;
-import javax.net.ssl.HttpsURLConnection;
 
 import io.pivotal.android.push.util.ApiRequestImpl;
 import io.pivotal.android.push.util.Const;
@@ -19,8 +20,8 @@ import io.pivotal.android.push.util.NetworkWrapper;
  */
 public class PCFPushUnregisterDeviceApiRequestImpl extends ApiRequestImpl implements PCFPushUnregisterDeviceApiRequest {
 
-    public PCFPushUnregisterDeviceApiRequestImpl(NetworkWrapper networkWrapper) {
-        super(networkWrapper);
+    public PCFPushUnregisterDeviceApiRequestImpl(Context context, NetworkWrapper networkWrapper) {
+        super(context, networkWrapper);
     }
 
     @Override
@@ -33,9 +34,7 @@ public class PCFPushUnregisterDeviceApiRequestImpl extends ApiRequestImpl implem
             final URL url = new URL(parameters.getServiceUrl() + "/" + Const.PCF_PUSH_REGISTRATION_REQUEST_ENDPOINT + "/" + pcfPushDeviceRegistrationId);
             final HttpURLConnection urlConnection = getHttpURLConnection(url);
 
-            if (parameters.isTrustAllSslCertificates() && urlConnection instanceof HttpsURLConnection) {
-                trustAllSslCertificates((HttpsURLConnection) urlConnection);
-            }
+            setupTrust(parameters, urlConnection);
 
             urlConnection.setRequestMethod("DELETE");
             urlConnection.addRequestProperty("Authorization", ApiRequestImpl.getBasicAuthorizationValue(parameters));
@@ -81,6 +80,6 @@ public class PCFPushUnregisterDeviceApiRequestImpl extends ApiRequestImpl implem
 
     @Override
     public PCFPushUnregisterDeviceApiRequest copy() {
-        return new PCFPushUnregisterDeviceApiRequestImpl(networkWrapper);
+        return new PCFPushUnregisterDeviceApiRequestImpl(context, networkWrapper);
     }
 }

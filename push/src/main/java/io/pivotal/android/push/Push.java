@@ -8,6 +8,7 @@ import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -144,7 +145,7 @@ public class Push {
         final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(dummyPCFPushRegistrationApiRequest);
         final VersionProvider versionProvider = new VersionProviderImpl(context);
         final PushParameters parameters = getPushParameters(deviceAlias, tags);
-        final PCFPushGetGeofenceUpdatesApiRequest geofenceUpdatesApiRequest = new PCFPushGetGeofenceUpdatesApiRequest(networkWrapper);
+        final PCFPushGetGeofenceUpdatesApiRequest geofenceUpdatesApiRequest = new PCFPushGetGeofenceUpdatesApiRequest(context, networkWrapper);
         final GeofenceRegistrar geofenceRegistrar = new GeofenceRegistrar(context);
         final FileHelper fileHelper = new FileHelper(context);
         final TimeProvider timeProvider = new TimeProvider();
@@ -188,8 +189,9 @@ public class Push {
         final String platformSecret = Pivotal.getPlatformSecret(context);
         final String serviceUrl = Pivotal.getServiceUrl(context);
         final boolean areGeofencesEnabled = Pivotal.getGeofencesEnabled(context);
-        final boolean trustAllSslCertificates = Pivotal.isTrustAllSslCertificates(context);
-        return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, deviceAlias, tags, areGeofencesEnabled, trustAllSslCertificates);
+        final boolean trustAllSslCertificates = Pivotal.isTrustAllSSLCertificates(context);
+        final List<String> pinnedCertificateNames = Pivotal.getPinnedSSLCertificateNames(context);
+        return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, deviceAlias, tags, areGeofencesEnabled, trustAllSslCertificates, pinnedCertificateNames);
     }
 
     private void verifyRegistrationArguments(@NonNull PushParameters parameters) {
@@ -288,9 +290,9 @@ public class Push {
         final GcmUnregistrationApiRequest dummyGcmUnregistrationApiRequest = new GcmUnregistrationApiRequestImpl(context, gcmProvider);
         final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(dummyGcmUnregistrationApiRequest);
         final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
-        final PCFPushUnregisterDeviceApiRequest dummyPCFPushUnregisterDeviceApiRequest = new PCFPushUnregisterDeviceApiRequestImpl(networkWrapper);
+        final PCFPushUnregisterDeviceApiRequest dummyPCFPushUnregisterDeviceApiRequest = new PCFPushUnregisterDeviceApiRequestImpl(context, networkWrapper);
         final PCFPushUnregisterDeviceApiRequestProvider pcfPushUnregisterDeviceApiRequestProvider = new PCFPushUnregisterDeviceApiRequestProvider(dummyPCFPushUnregisterDeviceApiRequest);
-        final PCFPushGetGeofenceUpdatesApiRequest geofenceUpdatesApiRequest = new PCFPushGetGeofenceUpdatesApiRequest(networkWrapper);
+        final PCFPushGetGeofenceUpdatesApiRequest geofenceUpdatesApiRequest = new PCFPushGetGeofenceUpdatesApiRequest(context, networkWrapper);
         final GeofenceRegistrar geofenceRegistrar = new GeofenceRegistrar(context);
         final FileHelper fileHelper = new FileHelper(context);
         final TimeProvider timeProvider = new TimeProvider();

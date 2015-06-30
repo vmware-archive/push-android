@@ -35,9 +35,29 @@ public class PCFPushGetGeofenceUpdatesApiRequestTest extends AndroidTestCase {
         FakeHttpURLConnection.reset();
     }
 
+    public void testRequiresContext() {
+        try {
+            new PCFPushGetGeofenceUpdatesApiRequest(null, networkWrapper);
+            fail("Should not have succeeded");
+        } catch (IllegalArgumentException ex) {
+            // Success
+        }
+    }
+
     public void testRequiresNetworkWrapper() {
         try {
-            new PCFPushGetGeofenceUpdatesApiRequest(null);
+            new PCFPushGetGeofenceUpdatesApiRequest(getContext(), null);
+            fail("Should not have succeeded");
+        } catch (IllegalArgumentException ex) {
+            // Success
+        }
+    }
+
+    public void testNewDeviceRegistrationRequiresContext() {
+        try {
+            final PCFPushGetGeofenceUpdatesApiRequest request = new PCFPushGetGeofenceUpdatesApiRequest(null, new FakeNetworkWrapper());
+            makePCFPushGeofenceUpdateApiRequestListener(true, 0, TEST_DEVICE_UUID);
+            request.getGeofenceUpdates(0, TEST_DEVICE_UUID, getParameters(), listener);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
             // Success
@@ -46,7 +66,7 @@ public class PCFPushGetGeofenceUpdatesApiRequestTest extends AndroidTestCase {
 
     public void testNewDeviceRegistrationRequiresNonNegativeTimestamp() {
         try {
-            final PCFPushGetGeofenceUpdatesApiRequest request = new PCFPushGetGeofenceUpdatesApiRequest(new FakeNetworkWrapper());
+            final PCFPushGetGeofenceUpdatesApiRequest request = new PCFPushGetGeofenceUpdatesApiRequest(getContext(), new FakeNetworkWrapper());
             makePCFPushGeofenceUpdateApiRequestListener(true, 0, TEST_DEVICE_UUID);
             request.getGeofenceUpdates(-1, TEST_DEVICE_UUID, getParameters(), listener);
             fail("Should not have succeeded");
@@ -57,7 +77,7 @@ public class PCFPushGetGeofenceUpdatesApiRequestTest extends AndroidTestCase {
 
     public void testNewDeviceRegistrationRequiresNonNullDeviceUuid() {
         try {
-            final PCFPushGetGeofenceUpdatesApiRequest request = new PCFPushGetGeofenceUpdatesApiRequest(new FakeNetworkWrapper());
+            final PCFPushGetGeofenceUpdatesApiRequest request = new PCFPushGetGeofenceUpdatesApiRequest(getContext(), new FakeNetworkWrapper());
             makePCFPushGeofenceUpdateApiRequestListener(true, 0, TEST_DEVICE_UUID);
             request.getGeofenceUpdates(0, null, getParameters(), listener);
             fail("Should not have succeeded");
@@ -68,7 +88,7 @@ public class PCFPushGetGeofenceUpdatesApiRequestTest extends AndroidTestCase {
 
     public void testNewDeviceRegistrationRequiresNonEmptyDeviceUuid() {
         try {
-            final PCFPushGetGeofenceUpdatesApiRequest request = new PCFPushGetGeofenceUpdatesApiRequest(new FakeNetworkWrapper());
+            final PCFPushGetGeofenceUpdatesApiRequest request = new PCFPushGetGeofenceUpdatesApiRequest(getContext(), new FakeNetworkWrapper());
             makePCFPushGeofenceUpdateApiRequestListener(true, 0, TEST_DEVICE_UUID);
             request.getGeofenceUpdates(0, "", getParameters(), listener);
             fail("Should not have succeeded");
@@ -79,7 +99,7 @@ public class PCFPushGetGeofenceUpdatesApiRequestTest extends AndroidTestCase {
 
     public void testNewDeviceRegistrationRequiresParameters() {
         try {
-            final PCFPushGetGeofenceUpdatesApiRequest request = new PCFPushGetGeofenceUpdatesApiRequest(new FakeNetworkWrapper());
+            final PCFPushGetGeofenceUpdatesApiRequest request = new PCFPushGetGeofenceUpdatesApiRequest(getContext(), new FakeNetworkWrapper());
             makePCFPushGeofenceUpdateApiRequestListener(true, 0, TEST_DEVICE_UUID);
             request.getGeofenceUpdates(0, TEST_DEVICE_UUID, null, listener);
             fail("Should not have succeeded");
@@ -90,7 +110,7 @@ public class PCFPushGetGeofenceUpdatesApiRequestTest extends AndroidTestCase {
 
     public void testNewDeviceRegistrationRequiresListener() {
         try {
-            final PCFPushGetGeofenceUpdatesApiRequest request = new PCFPushGetGeofenceUpdatesApiRequest(new FakeNetworkWrapper());
+            final PCFPushGetGeofenceUpdatesApiRequest request = new PCFPushGetGeofenceUpdatesApiRequest(getContext(), new FakeNetworkWrapper());
             makePCFPushGeofenceUpdateApiRequestListener(true, 0, TEST_DEVICE_UUID);
             request.getGeofenceUpdates(0, TEST_DEVICE_UUID, getParameters(), null);
             fail("Should not have succeeded");
@@ -101,7 +121,7 @@ public class PCFPushGetGeofenceUpdatesApiRequestTest extends AndroidTestCase {
 
     public void testSuccessfulGeofenceUpdateRequest() throws IOException {
         makeListenersForSuccessfulRequestFromNetwork(true, 200, "geofence_response_data_one_item.json", 99, TEST_DEVICE_UUID);
-        final PCFPushGetGeofenceUpdatesApiRequest request = new PCFPushGetGeofenceUpdatesApiRequest(networkWrapper);
+        final PCFPushGetGeofenceUpdatesApiRequest request = new PCFPushGetGeofenceUpdatesApiRequest(getContext(), networkWrapper);
         request.getGeofenceUpdates(99, TEST_DEVICE_UUID, getParameters(), listener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
@@ -109,7 +129,7 @@ public class PCFPushGetGeofenceUpdatesApiRequestTest extends AndroidTestCase {
 
     public void testNewDeviceRegistrationNullResponse() {
         makeListenersForSuccessfulNullResultFromNetwork(0, TEST_DEVICE_UUID);
-        final PCFPushGetGeofenceUpdatesApiRequest request = new PCFPushGetGeofenceUpdatesApiRequest(networkWrapper);
+        final PCFPushGetGeofenceUpdatesApiRequest request = new PCFPushGetGeofenceUpdatesApiRequest(getContext(), networkWrapper);
         request.getGeofenceUpdates(0, TEST_DEVICE_UUID, getParameters(), listener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
@@ -117,14 +137,14 @@ public class PCFPushGetGeofenceUpdatesApiRequestTest extends AndroidTestCase {
 
     public void testNewDeviceRegistrationSuccessful404() throws IOException {
         makeListenersForSuccessfulRequestFromNetwork(false, 404, "geofence_response_data_one_item.json", 0, TEST_DEVICE_UUID);
-        final PCFPushGetGeofenceUpdatesApiRequest request = new PCFPushGetGeofenceUpdatesApiRequest(networkWrapper);
+        final PCFPushGetGeofenceUpdatesApiRequest request = new PCFPushGetGeofenceUpdatesApiRequest(getContext(), networkWrapper);
         request.getGeofenceUpdates(0, TEST_DEVICE_UUID, getParameters(), listener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
     public void testNewDeviceRegistrationCouldNotConnect() {
         makeListenersFromFailedRequestFromNetwork("Your server is busted", 0, 0, TEST_DEVICE_UUID);
-        final PCFPushGetGeofenceUpdatesApiRequest request = new PCFPushGetGeofenceUpdatesApiRequest(networkWrapper);
+        final PCFPushGetGeofenceUpdatesApiRequest request = new PCFPushGetGeofenceUpdatesApiRequest(getContext(), networkWrapper);
         request.getGeofenceUpdates(0, TEST_DEVICE_UUID, getParameters(), listener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
@@ -132,7 +152,7 @@ public class PCFPushGetGeofenceUpdatesApiRequestTest extends AndroidTestCase {
 
     public void testNewDeviceRegistrationBadNetworkResponse() {
         makeListenersWithBadNetworkResponse(0, TEST_DEVICE_UUID);
-        final PCFPushGetGeofenceUpdatesApiRequest request = new PCFPushGetGeofenceUpdatesApiRequest(networkWrapper);
+        final PCFPushGetGeofenceUpdatesApiRequest request = new PCFPushGetGeofenceUpdatesApiRequest(getContext(), networkWrapper);
         request.getGeofenceUpdates(0, TEST_DEVICE_UUID, getParameters(), listener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
@@ -211,6 +231,6 @@ public class PCFPushGetGeofenceUpdatesApiRequestTest extends AndroidTestCase {
     }
 
     private PushParameters getParameters() {
-        return new PushParameters(null, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, null, null, true, false);
+        return new PushParameters(null, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, null, null, true, false, null);
     }
 }
