@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.Intent;
 
 import java.util.List;
+import java.util.Set;
 
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.geofence.PCFPushGetGeofenceUpdatesApiRequest;
@@ -84,7 +85,8 @@ public class GeofenceUpdater {
 
     public void clearGeofencesFromMonitorAndStore(GeofenceUpdaterListener listener) {
         Logger.v("Clearing geofences from monitor and store.");
-        geofenceEngine.processResponseData(0L, null);
+        final Set<String> subscribedTags = pushPreferencesProvider.getTags();
+        geofenceEngine.processResponseData(0L, null, subscribedTags);
         pushPreferencesProvider.setLastGeofenceUpdate(GeofenceEngine.NEVER_UPDATED_GEOFENCES);
         if (listener != null) {
             listener.onSuccess();
@@ -106,7 +108,8 @@ public class GeofenceUpdater {
             Logger.i("Successfully fetched geofence updates. Received 0 items.");
         }
         if (responseData != null) {
-            geofenceEngine.processResponseData(timestamp, responseData);
+            final Set<String> subscribedTags = pushPreferencesProvider.getTags();
+            geofenceEngine.processResponseData(timestamp, responseData, subscribedTags);
             pushPreferencesProvider.setLastGeofenceUpdate(responseData.getLastModified() == null ? 0 : responseData.getLastModified().getTime());
             if (listener != null) {
                 listener.onSuccess();

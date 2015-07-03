@@ -15,6 +15,7 @@ import org.mockito.stubbing.Answer;
 
 import java.io.IOException;
 import java.util.Properties;
+import java.util.Set;
 
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.geofence.PCFPushGetGeofenceUpdatesApiRequest;
@@ -25,7 +26,15 @@ import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.util.ModelUtil;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.verifyZeroInteractions;
 
 public class GeofenceServiceTest extends AndroidTestCase {
 
@@ -106,7 +115,7 @@ public class GeofenceServiceTest extends AndroidTestCase {
         service.setPushPreferencesProvider(preferences);
         service.onHandleIntent(intent);
 
-        verify(geofenceEngine, times(1)).processResponseData(eq(1337L), eq(responseData));
+        verify(geofenceEngine, times(1)).processResponseData(eq(1337L), eq(responseData), any(Set.class));
         verify(apiRequest, times(1)).getGeofenceUpdates(eq(1337L), eq(TEST_DEVICE_UUID), any(PushParameters.class), any(PCFPushGetGeofenceUpdatesListener.class));
         verifyNoMoreInteractions(apiRequest);
         verifyNoMoreInteractions(geofenceEngine);
@@ -133,7 +142,7 @@ public class GeofenceServiceTest extends AndroidTestCase {
         service.setPushPreferencesProvider(preferences);
         service.onHandleIntent(intent);
 
-        verify(geofenceEngine, times(1)).processResponseData(eq(1337L), eq(responseData));
+        verify(geofenceEngine, times(1)).processResponseData(eq(1337L), eq(responseData), any(Set.class));
         verify(apiRequest, times(1)).getGeofenceUpdates(eq(1337L), eq(TEST_DEVICE_UUID), any(PushParameters.class), any(PCFPushGetGeofenceUpdatesListener.class));
         verifyNoMoreInteractions(apiRequest);
         verifyNoMoreInteractions(geofenceEngine);
@@ -159,7 +168,7 @@ public class GeofenceServiceTest extends AndroidTestCase {
         service.setPushPreferencesProvider(preferences);
         service.onHandleIntent(intent);
 
-        verify(geofenceEngine, never()).processResponseData(eq(1337L), any(PCFPushGeofenceResponseData.class));
+        verify(geofenceEngine, never()).processResponseData(eq(1337L), any(PCFPushGeofenceResponseData.class), any(Set.class));
         verify(apiRequest, times(1)).getGeofenceUpdates(eq(1337L), eq(TEST_DEVICE_UUID), any(PushParameters.class), any(PCFPushGetGeofenceUpdatesListener.class));
         verifyNoMoreInteractions(apiRequest);
         verifyNoMoreInteractions(geofenceEngine);

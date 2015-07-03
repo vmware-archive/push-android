@@ -289,37 +289,19 @@ public class GcmServiceTest extends AndroidTestCase {
         final FakeGcmService service = startService(FakeGcmService.class, getContext(), getPreferences(true));
         final PCFPushGeofenceLocationMap expectedLocationsToClear = new PCFPushGeofenceLocationMap();
         expectedLocationsToClear.putLocation(GEOFENCE_DATA_LIST.get(11L), 0);
-        setupMultipleEvents();
-        service.onHandleIntent(intent);
-        service.assertMessageSendError(false);
-        service.assertMessageDeleted(false);
-        service.assertTimesGeofenceEntered(0);
-        service.assertTimesGeofenceExited(1);
-        service.assertGeofenceExitedContainsMessage("pizzas");
-        service.assertGeofenceExitedDoesNotContainMessage("eat all this great stuff");
-        service.assertGeofenceExitedDoesNotContainMessage("gelato");
-        service.onDestroy();
-        verifyMultipleEvents();
-        verify(engine, times(1)).clearLocations(eq(expectedLocationsToClear));
-        verifyNoMoreInteractions(engine);
-    }
-
-    public void testReceivesGeofenceExitEventMultipleWithSubscribedTag1() throws Exception {
-        final Intent intent = createGeofenceTransitionEventIntent(getContext(), Geofence.GEOFENCE_TRANSITION_EXIT);
-        final FakeGcmService service = startService(FakeGcmService.class, getContext(), getPreferences(true, "TAG_1"));
-        final PCFPushGeofenceLocationMap expectedLocationsToClear = new PCFPushGeofenceLocationMap();
-        expectedLocationsToClear.putLocation(GEOFENCE_DATA_LIST.get(11L), 0);
         expectedLocationsToClear.putLocation(GEOFENCE_DATA_LIST.get(44L), 0);
         expectedLocationsToClear.putLocation(GEOFENCE_DATA_LIST.get(44L), 1);
+        expectedLocationsToClear.putLocation(GEOFENCE_DATA_LIST.get(49L), 0);
+        expectedLocationsToClear.putLocation(GEOFENCE_DATA_LIST.get(49L), 1);
         setupMultipleEvents();
         service.onHandleIntent(intent);
         service.assertMessageSendError(false);
         service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
-        service.assertTimesGeofenceExited(3);
+        service.assertTimesGeofenceExited(5);
         service.assertGeofenceExitedContainsMessage("pizzas");
         service.assertGeofenceExitedContainsMessage("eat all this great stuff");
-        service.assertGeofenceExitedDoesNotContainMessage("gelato");
+        service.assertGeofenceExitedContainsMessage("gelato");
         service.onDestroy();
         verifyMultipleEvents();
         verify(engine, times(1)).clearLocations(eq(expectedLocationsToClear));

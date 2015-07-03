@@ -104,7 +104,7 @@ public class GeofenceService extends IntentService {
             final GeofenceRegistrar registrar = new GeofenceRegistrar(this);
             final GeofencePersistentStore store = new GeofencePersistentStore(this, fileHelper);
             final TimeProvider timeProvider = new TimeProvider();
-            geofenceEngine = new GeofenceEngine(registrar, store, timeProvider);
+            geofenceEngine = new GeofenceEngine(registrar, store, timeProvider, pushPreferencesProvider);
         }
     }
 

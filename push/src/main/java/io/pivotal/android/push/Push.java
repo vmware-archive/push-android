@@ -150,7 +150,7 @@ public class Push {
         final FileHelper fileHelper = new FileHelper(context);
         final TimeProvider timeProvider = new TimeProvider();
         final GeofencePersistentStore geofencePersistentStore = new GeofencePersistentStore(context, fileHelper);
-        final GeofenceEngine geofenceEngine = new GeofenceEngine(geofenceRegistrar, geofencePersistentStore, timeProvider);
+        final GeofenceEngine geofenceEngine = new GeofenceEngine(geofenceRegistrar, geofencePersistentStore, timeProvider, pushPreferencesProvider);
         final GeofenceUpdater geofenceUpdater = new GeofenceUpdater(context, geofenceUpdatesApiRequest, geofenceEngine, pushPreferencesProvider);
         final GeofenceStatusUtil geofenceStatusUtil = new GeofenceStatusUtil(context);
 
@@ -297,7 +297,7 @@ public class Push {
         final FileHelper fileHelper = new FileHelper(context);
         final TimeProvider timeProvider = new TimeProvider();
         final GeofencePersistentStore geofencePersistentStore = new GeofencePersistentStore(context, fileHelper);
-        final GeofenceEngine geofenceEngine = new GeofenceEngine(geofenceRegistrar, geofencePersistentStore, timeProvider);
+        final GeofenceEngine geofenceEngine = new GeofenceEngine(geofenceRegistrar, geofencePersistentStore, timeProvider, pushPreferencesProvider);
         final GeofenceUpdater geofenceUpdater = new GeofenceUpdater(context, geofenceUpdatesApiRequest, geofenceEngine, pushPreferencesProvider);
         final GeofenceStatusUtil geofenceStatusUtil = new GeofenceStatusUtil(context);
 

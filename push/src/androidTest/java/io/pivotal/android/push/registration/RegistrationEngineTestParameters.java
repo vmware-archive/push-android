@@ -254,7 +254,7 @@ public class RegistrationEngineTestParameters {
         AndroidTestCase.assertEquals(finalTagsInPrefs, pushPreferencesProvider.getTags());
         AndroidTestCase.assertEquals(finalGeofenceUpdateTimestampInPrefs, pushPreferencesProvider.getLastGeofenceUpdate());
         AndroidTestCase.assertEquals(finalAreGeofencesEnabled, pushPreferencesProvider.areGeofencesEnabled());
-        verify(geofenceEngine, times(numberOfGeofenceReregistrations)).reregisterCurrentLocations();
+        verify(geofenceEngine, times(numberOfGeofenceReregistrations)).reregisterCurrentLocations(any(Set.class));
     }
 
     public RegistrationEngineTestParameters setupPackageName(String inPrefs, String fromUser, String finalValue) {

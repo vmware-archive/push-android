@@ -5,6 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 
+import java.util.Set;
+
 import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofencePersistentStore;
 import io.pivotal.android.push.geofence.GeofenceRegistrar;
@@ -38,8 +40,9 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                     final FileHelper fileHelper = new FileHelper(context);
                     final TimeProvider timeProvider = new TimeProvider();
                     final GeofencePersistentStore geofencePersistentStore = new GeofencePersistentStore(context, fileHelper);
-                    final GeofenceEngine engine = new GeofenceEngine(geofenceRegistrar, geofencePersistentStore, timeProvider);
-                    engine.reregisterCurrentLocations();
+                    final GeofenceEngine engine = new GeofenceEngine(geofenceRegistrar, geofencePersistentStore, timeProvider, preferences);
+                    final Set<String> tags = preferences.getTags();
+                    engine.reregisterCurrentLocations(tags);
                     return (Void)null;
                 }
             };

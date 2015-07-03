@@ -14,10 +14,7 @@ import android.os.Bundle;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.location.Geofence;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofencePersistentStore;
@@ -90,13 +87,13 @@ public class GcmService extends IntentService {
             final FileHelper fileHelper = new FileHelper(this);
             store = new GeofencePersistentStore(this, fileHelper);
         }
+        if (preferences == null) {
+            preferences = new PushPreferencesProviderImpl(this);
+        }
         if (engine == null) {
             final GeofenceRegistrar registrar = new GeofenceRegistrar(this);
             final TimeProvider timeProvider = new TimeProvider();
-            engine = new GeofenceEngine(registrar, store, timeProvider);
-        }
-        if (preferences == null) {
-            preferences = new PushPreferencesProviderImpl(this);
+            engine = new GeofenceEngine(registrar, store, timeProvider, preferences);
         }
     }
 
@@ -150,10 +147,9 @@ public class GcmService extends IntentService {
     private void handleGeofencingEvent(Intent intent) {
         Logger.d("handleGeofencingEvent: " + intent);
         final PCFPushGeofenceLocationMap locationsToClear = new PCFPushGeofenceLocationMap();
-        final Set<String> subscribedTags = preferences.getTags();
 
         for (final Geofence geofence : helper.getGeofences()) {
-            processGeofence(locationsToClear, subscribedTags, geofence);
+            processGeofence(locationsToClear, geofence);
         }
 
         if (!locationsToClear.isEmpty()) {
@@ -161,7 +157,7 @@ public class GcmService extends IntentService {
         }
     }
 
-    private void processGeofence(PCFPushGeofenceLocationMap locationsToClear, Set<String> subscribedTags, Geofence geofence) {
+    private void processGeofence(PCFPushGeofenceLocationMap locationsToClear, Geofence geofence) {
         final String requestId = geofence.getRequestId();
         if (requestId == null) {
             Logger.e("Triggered geofence is missing a request ID: " + geofence);
@@ -175,7 +171,7 @@ public class GcmService extends IntentService {
             return;
         }
 
-        final Bundle bundleData = getGeofenceBundle(geofenceId, requestId, subscribedTags, geofenceData);
+        final Bundle bundleData = getGeofenceBundle(geofenceId, requestId, geofenceData);
         if (bundleData == null) {
             return;
         }
@@ -202,12 +198,7 @@ public class GcmService extends IntentService {
         addLocationToClear(locationsToClear, requestId, geofenceData);
     }
 
-    private Bundle getGeofenceBundle(long geofenceId, String requestId, Set<String> subscribedTags, PCFPushGeofenceData geofenceData) {
-
-        if (!isSubcribedToTag(geofenceData, subscribedTags)) {
-            Logger.i("Geofence (ID " + geofenceId + ") is for a tag that the user has not subscribed to.");
-            return null;
-        }
+    private Bundle getGeofenceBundle(long geofenceId, String requestId, PCFPushGeofenceData geofenceData) {
 
         if (geofenceData.getPayload() == null) {
             Logger.e("Triggered geofence with ID " + geofenceId + " has no message payload.");
@@ -227,37 +218,6 @@ public class GcmService extends IntentService {
         bundle.putString("PCF_GEOFENCE_ID", requestId);
 
         return bundle;
-    }
-
-    private boolean isSubcribedToTag(PCFPushGeofenceData geofenceData, Set<String> subscribedTags) {
-        final List<String> tags = lowercaseTags(geofenceData.getTags());
-        if (tags == null || tags.isEmpty()) {
-            return true;
-        }
-
-        if (subscribedTags == null || subscribedTags.isEmpty()) {
-            return false;
-        }
-
-        for (final String subscribedTag : subscribedTags) {
-            if (tags.contains(subscribedTag.toLowerCase())) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private List<String> lowercaseTags(List<String> tags) {
-        if (tags == null) {
-            return null;
-        }
-
-        final List<String> lowercaseTags = new ArrayList<>(tags.size());
-        for (int i = 0; i < tags.size(); i += 1) {
-            lowercaseTags.add(i, tags.get(i).toLowerCase());
-        }
-        return lowercaseTags;
     }
 
     private void addLocationToClear(PCFPushGeofenceLocationMap locationsToClear, String requestId, PCFPushGeofenceData geofenceData) {

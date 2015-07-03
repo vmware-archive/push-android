@@ -560,7 +560,7 @@ public class RegistrationEngine {
 
                 if (haveTagsBeenUpdated(parameters) && areGeofencesAvailable(parameters)) {
                     Logger.i("Tags have been updated - reregistering current geofences.");
-                    geofenceEngine.reregisterCurrentLocations();
+                    geofenceEngine.reregisterCurrentLocations(parameters.getTags());
                 }
 
                 Logger.i("Saving PCF Push device registration ID: " + pcfPushDeviceRegistrationId);
@@ -593,7 +593,7 @@ public class RegistrationEngine {
 
                 } else if (haveTagsBeenUpdated(parameters) && areGeofencesAvailable(parameters)) {
                     Logger.i("Tags have been updated - reregistering current geofences.");
-                    geofenceEngine.reregisterCurrentLocations();
+                    geofenceEngine.reregisterCurrentLocations(parameters.getTags());
                 }
 
                 clearPCFPushRegistrationPreferences();
