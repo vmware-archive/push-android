@@ -21,33 +21,6 @@ ext {
     isSnapshot = false
 }
 
-ext.pomInfo = {
-    packaging 'aar'
-    url 'https://github.com/cfmobile/push-android'
-
-    scm {
-        url 'git@github.com:cfmobile/push-android.git'
-        connection 'scm:git:git@github.com:cfmobile/push-android.git'
-        developerConnection 'scm:git:git@github.com:cfmobile/push-android.git'
-    }
-
-    licenses {
-        license {
-            name 'Pivotal Software License'
-            url 'http://www.pivotal.io/products/software-license-agreement'
-            distribution 'repo'
-        }
-    }
-
-    developers {
-        developer {
-            id 'rszumlakowski'
-            name 'Robert Szumlakowski'
-            email 'rszumlakowski@pivotal.io'
-        }
-    }
-}
-
 allprojects {
     apply plugin: 'maven'
 
@@ -88,6 +61,16 @@ subprojects {
     uploadArchives {
         configuration = configurations.archives
         repositories.mavenDeployer {
+
+            pom.project {
+                licenses {
+                    license {
+                        name 'Pivotal Software License'
+                        url 'TODO - provide correct license'
+                        distribution 'repo'
+                    }
+                }
+            }
 
             // Publishes to local repository
             // repository url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
