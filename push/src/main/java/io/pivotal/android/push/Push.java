@@ -350,4 +350,16 @@ public class Push {
         final GeofenceStatusUtil geofenceStatusUtil = new GeofenceStatusUtil(context);
         return geofenceStatusUtil.loadGeofenceStatus();
     }
+
+    /**
+     * Call this method to read the current PCF Push Notification Service device UUID.  You'll need device UUID if you want to target this
+     * specific device with remote notification using the PCF Push Notification Service.  This method will return `null` if the device is
+     * not currently registered with PCF Push.
+     *
+     * @return the current device UUID if the device is registered
+     */
+    public String getDeviceUuid() {
+        final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
+        return pushPreferencesProvider.getPCFPushDeviceRegistrationId();
+    }
 }
