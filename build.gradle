@@ -41,14 +41,14 @@ subprojects {
     apply plugin: 'android-library'
 
     android {
-        compileSdkVersion 21
-        buildToolsVersion "21.1.2"
+        compileSdkVersion 22
+        buildToolsVersion "22.0.1"
 
         defaultConfig {
             versionCode pushSdkVersionCode
             versionName pushSdkVersionName
             minSdkVersion 14
-            targetSdkVersion 21
+            targetSdkVersion 22
         }
     }
 
