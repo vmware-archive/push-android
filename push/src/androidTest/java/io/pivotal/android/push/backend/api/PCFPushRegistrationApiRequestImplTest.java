@@ -156,7 +156,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
     }
 
     public void testSuccessfulNewDeviceRegistrationRequestWithTags() {
-        final Set<String> expectedSubscribeTags = makeSet("CANDY TAG", "COOKIES TAG");
+        final Set<String> expectedSubscribeTags = makeSet("candy tag", "cookies tag");
         makeListenersForSuccessfulRequestFromNetwork(true, 200, HTTP_POST, expectedSubscribeTags, null, null);
         final PCFPushRegistrationApiRequestImpl request = new PCFPushRegistrationApiRequestImpl(getContext(), networkWrapper);
         request.startNewDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, null, getParameters(expectedSubscribeTags), listener);
@@ -173,7 +173,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
     }
 
     public void testSuccessfulUpdateDeviceRegistrationRequestSubscribeToTags() {
-        final Set<String> expectedSubscribeTags = makeSet("TACO TAG", "BURRITO TAG");
+        final Set<String> expectedSubscribeTags = makeSet("taco tag", "burrito tag");
         final Set<String> expectedUnsubscribeTags = makeSet();
         makeListenersForSuccessfulRequestFromNetwork(true, 200, HTTP_PUT, expectedSubscribeTags, expectedUnsubscribeTags, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID);
         final PCFPushRegistrationApiRequestImpl request = new PCFPushRegistrationApiRequestImpl(getContext(), networkWrapper);
@@ -184,7 +184,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
 
     public void testSuccessfulUpdateDeviceRegistrationRequestUnsubscribeFromTags() {
         final Set<String> expectedSubscribeTags = makeSet();
-        final Set<String> expectedUnsubscribeTags = makeSet("DONUT TAG", "CUPCAKE TAG");
+        final Set<String> expectedUnsubscribeTags = makeSet("donut tag", "cupcake tag");
         makeListenersForSuccessfulRequestFromNetwork(true, 200, HTTP_PUT, expectedSubscribeTags, expectedUnsubscribeTags, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID);
         final PCFPushRegistrationApiRequestImpl request = new PCFPushRegistrationApiRequestImpl(getContext(), networkWrapper);
         request.startUpdateDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, expectedUnsubscribeTags, getParameters(), listener);
@@ -193,9 +193,9 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
     }
 
     public void testSuccessfulUpdateDeviceRegistrationRequestSubscribeAndUnsubscribeFromTags() {
-        makeListenersForSuccessfulRequestFromNetwork(true, 200, HTTP_PUT, makeSet("NEW1"), makeSet("REMOVE1"), TEST_PCF_PUSH_DEVICE_REGISTRATION_ID);
+        makeListenersForSuccessfulRequestFromNetwork(true, 200, HTTP_PUT, makeSet("new1"), makeSet("remove1"), TEST_PCF_PUSH_DEVICE_REGISTRATION_ID);
         final PCFPushRegistrationApiRequestImpl request = new PCFPushRegistrationApiRequestImpl(getContext(), networkWrapper);
-        request.startUpdateDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, makeSet("REMOVE1", "KEEP1"), getParameters(makeSet("KEEP1", "NEW1")), listener);
+        request.startUpdateDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, makeSet("remove1", "keep1"), getParameters(makeSet("KEEP1", "NEW1")), listener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }

@@ -13,8 +13,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class Util {
 
@@ -32,6 +34,25 @@ public class Util {
             // should never happen
             throw new RuntimeException("Could not get package name: " + e);
         }
+    }
+
+    /**
+     * Returns a set of tags.  Each tag is converted to lowercase.
+     *
+     * @param tags A set of string tags.
+     *
+     * @return All of the given tags in lowercase.
+     */
+    public static Set<String> lowercaseTags(Set<String> tags) {
+        if (tags == null) {
+            return null;
+        }
+
+        final Set<String> lowercaseTags = new HashSet<>(tags.size());
+        for (String tag : tags) {
+            lowercaseTags.add(tag.toLowerCase());
+        }
+        return lowercaseTags;
     }
 
     /**

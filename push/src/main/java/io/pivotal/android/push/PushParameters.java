@@ -11,6 +11,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import io.pivotal.android.push.util.Util;
+
 /**
  * Parameters used to register with the Pivotal CF Mobile Services Push server.
  */
@@ -61,7 +63,7 @@ public class PushParameters {
         this.platformSecret = platformSecret;
         this.serviceUrl = serviceUrl;
         this.deviceAlias = deviceAlias;
-        this.tags = tags;
+        this.tags = Util.lowercaseTags(tags);
         this.areGeofencesEnabled = areGeofencesEnabled;
         this.trustAllSslCertificates = trustAllSslCertificates;
         this.pinnedSslCertificateNames = pinnedSslCertificateNames;

@@ -24,6 +24,7 @@ import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.util.Logger;
+import io.pivotal.android.push.util.Util;
 import io.pivotal.android.push.version.GeofenceStatus;
 import io.pivotal.android.push.version.VersionProvider;
 
@@ -320,7 +321,7 @@ public class RegistrationEngine {
     }
 
     private boolean haveTagsBeenUpdated(PushParameters parameters) {
-        final Set<String> savedTags = pushPreferencesProvider.getTags();
+        final Set<String> savedTags = Util.lowercaseTags(pushPreferencesProvider.getTags());
         final Set<String> requestedTags = parameters.getTags();
 
         if (isNullOrEmpty(savedTags) && isNullOrEmpty(requestedTags)) {
