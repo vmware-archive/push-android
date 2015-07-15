@@ -10,7 +10,6 @@ import java.util.Set;
 import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofencePersistentStore;
 import io.pivotal.android.push.geofence.GeofenceRegistrar;
-import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
 import io.pivotal.android.push.util.FileHelper;
@@ -29,7 +28,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
 
     private void reregisterGeofences(final Context context) {
         final PushPreferencesProvider preferences = new PushPreferencesProviderImpl(context);
-        final boolean areGeofencesEnabled = Pivotal.getGeofencesEnabled(context) && preferences.areGeofencesEnabled();
+        final boolean areGeofencesEnabled = preferences.areGeofencesEnabled();
         if (areGeofencesEnabled) {
             final AsyncTask<Void, Void, Void> asyncTask = new AsyncTask<Void, Void, Void>() {
 

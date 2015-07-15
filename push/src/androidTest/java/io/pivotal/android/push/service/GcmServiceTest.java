@@ -67,7 +67,7 @@ public class GcmServiceTest extends AndroidTestCase {
         store = mock(GeofencePersistentStore.class);
         engine = mock(GeofenceEngine.class);
         GEOFENCE_DATA_LIST = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_five_items.json");
-        Pivotal.setProperties(getPropertiesWithGeofencesEnabled("true"));
+        Pivotal.setProperties(getProperties());
     }
 
     public void testHandleNullIntent() throws InterruptedException {
@@ -156,7 +156,6 @@ public class GcmServiceTest extends AndroidTestCase {
     }
 
     public void testReceivesGeofenceUpdateSilentPushWithGeofencesDisabled() throws InterruptedException {
-        Pivotal.setProperties(getPropertiesWithGeofencesEnabled("false"));
         final FakeContext context = new FakeContext(getContext());
         final Intent intent = GeofenceServiceTest.createGeofenceUpdateSilentPushIntent(context, FakeGcmService.class);
         final FakeGcmService service = startService(FakeGcmService.class, context, getPreferences(false, (String)null));
@@ -194,9 +193,9 @@ public class GcmServiceTest extends AndroidTestCase {
     }
 
     public void testReceivesGeofenceEnterEventWithGeofencesDisabled() throws Exception {
-        Pivotal.setProperties(getPropertiesWithGeofencesEnabled("false"));
         final Intent intent = createGeofenceTransitionEventIntent(getContext(), Geofence.GEOFENCE_TRANSITION_ENTER);
-        final FakeGcmService service = startService(FakeGcmService.class);
+        final FakeContext context = new FakeContext(getContext());
+        final FakeGcmService service = startService(FakeGcmService.class, context, getPreferences(false));
         when(helper.isGeofencingEvent()).thenReturn(true);
         when(helper.getGeofenceTransition()).thenReturn(Geofence.GEOFENCE_TRANSITION_ENTER);
         service.onHandleIntent(intent);
@@ -250,9 +249,9 @@ public class GcmServiceTest extends AndroidTestCase {
     }
 
     public void testReceivesGeofenceExitEventWithGeofencesDisabled() throws Exception {
-        Pivotal.setProperties(getPropertiesWithGeofencesEnabled("false"));
         final Intent intent = createGeofenceTransitionEventIntent(getContext(), Geofence.GEOFENCE_TRANSITION_EXIT);
-        final FakeGcmService service = startService(FakeGcmService.class);
+        final FakeContext context = new FakeContext(getContext());
+        final FakeGcmService service = startService(FakeGcmService.class, context, getPreferences(false));
         when(helper.isGeofencingEvent()).thenReturn(true);
         when(helper.getGeofenceTransition()).thenReturn(Geofence.GEOFENCE_TRANSITION_EXIT);
         when(helper.getGeofences()).thenReturn(GEOFENCE_LIST_EXIT_1);
@@ -373,13 +372,13 @@ public class GcmServiceTest extends AndroidTestCase {
         return new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null, set, 0, areGeofencesEnabled);
     }
 
-    private Properties getPropertiesWithGeofencesEnabled(String geofencesEnabled) {
+    private Properties getProperties() {
+        // TODO - are properties still needed for this test?
         final Properties properties = new Properties();
         properties.setProperty(Pivotal.Keys.SERVICE_URL, "http://some.url");
         properties.setProperty(Pivotal.Keys.GCM_SENDER_ID, "fake_sender_id");
         properties.setProperty(Pivotal.Keys.PLATFORM_UUID, "fake_platform_uuid");
         properties.setProperty(Pivotal.Keys.PLATFORM_SECRET, "fake_platform_secret");
-        properties.setProperty(Pivotal.Keys.GEOFENCES_ENABLED, geofencesEnabled);
         return properties;
     }
 

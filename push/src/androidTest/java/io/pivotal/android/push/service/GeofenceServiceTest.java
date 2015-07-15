@@ -53,7 +53,7 @@ public class GeofenceServiceTest extends AndroidTestCase {
         service = startService();
         service.setGeofenceEngine(geofenceEngine);
         service.setGetGeofenceUpdatesApiRequest(apiRequest);
-        Pivotal.setProperties(getPropertiesWithGeofencesEnabled("true"));
+        Pivotal.setProperties(getProperties());
     }
 
     @Override
@@ -78,15 +78,16 @@ public class GeofenceServiceTest extends AndroidTestCase {
 
     public void testHandleEmptyIntent() throws InterruptedException {
         final Intent intent = new Intent(getContext(), FakeGeofenceService.class);
+        final FakePushPreferencesProvider preferences = getPreferences(1337L, false);
+        service.setPushPreferencesProvider(preferences);
         service.onHandleIntent(intent);
         verifyZeroInteractions(geofenceEngine);
         verifyZeroInteractions(apiRequest);
     }
 
     public void testGeofencesDisabled() throws IOException {
-        Pivotal.setProperties(getPropertiesWithGeofencesEnabled("false"));
         final Intent intent = GeofenceServiceTest.createGeofenceUpdateSilentPushIntent(getContext(), FakeGeofenceService.class);
-        final FakePushPreferencesProvider preferences = getPreferencesForTimestamp(1337L);
+        final FakePushPreferencesProvider preferences = getPreferences(1337L, false);
 
         service.setPushPreferencesProvider(preferences);
         service.onHandleIntent(intent);
@@ -99,7 +100,7 @@ public class GeofenceServiceTest extends AndroidTestCase {
     public void testFetchesUpdateSuccessfullyWithEmptyResponse() throws IOException {
         final Intent intent = GeofenceServiceTest.createGeofenceUpdateSilentPushIntent(getContext(), FakeGeofenceService.class);
         final PCFPushGeofenceResponseData responseData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_empty.json");
-        final FakePushPreferencesProvider preferences = getPreferencesForTimestamp(1337L);
+        final FakePushPreferencesProvider preferences = getPreferences(1337L, true);
 
         doAnswer(new Answer<Void>(){
 
@@ -126,7 +127,7 @@ public class GeofenceServiceTest extends AndroidTestCase {
     public void testFetchesUpdateSuccessfullyWithPopulatedResponse() throws IOException {
         final Intent intent = GeofenceServiceTest.createGeofenceUpdateSilentPushIntent(getContext(), FakeGeofenceService.class);
         final PCFPushGeofenceResponseData responseData = ModelUtil.getPCFPushGeofenceResponseData(getContext(), "geofence_response_data_complex.json");
-        final FakePushPreferencesProvider preferences = getPreferencesForTimestamp(1337L);
+        final FakePushPreferencesProvider preferences = getPreferences(1337L, true);
 
         doAnswer(new Answer<Void>(){
 
@@ -152,7 +153,7 @@ public class GeofenceServiceTest extends AndroidTestCase {
 
     public void testFetchFails() throws IOException {
         final Intent intent = GeofenceServiceTest.createGeofenceUpdateSilentPushIntent(getContext(), FakeGeofenceService.class);
-        final FakePushPreferencesProvider preferences = getPreferencesForTimestamp(1337L);
+        final FakePushPreferencesProvider preferences = getPreferences(1337L, true);
 
         doAnswer(new Answer<Void>(){
 
@@ -176,17 +177,17 @@ public class GeofenceServiceTest extends AndroidTestCase {
         assertEquals(1337L, preferences.getLastGeofenceUpdate());
     }
 
-    private FakePushPreferencesProvider getPreferencesForTimestamp(long timestamp) {
-        return new FakePushPreferencesProvider("", TEST_DEVICE_UUID, 0, "", "", "", "", "", "", null, timestamp, false);
+    private FakePushPreferencesProvider getPreferences(long timestamp, boolean areGeofencesEnabled) {
+        return new FakePushPreferencesProvider("", TEST_DEVICE_UUID, 0, "", "", "", "", "", "", null, timestamp, areGeofencesEnabled);
     }
 
-    private Properties getPropertiesWithGeofencesEnabled(String geofencesEnabled) {
+    private Properties getProperties() {
+        // TODO - are properties still needed for this test?
         final Properties properties = new Properties();
         properties.setProperty(Pivotal.Keys.SERVICE_URL, "http://some.url");
         properties.setProperty(Pivotal.Keys.GCM_SENDER_ID, "fake_sender_id");
         properties.setProperty(Pivotal.Keys.PLATFORM_UUID, "fake_platform_uuid");
         properties.setProperty(Pivotal.Keys.PLATFORM_SECRET, "fake_platform_secret");
-        properties.setProperty(Pivotal.Keys.GEOFENCES_ENABLED, geofencesEnabled);
         return properties;
     }
 

@@ -114,8 +114,9 @@ public class Push {
      * @param tags Provides the list of tags for registration.  This is optional and may be null.
      */
     public void startRegistration(@Nullable final String deviceAlias,
-                                  @Nullable final Set<String> tags) {
-        startRegistration(deviceAlias, tags, null);
+                                  @Nullable final Set<String> tags,
+                                  final boolean areGeofencesEnabled) {
+        startRegistration(deviceAlias, tags, areGeofencesEnabled, null);
     }
 
     /**
@@ -132,6 +133,7 @@ public class Push {
      */
     public void startRegistration(@Nullable final String deviceAlias,
                                   @Nullable final Set<String> tags,
+                                  final boolean areGeofencesEnabled,
                                   @Nullable final RegistrationListener listener) {
 
         final GcmProvider gcmProvider = new RealGcmProvider(context);
@@ -144,7 +146,7 @@ public class Push {
         final PCFPushRegistrationApiRequest dummyPCFPushRegistrationApiRequest = new PCFPushRegistrationApiRequestImpl(context, networkWrapper);
         final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(dummyPCFPushRegistrationApiRequest);
         final VersionProvider versionProvider = new VersionProviderImpl(context);
-        final PushParameters parameters = getPushParameters(deviceAlias, tags);
+        final PushParameters parameters = getPushParameters(deviceAlias, tags, areGeofencesEnabled);
         final PCFPushGetGeofenceUpdatesApiRequest geofenceUpdatesApiRequest = new PCFPushGetGeofenceUpdatesApiRequest(context, networkWrapper);
         final GeofenceRegistrar geofenceRegistrar = new GeofenceRegistrar(context);
         final FileHelper fileHelper = new FileHelper(context);
@@ -183,12 +185,12 @@ public class Push {
     }
 
     private PushParameters getPushParameters(@Nullable String deviceAlias,
-                                             @Nullable Set<String> tags) {
+                                             @Nullable Set<String> tags,
+                                             boolean areGeofencesEnabled) {
         final String gcmSenderId = Pivotal.getGcmSenderId(context);
         final String platformUuid = Pivotal.getPlatformUuid(context);
         final String platformSecret = Pivotal.getPlatformSecret(context);
         final String serviceUrl = Pivotal.getServiceUrl(context);
-        final boolean areGeofencesEnabled = Pivotal.getGeofencesEnabled(context);
         final boolean trustAllSslCertificates = Pivotal.isTrustAllSslCertificates(context);
         final List<String> pinnedCertificateNames = Pivotal.getPinnedSslCertificateNames(context);
         return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, deviceAlias, tags, areGeofencesEnabled, trustAllSslCertificates, pinnedCertificateNames);
@@ -250,8 +252,9 @@ public class Push {
 
         final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
         final String deviceAlias = pushPreferencesProvider.getDeviceAlias();
+        final boolean areGeofencesEnabled = pushPreferencesProvider.areGeofencesEnabled();
 
-        startRegistration(deviceAlias, tags, new RegistrationListener() {
+        startRegistration(deviceAlias, tags, areGeofencesEnabled, new RegistrationListener() {
             @Override
             public void onRegistrationComplete() {
                 if (subscribeToTagsListener != null) {
@@ -282,11 +285,13 @@ public class Push {
      * @param listener Optional listener for receiving a callback after un`registration finishes. This callback may
      */
     public void startUnregistration(@Nullable final UnregistrationListener listener) {
-        final PushParameters parameters = getPushParameters(null, null);
+        final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
+        final boolean areGeofencesEnabled = pushPreferencesProvider.areGeofencesEnabled();
+
+        final PushParameters parameters = getPushParameters(null, null, areGeofencesEnabled);
         verifyUnregistrationArguments(parameters);
 
         final GcmProvider gcmProvider = new RealGcmProvider(context);
-        final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
         final GcmUnregistrationApiRequest dummyGcmUnregistrationApiRequest = new GcmUnregistrationApiRequestImpl(context, gcmProvider);
         final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(dummyGcmUnregistrationApiRequest);
         final NetworkWrapper networkWrapper = new NetworkWrapperImpl();

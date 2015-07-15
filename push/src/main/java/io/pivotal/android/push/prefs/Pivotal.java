@@ -19,7 +19,6 @@ public class Pivotal {
         public static final String GCM_SENDER_ID = "pivotal.push.gcmSenderId";
         public static final String PLATFORM_UUID = "pivotal.push.platformUuid";
         public static final String PLATFORM_SECRET = "pivotal.push.platformSecret";
-        public static final String GEOFENCES_ENABLED = "pivotal.push.geofencesEnabled";
         public static final String TRUST_ALL_SSL_CERTIFICATES = "pivotal.push.trustAllSslCertificates";
         public static final String PINNED_SSL_CERTIFICATE_NAMES = "pivotal.push.pinnedSslCertificateNames";
     }
@@ -113,10 +112,6 @@ public class Pivotal {
 
     public static String getServiceUrl(Context context) {
         return getRequiredProperty(context, Keys.SERVICE_URL);
-    }
-
-    public static boolean getGeofencesEnabled(Context context) {
-        return Boolean.parseBoolean(getOptionalProperty(context, Keys.GEOFENCES_ENABLED, "false"));
     }
 
     public static boolean isTrustAllSslCertificates(Context context) {

@@ -60,10 +60,6 @@ public class PivotalTest extends AndroidTestCase {
         assertEquals("http://example.com", Pivotal.getServiceUrl(getContext()));
     }
 
-    public void testGetGeofencesEnabled() {
-        assertEquals(true, Pivotal.getGeofencesEnabled(getContext()));
-    }
-
     public void testGetTrustedCertificateNames() {
         final List<String> names = Pivotal.getPinnedSslCertificateNames(getContext());
         assertNotNull(names);
