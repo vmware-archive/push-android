@@ -65,8 +65,9 @@ subprojects {
             pom.project {
                 licenses {
                     license {
+                        // TODO - provide a more correct license file and URL
                         name 'Pivotal Software License'
-                        url 'TODO - provide correct license'
+                        url 'https://github.com/cfmobile/push-android/blob/master/LICENSE'
                         distribution 'repo'
                     }
                 }
