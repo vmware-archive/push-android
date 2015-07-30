@@ -21,6 +21,7 @@ public class Pivotal {
         public static final String PLATFORM_SECRET = "pivotal.push.platformSecret";
         public static final String SSL_CERT_VALIDATION_MODE = "pivotal.push.sslCertValidationMode";
         public static final String PINNED_SSL_CERTIFICATE_NAMES = "pivotal.push.pinnedSslCertificateNames";
+        public static final String ARE_ANALYTICS_ENABLED = "pivotal.push.areAnalyticsEnabled";
     }
 
     public enum SslCertValidationMode {
@@ -142,5 +143,9 @@ public class Pivotal {
 
     public static List<String> getPinnedSslCertificateNames(Context context) {
         return getOptionalListProperty(context, Keys.PINNED_SSL_CERTIFICATE_NAMES, null);
+    }
+
+    public static boolean getAreAnalyticsEnabled(Context context) {
+        return Boolean.parseBoolean(getOptionalProperty(context, Keys.ARE_ANALYTICS_ENABLED, "true"));
     }
 }

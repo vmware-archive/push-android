@@ -28,6 +28,7 @@ public class PushParameters {
     private final Set<String> tags;
     private final boolean areGeofencesEnabled;
     private final Pivotal.SslCertValidationMode sslCertValidationMode;
+    private final boolean areAnalyticsEnabled;
     private final List<String> pinnedSslCertificateNames;
     private final Map<String, String> requestHeaders;
 
@@ -49,6 +50,9 @@ public class PushParameters {
      *                       will be unsubscribed.
      * @param areGeofencesEnabled        Are geofences available (see the "pivotal.push.geofencesEnabled" property).
      * @param sslCertValidationMode      The SSL validation mode (see documentation in the 'Pivotal.properties' file)
+*                       already subscribed to them.  If you exclude any subscribed tags in a registration request, then those tags
+*                       will be unsubscribed.
+     * @param areAnalyticsEnabled  Indicates if analytics are available. Default set to true.
      * @param pinnedSslCertificateNames  The list of pinned SSL certificates.  May be null or empty.
      * @param requestHeaders             The list of extra request headers to inject into the request
      */
@@ -61,7 +65,8 @@ public class PushParameters {
                           boolean areGeofencesEnabled,
                           Pivotal.SslCertValidationMode sslCertValidationMode,
                           @Nullable List<String> pinnedSslCertificateNames,
-                          @Nullable Map<String, String> requestHeaders) {
+                          @Nullable Map<String, String> requestHeaders,
+                          boolean areAnalyticsEnabled) {
 
         this.gcmSenderId = gcmSenderId;
         this.platformUuid = platformUuid;
@@ -71,6 +76,7 @@ public class PushParameters {
         this.tags = Util.lowercaseTags(tags);
         this.areGeofencesEnabled = areGeofencesEnabled;
         this.sslCertValidationMode = sslCertValidationMode;
+        this.areAnalyticsEnabled = areAnalyticsEnabled;
         this.pinnedSslCertificateNames = pinnedSslCertificateNames;
         this.requestHeaders = requestHeaders;
     }
@@ -103,6 +109,8 @@ public class PushParameters {
         return areGeofencesEnabled;
     }
 
+    public boolean areAnalyticsEnabled() { return areAnalyticsEnabled; }
+
     public List<String> getPinnedSslCertificateNames() {
         return pinnedSslCertificateNames != null ? Collections.unmodifiableList(pinnedSslCertificateNames) : null;
     }
@@ -123,6 +131,7 @@ public class PushParameters {
         PushParameters that = (PushParameters) o;
 
         if (areGeofencesEnabled != that.areGeofencesEnabled) return false;
+        if (areAnalyticsEnabled != that.areAnalyticsEnabled) return false;
         if (gcmSenderId != null ? !gcmSenderId.equals(that.gcmSenderId) : that.gcmSenderId != null)
             return false;
         if (platformUuid != null ? !platformUuid.equals(that.platformUuid) : that.platformUuid != null)
@@ -151,6 +160,7 @@ public class PushParameters {
         result = 31 * result + (tags != null ? tags.hashCode() : 0);
         result = 31 * result + (areGeofencesEnabled ? 1 : 0);
         result = 31 * result + (sslCertValidationMode != null ? sslCertValidationMode.hashCode() : 0);
+        result = 31 * result + (areAnalyticsEnabled ? 1 : 0);
         result = 31 * result + (pinnedSslCertificateNames != null ? pinnedSslCertificateNames.hashCode() : 0);
         result = 31 * result + (requestHeaders != null ? requestHeaders.hashCode() : 0);
         return result;

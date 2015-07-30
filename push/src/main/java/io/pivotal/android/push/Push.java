@@ -196,7 +196,8 @@ public class Push {
         final String serviceUrl = Pivotal.getServiceUrl(context);
         final Pivotal.SslCertValidationMode sslCertValidationMode = Pivotal.getSslCertValidationMode(context);
         final List<String> pinnedCertificateNames = Pivotal.getPinnedSslCertificateNames(context);
-        return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, deviceAlias, tags, areGeofencesEnabled, sslCertValidationMode, pinnedCertificateNames, requestHeaders);
+        final boolean areAnalyticsEnabled = Pivotal.getAreAnalyticsEnabled(context);
+        return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, deviceAlias, tags, areGeofencesEnabled, sslCertValidationMode, pinnedCertificateNames, requestHeaders, areAnalyticsEnabled);
     }
 
     private void verifyRegistrationArguments(@NonNull PushParameters parameters) {
