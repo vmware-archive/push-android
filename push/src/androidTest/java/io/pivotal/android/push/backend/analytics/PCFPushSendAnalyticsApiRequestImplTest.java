@@ -3,12 +3,14 @@ package io.pivotal.android.push.backend.analytics;
 import android.net.Uri;
 import android.test.AndroidTestCase;
 
+import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Properties;
 
-import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.database.FakeEventsStorage;
 import io.pivotal.android.push.model.analytics.EventTest;
+import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.util.DelayedLoop;
 import io.pivotal.android.push.util.FakeHttpURLConnection;
@@ -26,7 +28,7 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
     private PCFPushSendAnalyticsListener listener;
     private DelayedLoop delayedLoop;
     private FakeEventsStorage eventsStorage;
-    private PushParameters parameters;
+    private FakePushPreferencesProvider preferencesProvider;
     private static final long TEN_SECOND_TIMEOUT = 10000L;
 
     private List<Uri> emptyList;
@@ -38,17 +40,17 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
         eventsStorage = new FakeEventsStorage();
         networkWrapper = new FakeNetworkWrapper();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
-        parameters = getParameters(true);
+        preferencesProvider = new FakePushPreferencesProvider(null, null, 0, TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_DEVICE_ALIAS, null, TEST_SERVICE_URL, null, 0, true);
         FakeHttpURLConnection.reset();
-        emptyList = new LinkedList<Uri>();
-        listWithOneItem = new LinkedList<Uri>();
+        emptyList = new LinkedList<>();
+        listWithOneItem = new LinkedList<>();
         final Uri uri = eventsStorage.saveEvent(EventTest.getEvent1());
         listWithOneItem.add(uri);
     }
 
     public void testRequiresContext() {
         try {
-            new PCFPushSendAnalyticsApiRequestImpl(null, eventsStorage, parameters, networkWrapper);
+            new PCFPushSendAnalyticsApiRequestImpl(null, eventsStorage, preferencesProvider, networkWrapper);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
             // Success
@@ -57,14 +59,14 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresEventsStorage() {
         try {
-            new PCFPushSendAnalyticsApiRequestImpl(getContext(), null, parameters, networkWrapper);
+            new PCFPushSendAnalyticsApiRequestImpl(getContext(), null, preferencesProvider, networkWrapper);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
             // Success
         }
     }
 
-    public void testRequiresPreferencesProvider() {
+    public void testRequiresPushPreferences() {
         try {
             new PCFPushSendAnalyticsApiRequestImpl(getContext(), eventsStorage, null, networkWrapper);
             fail("Should not have succeeded");
@@ -75,7 +77,7 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresNetworkWrapper() {
         try {
-            new PCFPushSendAnalyticsApiRequestImpl(getContext(), eventsStorage, parameters, null);
+            new PCFPushSendAnalyticsApiRequestImpl(getContext(), eventsStorage, preferencesProvider, null);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
             // Success
@@ -84,9 +86,9 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresMessageReceipts() {
         try {
-            final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(getContext(), eventsStorage, parameters, networkWrapper);
+            final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(getContext(), eventsStorage, preferencesProvider, networkWrapper);
             makeBackEndMessageReceiptListener(true);
-            request.startSendEvents(null, parameters, listener);
+            request.startSendEvents(null, listener);
             fail("Should not have succeeded");
         } catch (Exception e) {
             // Success
@@ -95,9 +97,9 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
 
     public void testMessageReceiptsMayNotBeEmpty() {
         try {
-            final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(getContext(), eventsStorage, parameters, networkWrapper);
+            final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(getContext(), eventsStorage, preferencesProvider, networkWrapper);
             makeBackEndMessageReceiptListener(true);
-            request.startSendEvents(emptyList, parameters, listener);
+            request.startSendEvents(emptyList, listener);
             fail("Should not have succeeded");
         } catch (Exception e) {
             // Success
@@ -106,8 +108,8 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
 
     public void testRequiresListener() {
         try {
-            final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(getContext(), eventsStorage, parameters, networkWrapper);
-            request.startSendEvents(listWithOneItem, parameters, null);
+            final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(getContext(), eventsStorage, preferencesProvider, networkWrapper);
+            request.startSendEvents(listWithOneItem, null);
             fail("Should not have succeeded");
         } catch (Exception e) {
             // Success
@@ -116,22 +118,33 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
 
     public void testSuccessfulRequest() {
         makeListenersForSuccessfulRequestFromNetwork(true, 200);
-        final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(getContext(), eventsStorage, parameters, networkWrapper);
-        request.startSendEvents(listWithOneItem, parameters, listener);
+        final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(getContext(), eventsStorage, preferencesProvider, networkWrapper);
+        request.startSendEvents(listWithOneItem, listener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
 
-    // TODO - restore test
+    public void testAreAnalyticsDisabled() {
+        Pivotal.setProperties(getProperties(false));
+        try {
+            final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(getContext(), eventsStorage, preferencesProvider, networkWrapper);
+            request.startSendEvents(listWithOneItem, null);
+            fail("Should not have succeeded");
+        } catch (Exception e) {
+            // Success
+        }
+    }
+
+    // TODO - restore test until the server supports this endpoint
 //    public void testCouldNotConnect() {
 //        makeListenersFromFailedRequestFromNetwork("Your server is busted", 0);
-//        final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
-//        request.startSendEvents(listWithOneItem, backEndMessageReceiptListener);
+//        final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(getContext(), eventsStorage, preferencesProvider, networkWrapper);
+//        request.startSendEvents(listWithOneItem, listener);
 //        delayedLoop.startLoop();
 //        assertTrue(delayedLoop.isSuccess());
 //    }
 
-    // TODO - restore test
+    // TODO - restore test until the server supports this endpoint
 //    public void testSuccessful400() {
 //        makeListenersForSuccessfulRequestFromNetwork(false, 400);
 //        final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
@@ -140,16 +153,16 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
 //        assertTrue(delayedLoop.isSuccess());
 //    }
 
-//    private void makeListenersFromFailedRequestFromNetwork(String exceptionText, int expectedHttpStatusCode) {
-//        IOException exception = null;
-//        if (exceptionText != null) {
-//            exception = new IOException(exceptionText);
-//        }
-//        FakeHttpURLConnection.setConnectionException(exception);
-//        FakeHttpURLConnection.willThrowConnectionException(true);
-//        FakeHttpURLConnection.setResponseCode(expectedHttpStatusCode);
-//        makeBackEndMessageReceiptListener(false);
-//    }
+    private void makeListenersFromFailedRequestFromNetwork(String exceptionText, int expectedHttpStatusCode) {
+        IOException exception = null;
+        if (exceptionText != null) {
+            exception = new IOException(exceptionText);
+        }
+        FakeHttpURLConnection.setConnectionException(exception);
+        FakeHttpURLConnection.willThrowConnectionException(true);
+        FakeHttpURLConnection.setResponseCode(expectedHttpStatusCode);
+        makeBackEndMessageReceiptListener(false);
+    }
 
     private void makeListenersForSuccessfulRequestFromNetwork(boolean isSuccessful, int expectedHttpStatusCode) {
         FakeHttpURLConnection.setResponseCode(expectedHttpStatusCode);
@@ -181,7 +194,13 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
         };
     }
 
-    private PushParameters getParameters(boolean areAnalyticsEnabled) {
-        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null, areAnalyticsEnabled);
+    private Properties getProperties(boolean areAnalyticsEnabled) {
+        final Properties properties = new Properties();
+        properties.setProperty(Pivotal.Keys.SERVICE_URL, "http://some.url");
+        properties.setProperty(Pivotal.Keys.GCM_SENDER_ID, "fake_sender_id");
+        properties.setProperty(Pivotal.Keys.PLATFORM_UUID, "fake_platform_uuid");
+        properties.setProperty(Pivotal.Keys.PLATFORM_SECRET, "fake_platform_secret");
+        properties.setProperty(Pivotal.Keys.ARE_ANALYTICS_ENABLED, Boolean.toString(areAnalyticsEnabled));
+        return properties;
     }
 }

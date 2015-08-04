@@ -5,8 +5,6 @@ import android.net.Uri;
 import java.util.Collections;
 import java.util.List;
 
-import io.pivotal.android.push.PushParameters;
-
 public class FakePCFPushSendAnalyticsApiRequest implements PCFPushSendAnalyticsApiRequest {
 
     private final FakePCFPushSendAnalyticsApiRequest originatingRequest;
@@ -29,7 +27,7 @@ public class FakePCFPushSendAnalyticsApiRequest implements PCFPushSendAnalyticsA
     }
 
     @Override
-    public void startSendEvents(List<Uri> eventUris, PushParameters parameters, PCFPushSendAnalyticsListener listener) {
+    public void startSendEvents(List<Uri> eventUris, PCFPushSendAnalyticsListener listener) {
 
         wasRequestAttempted = true;
         if (originatingRequest != null) {

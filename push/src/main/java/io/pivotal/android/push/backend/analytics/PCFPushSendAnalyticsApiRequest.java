@@ -8,6 +8,6 @@ import io.pivotal.android.push.PushParameters;
 
 public interface PCFPushSendAnalyticsApiRequest {
 
-    void startSendEvents(List<Uri> eventUris, PushParameters parameters, PCFPushSendAnalyticsListener listener);
+    void startSendEvents(List<Uri> eventUris, PCFPushSendAnalyticsListener listener);
     PCFPushSendAnalyticsApiRequest copy();
 }

@@ -33,7 +33,7 @@ public class FakeHttpURLConnection extends HttpsURLConnection {
     protected FakeHttpURLConnection(URL url) {
         super(url);
         FakeHttpURLConnection.url = url;
-        FakeHttpURLConnection.requestProperties = new HashMap<String, String>();
+        FakeHttpURLConnection.requestProperties = new HashMap<>();
     }
 
     public static void setResponseCode(int responseCode) {

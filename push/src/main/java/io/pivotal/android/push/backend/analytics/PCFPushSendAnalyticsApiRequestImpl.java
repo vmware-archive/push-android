@@ -13,11 +13,14 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.database.EventsStorage;
 import io.pivotal.android.push.model.analytics.Event;
 import io.pivotal.android.push.model.analytics.EventList;
+import io.pivotal.android.push.prefs.Pivotal;
+import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.util.ApiRequestImpl;
 import io.pivotal.android.push.util.Const;
 import io.pivotal.android.push.util.Logger;
@@ -29,36 +32,36 @@ public class PCFPushSendAnalyticsApiRequestImpl extends ApiRequestImpl implement
     private static final boolean POST_TO_BACK_END = false;
     private Context context;
     private EventsStorage eventsStorage;
-    private PushParameters parameters;
+    private PushPreferencesProvider preferencesProvider;
 
-    public PCFPushSendAnalyticsApiRequestImpl(Context context, EventsStorage eventsStorage, PushParameters parameters, NetworkWrapper networkWrapper) {
+    public PCFPushSendAnalyticsApiRequestImpl(Context context, EventsStorage eventsStorage, PushPreferencesProvider preferencesProvider, NetworkWrapper networkWrapper) {
         super(context, networkWrapper);
-        verifyArguments(context, eventsStorage, parameters);
-        saveArguments(context, eventsStorage, parameters);
+        verifyArguments(context, eventsStorage, preferencesProvider);
+        saveArguments(context, eventsStorage, preferencesProvider);
     }
 
-    private void verifyArguments(Context context, EventsStorage eventsStorage, PushParameters parameters) {
+    private void verifyArguments(Context context, EventsStorage eventsStorage, PushPreferencesProvider preferencesProvider) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
         if (eventsStorage == null) {
             throw new IllegalArgumentException("eventsStorage may not be null");
         }
-        if (parameters == null) {
-            throw new IllegalArgumentException("parameters may not be null");
+        if (preferencesProvider == null) {
+            throw new IllegalArgumentException("preferencesProvider may not be null");
         }
     }
 
-    private void saveArguments(Context context, EventsStorage eventsStorage, PushParameters parameters) {
+    private void saveArguments(Context context, EventsStorage eventsStorage, PushPreferencesProvider preferencesProvider) {
         this.context = context;
         this.eventsStorage = eventsStorage;
-        this.parameters = parameters;
+        this.preferencesProvider = preferencesProvider;
     }
 
     @Override
-    public void startSendEvents(List<Uri> eventUris, PushParameters parameters, PCFPushSendAnalyticsListener listener) {
+    public void startSendEvents(List<Uri> eventUris, PCFPushSendAnalyticsListener listener) {
         verifyRequestArguments(eventUris, listener);
-        processRequest(eventUris, parameters, listener);
+        processRequest(eventUris, listener);
     }
 
     private void verifyRequestArguments(List<Uri> uris, PCFPushSendAnalyticsListener listener) {
@@ -70,7 +73,9 @@ public class PCFPushSendAnalyticsApiRequestImpl extends ApiRequestImpl implement
         }
     }
 
-    private void processRequest(List<Uri> uris, PushParameters parameters, PCFPushSendAnalyticsListener listener) {
+    private void processRequest(List<Uri> uris, PCFPushSendAnalyticsListener listener) {
+
+        final PushParameters parameters = getParameters();
 
         OutputStream outputStream = null;
 
@@ -84,6 +89,8 @@ public class PCFPushSendAnalyticsApiRequestImpl extends ApiRequestImpl implement
             // then you will get a 405 error.
 
             if (POST_TO_BACK_END) {
+
+                // TODO - add the variant UUID/secret to the Authorization header
 
                 final HttpURLConnection urlConnection = getHttpURLConnection(url);
                 //final URL sendEventsUrl = new URL(baseServerUrl, Const.BACKEND_SEND_EVENTS_ENDPOINT);
@@ -150,7 +157,7 @@ public class PCFPushSendAnalyticsApiRequestImpl extends ApiRequestImpl implement
     }
 
     private List<Event> getEvents(List<Uri> uris) {
-        final List<Event> events = new LinkedList<Event>();
+        final List<Event> events = new LinkedList<>();
         for (final Uri uri : uris) {
             final Event event = eventsStorage.readEvent(uri);
             events.add(event);
@@ -172,6 +179,19 @@ public class PCFPushSendAnalyticsApiRequestImpl extends ApiRequestImpl implement
 
     @Override
     public PCFPushSendAnalyticsApiRequest copy() {
-        return new PCFPushSendAnalyticsApiRequestImpl(context, eventsStorage, parameters, networkWrapper);
+        return new PCFPushSendAnalyticsApiRequestImpl(context, eventsStorage, preferencesProvider, networkWrapper);
+    }
+
+    private PushParameters getParameters() {
+        final String gcmSenderId = Pivotal.getGcmSenderId(context);
+        final String platformUuid = Pivotal.getPlatformUuid(context);
+        final String platformSecret = Pivotal.getPlatformSecret(context);
+        final String serviceUrl = Pivotal.getServiceUrl(context);
+        final Pivotal.SslCertValidationMode sslCertValidationMode = Pivotal.getSslCertValidationMode(context);
+        final boolean areGeofencesEnabled = preferencesProvider.areGeofencesEnabled();
+        final Map<String, String> requestHeaders = preferencesProvider.getRequestHeaders();
+        final List<String> pinnedCertificateNames = Pivotal.getPinnedSslCertificateNames(context);
+        final boolean areAnalyticsEnabled = Pivotal.getAreAnalyticsEnabled(context);
+        return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, null, null, areGeofencesEnabled, sslCertValidationMode, pinnedCertificateNames, requestHeaders, areAnalyticsEnabled);
     }
 }

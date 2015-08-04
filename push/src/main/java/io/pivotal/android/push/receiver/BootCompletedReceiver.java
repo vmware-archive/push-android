@@ -7,11 +7,14 @@ import android.os.AsyncTask;
 
 import java.util.Set;
 
+import io.pivotal.android.push.analytics.jobs.PrepareDatabaseJob;
 import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofencePersistentStore;
 import io.pivotal.android.push.geofence.GeofenceRegistrar;
+import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
+import io.pivotal.android.push.service.EventService;
 import io.pivotal.android.push.util.FileHelper;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.TimeProvider;
@@ -24,6 +27,13 @@ public class BootCompletedReceiver extends BroadcastReceiver {
         Logger.setup(context);
         Logger.i("Pivotal CF Push SDK received boot completed message.");
         reregisterGeofences(context);
+
+        if (Pivotal.getAreAnalyticsEnabled(context)) {
+            Logger.fd("Device boot detected for package '%s'. Starting EventService.", context.getPackageName());
+            startEventService(context);
+        } else {
+            Logger.fd("Device boot detected for package '%s'. Analytics is disabled.", context.getPackageName());
+        }
     }
 
     private void reregisterGeofences(final Context context) {
@@ -47,5 +57,11 @@ public class BootCompletedReceiver extends BroadcastReceiver {
             };
             asyncTask.execute();
         }
+    }
+
+    private void startEventService(Context context) {
+        final PrepareDatabaseJob job = new PrepareDatabaseJob();
+        final Intent intent = EventService.getIntentToRunJob(context, job);
+        context.startService(intent);
     }
 }
