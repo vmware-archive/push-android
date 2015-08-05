@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
-import io.pivotal.android.push.analytics.jobs.SendEventsJob;
+import io.pivotal.android.push.analytics.jobs.SendAnalyticsEventsJob;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.service.AnalyticsEventService;
 import io.pivotal.android.push.util.Logger;
@@ -15,7 +15,7 @@ public class AnalyticsEventsSenderAlarmReceiver extends WakefulBroadcastReceiver
     @Override
     public void onReceive(Context context, Intent intent) {
         if (Pivotal.getAreAnalyticsEnabled(context)) {
-            final SendEventsJob job = new SendEventsJob();
+            final SendAnalyticsEventsJob job = new SendAnalyticsEventsJob();
             final Intent sendEventsJobIntent = AnalyticsEventService.getIntentToRunJob(context, job);
             WakefulBroadcastReceiver.startWakefulService(context, sendEventsJobIntent);
         } else {

@@ -32,6 +32,10 @@
             </intent-filter>
         </receiver>
 
+        <receiver
+            android:name="io.pivotal.android.push.receiver.AnalyticsEventsSenderAlarmReceiver"
+            android:exported="false"/>
+
     </application>
 
 </manifest>

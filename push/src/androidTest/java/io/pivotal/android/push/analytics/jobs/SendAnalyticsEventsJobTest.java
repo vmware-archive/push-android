@@ -11,16 +11,16 @@ import java.util.List;
 import io.pivotal.android.push.backend.analytics.FakePCFPushSendAnalyticsApiRequest;
 import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 
-public class SendEventsJobTest extends JobTest {
+public class SendAnalyticsEventsJobTest extends JobTest {
 
     public void testWithEmptyDatabase() throws InterruptedException {
 
-        final SendEventsJob job = new SendEventsJob();
+        final SendAnalyticsEventsJob job = new SendAnalyticsEventsJob();
         job.run(getJobParams(new JobResultListener() {
 
             @Override
             public void onJobComplete(int resultCode) {
-                assertEquals(SendEventsJob.RESULT_NO_WORK_TO_DO, resultCode);
+                assertEquals(SendAnalyticsEventsJob.RESULT_NO_WORK_TO_DO, resultCode);
                 semaphore.release();
             }
         }));
@@ -58,7 +58,7 @@ public class SendEventsJobTest extends JobTest {
 
         Assert.assertEquals(4, eventsStorage.getNumberOfEvents());
 
-        final SendEventsJob job = new SendEventsJob();
+        final SendAnalyticsEventsJob job = new SendAnalyticsEventsJob();
         job.run(getJobParams(new JobResultListener() {
 
             @Override
@@ -94,12 +94,12 @@ public class SendEventsJobTest extends JobTest {
             }
         });
 
-        final SendEventsJob job = new SendEventsJob();
+        final SendAnalyticsEventsJob job = new SendAnalyticsEventsJob();
         job.run(getJobParams(new JobResultListener() {
 
             @Override
             public void onJobComplete(int resultCode) {
-                assertEquals(SendEventsJob.RESULT_FAILED_TO_SEND_RECEIPTS, resultCode);
+                assertEquals(SendAnalyticsEventsJob.RESULT_FAILED_TO_SEND_RECEIPTS, resultCode);
                 semaphore.release();
             }
         }));
@@ -112,15 +112,15 @@ public class SendEventsJobTest extends JobTest {
     }
 
     public void testEquals() {
-        final SendEventsJob job1 = new SendEventsJob();
-        final SendEventsJob job2 = new SendEventsJob();
+        final SendAnalyticsEventsJob job1 = new SendAnalyticsEventsJob();
+        final SendAnalyticsEventsJob job2 = new SendAnalyticsEventsJob();
         Assert.assertEquals(event1, event1);
         assertEquals(job1, job2);
     }
 
     public void testParcelsData() {
-        final SendEventsJob inputJob = new SendEventsJob();
-        final SendEventsJob outputJob = getJobViaParcel(inputJob);
+        final SendAnalyticsEventsJob inputJob = new SendAnalyticsEventsJob();
+        final SendAnalyticsEventsJob outputJob = getJobViaParcel(inputJob);
         assertNotNull(outputJob);
         assertEquals(inputJob, outputJob);
     }

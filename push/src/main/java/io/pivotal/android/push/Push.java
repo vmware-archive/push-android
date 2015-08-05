@@ -6,6 +6,7 @@ package io.pivotal.android.push;
 import android.app.Application;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -15,6 +16,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import io.pivotal.android.push.analytics.AnalyticsEventLogger;
 import io.pivotal.android.push.analytics.jobs.PrepareDatabaseJob;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequest;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestImpl;
@@ -51,6 +53,8 @@ import io.pivotal.android.push.util.FileHelper;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.NetworkWrapper;
 import io.pivotal.android.push.util.NetworkWrapperImpl;
+import io.pivotal.android.push.util.ServiceStarter;
+import io.pivotal.android.push.util.ServiceStarterImpl;
 import io.pivotal.android.push.util.TimeProvider;
 import io.pivotal.android.push.version.GeofenceStatus;
 import io.pivotal.android.push.version.VersionProvider;
@@ -417,5 +421,20 @@ public class Push {
     public void setRequestHeaders(@Nullable Map<String, String> requestHeaders) {
         final PushPreferencesProviderImpl preferences = new PushPreferencesProviderImpl(context);
         preferences.setRequestHeaders(requestHeaders);
+    }
+
+    // TODO - add documentation
+    public void logOpenedNotification(Bundle bundle) {
+        final ServiceStarter serviceStarter = new ServiceStarterImpl();
+        final PushPreferencesProvider preferences = new PushPreferencesProviderImpl(context);
+        final AnalyticsEventLogger eventLogger = new AnalyticsEventLogger(serviceStarter, preferences, context);
+        if (bundle != null && bundle.containsKey("receiptId")) {
+            final String receiptId = bundle.getString("receiptId");
+            if (receiptId != null) {
+                eventLogger.logOpenedNotification(receiptId);
+            }
+        } else {
+            Logger.w("Note: notification has no receiptId. No analytics event will be logged for opening this notification.");
+        }
     }
 }

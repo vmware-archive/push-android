@@ -248,6 +248,8 @@ public class GcmService extends IntentService {
         final String receiptId = intent.getStringExtra(KEY_RECEIPT_ID);
         if (receiptId != null) {
             eventLogger.logReceivedNotification(receiptId);
+        } else {
+            Logger.w("Note: notification has no receiptId. No analytics event will be logged for receiving this notification.");
         }
     }
 

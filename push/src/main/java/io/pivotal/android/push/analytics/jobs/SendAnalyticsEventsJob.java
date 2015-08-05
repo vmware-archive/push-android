@@ -7,18 +7,17 @@ import android.os.Parcelable;
 import java.util.ArrayList;
 import java.util.List;
 
-import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsApiRequest;
 import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsListener;
 import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 import io.pivotal.android.push.util.Logger;
 
-public class SendEventsJob extends BaseJob {
+public class SendAnalyticsEventsJob extends BaseJob {
 
     public static final int RESULT_NO_WORK_TO_DO = 100;
     public static final int RESULT_FAILED_TO_SEND_RECEIPTS = 101;
 
-    public SendEventsJob() {
+    public SendAnalyticsEventsJob() {
         super();
     }
 
@@ -45,13 +44,13 @@ public class SendEventsJob extends BaseJob {
     private void sendEvents(final JobParams jobParams, final List<Uri> uris) {
 
         final PCFPushSendAnalyticsApiRequest request = jobParams.requestProvider.getRequest();
-        final PushParameters pushParameters = getParameters();
         request.startSendEvents(uris, new PCFPushSendAnalyticsListener() {
 
             public void onBackEndSendEventsSuccess() {
                 if (uris != null) {
                     jobParams.eventsStorage.deleteEvents(uris);
                 }
+                jobParams.alarmProvider.disableAlarm();
                 sendJobResult(JobResultListener.RESULT_SUCCESS, jobParams);
             }
 
@@ -61,11 +60,6 @@ public class SendEventsJob extends BaseJob {
                 sendJobResult(RESULT_FAILED_TO_SEND_RECEIPTS, jobParams);
             }
         });
-    }
-
-    private PushParameters getParameters() {
-        // TODO - provide a push parameters object
-        return null;
     }
 
     private String getPackageName(JobParams jobParams) {
@@ -86,7 +80,7 @@ public class SendEventsJob extends BaseJob {
         if (o == null) {
             return false;
         }
-        if (!(o instanceof SendEventsJob)) {
+        if (!(o instanceof SendAnalyticsEventsJob)) {
             return false;
         }
         return true;
@@ -94,18 +88,18 @@ public class SendEventsJob extends BaseJob {
 
     // Parcelable stuff
 
-    public static final Parcelable.Creator<SendEventsJob> CREATOR = new Parcelable.Creator<SendEventsJob>() {
+    public static final Parcelable.Creator<SendAnalyticsEventsJob> CREATOR = new Parcelable.Creator<SendAnalyticsEventsJob>() {
 
-        public SendEventsJob createFromParcel(Parcel in) {
-            return new SendEventsJob(in);
+        public SendAnalyticsEventsJob createFromParcel(Parcel in) {
+            return new SendAnalyticsEventsJob(in);
         }
 
-        public SendEventsJob[] newArray(int size) {
-            return new SendEventsJob[size];
+        public SendAnalyticsEventsJob[] newArray(int size) {
+            return new SendAnalyticsEventsJob[size];
         }
     };
 
-    private SendEventsJob(Parcel in) {
+    private SendAnalyticsEventsJob(Parcel in) {
         super(in);
     }
 
