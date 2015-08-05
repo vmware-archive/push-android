@@ -12,9 +12,9 @@ import java.util.concurrent.Semaphore;
 
 import io.pivotal.android.push.backend.analytics.FakePCFPushSendAnalyticsApiRequest;
 import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsApiRequestProvider;
-import io.pivotal.android.push.database.FakeEventsStorage;
-import io.pivotal.android.push.model.analytics.Event;
-import io.pivotal.android.push.model.analytics.EventTest;
+import io.pivotal.android.push.database.FakeAnalyticsEventsStorage;
+import io.pivotal.android.push.model.analytics.AnalyticsEvent;
+import io.pivotal.android.push.model.analytics.AnalyticsEventTest;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.receiver.FakeAnalyticsEventsSenderAlarmProvider;
 import io.pivotal.android.push.util.FakeNetworkWrapper;
@@ -23,9 +23,9 @@ public abstract class JobTest extends AndroidTestCase {
 
     private static final String TEST_SERVICE_URL = "http://test.service.url";
 
-    protected Event event1;
-    protected Event event2;
-    protected FakeEventsStorage eventsStorage;
+    protected AnalyticsEvent event1;
+    protected AnalyticsEvent event2;
+    protected FakeAnalyticsEventsStorage eventsStorage;
     protected FakeNetworkWrapper networkWrapper;
     protected FakePushPreferencesProvider preferencesProvider;
     protected FakeAnalyticsEventsSenderAlarmProvider alarmProvider;
@@ -36,9 +36,9 @@ public abstract class JobTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        event1 = EventTest.getEvent1();
-        event2 = EventTest.getEvent2();
-        eventsStorage = new FakeEventsStorage();
+        event1 = AnalyticsEventTest.getEvent1();
+        event2 = AnalyticsEventTest.getEvent2();
+        eventsStorage = new FakeAnalyticsEventsStorage();
         networkWrapper = new FakeNetworkWrapper();
         alarmProvider = new FakeAnalyticsEventsSenderAlarmProvider();
         preferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, TEST_SERVICE_URL, null, 0, false);
@@ -60,7 +60,7 @@ public abstract class JobTest extends AndroidTestCase {
     }
 
     protected void assertEventHasStatus(Uri uri, int expectedStatus) {
-        final Event event = eventsStorage.readEvent(uri);
+        final AnalyticsEvent event = eventsStorage.readEvent(uri);
         assertNotNull(event);
         assertEquals(expectedStatus, event.getStatus());
     }

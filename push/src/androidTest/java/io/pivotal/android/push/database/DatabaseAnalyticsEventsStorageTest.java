@@ -9,16 +9,16 @@ import java.util.LinkedList;
 import java.util.List;
 
 import io.pivotal.android.push.model.analytics.DummyEvent;
-import io.pivotal.android.push.model.analytics.Event;
+import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 
-public class DatabaseEventsStorageTest extends AndroidTestCase {
+public class DatabaseAnalyticsEventsStorageTest extends AndroidTestCase {
 
     private static final String TEST_DEVICE_UUID_1 = "TEST-DEVICE-UUID-1";
     private static final String TEST_DEVICE_UUID_2 = "TEST-DEVICE-UUID-2";
     private static final Uri NON_EXISTENT_FILE_1 = Uri.withAppendedPath(Database.EVENTS_CONTENT_URI, "/999999");
-    private DatabaseEventsStorage eventsStorage;
-    private Event EVENT_1;
-    private Event EVENT_2;
+    private DatabaseAnalyticsEventsStorage eventsStorage;
+    private AnalyticsEvent EVENT_1;
+    private AnalyticsEvent EVENT_2;
 
     @Override
     protected void setUp() throws Exception {
@@ -26,7 +26,7 @@ public class DatabaseEventsStorageTest extends AndroidTestCase {
         DatabaseWrapper.createDatabaseInstance(getContext());
         EVENT_1 = DummyEvent.getEvent(TEST_DEVICE_UUID_1);
         EVENT_2 = DummyEvent.getEvent(TEST_DEVICE_UUID_2);
-        eventsStorage = new DatabaseEventsStorage();
+        eventsStorage = new DatabaseAnalyticsEventsStorage();
         eventsStorage.reset();
     }
 
@@ -56,14 +56,14 @@ public class DatabaseEventsStorageTest extends AndroidTestCase {
         eventsStorage.saveEvent(EVENT_1);
         final List<Uri> files1 = eventsStorage.getEventUris();
         assertEquals(1, files1.size());
-        final Event fileContents = eventsStorage.readEvent(files1.get(0));
+        final AnalyticsEvent fileContents = eventsStorage.readEvent(files1.get(0));
         assertEquals(EVENT_1, fileContents);
     }
 
     public void testReadNonExistentFile() {
         boolean exceptionThrown = false;
         try {
-            final Event fileContents1 = eventsStorage.readEvent(NON_EXISTENT_FILE_1);
+            final AnalyticsEvent fileContents1 = eventsStorage.readEvent(NON_EXISTENT_FILE_1);
             assertEquals(null, fileContents1);
         } catch (Exception e) {
             exceptionThrown = true;
@@ -74,7 +74,7 @@ public class DatabaseEventsStorageTest extends AndroidTestCase {
     public void testSetStatusNonExistentFile() {
         boolean exceptionThrown = false;
         try {
-            eventsStorage.setEventStatus(NON_EXISTENT_FILE_1, Event.Status.POSTED);
+            eventsStorage.setEventStatus(NON_EXISTENT_FILE_1, AnalyticsEvent.Status.POSTED);
         } catch (IllegalArgumentException e) {
             exceptionThrown = true;
         }
@@ -133,28 +133,28 @@ public class DatabaseEventsStorageTest extends AndroidTestCase {
 
         final Uri uri1 = eventsStorage.saveEvent(EVENT_1);
         assertNotNull(uri1);
-        assertEquals(Event.Status.NOT_POSTED, EVENT_1.getStatus());
+        assertEquals(AnalyticsEvent.Status.NOT_POSTED, EVENT_1.getStatus());
 
-        eventsStorage.setEventStatus(uri1, Event.Status.POSTING);
-        Assert.assertEquals(Event.Status.POSTING, eventsStorage.readEvent(uri1).getStatus());
+        eventsStorage.setEventStatus(uri1, AnalyticsEvent.Status.POSTING);
+        Assert.assertEquals(AnalyticsEvent.Status.POSTING, eventsStorage.readEvent(uri1).getStatus());
 
-        eventsStorage.setEventStatus(uri1, Event.Status.POSTED);
-        Assert.assertEquals(Event.Status.POSTED, eventsStorage.readEvent(uri1).getStatus());
+        eventsStorage.setEventStatus(uri1, AnalyticsEvent.Status.POSTED);
+        Assert.assertEquals(AnalyticsEvent.Status.POSTED, eventsStorage.readEvent(uri1).getStatus());
     }
 
     public void testGetMessageReceiptEventUrisWithStatus() {
-        EVENT_1.setStatus(Event.Status.POSTED);
-        EVENT_2.setStatus(Event.Status.POSTING_ERROR);
+        EVENT_1.setStatus(AnalyticsEvent.Status.POSTED);
+        EVENT_2.setStatus(AnalyticsEvent.Status.POSTING_ERROR);
         eventsStorage.saveEvent(EVENT_1);
         eventsStorage.saveEvent(EVENT_2);
 
-        final List<Uri> uris1 = eventsStorage.getEventUrisWithStatus(Event.Status.NOT_POSTED);
+        final List<Uri> uris1 = eventsStorage.getEventUrisWithStatus(AnalyticsEvent.Status.NOT_POSTED);
         assertEquals(0, uris1.size());
 
-        final List<Uri> uris2 = eventsStorage.getEventUrisWithStatus(Event.Status.POSTING);
+        final List<Uri> uris2 = eventsStorage.getEventUrisWithStatus(AnalyticsEvent.Status.POSTING);
         assertEquals(0, uris2.size());
 
-        final List<Uri> uris3 = eventsStorage.getEventUrisWithStatus(Event.Status.POSTING_ERROR);
+        final List<Uri> uris3 = eventsStorage.getEventUrisWithStatus(AnalyticsEvent.Status.POSTING_ERROR);
         assertEquals(1, uris3.size());
     }
 }

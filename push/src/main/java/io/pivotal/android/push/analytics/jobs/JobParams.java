@@ -3,7 +3,7 @@ package io.pivotal.android.push.analytics.jobs;
 import android.content.Context;
 
 import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsApiRequestProvider;
-import io.pivotal.android.push.database.EventsStorage;
+import io.pivotal.android.push.database.AnalyticsEventsStorage;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.receiver.AnalyticsEventsSenderAlarmProvider;
 import io.pivotal.android.push.util.NetworkWrapper;
@@ -14,14 +14,14 @@ public class JobParams {
     public final JobResultListener listener;
     public final NetworkWrapper networkWrapper;
     public final PushPreferencesProvider pushPreferencesProvider;
-    public final EventsStorage eventsStorage;
+    public final AnalyticsEventsStorage eventsStorage;
     public final AnalyticsEventsSenderAlarmProvider alarmProvider;
     public final PCFPushSendAnalyticsApiRequestProvider requestProvider;
 
     public JobParams(Context context,
                      JobResultListener listener,
                      NetworkWrapper networkWrapper,
-                     EventsStorage eventsStorage,
+                     AnalyticsEventsStorage eventsStorage,
                      PushPreferencesProvider pushPreferencesProvider,
                      AnalyticsEventsSenderAlarmProvider alarmProvider,
                      PCFPushSendAnalyticsApiRequestProvider requestProvider) {
@@ -40,7 +40,7 @@ public class JobParams {
     private void verifyArguments(Context context,
                                  JobResultListener listener,
                                  NetworkWrapper networkWrapper,
-                                 EventsStorage eventsStorage,
+                                 AnalyticsEventsStorage eventsStorage,
                                  PushPreferencesProvider pushPreferencesProvider,
                                  AnalyticsEventsSenderAlarmProvider alarmProvider,
                                  PCFPushSendAnalyticsApiRequestProvider requestProvider) {

@@ -16,7 +16,7 @@ import com.google.android.gms.location.Geofence;
 
 import java.util.Map;
 
-import io.pivotal.android.push.analytics.EventLogger;
+import io.pivotal.android.push.analytics.AnalyticsEventLogger;
 import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofencePersistentStore;
 import io.pivotal.android.push.geofence.GeofenceRegistrar;
@@ -43,7 +43,7 @@ public class GcmService extends IntentService {
     private GeofenceEngine engine;
     private GeofencePersistentStore store;
     private PushPreferencesProvider preferences;
-    private EventLogger eventLogger;
+    private AnalyticsEventLogger eventLogger;
 
     public GcmService() {
         super("GcmService");
@@ -65,7 +65,7 @@ public class GcmService extends IntentService {
         this.preferences = preferences;
     }
 
-    /* package */ void setEventLogger(EventLogger eventLogger) {
+    /* package */ void setEventLogger(AnalyticsEventLogger eventLogger) {
         this.eventLogger = eventLogger;
     }
 
@@ -105,7 +105,7 @@ public class GcmService extends IntentService {
         }
         if (eventLogger == null) {
             final ServiceStarter serviceStarter = new ServiceStarterImpl();
-            eventLogger = new EventLogger(serviceStarter, preferences, this);
+            eventLogger = new AnalyticsEventLogger(serviceStarter, preferences, this);
         }
     }
 

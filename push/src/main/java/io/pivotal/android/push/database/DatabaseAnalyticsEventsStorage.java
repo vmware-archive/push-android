@@ -7,16 +7,16 @@ import android.net.Uri;
 import java.util.LinkedList;
 import java.util.List;
 
-import io.pivotal.android.push.model.analytics.Event;
+import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 
 
-public class DatabaseEventsStorage implements EventsStorage {
+public class DatabaseAnalyticsEventsStorage implements AnalyticsEventsStorage {
 
-	public DatabaseEventsStorage() {
+	public DatabaseAnalyticsEventsStorage() {
 	}
 
 	@Override
-	public Uri saveEvent(Event event) {
+	public Uri saveEvent(AnalyticsEvent event) {
 		final ContentValues contentValues = event.getContentValues();
 		final Uri uri = DatabaseWrapper.insert(Database.EVENTS_CONTENT_URI, contentValues);
 		return uri;
@@ -47,7 +47,7 @@ public class DatabaseEventsStorage implements EventsStorage {
 		final List<Uri> uris = new LinkedList<Uri>();
 		if (cursor != null) {
 			for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
-				final int id = Event.getRowIdFromCursor(cursor);
+				final int id = AnalyticsEvent.getRowIdFromCursor(cursor);
 				final Uri uri = Uri.withAppendedPath(Database.EVENTS_CONTENT_URI, String.valueOf(id));
 				uris.add(uri);
 			}
@@ -73,14 +73,14 @@ public class DatabaseEventsStorage implements EventsStorage {
 	}
 
 	@Override
-	public Event readEvent(Uri uri) {
+	public AnalyticsEvent readEvent(Uri uri) {
 		Cursor cursor = null;
 		try {
 			cursor = DatabaseWrapper.query(uri, null, null, null, null);
 			if (cursor != null) {
 				cursor.moveToFirst();
 				if (cursor.getCount() > 0) {
-					final Event event = new Event(cursor);
+					final AnalyticsEvent event = new AnalyticsEvent(cursor);
 					return event;
 				}
 			}
@@ -105,7 +105,7 @@ public class DatabaseEventsStorage implements EventsStorage {
 	@Override
 	public void setEventStatus(Uri eventUri, int status) {
 		final ContentValues values = new ContentValues();
-		values.put(Event.Columns.STATUS, status);
+		values.put(AnalyticsEvent.Columns.STATUS, status);
 		final int numberOfRowsUpdated = DatabaseWrapper.update(eventUri, values, null, null);
 		if (numberOfRowsUpdated == 0) {
 			throw new IllegalArgumentException("Could not find event with Uri " + eventUri.getPath());

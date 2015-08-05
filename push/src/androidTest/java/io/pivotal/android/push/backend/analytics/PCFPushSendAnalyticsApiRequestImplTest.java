@@ -8,8 +8,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Properties;
 
-import io.pivotal.android.push.database.FakeEventsStorage;
-import io.pivotal.android.push.model.analytics.EventTest;
+import io.pivotal.android.push.database.FakeAnalyticsEventsStorage;
+import io.pivotal.android.push.model.analytics.AnalyticsEventTest;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.util.DelayedLoop;
@@ -27,7 +27,7 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
     private NetworkWrapper networkWrapper;
     private PCFPushSendAnalyticsListener listener;
     private DelayedLoop delayedLoop;
-    private FakeEventsStorage eventsStorage;
+    private FakeAnalyticsEventsStorage eventsStorage;
     private FakePushPreferencesProvider preferencesProvider;
     private static final long TEN_SECOND_TIMEOUT = 10000L;
 
@@ -37,14 +37,14 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        eventsStorage = new FakeEventsStorage();
+        eventsStorage = new FakeAnalyticsEventsStorage();
         networkWrapper = new FakeNetworkWrapper();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
         preferencesProvider = new FakePushPreferencesProvider(null, null, 0, TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_DEVICE_ALIAS, null, TEST_SERVICE_URL, null, 0, true);
         FakeHttpURLConnection.reset();
         emptyList = new LinkedList<>();
         listWithOneItem = new LinkedList<>();
-        final Uri uri = eventsStorage.saveEvent(EventTest.getEvent1());
+        final Uri uri = eventsStorage.saveEvent(AnalyticsEventTest.getEvent1());
         listWithOneItem.add(uri);
     }
 

@@ -2,7 +2,7 @@ package io.pivotal.android.push.analytics.jobs;
 
 import android.net.Uri;
 
-import io.pivotal.android.push.model.analytics.Event;
+import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 
 public class PrepareDatabaseJobTest extends JobTest {
 
@@ -19,7 +19,7 @@ public class PrepareDatabaseJobTest extends JobTest {
 
     public void testStartsAlarmForNotPostedEvent() throws InterruptedException {
 
-        final Uri uri = saveEventWithStatus(Event.Status.NOT_POSTED);
+        final Uri uri = saveEventWithStatus(AnalyticsEvent.Status.NOT_POSTED);
         assertDatabaseEventCount(1);
         assertFalse(alarmProvider.isAlarmEnabled());
 
@@ -27,12 +27,12 @@ public class PrepareDatabaseJobTest extends JobTest {
 
         assertDatabaseEventCount(1);
         assertTrue(alarmProvider.isAlarmEnabled());
-        assertEventHasStatus(uri, Event.Status.NOT_POSTED);
+        assertEventHasStatus(uri, AnalyticsEvent.Status.NOT_POSTED);
     }
 
     public void testStartsAlarmForPostingErrorEvent() throws InterruptedException {
 
-        final Uri uri = saveEventWithStatus(Event.Status.POSTING_ERROR);
+        final Uri uri = saveEventWithStatus(AnalyticsEvent.Status.POSTING_ERROR);
         assertDatabaseEventCount(1);
         assertFalse(alarmProvider.isAlarmEnabled());
 
@@ -40,12 +40,12 @@ public class PrepareDatabaseJobTest extends JobTest {
 
         assertDatabaseEventCount(1);
         assertTrue(alarmProvider.isAlarmEnabled());
-        assertEventHasStatus(uri, Event.Status.POSTING_ERROR);
+        assertEventHasStatus(uri, AnalyticsEvent.Status.POSTING_ERROR);
     }
 
     public void testResetsStatusAndStartsAlarmForPostingEvent() throws InterruptedException {
 
-        final Uri uri = saveEventWithStatus(Event.Status.POSTING);
+        final Uri uri = saveEventWithStatus(AnalyticsEvent.Status.POSTING);
         assertDatabaseEventCount(1);
         assertFalse(alarmProvider.isAlarmEnabled());
 
@@ -53,12 +53,12 @@ public class PrepareDatabaseJobTest extends JobTest {
 
         assertDatabaseEventCount(1);
         assertTrue(alarmProvider.isAlarmEnabled());
-        assertEventHasStatus(uri, Event.Status.NOT_POSTED);
+        assertEventHasStatus(uri, AnalyticsEvent.Status.NOT_POSTED);
     }
 
     public void testDeletesPostedEvent() throws InterruptedException {
 
-        final Uri uri = saveEventWithStatus(Event.Status.POSTED);
+        final Uri uri = saveEventWithStatus(AnalyticsEvent.Status.POSTED);
         assertDatabaseEventCount(1);
         assertFalse(alarmProvider.isAlarmEnabled());
 
@@ -71,10 +71,10 @@ public class PrepareDatabaseJobTest extends JobTest {
 
     public void testHandlesDatabaseWithManyEvents() throws InterruptedException {
 
-        final Uri uri1 = saveEventWithStatus(Event.Status.NOT_POSTED);
-        final Uri uri2 = saveEventWithStatus(Event.Status.POSTING);
-        final Uri uri3 = saveEventWithStatus(Event.Status.POSTING_ERROR);
-        final Uri uri4 = saveEventWithStatus(Event.Status.POSTED);
+        final Uri uri1 = saveEventWithStatus(AnalyticsEvent.Status.NOT_POSTED);
+        final Uri uri2 = saveEventWithStatus(AnalyticsEvent.Status.POSTING);
+        final Uri uri3 = saveEventWithStatus(AnalyticsEvent.Status.POSTING_ERROR);
+        final Uri uri4 = saveEventWithStatus(AnalyticsEvent.Status.POSTED);
 
         assertDatabaseEventCount(4);
         assertFalse(alarmProvider.isAlarmEnabled());
@@ -83,9 +83,9 @@ public class PrepareDatabaseJobTest extends JobTest {
 
         assertDatabaseEventCount(3);
 
-        assertEventHasStatus(uri1, Event.Status.NOT_POSTED);
-        assertEventHasStatus(uri2, Event.Status.NOT_POSTED);
-        assertEventHasStatus(uri3, Event.Status.POSTING_ERROR);
+        assertEventHasStatus(uri1, AnalyticsEvent.Status.NOT_POSTED);
+        assertEventHasStatus(uri2, AnalyticsEvent.Status.NOT_POSTED);
+        assertEventHasStatus(uri3, AnalyticsEvent.Status.POSTING_ERROR);
         assertEventNotInStorage(uri4);
 
         assertTrue(alarmProvider.isAlarmEnabled());

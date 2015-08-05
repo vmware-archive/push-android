@@ -6,17 +6,17 @@ public class DummyEvent {
 
     public static final String EVENT_TYPE = "event_dummy";
 
-    public static Event getEvent(String deviceUuid) {
+    public static AnalyticsEvent getEvent(String deviceUuid) {
         final Date time = new Date();
         return getEvent(deviceUuid, time);
     }
 
-    public static Event getEvent(String deviceUuid, Date time) {
-        final Event event = new Event();
+    public static AnalyticsEvent getEvent(String deviceUuid, Date time) {
+        final AnalyticsEvent event = new AnalyticsEvent();
         event.setEventType(EVENT_TYPE);
         event.setDeviceUuid(deviceUuid);
         event.setEventTime(time);
-        event.setStatus(Event.Status.NOT_POSTED);
+        event.setStatus(AnalyticsEvent.Status.NOT_POSTED);
         return event;
     }
 }

@@ -3,32 +3,32 @@ package io.pivotal.android.push.analytics.jobs;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import io.pivotal.android.push.model.analytics.Event;
+import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 import io.pivotal.android.push.util.Logger;
 
 public class EnqueueEventJob extends BaseJob {
 
     public static final int RESULT_COULD_NOT_SAVE_EVENT_TO_STORAGE = 200;
 
-    private Event event;
+    private AnalyticsEvent event;
 
-    public EnqueueEventJob(Event event) {
+    public EnqueueEventJob(AnalyticsEvent event) {
         super();
         verifyArguments(event);
         saveArguments(event);
     }
 
-    private void verifyArguments(Event event) {
+    private void verifyArguments(AnalyticsEvent event) {
         if (event == null) {
             throw new IllegalArgumentException("event may not be null");
         }
     }
 
-    private void saveArguments(Event event) {
+    private void saveArguments(AnalyticsEvent event) {
         this.event = event;
     }
 
-    public Event getEvent() {
+    public AnalyticsEvent getEvent() {
         return this.event;
     }
 
@@ -100,8 +100,8 @@ public class EnqueueEventJob extends BaseJob {
         event = readEventFromParcel(in);
     }
 
-    private Event readEventFromParcel(Parcel parcel) {
-        return parcel.readParcelable(Event.class.getClassLoader());
+    private AnalyticsEvent readEventFromParcel(Parcel parcel) {
+        return parcel.readParcelable(AnalyticsEvent.class.getClassLoader());
     }
 
     @Override

@@ -7,16 +7,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class EventListTest extends AndroidTestCase {
+public class AnalyticsEventListTest extends AndroidTestCase {
 
-    private static Event EVENT1;
-    private static Event EVENT2;
-    private static Event EVENT3;
+    private static AnalyticsEvent EVENT1;
+    private static AnalyticsEvent EVENT2;
+    private static AnalyticsEvent EVENT3;
 
     static {
-        EVENT1 = EventTest.getEvent1();
-        EVENT2 = EventTest.getEvent2();
-        EVENT3 = EventTest.getEvent3();
+        EVENT1 = AnalyticsEventTest.getEvent1();
+        EVENT2 = AnalyticsEventTest.getEvent2();
+        EVENT3 = AnalyticsEventTest.getEvent3();
     }
 
     @Override
@@ -25,30 +25,30 @@ public class EventListTest extends AndroidTestCase {
     }
 
     public void testHashCodeNulls() {
-        final EventList list1 = new EventList();
-        final EventList list2 = new EventList();
+        final AnalyticsEventList list1 = new AnalyticsEventList();
+        final AnalyticsEventList list2 = new AnalyticsEventList();
         assertEquals(list1.hashCode(), list2.hashCode());
     }
 
     public void testHashCodeNotNulls() {
 
-        final EventList list1 = new EventList();
+        final AnalyticsEventList list1 = new AnalyticsEventList();
         list1.setEvents(getEventList(EVENT1, EVENT2, EVENT3));
 
-        final EventList list2 = new EventList();
+        final AnalyticsEventList list2 = new AnalyticsEventList();
         list2.setEvents(getEventList(EVENT1, EVENT2, EVENT3));
         assertEquals(list1.hashCode(), list2.hashCode());
     }
 
     public void testEquals1() {
-        final EventList list1 = new EventList();
-        final EventList list2 = new EventList();
+        final AnalyticsEventList list1 = new AnalyticsEventList();
+        final AnalyticsEventList list2 = new AnalyticsEventList();
         assertEquals(list1, list2);
     }
 
     public void testEqualsWithEventLists() {
-        final EventList list1 = new EventList();
-        final EventList list2 = new EventList();
+        final AnalyticsEventList list1 = new AnalyticsEventList();
+        final AnalyticsEventList list2 = new AnalyticsEventList();
         assertEquals(list1, list2);
         list1.setEvents(getEventList(EVENT1, EVENT2, EVENT3));
         MoreAsserts.assertNotEqual(list1, list2);
@@ -58,7 +58,7 @@ public class EventListTest extends AndroidTestCase {
         MoreAsserts.assertNotEqual(list1, list2);
     }
 
-    private static List<Event> getEventList(Event... events) {
+    private static List<AnalyticsEvent> getEventList(AnalyticsEvent... events) {
         return new ArrayList<>(Arrays.asList(events));
     }
 }

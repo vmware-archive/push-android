@@ -7,7 +7,7 @@ import android.test.AndroidTestCase;
 import android.test.RenamingDelegatingContext;
 
 import io.pivotal.android.push.model.analytics.DummyEvent;
-import io.pivotal.android.push.model.analytics.Event;
+import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 
 public class DatabaseTest extends AndroidTestCase {
 
@@ -42,17 +42,17 @@ public class DatabaseTest extends AndroidTestCase {
     }
 
     public void testInsertOneRow() {
-        final Event event = DummyEvent.getEvent(TEST_DEVICE_UUID_1);
+        final AnalyticsEvent event = DummyEvent.getEvent(TEST_DEVICE_UUID_1);
         long rowId = database.insert(TABLE_NAME, null, event.getContentValues());
         assertFalse(-1 == rowId);
         assertTableRowCount(1, TABLE_NAME);
     }
 
     public void testInsertTwoRows() {
-        final Event event1 = DummyEvent.getEvent(TEST_DEVICE_UUID_1);
+        final AnalyticsEvent event1 = DummyEvent.getEvent(TEST_DEVICE_UUID_1);
         long rowId1 = database.insert(TABLE_NAME, null, event1.getContentValues());
         assertFalse(-1 == rowId1);
-        final Event event2 = DummyEvent.getEvent(TEST_DEVICE_UUID_2);
+        final AnalyticsEvent event2 = DummyEvent.getEvent(TEST_DEVICE_UUID_2);
         long rowId2 = database.insert(TABLE_NAME, null, event2.getContentValues());
         assertFalse(-1 == rowId2);
         assertTableRowCount(2, TABLE_NAME);

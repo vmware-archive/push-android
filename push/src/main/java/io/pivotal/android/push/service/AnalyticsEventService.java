@@ -14,9 +14,9 @@ import io.pivotal.android.push.analytics.jobs.JobResultListener;
 import io.pivotal.android.push.analytics.jobs.PrepareDatabaseJob;
 import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsApiRequestImpl;
 import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsApiRequestProvider;
-import io.pivotal.android.push.database.DatabaseEventsStorage;
+import io.pivotal.android.push.database.DatabaseAnalyticsEventsStorage;
 import io.pivotal.android.push.database.DatabaseWrapper;
-import io.pivotal.android.push.database.EventsStorage;
+import io.pivotal.android.push.database.AnalyticsEventsStorage;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
@@ -38,7 +38,7 @@ public class AnalyticsEventService extends IntentService {
 
     // Used by unit tests
     /* package */ static Semaphore semaphore = null;
-    /* package */ static EventsStorage eventsStorage = null;
+    /* package */ static AnalyticsEventsStorage eventsStorage = null;
     /* package */ static NetworkWrapper networkWrapper = null;
     /* package */ static AnalyticsEventsSenderAlarmProvider alarmProvider = null;
     /* package */ static PCFPushSendAnalyticsApiRequestProvider requestProvider = null;
@@ -126,7 +126,7 @@ public class AnalyticsEventService extends IntentService {
 
     private boolean setupDatabase() {
         final boolean wasDatabaseInstanceCreated = DatabaseWrapper.createDatabaseInstance(this);
-        AnalyticsEventService.eventsStorage = new DatabaseEventsStorage();
+        AnalyticsEventService.eventsStorage = new DatabaseAnalyticsEventsStorage();
         return wasDatabaseInstanceCreated;
     }
 

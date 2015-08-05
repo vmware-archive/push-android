@@ -7,17 +7,17 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-import io.pivotal.android.push.model.analytics.Event;
+import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 
 
-public class FakeEventsStorage implements EventsStorage {
+public class FakeAnalyticsEventsStorage implements AnalyticsEventsStorage {
 
-    private final Map<Uri, Event> events;
+    private final Map<Uri, AnalyticsEvent> events;
     private static int fileId = 0;
     private boolean willSaveFail;
 
-    public FakeEventsStorage() {
-        events = new HashMap<Uri, Event>();
+    public FakeAnalyticsEventsStorage() {
+        events = new HashMap<Uri, AnalyticsEvent>();
     }
 
     public void setWillSaveFail(boolean willSaveFail) {
@@ -25,23 +25,23 @@ public class FakeEventsStorage implements EventsStorage {
     }
 
     /**
-     * Saves a {@link io.pivotal.android.push.model.analytics.Event} object into the fake filesystem.
+     * Saves a {@link AnalyticsEvent} object into the fake filesystem.
      *
      * @param event
      */
     @Override
-    public Uri saveEvent(Event event) {
+    public Uri saveEvent(AnalyticsEvent event) {
         if (willSaveFail) {
             return null;
         }
         final Uri uri = getNextFileId();
-        final Event clonedEvent = new Event(event);
+        final AnalyticsEvent clonedEvent = new AnalyticsEvent(event);
         events.put(uri, clonedEvent);
         return uri;
     }
 
     /**
-     * Gets the filenames for all the {@link io.pivotal.android.push.model.analytics.Event} objects currently in the fake filesystem.
+     * Gets the filenames for all the {@link AnalyticsEvent} objects currently in the fake filesystem.
      */
     @Override
     public List<Uri> getEventUris() {
@@ -49,7 +49,7 @@ public class FakeEventsStorage implements EventsStorage {
     }
 
     /**
-     * Gets the {@link io.pivotal.android.push.model.analytics.Event} objects currently in the fake filesystem that match the given status
+     * Gets the {@link AnalyticsEvent} objects currently in the fake filesystem that match the given status
      *
      * @param status
      */
@@ -62,7 +62,7 @@ public class FakeEventsStorage implements EventsStorage {
 
     private void getEventUrisWithStatusForEventType(int status, final List<Uri> result) {
         for (final Uri uri : events.keySet()) {
-            final Event event = events.get(uri);
+            final AnalyticsEvent event = events.get(uri);
             if (event.getStatus() == status) {
                 result.add(uri);
             }
@@ -70,10 +70,10 @@ public class FakeEventsStorage implements EventsStorage {
     }
 
     /**
-     * Retrieves the {@link io.pivotal.android.push.model.analytics.Event} object with the given filename from the fake filesystem.
+     * Retrieves the {@link AnalyticsEvent} object with the given filename from the fake filesystem.
      */
     @Override
-    public Event readEvent(Uri uri) {
+    public AnalyticsEvent readEvent(Uri uri) {
         if (events.containsKey(uri)) {
             return events.get(uri);
         } else {
@@ -82,7 +82,7 @@ public class FakeEventsStorage implements EventsStorage {
     }
 
     /**
-     * Deletes the {@link io.pivotal.android.push.model.analytics.Event} objects from the fake filesystem with the given list of filenames.
+     * Deletes the {@link AnalyticsEvent} objects from the fake filesystem with the given list of filenames.
      */
     @Override
     public void deleteEvents(List<Uri> eventUris) {
@@ -94,14 +94,14 @@ public class FakeEventsStorage implements EventsStorage {
     }
 
     /**
-     * Returns the number of {@link io.pivotal.android.push.model.analytics.Event} objects currently in the fake filesystem.
+     * Returns the number of {@link AnalyticsEvent} objects currently in the fake filesystem.
      */
     public int getNumberOfEvents() {
         return events.size();
     }
 
     /**
-     * Clears all {@link io.pivotal.android.push.model.analytics.Event} objects from the fake filesystem.
+     * Clears all {@link AnalyticsEvent} objects from the fake filesystem.
      */
     @Override
     public void reset() {
@@ -115,7 +115,7 @@ public class FakeEventsStorage implements EventsStorage {
 
     @Override
     public void setEventStatus(Uri eventUri, int status) {
-        final Event event = readEvent(eventUri);
+        final AnalyticsEvent event = readEvent(eventUri);
         event.setStatus(status);
     }
 }

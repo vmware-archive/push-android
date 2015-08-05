@@ -23,7 +23,7 @@ import java.util.List;
 import io.pivotal.android.push.database.Database;
 import io.pivotal.android.push.util.Logger;
 
-public class Event implements Parcelable {
+public class AnalyticsEvent implements Parcelable {
 
     public static class Columns {
         public static final String RECEIPT_ID = "receiptId";
@@ -78,11 +78,11 @@ public class Event implements Parcelable {
     private String locationId;
 
 
-    public Event() {
+    public AnalyticsEvent() {
     }
 
     // Construct from cursor
-    public Event(Cursor cursor) {
+    public AnalyticsEvent(Cursor cursor) {
         int columnIndex;
 
         columnIndex = cursor.getColumnIndex(BaseColumns._ID);
@@ -132,7 +132,7 @@ public class Event implements Parcelable {
     }
 
     // Copy constructor
-    public Event(Event source) {
+    public AnalyticsEvent(AnalyticsEvent source) {
         this.status = source.status;
         this.id = source.id;
         this.receiptId = source.receiptId;
@@ -223,7 +223,7 @@ public class Event implements Parcelable {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        Event event = (Event) o;
+        AnalyticsEvent event = (AnalyticsEvent) o;
 
         if (status != event.status) return false;
         if (receiptId != null ? !receiptId.equals(event.receiptId) : event.receiptId != null)
@@ -254,14 +254,14 @@ public class Event implements Parcelable {
 
     // JSON helpers
 
-    public static List<Event> jsonStringToList(String str) {
+    public static List<AnalyticsEvent> jsonStringToList(String str) {
         final Gson gson = new Gson();
         final Type type = getTypeToken();
         final List list = gson.fromJson(str, type);
         return list;
     }
 
-    public static String listToJsonString(List<Event> list) {
+    public static String listToJsonString(List<AnalyticsEvent> list) {
         if (list == null) {
             return null;
         } else {
@@ -273,7 +273,7 @@ public class Event implements Parcelable {
     }
 
     private static Type getTypeToken() {
-        return new TypeToken<List<Event>>() {}.getType();
+        return new TypeToken<List<AnalyticsEvent>>() {}.getType();
     }
 
     // Database helpers
@@ -402,18 +402,18 @@ public class Event implements Parcelable {
 
     // Parcelable stuff
 
-    public static final Parcelable.Creator<Event> CREATOR = new Parcelable.Creator<Event>() {
+    public static final Parcelable.Creator<AnalyticsEvent> CREATOR = new Parcelable.Creator<AnalyticsEvent>() {
 
-        public Event createFromParcel(Parcel in) {
-            return new Event(in);
+        public AnalyticsEvent createFromParcel(Parcel in) {
+            return new AnalyticsEvent(in);
         }
 
-        public Event[] newArray(int size) {
-            return new Event[size];
+        public AnalyticsEvent[] newArray(int size) {
+            return new AnalyticsEvent[size];
         }
     };
 
-    private Event(Parcel in) {
+    private AnalyticsEvent(Parcel in) {
         id = in.readInt();
         status = in.readInt();
         eventType = in.readString();

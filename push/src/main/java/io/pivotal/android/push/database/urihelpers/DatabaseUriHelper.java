@@ -4,8 +4,8 @@ import android.net.Uri;
 
 import java.util.Set;
 
-import io.pivotal.android.push.model.analytics.urihelpers.EventsAllUriHelper;
-import io.pivotal.android.push.model.analytics.urihelpers.EventsUriHelper;
+import io.pivotal.android.push.model.analytics.urihelpers.AnalyticsEventsAllUriHelper;
+import io.pivotal.android.push.model.analytics.urihelpers.AnalyticsEventsUriHelper;
 
 public class DatabaseUriHelper {
 
@@ -18,8 +18,8 @@ public class DatabaseUriHelper {
 
     static {
         uriHelperFactory = new UriHelperFactory();
-        uriHelperFactory.addUriHelper(new EventsAllUriHelper(), UriMatches.EVENTS_ALL);
-        uriHelperFactory.addUriHelper(new EventsUriHelper(), UriMatches.EVENTS);
+        uriHelperFactory.addUriHelper(new AnalyticsEventsAllUriHelper(), UriMatches.EVENTS_ALL);
+        uriHelperFactory.addUriHelper(new AnalyticsEventsUriHelper(), UriMatches.EVENTS);
     }
 
     public static UriHelper getUriHelper(final Uri uri) {

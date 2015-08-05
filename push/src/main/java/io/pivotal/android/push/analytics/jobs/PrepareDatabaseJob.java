@@ -6,7 +6,7 @@ import android.os.Parcelable;
 
 import java.util.List;
 
-import io.pivotal.android.push.model.analytics.Event;
+import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 import io.pivotal.android.push.util.Logger;
 
 public class PrepareDatabaseJob extends BaseJob {
@@ -24,8 +24,8 @@ public class PrepareDatabaseJob extends BaseJob {
 
     private void cleanupDatabase(JobParams jobParams) {
         int numberOfFixedEvents = 0;
-        numberOfFixedEvents += fixEventsWithStatus(Event.Status.POSTING, jobParams);
-        numberOfFixedEvents += deleteEventsWithStatus(Event.Status.POSTED, jobParams);
+        numberOfFixedEvents += fixEventsWithStatus(AnalyticsEvent.Status.POSTING, jobParams);
+        numberOfFixedEvents += deleteEventsWithStatus(AnalyticsEvent.Status.POSTED, jobParams);
         if (numberOfFixedEvents <= 0) {
             Logger.fd("PrepareDatabaseJob: no events in the database that need to be cleaned.", numberOfFixedEvents);
         }
@@ -35,9 +35,9 @@ public class PrepareDatabaseJob extends BaseJob {
         final List<Uri> uris = jobParams.eventsStorage.getEventUrisWithStatus(status);
         if (uris.size() > 0) {
             for (final Uri uri : uris) {
-                jobParams.eventsStorage.setEventStatus(uri, Event.Status.NOT_POSTED);
+                jobParams.eventsStorage.setEventStatus(uri, AnalyticsEvent.Status.NOT_POSTED);
             }
-            Logger.fd("PrepareDatabaseJob: set %d '%s' events to status '%s'", uris.size(), Event.statusString(status), Event.statusString(Event.Status.NOT_POSTED));
+            Logger.fd("PrepareDatabaseJob: set %d '%s' events to status '%s'", uris.size(), AnalyticsEvent.statusString(status), AnalyticsEvent.statusString(AnalyticsEvent.Status.NOT_POSTED));
         }
         return uris.size();
     }
@@ -46,15 +46,15 @@ public class PrepareDatabaseJob extends BaseJob {
         final List<Uri> uris = jobParams.eventsStorage.getEventUrisWithStatus(status);
         jobParams.eventsStorage.deleteEvents(uris);
         if (uris.size() > 0) {
-            Logger.fd("PrepareDatabaseJob: deleted %d events with status '%s'", uris.size(), Event.statusString(status));
+            Logger.fd("PrepareDatabaseJob: deleted %d events with status '%s'", uris.size(), AnalyticsEvent.statusString(status));
         }
         return uris.size();
     }
 
     private void enableAlarmIfRequired(JobParams jobParams) {
         int numberOfPendingMessageReceipts = 0;
-        numberOfPendingMessageReceipts += jobParams.eventsStorage.getEventUrisWithStatus(Event.Status.NOT_POSTED).size();
-        numberOfPendingMessageReceipts += jobParams.eventsStorage.getEventUrisWithStatus(Event.Status.POSTING_ERROR).size();
+        numberOfPendingMessageReceipts += jobParams.eventsStorage.getEventUrisWithStatus(AnalyticsEvent.Status.NOT_POSTED).size();
+        numberOfPendingMessageReceipts += jobParams.eventsStorage.getEventUrisWithStatus(AnalyticsEvent.Status.POSTING_ERROR).size();
         if (numberOfPendingMessageReceipts > 0) {
             Logger.fd("PrepareDatabaseJob: There are %d events(s) queued for sending. Enabling alarm.", numberOfPendingMessageReceipts);
             jobParams.alarmProvider.enableAlarmIfDisabled();

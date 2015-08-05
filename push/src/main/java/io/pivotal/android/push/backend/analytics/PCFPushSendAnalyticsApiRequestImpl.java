@@ -16,9 +16,9 @@ import java.util.List;
 import java.util.Map;
 
 import io.pivotal.android.push.PushParameters;
-import io.pivotal.android.push.database.EventsStorage;
-import io.pivotal.android.push.model.analytics.Event;
-import io.pivotal.android.push.model.analytics.EventList;
+import io.pivotal.android.push.database.AnalyticsEventsStorage;
+import io.pivotal.android.push.model.analytics.AnalyticsEvent;
+import io.pivotal.android.push.model.analytics.AnalyticsEventList;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.util.ApiRequestImpl;
@@ -31,16 +31,16 @@ public class PCFPushSendAnalyticsApiRequestImpl extends ApiRequestImpl implement
     // Set to 'true' to test really send events to the server. The server does not accept these events right now.
     private static final boolean POST_TO_BACK_END = false;
     private Context context;
-    private EventsStorage eventsStorage;
+    private AnalyticsEventsStorage eventsStorage;
     private PushPreferencesProvider preferencesProvider;
 
-    public PCFPushSendAnalyticsApiRequestImpl(Context context, EventsStorage eventsStorage, PushPreferencesProvider preferencesProvider, NetworkWrapper networkWrapper) {
+    public PCFPushSendAnalyticsApiRequestImpl(Context context, AnalyticsEventsStorage eventsStorage, PushPreferencesProvider preferencesProvider, NetworkWrapper networkWrapper) {
         super(context, networkWrapper);
         verifyArguments(context, eventsStorage, preferencesProvider);
         saveArguments(context, eventsStorage, preferencesProvider);
     }
 
-    private void verifyArguments(Context context, EventsStorage eventsStorage, PushPreferencesProvider preferencesProvider) {
+    private void verifyArguments(Context context, AnalyticsEventsStorage eventsStorage, PushPreferencesProvider preferencesProvider) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
@@ -52,7 +52,7 @@ public class PCFPushSendAnalyticsApiRequestImpl extends ApiRequestImpl implement
         }
     }
 
-    private void saveArguments(Context context, EventsStorage eventsStorage, PushPreferencesProvider preferencesProvider) {
+    private void saveArguments(Context context, AnalyticsEventsStorage eventsStorage, PushPreferencesProvider preferencesProvider) {
         this.context = context;
         this.eventsStorage = eventsStorage;
         this.preferencesProvider = preferencesProvider;
@@ -148,18 +148,18 @@ public class PCFPushSendAnalyticsApiRequestImpl extends ApiRequestImpl implement
     }
 
     private String getRequestBodyData(List<Uri> uris) {
-        final List<Event> events = getEvents(uris);
-        final EventList eventList = new EventList();
+        final List<AnalyticsEvent> events = getEvents(uris);
+        final AnalyticsEventList eventList = new AnalyticsEventList();
         eventList.setEvents(events);
         final Gson gson = new Gson();
         final String requestBodyData = gson.toJson(eventList);
         return requestBodyData;
     }
 
-    private List<Event> getEvents(List<Uri> uris) {
-        final List<Event> events = new LinkedList<>();
+    private List<AnalyticsEvent> getEvents(List<Uri> uris) {
+        final List<AnalyticsEvent> events = new LinkedList<>();
         for (final Uri uri : uris) {
-            final Event event = eventsStorage.readEvent(uri);
+            final AnalyticsEvent event = eventsStorage.readEvent(uri);
             events.add(event);
         }
         return events;

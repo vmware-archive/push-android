@@ -7,9 +7,9 @@ import junit.framework.Assert;
 
 import java.util.List;
 
-import io.pivotal.android.push.model.analytics.Event;
+import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 
-public class EnqueueEventJobTest extends JobTest {
+public class EnqueueAnalyticsEventJobTest extends JobTest {
 
     public void testRequiresEvent() {
         try {
@@ -43,7 +43,7 @@ public class EnqueueEventJobTest extends JobTest {
         Assert.assertEquals(1, eventsStorage.getNumberOfEvents());
         final List<Uri> uris = eventsStorage.getEventUris();
         assertEquals(1, uris.size());
-        final Event savedEvent = eventsStorage.readEvent(uris.get(0));
+        final AnalyticsEvent savedEvent = eventsStorage.readEvent(uris.get(0));
         assertEquals(event1, savedEvent);
 
         // Ensure alarm was enabled

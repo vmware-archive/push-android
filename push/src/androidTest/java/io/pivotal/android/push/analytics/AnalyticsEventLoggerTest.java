@@ -8,14 +8,14 @@ import java.util.HashMap;
 import java.util.Properties;
 
 import io.pivotal.android.push.analytics.jobs.EnqueueEventJob;
-import io.pivotal.android.push.model.analytics.Event;
+import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.service.AnalyticsEventService;
 import io.pivotal.android.push.util.FakeServiceStarter;
 
-public class EventLoggerTest extends AndroidTestCase {
+public class AnalyticsEventLoggerTest extends AndroidTestCase {
 
     private static final String TEST_EVENT_TYPE = "TEST_EVENT_TYPE";
     private static final String TEST_EVENT_RECEIPT_ID = "receiptId";
@@ -50,7 +50,7 @@ public class EventLoggerTest extends AndroidTestCase {
 
     public void testRequiresServiceStarter() {
         try {
-            new EventLogger(null, preferencesProvider, getContext());
+            new AnalyticsEventLogger(null, preferencesProvider, getContext());
             fail("should have failed");
         } catch (IllegalArgumentException e) {
             // should have thrown
@@ -59,7 +59,7 @@ public class EventLoggerTest extends AndroidTestCase {
 
     public void testRequiresPushParameters() {
         try {
-            new EventLogger(serviceStarter, null, getContext());
+            new AnalyticsEventLogger(serviceStarter, null, getContext());
             fail("should have failed");
         } catch (IllegalArgumentException e) {
             // should have thrown
@@ -68,7 +68,7 @@ public class EventLoggerTest extends AndroidTestCase {
 
     public void testRequiresContext() {
         try {
-            new EventLogger(serviceStarter, preferencesProvider, null);
+            new AnalyticsEventLogger(serviceStarter, preferencesProvider, null);
             fail("should have failed");
         } catch (IllegalArgumentException e) {
             // should have thrown
@@ -76,29 +76,29 @@ public class EventLoggerTest extends AndroidTestCase {
     }
 
     public void testLogEventAnalyticsDisabled() {
-        final EventLogger eventLogger = getEventLoggerWithAnalyticsDisabled();
+        final AnalyticsEventLogger eventLogger = getEventLoggerWithAnalyticsDisabled();
         eventLogger.logEvent(TEST_EVENT_TYPE, TEST_EVENT_FIELDS);
         assertFalse(serviceStarter.wasStarted());
     }
 
     public void testLogEventAnalyticsEnabled() {
-        final EventLogger eventLogger = getEventLoggerWithAnalyticsEnabled();
+        final AnalyticsEventLogger eventLogger = getEventLoggerWithAnalyticsEnabled();
         eventLogger.logEvent(TEST_EVENT_TYPE, TEST_EVENT_FIELDS);
         assertTrue(serviceStarter.wasStarted());
         assertEquals(TEST_EVENT_TYPE, getLoggedEvent().getEventType());
     }
 
     public void testLogEventDataAnalyticsDisabled() {
-        final EventLogger eventLogger = getEventLoggerWithAnalyticsDisabled();
+        final AnalyticsEventLogger eventLogger = getEventLoggerWithAnalyticsDisabled();
         eventLogger.logEvent(TEST_EVENT_TYPE, TEST_EVENT_FIELDS);
         assertFalse(serviceStarter.wasStarted());
     }
 
     public void testLogEventNotificationReceived() {
-        final EventLogger eventLogger = getEventLoggerWithAnalyticsEnabled();
+        final AnalyticsEventLogger eventLogger = getEventLoggerWithAnalyticsEnabled();
         eventLogger.logReceivedNotification(TEST_EVENT_RECEIPT_ID_VALUE);
         assertTrue(serviceStarter.wasStarted());
-        assertEquals(EventLogger.PCF_PUSH_EVENT_TYPE_PUSH_NOTIFICATION_RECEIVED, getLoggedEvent().getEventType());
+        assertEquals(AnalyticsEventLogger.PCF_PUSH_EVENT_TYPE_PUSH_NOTIFICATION_RECEIVED, getLoggedEvent().getEventType());
         assertEquals(TEST_EVENT_RECEIPT_ID_VALUE, getLoggedEvent().getReceiptId());
         assertEquals(TEST_EVENT_DEVICE_UUID_VALUE, getLoggedEvent().getDeviceUuid());
         assertNull(getLoggedEvent().getGeofenceId());
@@ -107,10 +107,10 @@ public class EventLoggerTest extends AndroidTestCase {
     }
 
     public void testLogEventNotificationOpened() {
-        final EventLogger eventLogger = getEventLoggerWithAnalyticsEnabled();
+        final AnalyticsEventLogger eventLogger = getEventLoggerWithAnalyticsEnabled();
         eventLogger.logOpenedNotification(TEST_EVENT_RECEIPT_ID_VALUE);
         assertTrue(serviceStarter.wasStarted());
-        assertEquals(EventLogger.PCF_PUSH_EVENT_TYPE_PUSH_NOTIFICATION_OPENED, getLoggedEvent().getEventType());
+        assertEquals(AnalyticsEventLogger.PCF_PUSH_EVENT_TYPE_PUSH_NOTIFICATION_OPENED, getLoggedEvent().getEventType());
         assertEquals(TEST_EVENT_RECEIPT_ID_VALUE, getLoggedEvent().getReceiptId());
         assertEquals(TEST_EVENT_DEVICE_UUID_VALUE, getLoggedEvent().getDeviceUuid());
         assertNull(getLoggedEvent().getGeofenceId());
@@ -119,10 +119,10 @@ public class EventLoggerTest extends AndroidTestCase {
     }
 
     public void testLogEventGeofenceTriggered() {
-        final EventLogger eventLogger = getEventLoggerWithAnalyticsEnabled();
+        final AnalyticsEventLogger eventLogger = getEventLoggerWithAnalyticsEnabled();
         eventLogger.logGeofenceTriggered("57", "1337");
         assertTrue(serviceStarter.wasStarted());
-        assertEquals(EventLogger.PCF_PUSH_EVENT_TYPE_GEOFENCE_LOCATION_TRIGGERED, getLoggedEvent().getEventType());
+        assertEquals(AnalyticsEventLogger.PCF_PUSH_EVENT_TYPE_GEOFENCE_LOCATION_TRIGGERED, getLoggedEvent().getEventType());
         assertEquals(TEST_EVENT_DEVICE_UUID_VALUE, getLoggedEvent().getDeviceUuid());
         assertEquals("57", getLoggedEvent().getGeofenceId());
         assertEquals("1337", getLoggedEvent().getLocationId());
@@ -130,17 +130,17 @@ public class EventLoggerTest extends AndroidTestCase {
         assertNotNull(getLoggedEvent().getEventTime());
     }
 
-    private EventLogger getEventLoggerWithAnalyticsDisabled() {
+    private AnalyticsEventLogger getEventLoggerWithAnalyticsDisabled() {
         Pivotal.setProperties(getProperties(false));
-        return new EventLogger(serviceStarter, preferencesProvider, getContext());
+        return new AnalyticsEventLogger(serviceStarter, preferencesProvider, getContext());
     }
 
-    private EventLogger getEventLoggerWithAnalyticsEnabled() {
+    private AnalyticsEventLogger getEventLoggerWithAnalyticsEnabled() {
         Pivotal.setProperties(getProperties(true));
-        return new EventLogger(serviceStarter, preferencesProvider, getContext());
+        return new AnalyticsEventLogger(serviceStarter, preferencesProvider, getContext());
     }
 
-    private Event getLoggedEvent() {
+    private AnalyticsEvent getLoggedEvent() {
         final Intent intent = serviceStarter.getStartedIntent();
         final EnqueueEventJob job = intent.getParcelableExtra(AnalyticsEventService.KEY_JOB);
         return job.getEvent();

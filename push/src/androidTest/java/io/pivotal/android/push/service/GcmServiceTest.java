@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Properties;
 import java.util.Set;
 
-import io.pivotal.android.push.analytics.EventLogger;
+import io.pivotal.android.push.analytics.AnalyticsEventLogger;
 import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofencePersistentStore;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceDataList;
@@ -60,7 +60,7 @@ public class GcmServiceTest extends AndroidTestCase {
     private GeofenceHelper helper;
     private GeofencePersistentStore store;
     private GeofenceEngine engine;
-    private EventLogger eventLogger;
+    private AnalyticsEventLogger eventLogger;
 
     @Override
     protected void setUp() throws Exception {
@@ -69,7 +69,7 @@ public class GcmServiceTest extends AndroidTestCase {
         helper = mock(GeofenceHelper.class);
         store = mock(GeofencePersistentStore.class);
         engine = mock(GeofenceEngine.class);
-        eventLogger = mock(EventLogger.class);
+        eventLogger = mock(AnalyticsEventLogger.class);
         GEOFENCE_DATA_LIST = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_five_items.json");
         Pivotal.setProperties(getProperties());
     }

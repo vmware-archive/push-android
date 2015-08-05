@@ -17,18 +17,18 @@ import io.pivotal.android.push.analytics.jobs.PrepareDatabaseJob;
 import io.pivotal.android.push.backend.analytics.FakePCFPushSendAnalyticsApiRequest;
 import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsApiRequestProvider;
 import io.pivotal.android.push.database.DatabaseWrapper;
-import io.pivotal.android.push.database.FakeEventsStorage;
-import io.pivotal.android.push.model.analytics.EventTest;
+import io.pivotal.android.push.database.FakeAnalyticsEventsStorage;
+import io.pivotal.android.push.model.analytics.AnalyticsEventTest;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.receiver.FakeAnalyticsEventsSenderAlarmProvider;
 import io.pivotal.android.push.util.FakeNetworkWrapper;
 
-public class EventServiceTest extends ServiceTestCase<AnalyticsEventService> {
+public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventService> {
 
     private static final int DUMMY_RESULT_CODE = 1337;
 
     private FakeNetworkWrapper networkWrapper;
-    private FakeEventsStorage eventsStorage;
+    private FakeAnalyticsEventsStorage eventsStorage;
     private FakePushPreferencesProvider pushPreferencesProvider;
     private FakeAnalyticsEventsSenderAlarmProvider alarmProvider;
     private FakePCFPushSendAnalyticsApiRequest apiRequest;
@@ -49,7 +49,7 @@ public class EventServiceTest extends ServiceTestCase<AnalyticsEventService> {
         }
     }
 
-    public EventServiceTest() {
+    public AnalyticsEventServiceTest() {
         super(AnalyticsEventService.class);
     }
 
@@ -58,7 +58,7 @@ public class EventServiceTest extends ServiceTestCase<AnalyticsEventService> {
         super.setUp();
 
         networkWrapper = new FakeNetworkWrapper();
-        eventsStorage = new FakeEventsStorage();
+        eventsStorage = new FakeAnalyticsEventsStorage();
         pushPreferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null, null, 0, false);
         apiRequest = new FakePCFPushSendAnalyticsApiRequest();
         testResultReceiver = new TestResultReceiver(null);
@@ -124,7 +124,7 @@ public class EventServiceTest extends ServiceTestCase<AnalyticsEventService> {
 
     public void testRunNotAJob() throws InterruptedException {
         final Intent intent = AnalyticsEventService.getIntentToRunJob(getContext(), null);
-        intent.putExtra(AnalyticsEventService.KEY_JOB, EventTest.getEvent1());
+        intent.putExtra(AnalyticsEventService.KEY_JOB, AnalyticsEventTest.getEvent1());
         addResultReceiverToIntent(intent);
         startService(intent);
         AnalyticsEventService.semaphore.acquire();

@@ -11,11 +11,11 @@ import io.pivotal.android.push.database.urihelpers.UriHelper;
 import io.pivotal.android.push.database.urihelpers.UriMatcherParams;
 import io.pivotal.android.push.util.StringUtil;
 
-public class EventsUriHelper implements UriHelper {
+public class AnalyticsEventsUriHelper implements UriHelper {
 
 	@Override
 	public String getType() {
-		return "vnd.android.cursor.item/vnd.io.pivotal.android.push.model.analytics.Event";
+		return "vnd.android.cursor.item/vnd.io.pivotal.android.push.model.analytics.AnalyticsEvent";
 	}
 
 	@Override

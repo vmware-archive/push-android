@@ -5,18 +5,18 @@ import com.google.gson.annotations.SerializedName;
 import java.util.Collections;
 import java.util.List;
 
-public class EventList {
+public class AnalyticsEventList {
 
     private static final String EVENTS = "events";
 
     @SerializedName(EVENTS)
-    private List<Event> events;
+    private List<AnalyticsEvent> events;
 
-    public List<Event> getEvents() {
+    public List<AnalyticsEvent> getEvents() {
         return Collections.unmodifiableList(events);
     }
 
-    public void setEvents(List<Event> events) {
+    public void setEvents(List<AnalyticsEvent> events) {
         this.events = events;
     }
 
@@ -27,7 +27,7 @@ public class EventList {
             return false;
         }
 
-        final EventList eventList = (EventList) o;
+        final AnalyticsEventList eventList = (AnalyticsEventList) o;
 
         if (events != null ? !events.equals(eventList.events) : eventList.events != null) {
             // Do we need to do a deep equals comparison?

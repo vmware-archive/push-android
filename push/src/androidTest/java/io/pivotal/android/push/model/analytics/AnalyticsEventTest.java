@@ -12,7 +12,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 
-public class EventTest extends AndroidTestCase {
+public class AnalyticsEventTest extends AndroidTestCase {
 
     private static final String TEST_RECEIPT_ID_1 = "RECEIPT-ID-1";
     private static final String TEST_MESSAGE_UUID_1 = "SOME-MESSAGE-UUID-1";
@@ -37,39 +37,39 @@ public class EventTest extends AndroidTestCase {
     private static final String TEST_EVENT_TYPE_3 = "EVENT_OF_AWESOME";
 
     public void testEquals1() {
-        final Event model1 = getEvent1();
-        final Event model2 = getEvent1();
+        final AnalyticsEvent model1 = getEvent1();
+        final AnalyticsEvent model2 = getEvent1();
         assertEquals(model1, model2);
         assertEquals(model2, model1);
     }
 
     public void testNotEquals() {
-        final Event model1 = getEvent1();
-        final Event model2 = getEvent2();
+        final AnalyticsEvent model1 = getEvent1();
+        final AnalyticsEvent model2 = getEvent2();
         MoreAsserts.assertNotEqual(model1, model2);
         MoreAsserts.assertNotEqual(model2, model1);
     }
 
     public void testCopyConstructor1() {
-        final Event model1 = new Event();
-        final Event model2 = new Event(model1);
+        final AnalyticsEvent model1 = new AnalyticsEvent();
+        final AnalyticsEvent model2 = new AnalyticsEvent(model1);
         assertEquals(model1, model2);
         assertFalse(model1 == model2);
     }
 
     public void testCopyConstructor2() {
-        final Event model1 = getEvent1();
-        final Event model2 = new Event(model1);
+        final AnalyticsEvent model1 = getEvent1();
+        final AnalyticsEvent model2 = new AnalyticsEvent(model1);
         assertEquals(model1, model2);
         assertFalse(model1 == model2);
     }
 
     public void testNotEqualsWithDates() {
 
-        final Event model1 = new Event();
+        final AnalyticsEvent model1 = new AnalyticsEvent();
         model1.setEventTime(getTestDate1());
 
-        final Event model2 = new Event();
+        final AnalyticsEvent model2 = new AnalyticsEvent();
         model2.setEventTime(getTestDate2());
 
         MoreAsserts.assertNotEqual(model1, model2);
@@ -89,10 +89,10 @@ public class EventTest extends AndroidTestCase {
 
     public void testNotEqualsWithIds() {
 
-        final Event model1 = new Event();
+        final AnalyticsEvent model1 = new AnalyticsEvent();
         model1.setReceiptId(TEST_RECEIPT_ID_1);
 
-        final Event model2 = new Event();
+        final AnalyticsEvent model2 = new AnalyticsEvent();
         model2.setReceiptId(TEST_RECEIPT_ID_2);
 
         MoreAsserts.assertNotEqual(model1, model2);
@@ -108,34 +108,34 @@ public class EventTest extends AndroidTestCase {
 
     public void testNotEqualsWithStatuses() {
 
-        final Event model1 = new Event();
-        model1.setStatus(Event.Status.POSTING_ERROR);
+        final AnalyticsEvent model1 = new AnalyticsEvent();
+        model1.setStatus(AnalyticsEvent.Status.POSTING_ERROR);
 
-        final Event model2 = new Event();
-        model1.setStatus(Event.Status.POSTING);
+        final AnalyticsEvent model2 = new AnalyticsEvent();
+        model1.setStatus(AnalyticsEvent.Status.POSTING);
 
         MoreAsserts.assertNotEqual(model1, model2);
         MoreAsserts.assertNotEqual(model2, model1);
     }
 
     public void testNotEqualsNull() {
-        final Event model1 = getEvent1();
+        final AnalyticsEvent model1 = getEvent1();
         assertFalse(model1.equals(null));
     }
 
     public void testNotEqualsOtherObject() {
-        final Event model1 = getEvent1();
+        final AnalyticsEvent model1 = getEvent1();
         assertFalse(model1.equals("INTERLOPER STRING"));
     }
 
     public void testHashCode() {
-        final Event model1 = getEvent1();
-        final Event model2 = getEvent1();
+        final AnalyticsEvent model1 = getEvent1();
+        final AnalyticsEvent model2 = getEvent1();
         assertEquals(model1.hashCode(), model2.hashCode());
     }
 
     public void testToJson() {
-        final Event event = getEvent1();
+        final AnalyticsEvent event = getEvent1();
 
         final Gson gson = new Gson();
         final String json = gson.toJson(event);
@@ -147,58 +147,58 @@ public class EventTest extends AndroidTestCase {
     }
 
     public void testConvertStringToListEmpty1() {
-        final List<Event> list = Event.jsonStringToList("");
+        final List<AnalyticsEvent> list = AnalyticsEvent.jsonStringToList("");
         assertNull(list);
     }
 
     public void testConvertStringToListEmpty2() {
-        final List<Event> list = Event.jsonStringToList("[]");
+        final List<AnalyticsEvent> list = AnalyticsEvent.jsonStringToList("[]");
         assertEquals(0, list.size());
     }
 
     public void testConvertStringToListNull() {
-        final List<Event> list = Event.jsonStringToList(null);
+        final List<AnalyticsEvent> list = AnalyticsEvent.jsonStringToList(null);
         assertNull(list);
     }
 
     public void testConvertListToString() {
-        List<Event> list = new LinkedList<>();
+        List<AnalyticsEvent> list = new LinkedList<>();
         list.add(getEvent1());
         list.add(getEvent2());
-        final String str = Event.listToJsonString(list);
+        final String str = AnalyticsEvent.listToJsonString(list);
         assertTrue(str.contains("\"eventType\":\"" + DummyEvent.EVENT_TYPE + "\""));
         assertTrue(str.contains("\"eventType\":\"" + SOME_OTHER_EVENT_TYPE + "\""));
     }
 
     public void testConvertListToStringEmpty() {
-        List<Event> list = new LinkedList<>();
-        final String str = Event.listToJsonString(list);
+        List<AnalyticsEvent> list = new LinkedList<>();
+        final String str = AnalyticsEvent.listToJsonString(list);
         assertEquals("[]", str);
     }
 
     public void testConvertListToStringNull() {
-        final String str = Event.listToJsonString(null);
+        final String str = AnalyticsEvent.listToJsonString(null);
         assertNull(str);
     }
 
-    public static Event getEvent1() {
-        final Event event = new Event();
+    public static AnalyticsEvent getEvent1() {
+        final AnalyticsEvent event = new AnalyticsEvent();
         event.setReceiptId(TEST_RECEIPT_ID_1);
         event.setEventTime(getTestDate1());
         event.setEventType(DummyEvent.EVENT_TYPE);
         return event;
     }
 
-    public static Event getEvent2() {
-        final Event event = new Event();
+    public static AnalyticsEvent getEvent2() {
+        final AnalyticsEvent event = new AnalyticsEvent();
         event.setReceiptId(TEST_RECEIPT_ID_2);
         event.setEventTime(getTestDate1());
         event.setEventType(SOME_OTHER_EVENT_TYPE);
         return event;
     }
 
-    public static Event getEvent3() {
-        final Event event = new Event();
+    public static AnalyticsEvent getEvent3() {
+        final AnalyticsEvent event = new AnalyticsEvent();
         event.setReceiptId(TEST_RECEIPT_ID_3);
         event.setEventTime(getTestDate2());
         event.setEventType(TEST_EVENT_TYPE_3);

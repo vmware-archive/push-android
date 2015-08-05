@@ -10,7 +10,7 @@ import java.util.List;
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsApiRequest;
 import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsListener;
-import io.pivotal.android.push.model.analytics.Event;
+import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 import io.pivotal.android.push.util.Logger;
 
 public class SendEventsJob extends BaseJob {
@@ -29,7 +29,7 @@ public class SendEventsJob extends BaseJob {
         Logger.fd("SendEventsJob: package %s: events available to send: %d", getPackageName(jobParams), uris.size());
 
         if (uris.size() > 0) {
-            setStatusForEvents(jobParams, uris, Event.Status.POSTING);
+            setStatusForEvents(jobParams, uris, AnalyticsEvent.Status.POSTING);
             sendEvents(jobParams, uris);
         } else {
             sendJobResult(RESULT_NO_WORK_TO_DO, jobParams);
@@ -57,7 +57,7 @@ public class SendEventsJob extends BaseJob {
 
             @Override
             public void onBackEndSendEventsFailed(String reason) {
-                setStatusForEvents(jobParams, uris, Event.Status.POSTING_ERROR);
+                setStatusForEvents(jobParams, uris, AnalyticsEvent.Status.POSTING_ERROR);
                 sendJobResult(RESULT_FAILED_TO_SEND_RECEIPTS, jobParams);
             }
         });
@@ -74,8 +74,8 @@ public class SendEventsJob extends BaseJob {
     }
 
     private List<Uri> getUnpostedEvents(JobParams jobParams) {
-        final List<Uri> uris1 = jobParams.eventsStorage.getEventUrisWithStatus(Event.Status.NOT_POSTED);
-        final List<Uri> uris2 = jobParams.eventsStorage.getEventUrisWithStatus(Event.Status.POSTING_ERROR);
+        final List<Uri> uris1 = jobParams.eventsStorage.getEventUrisWithStatus(AnalyticsEvent.Status.NOT_POSTED);
+        final List<Uri> uris2 = jobParams.eventsStorage.getEventUrisWithStatus(AnalyticsEvent.Status.POSTING_ERROR);
         final List<Uri> uris = new ArrayList<>(uris1);
         uris.addAll(uris2);
         return uris;

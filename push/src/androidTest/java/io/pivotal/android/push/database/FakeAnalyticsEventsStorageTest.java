@@ -7,9 +7,9 @@ import java.util.LinkedList;
 import java.util.List;
 
 import io.pivotal.android.push.model.analytics.DummyEvent;
-import io.pivotal.android.push.model.analytics.Event;
+import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 
-public class FakeEventsStorageTest extends AndroidTestCase {
+public class FakeAnalyticsEventsStorageTest extends AndroidTestCase {
 
 	private static final Uri NON_EXISTENT_FILE_1 = Uri.parse("file://events/this_name_does_not_exist_come_on!");
     private static final String TEST_VARIANT_ID_1 = "TEST_VARIANT_ID_1";
@@ -21,10 +21,10 @@ public class FakeEventsStorageTest extends AndroidTestCase {
     private static final String TEST_DEVICE_ID_1 = "TEST-DEVICE-ID-1";
     private static final String TEST_DEVICE_ID_2 = "TEST-DEVICE-ID-2";
     private static final String TEST_DEVICE_ID_3 = "TEST-DEVICE-ID-3";
-	private Event EVENT_1;
-	private Event EVENT_2;
-	private Event EVENT_3;
-	private FakeEventsStorage storage;
+	private AnalyticsEvent EVENT_1;
+	private AnalyticsEvent EVENT_2;
+	private AnalyticsEvent EVENT_3;
+	private FakeAnalyticsEventsStorage storage;
 
 	@Override
 	protected void setUp() throws Exception {
@@ -32,7 +32,7 @@ public class FakeEventsStorageTest extends AndroidTestCase {
 		EVENT_1 = DummyEvent.getEvent(TEST_DEVICE_ID_1);
 		EVENT_2 = DummyEvent.getEvent(TEST_DEVICE_ID_2);
 		EVENT_3 = DummyEvent.getEvent(TEST_DEVICE_ID_3);
-		storage = new FakeEventsStorage();
+		storage = new FakeAnalyticsEventsStorage();
 	}
 
 	public void testStartState() {
@@ -78,7 +78,7 @@ public class FakeEventsStorageTest extends AndroidTestCase {
 		assertEquals(uris1.get(0), uris2.get(0));
 
 		// Read the file back and confirm that it matches
-		final Event fileContents = (Event) storage.readEvent(uris2.get(0));
+		final AnalyticsEvent fileContents = (AnalyticsEvent) storage.readEvent(uris2.get(0));
 		assertEquals(EVENT_1, fileContents);
 	}
 
@@ -154,39 +154,39 @@ public class FakeEventsStorageTest extends AndroidTestCase {
 	public void testSetStatus() {
 
 		final Uri uri1 = storage.saveEvent(EVENT_1);
-        assertEventStatus(uri1, Event.Status.NOT_POSTED);
+        assertEventStatus(uri1, AnalyticsEvent.Status.NOT_POSTED);
 
-		storage.setEventStatus(uri1, Event.Status.POSTING);
-        assertEventStatus(uri1, Event.Status.POSTING);
+		storage.setEventStatus(uri1, AnalyticsEvent.Status.POSTING);
+        assertEventStatus(uri1, AnalyticsEvent.Status.POSTING);
 
-		storage.setEventStatus(uri1, Event.Status.POSTED);
-        assertEventStatus(uri1, Event.Status.POSTED);
+		storage.setEventStatus(uri1, AnalyticsEvent.Status.POSTED);
+        assertEventStatus(uri1, AnalyticsEvent.Status.POSTED);
 	}
 
     private void assertEventStatus(Uri uri, int expectedStatus) {
-        final Event event = storage.readEvent(uri);
+        final AnalyticsEvent event = storage.readEvent(uri);
         assertEquals(expectedStatus, event.getStatus());
     }
 
 	public void testGetMessageReceiptEventUrisWithStatus() {
-		EVENT_1.setStatus(Event.Status.POSTED);
-		EVENT_2.setStatus(Event.Status.POSTING_ERROR);
-		EVENT_3.setStatus(Event.Status.POSTING_ERROR);
+		EVENT_1.setStatus(AnalyticsEvent.Status.POSTED);
+		EVENT_2.setStatus(AnalyticsEvent.Status.POSTING_ERROR);
+		EVENT_3.setStatus(AnalyticsEvent.Status.POSTING_ERROR);
 		final Uri uri1 = storage.saveEvent(EVENT_1);
 		final Uri uri2 = storage.saveEvent(EVENT_2);
 		final Uri uri3 = storage.saveEvent(EVENT_3);
 
-		final List<Uri> uris1 = storage.getEventUrisWithStatus(Event.Status.NOT_POSTED);
+		final List<Uri> uris1 = storage.getEventUrisWithStatus(AnalyticsEvent.Status.NOT_POSTED);
 		assertEquals(0, uris1.size());
 
-		final List<Uri> uris2 = storage.getEventUrisWithStatus(Event.Status.POSTING);
+		final List<Uri> uris2 = storage.getEventUrisWithStatus(AnalyticsEvent.Status.POSTING);
 		assertEquals(0, uris2.size());
 
-		final List<Uri> uris3 = storage.getEventUrisWithStatus(Event.Status.POSTED);
+		final List<Uri> uris3 = storage.getEventUrisWithStatus(AnalyticsEvent.Status.POSTED);
 		assertEquals(1, uris3.size());
 		assertEquals(uri1, uris3.get(0));
 
-		final List<Uri> uris4 = storage.getEventUrisWithStatus(Event.Status.POSTING_ERROR);
+		final List<Uri> uris4 = storage.getEventUrisWithStatus(AnalyticsEvent.Status.POSTING_ERROR);
 		assertEquals(2, uris4.size());
 		assertTrue(uri2.equals(uris4.get(0)) || uri2.equals(uris4.get(1)));
 		assertTrue(uri3.equals(uris4.get(0)) || uri3.equals(uris4.get(1)));
