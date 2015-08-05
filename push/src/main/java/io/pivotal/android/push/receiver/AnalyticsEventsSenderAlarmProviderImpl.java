@@ -10,11 +10,11 @@ import java.util.Random;
 import io.pivotal.android.push.util.DebugUtil;
 import io.pivotal.android.push.util.Logger;
 
-public class EventsSenderAlarmProviderImpl implements EventsSenderAlarmProvider {
+public class AnalyticsEventsSenderAlarmProviderImpl implements AnalyticsEventsSenderAlarmProvider {
 
     private final Context context;
 
-    public EventsSenderAlarmProviderImpl(Context context) {
+    public AnalyticsEventsSenderAlarmProviderImpl(Context context) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
@@ -24,7 +24,7 @@ public class EventsSenderAlarmProviderImpl implements EventsSenderAlarmProvider 
     @Override
     public synchronized void enableAlarm() {
         Logger.d("Events sender alarm enabled.");
-        final PendingIntent intent = EventsSenderAlarmReceiver.getPendingIntent(context, PendingIntent.FLAG_UPDATE_CURRENT);
+        final PendingIntent intent = AnalyticsEventsSenderAlarmReceiver.getPendingIntent(context, PendingIntent.FLAG_UPDATE_CURRENT);
         final AlarmManager alarmManager = getAlarmManager();
         alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, getTriggerMillis(), getIntervalMillis(), intent);
     }
@@ -33,7 +33,7 @@ public class EventsSenderAlarmProviderImpl implements EventsSenderAlarmProvider 
         if (DebugUtil.getInstance(context).isDebuggable()) {
             return SystemClock.elapsedRealtime() + 2 * 60 * 1000; // 2 minutes
         } else {
-            return SystemClock.elapsedRealtime() + EventsSenderAlarmProviderImpl.getTriggerOffsetInMillis();
+            return SystemClock.elapsedRealtime() + AnalyticsEventsSenderAlarmProviderImpl.getTriggerOffsetInMillis();
         }
     }
 
@@ -52,7 +52,7 @@ public class EventsSenderAlarmProviderImpl implements EventsSenderAlarmProvider 
     @Override
     public synchronized void disableAlarm() {
         Logger.d("Events sender alarm disabled.");
-        final PendingIntent intent = EventsSenderAlarmReceiver.getPendingIntent(context, PendingIntent.FLAG_UPDATE_CURRENT);
+        final PendingIntent intent = AnalyticsEventsSenderAlarmReceiver.getPendingIntent(context, PendingIntent.FLAG_UPDATE_CURRENT);
         final AlarmManager alarmManager = getAlarmManager();
         alarmManager.cancel(intent);
         intent.cancel();
@@ -60,7 +60,7 @@ public class EventsSenderAlarmProviderImpl implements EventsSenderAlarmProvider 
 
     @Override
     public synchronized boolean isAlarmEnabled() {
-        final PendingIntent intent = EventsSenderAlarmReceiver.getPendingIntent(context, PendingIntent.FLAG_NO_CREATE);
+        final PendingIntent intent = AnalyticsEventsSenderAlarmReceiver.getPendingIntent(context, PendingIntent.FLAG_NO_CREATE);
         final boolean isAlarmEnabled = (intent != null);
         Logger.d("Events sender alarm enabled: " + (isAlarmEnabled ? "yes." : "no."));
         return isAlarmEnabled;

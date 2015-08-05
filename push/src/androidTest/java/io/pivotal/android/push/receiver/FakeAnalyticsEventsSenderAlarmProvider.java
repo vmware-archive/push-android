@@ -1,6 +1,6 @@
 package io.pivotal.android.push.receiver;
 
-public class FakeEventsSenderAlarmProvider implements EventsSenderAlarmProvider {
+public class FakeAnalyticsEventsSenderAlarmProvider implements AnalyticsEventsSenderAlarmProvider {
 
     private boolean isAlarmEnabled = false;
 

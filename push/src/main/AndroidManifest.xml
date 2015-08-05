@@ -18,6 +18,10 @@
             android:name="io.pivotal.android.push.service.GeofenceService"
             android:exported="false"/>
 
+        <service
+            android:name="io.pivotal.android.push.service.AnalyticsEventService"
+            android:exported="false"/>
+
         <receiver
             android:name="io.pivotal.android.push.receiver.BootCompletedReceiver"
             android:enabled="true"

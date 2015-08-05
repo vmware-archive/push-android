@@ -16,6 +16,7 @@ import com.google.android.gms.location.Geofence;
 
 import java.util.Map;
 
+import io.pivotal.android.push.analytics.EventLogger;
 import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofencePersistentStore;
 import io.pivotal.android.push.geofence.GeofenceRegistrar;
@@ -28,17 +29,21 @@ import io.pivotal.android.push.receiver.GcmBroadcastReceiver;
 import io.pivotal.android.push.util.FileHelper;
 import io.pivotal.android.push.util.GeofenceHelper;
 import io.pivotal.android.push.util.Logger;
+import io.pivotal.android.push.util.ServiceStarter;
+import io.pivotal.android.push.util.ServiceStarterImpl;
 import io.pivotal.android.push.util.TimeProvider;
 
 public class GcmService extends IntentService {
 
     public static final String GEOFENCE_TRANSITION_KEY = "com.google.android.location.intent.extra.transition";
     public static final String KEY_MESSAGE = "message";
+    public static final String KEY_RECEIPT_ID = "receiptId";
 
     private GeofenceHelper helper;
     private GeofenceEngine engine;
     private GeofencePersistentStore store;
     private PushPreferencesProvider preferences;
+    private EventLogger eventLogger;
 
     public GcmService() {
         super("GcmService");
@@ -58,6 +63,10 @@ public class GcmService extends IntentService {
 
     /* package */ void setPushPreferencesProvider(PushPreferencesProvider preferences) {
         this.preferences = preferences;
+    }
+
+    /* package */ void setEventLogger(EventLogger eventLogger) {
+        this.eventLogger = eventLogger;
     }
 
     @Override
@@ -94,6 +103,10 @@ public class GcmService extends IntentService {
             final TimeProvider timeProvider = new TimeProvider();
             engine = new GeofenceEngine(registrar, store, timeProvider, preferences);
         }
+        if (eventLogger == null) {
+            final ServiceStarter serviceStarter = new ServiceStarterImpl();
+            eventLogger = new EventLogger(serviceStarter, preferences, this);
+        }
     }
 
     private void onReceive(Intent intent) {
@@ -124,6 +137,7 @@ public class GcmService extends IntentService {
 
         } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
             Logger.i("GcmService has received a push message.");
+            enqueueMessageReceivedEvent(intent);
             onReceiveMessage(extras);
 
         } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
@@ -164,6 +178,7 @@ public class GcmService extends IntentService {
         }
 
         final long geofenceId = PCFPushGeofenceLocationMap.getGeofenceId(requestId);
+        final long locationId = PCFPushGeofenceLocationMap.getLocationId(requestId);
         final PCFPushGeofenceData geofenceData = store.getGeofenceData(geofenceId);
         if (geofenceData == null) {
             Logger.e("Triggered geofence with ID " + geofenceId + " has no matching data in our persistent store.");
@@ -179,6 +194,7 @@ public class GcmService extends IntentService {
 
             try {
                 Logger.i("Entered geofence: " + geofence);
+                eventLogger.logGeofenceTriggered(String.valueOf(geofenceId), String.valueOf(locationId));
                 onGeofenceEnter(bundleData);
             } catch (Exception e) {
                 Logger.ex("Caught exception in user code", e);
@@ -188,6 +204,7 @@ public class GcmService extends IntentService {
 
             try {
                 Logger.i("Exited geofence: " + geofence);
+                eventLogger.logGeofenceTriggered(String.valueOf(geofenceId), String.valueOf(locationId));
                 onGeofenceExit(bundleData);
             } catch (Exception e) {
                 Logger.ex("Caught exception in user code", e);
@@ -224,6 +241,13 @@ public class GcmService extends IntentService {
         final PCFPushGeofenceLocation location = geofenceData.getLocationWithId(locationId);
         if (location != null) {
             locationsToClear.putLocation(geofenceData, location);
+        }
+    }
+
+    private void enqueueMessageReceivedEvent(Intent intent) {
+        final String receiptId = intent.getStringExtra(KEY_RECEIPT_ID);
+        if (receiptId != null) {
+            eventLogger.logReceivedNotification(receiptId);
         }
     }
 

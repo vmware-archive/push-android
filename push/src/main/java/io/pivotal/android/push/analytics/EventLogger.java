@@ -11,7 +11,7 @@ import io.pivotal.android.push.analytics.jobs.EnqueueEventJob;
 import io.pivotal.android.push.model.analytics.Event;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
-import io.pivotal.android.push.service.EventService;
+import io.pivotal.android.push.service.AnalyticsEventService;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.ServiceStarter;
 
@@ -25,9 +25,7 @@ public class EventLogger {
     private ServiceStarter serviceStarter;
     private PushPreferencesProvider preferencesProvider;
 
-    // The Event Logger can only be instantiated from the AnalyticsSDK class or unit tests.
-
-    /* package */ EventLogger(ServiceStarter serviceStarter, PushPreferencesProvider preferencesProvider, Context context) {
+    public EventLogger(ServiceStarter serviceStarter, PushPreferencesProvider preferencesProvider, Context context) {
         verifyArguments(serviceStarter, preferencesProvider, context);
         saveArguments(serviceStarter, preferencesProvider, context);
     }
@@ -77,7 +75,7 @@ public class EventLogger {
         if (Pivotal.getAreAnalyticsEnabled(context)) {
             final Event event = getEvent(eventType, fields);
             final EnqueueEventJob job = new EnqueueEventJob(event);
-            final Intent intent = EventService.getIntentToRunJob(context, job);
+            final Intent intent = AnalyticsEventService.getIntentToRunJob(context, job);
             serviceStarter.startService(context, intent);
         } else {
             Logger.w("Event not logged. Analytics is either not set up or disabled.");

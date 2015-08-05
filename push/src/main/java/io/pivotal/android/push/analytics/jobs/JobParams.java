@@ -5,7 +5,7 @@ import android.content.Context;
 import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsApiRequestProvider;
 import io.pivotal.android.push.database.EventsStorage;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
-import io.pivotal.android.push.receiver.EventsSenderAlarmProvider;
+import io.pivotal.android.push.receiver.AnalyticsEventsSenderAlarmProvider;
 import io.pivotal.android.push.util.NetworkWrapper;
 
 public class JobParams {
@@ -15,7 +15,7 @@ public class JobParams {
     public final NetworkWrapper networkWrapper;
     public final PushPreferencesProvider pushPreferencesProvider;
     public final EventsStorage eventsStorage;
-    public final EventsSenderAlarmProvider alarmProvider;
+    public final AnalyticsEventsSenderAlarmProvider alarmProvider;
     public final PCFPushSendAnalyticsApiRequestProvider requestProvider;
 
     public JobParams(Context context,
@@ -23,7 +23,7 @@ public class JobParams {
                      NetworkWrapper networkWrapper,
                      EventsStorage eventsStorage,
                      PushPreferencesProvider pushPreferencesProvider,
-                     EventsSenderAlarmProvider alarmProvider,
+                     AnalyticsEventsSenderAlarmProvider alarmProvider,
                      PCFPushSendAnalyticsApiRequestProvider requestProvider) {
 
         verifyArguments(context, listener, networkWrapper, eventsStorage, pushPreferencesProvider, alarmProvider, requestProvider);
@@ -42,7 +42,7 @@ public class JobParams {
                                  NetworkWrapper networkWrapper,
                                  EventsStorage eventsStorage,
                                  PushPreferencesProvider pushPreferencesProvider,
-                                 EventsSenderAlarmProvider alarmProvider,
+                                 AnalyticsEventsSenderAlarmProvider alarmProvider,
                                  PCFPushSendAnalyticsApiRequestProvider requestProvider) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");

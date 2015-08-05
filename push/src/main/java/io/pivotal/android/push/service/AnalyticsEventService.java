@@ -20,14 +20,14 @@ import io.pivotal.android.push.database.EventsStorage;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
-import io.pivotal.android.push.receiver.EventsSenderAlarmProvider;
-import io.pivotal.android.push.receiver.EventsSenderAlarmProviderImpl;
-import io.pivotal.android.push.receiver.EventsSenderAlarmReceiver;
+import io.pivotal.android.push.receiver.AnalyticsEventsSenderAlarmProvider;
+import io.pivotal.android.push.receiver.AnalyticsEventsSenderAlarmProviderImpl;
+import io.pivotal.android.push.receiver.AnalyticsEventsSenderAlarmReceiver;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.NetworkWrapper;
 import io.pivotal.android.push.util.NetworkWrapperImpl;
 
-public class EventService extends IntentService {
+public class AnalyticsEventService extends IntentService {
 
     public static final String KEY_RESULT_RECEIVER = "result_receiver";
     public static final String KEY_JOB = "job";
@@ -40,7 +40,7 @@ public class EventService extends IntentService {
     /* package */ static Semaphore semaphore = null;
     /* package */ static EventsStorage eventsStorage = null;
     /* package */ static NetworkWrapper networkWrapper = null;
-    /* package */ static EventsSenderAlarmProvider alarmProvider = null;
+    /* package */ static AnalyticsEventsSenderAlarmProvider alarmProvider = null;
     /* package */ static PCFPushSendAnalyticsApiRequestProvider requestProvider = null;
     /* package */ static List<String> listOfCompletedJobs = null;
     /* package */ static PushPreferencesProvider pushPreferencesProvider;
@@ -48,19 +48,19 @@ public class EventService extends IntentService {
 
     // Used by unit tests
     /* package */ static void setPushPreferencesProvider(PushPreferencesProvider preferences) {
-        EventService.pushPreferencesProvider = preferences;
+        AnalyticsEventService.pushPreferencesProvider = preferences;
     }
 
     public static Intent getIntentToRunJob(Context context, BaseJob job) {
-        final Intent intent = new Intent(context, EventService.class);
+        final Intent intent = new Intent(context, AnalyticsEventService.class);
         if (job != null) {
             intent.putExtra(KEY_JOB, job);
         }
         return intent;
     }
 
-    public EventService() {
-        super("EventService");
+    public AnalyticsEventService() {
+        super("AnalyticsEventService");
     }
 
     @Override
@@ -94,21 +94,21 @@ public class EventService extends IntentService {
 
         boolean needToCleanDatabase = false;
 
-        if (EventService.pushPreferencesProvider == null) {
-            EventService.pushPreferencesProvider = new PushPreferencesProviderImpl(this);
+        if (AnalyticsEventService.pushPreferencesProvider == null) {
+            AnalyticsEventService.pushPreferencesProvider = new PushPreferencesProviderImpl(this);
         }
-        if (EventService.eventsStorage == null) {
+        if (AnalyticsEventService.eventsStorage == null) {
             needToCleanDatabase = setupDatabase();
         }
-        if (EventService.alarmProvider == null) {
-            EventService.alarmProvider = new EventsSenderAlarmProviderImpl(this);
+        if (AnalyticsEventService.alarmProvider == null) {
+            AnalyticsEventService.alarmProvider = new AnalyticsEventsSenderAlarmProviderImpl(this);
         }
-        if (EventService.networkWrapper == null) {
-            EventService.networkWrapper = new NetworkWrapperImpl();
+        if (AnalyticsEventService.networkWrapper == null) {
+            AnalyticsEventService.networkWrapper = new NetworkWrapperImpl();
         }
-        if (EventService.requestProvider == null) {
-            final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(this, EventService.eventsStorage, EventService.pushPreferencesProvider, EventService.networkWrapper);
-            EventService.requestProvider = new PCFPushSendAnalyticsApiRequestProvider(request);
+        if (AnalyticsEventService.requestProvider == null) {
+            final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(this, AnalyticsEventService.eventsStorage, AnalyticsEventService.pushPreferencesProvider, AnalyticsEventService.networkWrapper);
+            AnalyticsEventService.requestProvider = new PCFPushSendAnalyticsApiRequestProvider(request);
         }
 
         if (!isIntentForCleanup(intent) && needToCleanDatabase) {
@@ -126,7 +126,7 @@ public class EventService extends IntentService {
 
     private boolean setupDatabase() {
         final boolean wasDatabaseInstanceCreated = DatabaseWrapper.createDatabaseInstance(this);
-        EventService.eventsStorage = new DatabaseEventsStorage();
+        AnalyticsEventService.eventsStorage = new DatabaseEventsStorage();
         return wasDatabaseInstanceCreated;
     }
 
@@ -199,11 +199,11 @@ public class EventService extends IntentService {
     private JobParams getJobParams(JobResultListener listener) {
         return new JobParams(this,
                 listener,
-                EventService.networkWrapper,
-                EventService.eventsStorage,
-                EventService.pushPreferencesProvider,
-                EventService.alarmProvider,
-                EventService.requestProvider);
+                AnalyticsEventService.networkWrapper,
+                AnalyticsEventService.eventsStorage,
+                AnalyticsEventService.pushPreferencesProvider,
+                AnalyticsEventService.alarmProvider,
+                AnalyticsEventService.requestProvider);
     }
 
     // Used by unit tests
@@ -215,8 +215,8 @@ public class EventService extends IntentService {
 
     // Used by unit tests
     private void recordCompletedJob(BaseJob job) {
-        if (EventService.listOfCompletedJobs != null) {
-            EventService.listOfCompletedJobs.add(job.toString());
+        if (AnalyticsEventService.listOfCompletedJobs != null) {
+            AnalyticsEventService.listOfCompletedJobs.add(job.toString());
         }
     }
 
@@ -227,8 +227,8 @@ public class EventService extends IntentService {
             cleanupStatics();
 
             // If unit tests are running then release them so that they can continue
-            if (EventService.semaphore != null) {
-                EventService.semaphore.release();
+            if (AnalyticsEventService.semaphore != null) {
+                AnalyticsEventService.semaphore.release();
             }
 
         } finally {
@@ -237,17 +237,17 @@ public class EventService extends IntentService {
             // SUPER IMPORTANT! Make sure that this gets called EVERY time this service is invoked, but not until AFTER
             // any requests are completed -- otherwise the device might return to sleep before the request is complete.
             if (intent != null) {
-                EventsSenderAlarmReceiver.completeWakefulIntent(intent);
+                AnalyticsEventsSenderAlarmReceiver.completeWakefulIntent(intent);
             }
         }
     }
 
     private void cleanupStatics() {
-        EventService.eventsStorage = null;
-        EventService.alarmProvider = null;
-        EventService.networkWrapper = null;
-        EventService.pushPreferencesProvider = null;
-        EventService.requestProvider = null;
-        EventService.listOfCompletedJobs = null;
+        AnalyticsEventService.eventsStorage = null;
+        AnalyticsEventService.alarmProvider = null;
+        AnalyticsEventService.networkWrapper = null;
+        AnalyticsEventService.pushPreferencesProvider = null;
+        AnalyticsEventService.requestProvider = null;
+        AnalyticsEventService.listOfCompletedJobs = null;
     }
 }

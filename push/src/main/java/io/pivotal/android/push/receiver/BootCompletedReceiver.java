@@ -14,7 +14,7 @@ import io.pivotal.android.push.geofence.GeofenceRegistrar;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
-import io.pivotal.android.push.service.EventService;
+import io.pivotal.android.push.service.AnalyticsEventService;
 import io.pivotal.android.push.util.FileHelper;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.TimeProvider;
@@ -29,7 +29,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
         reregisterGeofences(context);
 
         if (Pivotal.getAreAnalyticsEnabled(context)) {
-            Logger.fd("Device boot detected for package '%s'. Starting EventService.", context.getPackageName());
+            Logger.fd("Device boot detected for package '%s'. Starting AnalyticsEventService.", context.getPackageName());
             startEventService(context);
         } else {
             Logger.fd("Device boot detected for package '%s'. Analytics is disabled.", context.getPackageName());
@@ -61,7 +61,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
 
     private void startEventService(Context context) {
         final PrepareDatabaseJob job = new PrepareDatabaseJob();
-        final Intent intent = EventService.getIntentToRunJob(context, job);
+        final Intent intent = AnalyticsEventService.getIntentToRunJob(context, job);
         context.startService(intent);
     }
 }

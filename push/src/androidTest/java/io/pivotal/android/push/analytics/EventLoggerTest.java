@@ -12,7 +12,7 @@ import io.pivotal.android.push.model.analytics.Event;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
-import io.pivotal.android.push.service.EventService;
+import io.pivotal.android.push.service.AnalyticsEventService;
 import io.pivotal.android.push.util.FakeServiceStarter;
 
 public class EventLoggerTest extends AndroidTestCase {
@@ -43,7 +43,7 @@ public class EventLoggerTest extends AndroidTestCase {
     protected void setUp() throws Exception {
         super.setUp();
         serviceStarter = new FakeServiceStarter();
-        serviceStarter.setReturnedComponentName(new ComponentName(getContext(), EventService.class));
+        serviceStarter.setReturnedComponentName(new ComponentName(getContext(), AnalyticsEventService.class));
         preferencesProvider = new FakePushPreferencesProvider(null, TEST_EVENT_DEVICE_UUID_VALUE, 0, null, null, null, null, null, null, null, 0, false);
 
     }
@@ -93,7 +93,7 @@ public class EventLoggerTest extends AndroidTestCase {
         eventLogger.logEvent(TEST_EVENT_TYPE, TEST_EVENT_FIELDS);
         assertFalse(serviceStarter.wasStarted());
     }
-    
+
     public void testLogEventNotificationReceived() {
         final EventLogger eventLogger = getEventLoggerWithAnalyticsEnabled();
         eventLogger.logReceivedNotification(TEST_EVENT_RECEIPT_ID_VALUE);
@@ -142,7 +142,7 @@ public class EventLoggerTest extends AndroidTestCase {
 
     private Event getLoggedEvent() {
         final Intent intent = serviceStarter.getStartedIntent();
-        final EnqueueEventJob job = intent.getParcelableExtra(EventService.KEY_JOB);
+        final EnqueueEventJob job = intent.getParcelableExtra(AnalyticsEventService.KEY_JOB);
         return job.getEvent();
     }
 

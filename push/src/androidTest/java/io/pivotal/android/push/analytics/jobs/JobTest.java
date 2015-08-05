@@ -16,7 +16,7 @@ import io.pivotal.android.push.database.FakeEventsStorage;
 import io.pivotal.android.push.model.analytics.Event;
 import io.pivotal.android.push.model.analytics.EventTest;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
-import io.pivotal.android.push.receiver.FakeEventsSenderAlarmProvider;
+import io.pivotal.android.push.receiver.FakeAnalyticsEventsSenderAlarmProvider;
 import io.pivotal.android.push.util.FakeNetworkWrapper;
 
 public abstract class JobTest extends AndroidTestCase {
@@ -28,7 +28,7 @@ public abstract class JobTest extends AndroidTestCase {
     protected FakeEventsStorage eventsStorage;
     protected FakeNetworkWrapper networkWrapper;
     protected FakePushPreferencesProvider preferencesProvider;
-    protected FakeEventsSenderAlarmProvider alarmProvider;
+    protected FakeAnalyticsEventsSenderAlarmProvider alarmProvider;
     protected FakePCFPushSendAnalyticsApiRequest backEndMessageReceiptApiRequest;
     protected PCFPushSendAnalyticsApiRequestProvider backEndSendEventsApiRequestProvider;
     protected Semaphore semaphore = new Semaphore(0);
@@ -40,7 +40,7 @@ public abstract class JobTest extends AndroidTestCase {
         event2 = EventTest.getEvent2();
         eventsStorage = new FakeEventsStorage();
         networkWrapper = new FakeNetworkWrapper();
-        alarmProvider = new FakeEventsSenderAlarmProvider();
+        alarmProvider = new FakeAnalyticsEventsSenderAlarmProvider();
         preferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, TEST_SERVICE_URL, null, 0, false);
         backEndMessageReceiptApiRequest = new FakePCFPushSendAnalyticsApiRequest();
         backEndSendEventsApiRequestProvider = new PCFPushSendAnalyticsApiRequestProvider(backEndMessageReceiptApiRequest);

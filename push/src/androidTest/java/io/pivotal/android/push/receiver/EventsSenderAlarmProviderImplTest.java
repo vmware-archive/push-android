@@ -11,7 +11,7 @@ public class EventsSenderAlarmProviderImplTest extends AndroidTestCase {
 
     public void testGetTriggerOffset() {
         for (int i = 0; i < NUMBER_OF_TESTS; i += 1) {
-            long offset = EventsSenderAlarmProviderImpl.getTriggerOffsetInMillis();
+            long offset = AnalyticsEventsSenderAlarmProviderImpl.getTriggerOffsetInMillis();
             assertTrue("Bad trigger offset " + offset, offset >= TRIGGER_LOWER_BOUND);
             assertTrue("Bad trigger offset " + offset, offset <=  TRIGGER_UPPER_BOUND);
         }

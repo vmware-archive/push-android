@@ -1,6 +1,6 @@
 package io.pivotal.android.push.receiver;
 
-public interface EventsSenderAlarmProvider {
+public interface AnalyticsEventsSenderAlarmProvider {
 
     void enableAlarm();
     void disableAlarm();

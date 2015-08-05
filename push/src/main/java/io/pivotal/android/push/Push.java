@@ -5,6 +5,7 @@ package io.pivotal.android.push;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -14,6 +15,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import io.pivotal.android.push.analytics.jobs.PrepareDatabaseJob;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequest;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestImpl;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestProvider;
@@ -37,11 +39,14 @@ import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
+import io.pivotal.android.push.receiver.AnalyticsEventsSenderAlarmProvider;
+import io.pivotal.android.push.receiver.AnalyticsEventsSenderAlarmProviderImpl;
 import io.pivotal.android.push.registration.RegistrationEngine;
 import io.pivotal.android.push.registration.RegistrationListener;
 import io.pivotal.android.push.registration.SubscribeToTagsListener;
 import io.pivotal.android.push.registration.UnregistrationEngine;
 import io.pivotal.android.push.registration.UnregistrationListener;
+import io.pivotal.android.push.service.AnalyticsEventService;
 import io.pivotal.android.push.util.FileHelper;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.NetworkWrapper;
@@ -82,6 +87,7 @@ public class Push {
     }
 
     private Context context;
+    private boolean wasDatabaseCleanupJobRun = false;
 
     private Push(@NonNull Context context) {
         verifyArguments(context);
@@ -157,6 +163,14 @@ public class Push {
         final GeofenceUpdater geofenceUpdater = new GeofenceUpdater(context, geofenceUpdatesApiRequest, geofenceEngine, pushPreferencesProvider);
         final GeofenceStatusUtil geofenceStatusUtil = new GeofenceStatusUtil(context);
 
+        if (Pivotal.getAreAnalyticsEnabled(context)) {
+            cleanupDatabase();
+        } else {
+            Logger.i("Pivotal PushSDK analytics is disabled.");
+            final AnalyticsEventsSenderAlarmProvider alarmProvider = new AnalyticsEventsSenderAlarmProviderImpl(context);
+            alarmProvider.disableAlarm();
+        }
+
         verifyRegistrationArguments(parameters);
 
         final Runnable runnable = new Runnable() {
@@ -216,6 +230,23 @@ public class Push {
         if (parameters.getServiceUrl() == null) {
             throw new IllegalArgumentException("parameters.serviceUrl may not be null");
         }
+    }
+
+    private void cleanupDatabase() {
+        if (!wasDatabaseCleanupJobRun) {
+
+            // If the process has just been initialized, then run the PrepareDatabaseJob in order to prepare the database
+            final PrepareDatabaseJob job = new PrepareDatabaseJob();
+            final Intent intent = AnalyticsEventService.getIntentToRunJob(context, job);
+            context.startService(intent);
+
+        } else {
+
+            // Otherwise, simply make sure that the timer for posting events to the server is enabled.
+            final AnalyticsEventsSenderAlarmProvider alarmProvider = new AnalyticsEventsSenderAlarmProviderImpl(context);
+            alarmProvider.enableAlarmIfDisabled();
+        }
+        wasDatabaseCleanupJobRun = true;
     }
 
     /**
