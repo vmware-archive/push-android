@@ -10,6 +10,7 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Properties;
 import java.util.concurrent.Semaphore;
 
 import io.pivotal.android.push.analytics.jobs.DummyJob;
@@ -20,6 +21,7 @@ import io.pivotal.android.push.database.DatabaseWrapper;
 import io.pivotal.android.push.database.FakeAnalyticsEventsStorage;
 import io.pivotal.android.push.model.analytics.AnalyticsEventTest;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
+import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.receiver.FakeAnalyticsEventsSenderAlarmProvider;
 import io.pivotal.android.push.util.FakeNetworkWrapper;
 
@@ -27,11 +29,6 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
 
     private static final int DUMMY_RESULT_CODE = 1337;
 
-    private FakeNetworkWrapper networkWrapper;
-    private FakeAnalyticsEventsStorage eventsStorage;
-    private FakePushPreferencesProvider pushPreferencesProvider;
-    private FakeAnalyticsEventsSenderAlarmProvider alarmProvider;
-    private FakePCFPushSendAnalyticsApiRequest apiRequest;
     private List<String> listOfCompletedJobs;
     private int testResultCode = AnalyticsEventService.NO_RESULT;
     private TestResultReceiver testResultReceiver;
@@ -57,14 +54,15 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
     protected void setUp() throws Exception {
         super.setUp();
 
-        networkWrapper = new FakeNetworkWrapper();
-        eventsStorage = new FakeAnalyticsEventsStorage();
-        pushPreferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null, null, 0, false);
-        apiRequest = new FakePCFPushSendAnalyticsApiRequest();
+        final FakeNetworkWrapper networkWrapper = new FakeNetworkWrapper();
+        final FakeAnalyticsEventsStorage eventsStorage = new FakeAnalyticsEventsStorage();
+        final FakePushPreferencesProvider pushPreferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null, null, 0, false);
+        final FakePCFPushSendAnalyticsApiRequest apiRequest = new FakePCFPushSendAnalyticsApiRequest();
+
         testResultReceiver = new TestResultReceiver(null);
         listOfCompletedJobs = new ArrayList<>();
 
-        alarmProvider = new FakeAnalyticsEventsSenderAlarmProvider();
+        FakeAnalyticsEventsSenderAlarmProvider alarmProvider = new FakeAnalyticsEventsSenderAlarmProvider();
         alarmProvider.enableAlarm();
 
         AnalyticsEventService.semaphore = new Semaphore(0);
@@ -74,6 +72,8 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
         AnalyticsEventService.requestProvider = new PCFPushSendAnalyticsApiRequestProvider(apiRequest);
         AnalyticsEventService.alarmProvider = alarmProvider;
         AnalyticsEventService.listOfCompletedJobs = listOfCompletedJobs;
+
+        Pivotal.setProperties(getProperties(true));
     }
 
     @Override
@@ -132,17 +132,17 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
         assertEquals(0, listOfCompletedJobs.size());
     }
 
-//    public void testAnalyticsDisabled() throws InterruptedException {
-//        pushPreferencesProvider.setIsAnalyticsEnabled(false);
-//        final DummyJob inputJob = new DummyJob();
-//        inputJob.setResultCode(DUMMY_RESULT_CODE);
-//        final Intent intent = AnalyticsEventService.getIntentToRunJob(getContext(), inputJob);
-//        addResultReceiverToIntent(intent);
-//        startService(intent);
-//        AnalyticsEventService.semaphore.acquire();
-//        assertEquals(AnalyticsEventService.ANALYTICS_DISABLED, testResultCode);
-//        assertEquals(0, listOfCompletedJobs.size());
-//    }
+    public void testAnalyticsDisabled() throws InterruptedException {
+        Pivotal.setProperties(getProperties(false));
+        final DummyJob inputJob = new DummyJob();
+        inputJob.setResultCode(DUMMY_RESULT_CODE);
+        final Intent intent = AnalyticsEventService.getIntentToRunJob(getContext(), inputJob);
+        addResultReceiverToIntent(intent);
+        startService(intent);
+        AnalyticsEventService.semaphore.acquire();
+        assertEquals(AnalyticsEventService.ANALYTICS_DISABLED, testResultCode);
+        assertEquals(0, listOfCompletedJobs.size());
+    }
 
     public void testRunDummyJob() throws InterruptedException {
         final DummyJob inputJob = new DummyJob();
@@ -180,19 +180,29 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
         assertEquals(inputJob.toString(), listOfCompletedJobs.get(1));
     }
 
-//    public void testDoesNotRunPrepareDatabaseJobIfReceivingAFreshDatabaseInstanceAndAnalyticsAreDisabled() throws InterruptedException {
-//        pushPreferencesProvider.setIsAnalyticsEnabled(false);
-//        AnalyticsEventService.eventsStorage = null;
-//        DatabaseWrapper.removeDatabaseInstance();
-//        final DummyJob inputJob = new DummyJob();
-//        final Intent intent = AnalyticsEventService.getIntentToRunJob(getContext(), inputJob);
-//        addResultReceiverToIntent(intent);
-//        startService(intent);
-//        AnalyticsEventService.semaphore.acquire();
-//        assertEquals(0, listOfCompletedJobs.size());
-//    }
+    public void testDoesNotRunPrepareDatabaseJobIfReceivingAFreshDatabaseInstanceAndAnalyticsAreDisabled() throws InterruptedException {
+        Pivotal.setProperties(getProperties(false));
+        AnalyticsEventService.eventsStorage = null;
+        DatabaseWrapper.removeDatabaseInstance();
+        final DummyJob inputJob = new DummyJob();
+        final Intent intent = AnalyticsEventService.getIntentToRunJob(getContext(), inputJob);
+        addResultReceiverToIntent(intent);
+        startService(intent);
+        AnalyticsEventService.semaphore.acquire();
+        assertEquals(0, listOfCompletedJobs.size());
+    }
 
     private void addResultReceiverToIntent(Intent intent) {
         intent.putExtra(AnalyticsEventService.KEY_RESULT_RECEIVER, testResultReceiver);
+    }
+
+    private Properties getProperties(boolean areAnalyticsEnabled) {
+        final Properties properties = new Properties();
+        properties.setProperty(Pivotal.Keys.SERVICE_URL, "http://some.url");
+        properties.setProperty(Pivotal.Keys.GCM_SENDER_ID, "fake_sender_id");
+        properties.setProperty(Pivotal.Keys.PLATFORM_UUID, "fake_platform_uuid");
+        properties.setProperty(Pivotal.Keys.PLATFORM_SECRET, "fake_platform_secret");
+        properties.setProperty(Pivotal.Keys.ARE_ANALYTICS_ENABLED, Boolean.toString(areAnalyticsEnabled));
+        return properties;
     }
 }

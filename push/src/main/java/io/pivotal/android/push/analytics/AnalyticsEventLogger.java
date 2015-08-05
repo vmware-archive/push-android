@@ -48,29 +48,10 @@ public class AnalyticsEventLogger {
         this.context = context;
     }
 
-    /**
-     * Logs an event into the analytics database with an empty data field.  This event will be posted to the analytics
-     * server sometime in the near future.
-     * <p/>
-     * Does nothing if analytics is disabled.  You can enable analytics by calling the `AnalyticsSDK.setParameters`
-     * method with the `areAnalyticsEnabled` field set to `true`.
-     *
-     * @param eventType The type of the event being logged.
-     */
     public void logEvent(String eventType) {
         logEvent(eventType, null);
     }
 
-    /**
-     * Logs an event into the analytics database, including optional data.  This event will be posted to the
-     * analytics server sometime in the near future.
-     * <p/>
-     * Does nothing if analytics is disabled.  You can enable analytics by calling the `AnalyticsSDK.setParameters`
-     * method with the `areAnalyticsEnabled` field set to `true`.
-     *
-     * @param eventType The type of the event being logged.
-     * @param fields    Event parameters
-     */
     public void logEvent(String eventType, Map<String, String> fields) {
         if (Pivotal.getAreAnalyticsEnabled(context)) {
             final AnalyticsEvent event = getEvent(eventType, fields);
@@ -82,12 +63,6 @@ public class AnalyticsEventLogger {
         }
     }
 
-    /**
-     * Logs a push notification "received" event into the analytics database.  This event will be posted to the
-     * analytics server sometime in the near future.
-     * <p/>
-     * Does nothing if analytics is disabled.  You can enable analytics by setting `areAnalyticsEnabled` to `true`.
-     */
     public void logReceivedNotification(String receiptId) {
         Map<String, String> fields = new HashMap<>();
         fields.put("receiptId", receiptId);
@@ -96,12 +71,6 @@ public class AnalyticsEventLogger {
         Logger.i("Logging received remote notification for receiptId: " + receiptId);
     }
 
-    /**
-     * Logs a push notification "opened" event into the analytics database.  This event will be posted to the
-     * analytics server sometime in the near future.
-     * <p/>
-     * Does nothing if analytics is disabled.  You can enable analytics by setting `areAnalyticsEnabled` to `true`.
-     */
     public void logOpenedNotification(String receiptId) {
         Map<String, String> fields = new HashMap<>();
         fields.put("receiptId", receiptId);
@@ -110,12 +79,6 @@ public class AnalyticsEventLogger {
         Logger.i("Logging opened remote notification for receiptId: " + receiptId);
     }
 
-    /**
-     * Logs a geofence "triggered" event into the analytics database.  This event will be posted to the
-     * analytics server sometime in the near future.
-     * <p/>
-     * Does nothing if analytics is disabled.  You can enable analytics by setting `areAnalyticsEnabled` to `true`.
-     */
     public void logGeofenceTriggered(String geofenceId, String locationId) {
         Map<String, String> fields = new HashMap<>();
         fields.put("geofenceId", geofenceId);

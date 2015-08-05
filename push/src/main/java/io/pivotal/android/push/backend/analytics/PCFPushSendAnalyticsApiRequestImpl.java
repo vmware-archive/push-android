@@ -82,48 +82,23 @@ public class PCFPushSendAnalyticsApiRequestImpl extends ApiRequestImpl implement
         try {
 
             final URL url = getUrl(parameters);
+            final HttpURLConnection urlConnection = getHttpURLConnection(url);
+            urlConnection.addRequestProperty("Content-Type", "application/json");
+            urlConnection.addRequestProperty("Authorization", getBasicAuthorizationValue(parameters));
+            urlConnection.setRequestMethod("POST");
+            urlConnection.setDoInput(true);
+            urlConnection.connect();
 
-            // TODO - once the server supports receiving analytics events then remove
-            // this silly 'if' block and let the library post the events for real.
-            // At this time, if you attempt to post events to the server
-            // then you will get a 405 error.
+            outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
 
-            if (POST_TO_BACK_END) {
+            final String requestBodyData = getRequestBodyData(uris);
+            Logger.v("Making network request to post event data to the back-end server: " + requestBodyData);
+            writeOutput(requestBodyData, outputStream);
 
-                // TODO - add the variant UUID/secret to the Authorization header
+            final int statusCode = urlConnection.getResponseCode();
+            urlConnection.disconnect();
 
-                final HttpURLConnection urlConnection = getHttpURLConnection(url);
-                //final URL sendEventsUrl = new URL(baseServerUrl, Const.BACKEND_SEND_EVENTS_ENDPOINT);
-                //final HttpURLConnection urlConnection = getHttpURLConnection(sendEventsUrl);
-                urlConnection.addRequestProperty("Content-Type", "application/json");
-                urlConnection.setRequestMethod("POST");
-                urlConnection.setDoInput(true);
-                urlConnection.connect();
-
-                outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
-
-                // TODO - serialize events directly as JSON into the url connection?
-
-                final String requestBodyData = getRequestBodyData(uris);
-                Logger.v("Making network request to post event data to the back-end server: " + requestBodyData);
-                writeOutput(requestBodyData, outputStream);
-
-                final int statusCode = urlConnection.getResponseCode();
-                urlConnection.disconnect();
-
-                onSuccessfulNetworkRequest(statusCode, listener);
-
-            } else { // FAKE IT!
-
-                // NOTE: the server does not support receiving events at this time.  In the meanwhile,
-                // this block of code is hard-coded to pretend that the library posts to the server and succeeds.
-
-                final String requestBodyData = getRequestBodyData(uris);
-                Logger.v("Making network request to post event data to the back-end server: " + requestBodyData);
-
-                final int statusCode = 200;
-                onSuccessfulNetworkRequest(statusCode, listener);
-            }
+            onSuccessfulNetworkRequest(statusCode, listener);
 
         } catch (Exception e) {
             Logger.ex("Sending event data to back-end server failed", e);

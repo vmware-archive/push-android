@@ -3,7 +3,7 @@ package io.pivotal.android.push.receiver;
 import android.app.AlarmManager;
 import android.test.AndroidTestCase;
 
-public class EventsSenderAlarmProviderImplTest extends AndroidTestCase {
+public class AnalyticsEventsSenderAlarmProviderImplTest extends AndroidTestCase {
 
     private static final int NUMBER_OF_TESTS = 1000;
     private static final long TRIGGER_LOWER_BOUND = AlarmManager.INTERVAL_HOUR;

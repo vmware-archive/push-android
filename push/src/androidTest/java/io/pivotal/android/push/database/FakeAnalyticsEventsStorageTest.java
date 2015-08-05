@@ -12,12 +12,6 @@ import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 public class FakeAnalyticsEventsStorageTest extends AndroidTestCase {
 
 	private static final Uri NON_EXISTENT_FILE_1 = Uri.parse("file://events/this_name_does_not_exist_come_on!");
-    private static final String TEST_VARIANT_ID_1 = "TEST_VARIANT_ID_1";
-    private static final String TEST_VARIANT_ID_2 = "TEST_VARIANT_ID_2";
-    private static final String TEST_VARIANT_ID_3 = "TEST_VARIANT_ID_3";
-    private static final String TEST_MESSAGE_UUID_1 = "TEST_MESSAGE_UUID_1";
-    private static final String TEST_MESSAGE_UUID_2 = "TEST_MESSAGE_UUID_2";
-    private static final String TEST_MESSAGE_UUID_3 = "TEST_MESSAGE_UUID_3";
     private static final String TEST_DEVICE_ID_1 = "TEST-DEVICE-ID-1";
     private static final String TEST_DEVICE_ID_2 = "TEST-DEVICE-ID-2";
     private static final String TEST_DEVICE_ID_3 = "TEST-DEVICE-ID-3";
@@ -78,7 +72,7 @@ public class FakeAnalyticsEventsStorageTest extends AndroidTestCase {
 		assertEquals(uris1.get(0), uris2.get(0));
 
 		// Read the file back and confirm that it matches
-		final AnalyticsEvent fileContents = (AnalyticsEvent) storage.readEvent(uris2.get(0));
+		final AnalyticsEvent fileContents = storage.readEvent(uris2.get(0));
 		assertEquals(EVENT_1, fileContents);
 	}
 

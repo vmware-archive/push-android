@@ -135,23 +135,21 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
         }
     }
 
-    // TODO - restore test until the server supports this endpoint
-//    public void testCouldNotConnect() {
-//        makeListenersFromFailedRequestFromNetwork("Your server is busted", 0);
-//        final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(getContext(), eventsStorage, preferencesProvider, networkWrapper);
-//        request.startSendEvents(listWithOneItem, listener);
-//        delayedLoop.startLoop();
-//        assertTrue(delayedLoop.isSuccess());
-//    }
+    public void testCouldNotConnect() {
+        makeListenersFromFailedRequestFromNetwork("Your server is busted", 0);
+        final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(getContext(), eventsStorage, preferencesProvider, networkWrapper);
+        request.startSendEvents(listWithOneItem, listener);
+        delayedLoop.startLoop();
+        assertTrue(delayedLoop.isSuccess());
+    }
 
-    // TODO - restore test until the server supports this endpoint
-//    public void testSuccessful400() {
-//        makeListenersForSuccessfulRequestFromNetwork(false, 400);
-//        final BackEndMessageReceiptApiRequestImpl request = new BackEndMessageReceiptApiRequestImpl(networkWrapper);
-//        request.startSendEvents(listWithOneItem, backEndMessageReceiptListener);
-//        delayedLoop.startLoop();
-//        assertTrue(delayedLoop.isSuccess());
-//    }
+    public void testSuccessful400() {
+        makeListenersForSuccessfulRequestFromNetwork(false, 400);
+        final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(getContext(), eventsStorage, preferencesProvider, networkWrapper);
+        request.startSendEvents(listWithOneItem, listener);
+        delayedLoop.startLoop();
+        assertTrue(delayedLoop.isSuccess());
+    }
 
     private void makeListenersFromFailedRequestFromNetwork(String exceptionText, int expectedHttpStatusCode) {
         IOException exception = null;

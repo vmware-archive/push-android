@@ -11,7 +11,7 @@ import io.pivotal.android.push.util.Logger;
 
 public class Database extends SQLiteOpenHelper {
 
-    public static final int DATABASE_VERSION = 3;
+    public static final int DATABASE_VERSION = 1;
     public static final String DATABASE_FILENAME = "io.pivotal.android.push.events.db";
     public static final String AUTHORITY = "io.pivotal.android.push.providers.EventsDatabase";
     public static final String EVENTS_TABLE_NAME = "events";

@@ -52,7 +52,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                     final GeofenceEngine engine = new GeofenceEngine(geofenceRegistrar, geofencePersistentStore, timeProvider, preferences);
                     final Set<String> tags = preferences.getTags();
                     engine.reregisterCurrentLocations(tags);
-                    return (Void)null;
+                    return null;
                 }
             };
             asyncTask.execute();
