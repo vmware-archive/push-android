@@ -3,6 +3,7 @@
  */
 package io.pivotal.android.push.prefs;
 
+import java.util.Map;
 import java.util.Set;
 
 public interface PushPreferencesProvider {
@@ -56,4 +57,8 @@ public interface PushPreferencesProvider {
     boolean areGeofencesEnabled();
 
     void setAreGeofencesEnabled(boolean areGeofencesEnabled);
+
+    Map<String, String> getRequestHeaders();
+
+    void setRequestHeaders(Map<String, String> requestHeaders);
 }

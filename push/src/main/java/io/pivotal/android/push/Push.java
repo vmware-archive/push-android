@@ -9,6 +9,7 @@ import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -146,7 +147,7 @@ public class Push {
         final PCFPushRegistrationApiRequest dummyPCFPushRegistrationApiRequest = new PCFPushRegistrationApiRequestImpl(context, networkWrapper);
         final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(dummyPCFPushRegistrationApiRequest);
         final VersionProvider versionProvider = new VersionProviderImpl(context);
-        final PushParameters parameters = getPushParameters(deviceAlias, tags, areGeofencesEnabled);
+        final PushParameters parameters = getPushParameters(deviceAlias, tags, areGeofencesEnabled, pushPreferencesProvider.getRequestHeaders());
         final PCFPushGetGeofenceUpdatesApiRequest geofenceUpdatesApiRequest = new PCFPushGetGeofenceUpdatesApiRequest(context, networkWrapper);
         final GeofenceRegistrar geofenceRegistrar = new GeofenceRegistrar(context);
         final FileHelper fileHelper = new FileHelper(context);
@@ -186,14 +187,16 @@ public class Push {
 
     private PushParameters getPushParameters(@Nullable String deviceAlias,
                                              @Nullable Set<String> tags,
-                                             boolean areGeofencesEnabled) {
+                                             boolean areGeofencesEnabled,
+                                             @Nullable Map<String, String> requestHeaders) {
+
         final String gcmSenderId = Pivotal.getGcmSenderId(context);
         final String platformUuid = Pivotal.getPlatformUuid(context);
         final String platformSecret = Pivotal.getPlatformSecret(context);
         final String serviceUrl = Pivotal.getServiceUrl(context);
         final boolean trustAllSslCertificates = Pivotal.isTrustAllSslCertificates(context);
         final List<String> pinnedCertificateNames = Pivotal.getPinnedSslCertificateNames(context);
-        return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, deviceAlias, tags, areGeofencesEnabled, trustAllSslCertificates, pinnedCertificateNames);
+        return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, deviceAlias, tags, areGeofencesEnabled, trustAllSslCertificates, pinnedCertificateNames, requestHeaders);
     }
 
     private void verifyRegistrationArguments(@NonNull PushParameters parameters) {
@@ -288,7 +291,7 @@ public class Push {
         final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
         final boolean areGeofencesEnabled = pushPreferencesProvider.areGeofencesEnabled();
 
-        final PushParameters parameters = getPushParameters(null, null, areGeofencesEnabled);
+        final PushParameters parameters = getPushParameters(null, null, areGeofencesEnabled, pushPreferencesProvider.getRequestHeaders());
         verifyUnregistrationArguments(parameters);
 
         final GcmProvider gcmProvider = new RealGcmProvider(context);
@@ -366,5 +369,21 @@ public class Push {
     public String getDeviceUuid() {
         final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
         return pushPreferencesProvider.getPCFPushDeviceRegistrationId();
+    }
+
+    /**
+     * Call this method in order to inject custom headers into any HTTP requests made by the Push SDK.
+     * Note that you can not provide any 'Authorization' or 'Content-Type' headers via this method; they will
+     * be ignored by the Push SDK.
+     *
+     * In order for this method to take effect you will need to call it *before* `startRegistration`,
+     * `subscribeToTags`, or any other methods that will make network requests.
+     *
+     * @param requestHeaders  A Map object with pairs of String headers and String values that will be injected into
+     *                        any network requests made by the Push SDK.
+     */
+    public void setRequestHeaders(Map<String, String> requestHeaders) {
+        final PushPreferencesProviderImpl preferences = new PushPreferencesProviderImpl(context);
+        preferences.setRequestHeaders(requestHeaders);
     }
 }

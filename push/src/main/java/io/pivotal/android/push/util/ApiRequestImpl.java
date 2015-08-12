@@ -23,6 +23,7 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.interfaces.RSAPublicKey;
 import java.util.List;
+import java.util.Map;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
@@ -99,6 +100,16 @@ public class ApiRequestImpl {
 
     protected boolean isFailureStatusCode(int statusCode) {
         return (statusCode < 200 || statusCode >= 300);
+    }
+
+
+    protected void addCustomRequestHeaders(PushParameters parameters, HttpURLConnection urlConnection) {
+        final Map<String, String> requestHeaders = parameters.getRequestHeaders();
+        if (requestHeaders != null && !requestHeaders.isEmpty()) {
+            for (Map.Entry<String, String> entry : requestHeaders.entrySet()) {
+                urlConnection.addRequestProperty(entry.getKey(), entry.getValue());
+            }
+        }
     }
 
     protected void setupTrust(PushParameters parameters, HttpURLConnection urlConnection) throws GeneralSecurityException, IOException {

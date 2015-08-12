@@ -141,7 +141,7 @@ public class RegistrationEngineTestParameters {
         final GeofenceEngine geofenceEngine = mock(GeofenceEngine.class);
         final GeofenceStatusUtil geofenceStatusUtil = mock(GeofenceStatusUtil.class);
         final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, PCFPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
-        final PushParameters parameters = new PushParameters(gcmSenderIdFromUser, platformUuidFromUser, platformSecretFromUser, serviceUrlFromUser, deviceAliasFromUser, tagsFromUser, areGeofencesEnabledFromUser, false, null);
+        final PushParameters parameters = new PushParameters(gcmSenderIdFromUser, platformUuidFromUser, platformSecretFromUser, serviceUrlFromUser, deviceAliasFromUser, tagsFromUser, areGeofencesEnabledFromUser, false, null, null);
 
         doAnswer(new Answer<Void>() {
 

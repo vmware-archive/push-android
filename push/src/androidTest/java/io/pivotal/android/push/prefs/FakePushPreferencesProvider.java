@@ -3,6 +3,7 @@
  */
 package io.pivotal.android.push.prefs;
 
+import java.util.Map;
 import java.util.Set;
 
 import io.pivotal.android.push.geofence.GeofenceEngine;
@@ -18,6 +19,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     private String packageName;
     private String serviceUrl;
     private Set<String> tags;
+    private Map<String, String> requestHeaders;
     private int appVersion;
     private long lastGeofenceUpdate = GeofenceEngine.NEVER_UPDATED_GEOFENCES;
     private boolean areGeofencesEnabled;
@@ -125,6 +127,12 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     }
 
     @Override
+    public Map<String, String> getRequestHeaders()
+    {
+        return requestHeaders;
+    }
+
+    @Override
     public void setPCFPushDeviceRegistrationId(String pcfPushDeviceRegistrationId) {
         this.pcfPushDeviceRegistrationId = pcfPushDeviceRegistrationId;
         wasPCFPushDeviceRegistrationIdSaved = true;
@@ -194,6 +202,12 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     public void setAreGeofencesEnabled(boolean areGeofencesEnabled) {
         this.areGeofencesEnabled = areGeofencesEnabled;
         wasAreGeofencesEnabledSaved = true;
+    }
+
+    @Override
+    public void setRequestHeaders(Map<String, String> requestHeaders)
+    {
+        this.requestHeaders = requestHeaders;
     }
 
     public boolean wasGcmDeviceRegistrationIdSaved() {

@@ -9,7 +9,9 @@ import com.google.gson.Gson;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
 
 import io.pivotal.android.push.PushParameters;
@@ -37,6 +39,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
     private FakeNetworkWrapper networkWrapper;
     private DelayedLoop delayedLoop;
     private PCFPushRegistrationListener listener;
+    private Map<String, String> EXPECTED_REQUEST_HEADERS = new HashMap<>();
 
     @Override
     protected void setUp() throws Exception {
@@ -44,6 +47,8 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
         networkWrapper = new FakeNetworkWrapper();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
         FakeHttpURLConnection.reset();
+        EXPECTED_REQUEST_HEADERS.put("COOKIES", "COMPOST COOKIES");
+        EXPECTED_REQUEST_HEADERS.put("CANDY", "CHOCOLATE ALMONDS SO ADDICTING");
     }
 
     public void testRequiresContext() {
@@ -67,7 +72,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
     public void testNewDeviceRegistrationRequiresGcmDeviceRegistrationId() {
         try {
             final PCFPushRegistrationApiRequestImpl request = new PCFPushRegistrationApiRequestImpl(getContext(), new FakeNetworkWrapper());
-            makePCFPushRegistrationApiRequestListener(true, HTTP_POST, null, null, null, false);
+            makePCFPushRegistrationApiRequestListener(true, HTTP_POST, null, null, null, false, null);
             request.startNewDeviceRegistration(null, null, getParameters(), listener);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
@@ -78,7 +83,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
     public void testNewDeviceRegistrationRequiresParameters() {
         try {
             final PCFPushRegistrationApiRequestImpl request = new PCFPushRegistrationApiRequestImpl(getContext(), new FakeNetworkWrapper());
-            makePCFPushRegistrationApiRequestListener(true, HTTP_POST, null, null, null, false);
+            makePCFPushRegistrationApiRequestListener(true, HTTP_POST, null, null, null, false, null);
             request.startNewDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, null, null, listener);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
@@ -99,7 +104,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
     public void testUpdateDeviceRegistrationRequiresGcmDeviceRegistrationId() {
         try {
             final PCFPushRegistrationApiRequestImpl request = new PCFPushRegistrationApiRequestImpl(getContext(), new FakeNetworkWrapper());
-            makePCFPushRegistrationApiRequestListener(true, HTTP_POST, null, null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, false);
+            makePCFPushRegistrationApiRequestListener(true, HTTP_POST, null, null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, false, null);
             request.startUpdateDeviceRegistration(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, null, getParameters(), listener);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
@@ -110,7 +115,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
     public void testUpdateDeviceRegistrationRequiresPCFPushDeviceRegistrationId() {
         try {
             final PCFPushRegistrationApiRequestImpl request = new PCFPushRegistrationApiRequestImpl(getContext(), new FakeNetworkWrapper());
-            makePCFPushRegistrationApiRequestListener(true, HTTP_PUT, null, null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, false);
+            makePCFPushRegistrationApiRequestListener(true, HTTP_PUT, null, null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, false, null);
             request.startUpdateDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, null, null, getParameters(), listener);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
@@ -121,7 +126,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
     public void testUpdateDeviceRegistrationRequiresParameters() {
         try {
             final PCFPushRegistrationApiRequestImpl request = new PCFPushRegistrationApiRequestImpl(getContext(), new FakeNetworkWrapper());
-            makePCFPushRegistrationApiRequestListener(true, HTTP_PUT, null, null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, false);
+            makePCFPushRegistrationApiRequestListener(true, HTTP_PUT, null, null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, false, null);
             request.startUpdateDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, null, null, listener);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
@@ -280,6 +285,22 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
         assertTrue(delayedLoop.isSuccess());
     }
 
+    public void testNewDeviceRegistrationWithCustomHeaders() {
+        makeListenersForSuccessfulRequestWithCustomHeaders(true, 200, HTTP_POST, null, null, null, EXPECTED_REQUEST_HEADERS);
+        final PCFPushRegistrationApiRequestImpl request = new PCFPushRegistrationApiRequestImpl(getContext(), networkWrapper);
+        request.startNewDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, null, getParameters(EXPECTED_REQUEST_HEADERS), listener);
+        delayedLoop.startLoop();
+        assertTrue(delayedLoop.isSuccess());
+    }
+
+    public void testUpdateDeviceRegistrationWithCustomHeaders() {
+        makeListenersForSuccessfulRequestWithCustomHeaders(true, 200, HTTP_PUT, null, null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, EXPECTED_REQUEST_HEADERS);
+        final PCFPushRegistrationApiRequestImpl request = new PCFPushRegistrationApiRequestImpl(getContext(), networkWrapper);
+        request.startUpdateDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, null, getParameters(EXPECTED_REQUEST_HEADERS), listener);
+        delayedLoop.startLoop();
+        assertTrue(delayedLoop.isSuccess());
+    }
+
     public void testAuthorization() {
         final String base64encodedAuthorization = ApiRequestImpl.getBasicAuthorizationValue(getParameters());
         assertEquals("Basic  " + TEST_BASE64_ENCODED_AUTHORIZATION, base64encodedAuthorization);
@@ -295,7 +316,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
         final String resultantJson = "{\"device_uuid\" : \"" + TEST_PCF_PUSH_DEVICE_REGISTRATION_ID + "\"}";
         FakeHttpURLConnection.setResponseData(resultantJson);
         FakeHttpURLConnection.setResponseCode(expectedHttpStatusCode);
-        makePCFPushRegistrationApiRequestListener(isSuccessfulResult, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, false);
+        makePCFPushRegistrationApiRequestListener(isSuccessfulResult, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, false, null);
     }
 
     private void makeListenersForSuccessfulRequestFromNetworkSsl(boolean isSuccessfulResult,
@@ -308,7 +329,21 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
         final String resultantJson = "{\"device_uuid\" : \"" + TEST_PCF_PUSH_DEVICE_REGISTRATION_ID + "\"}";
         FakeHttpURLConnection.setResponseData(resultantJson);
         FakeHttpURLConnection.setResponseCode(expectedHttpStatusCode);
-        makePCFPushRegistrationApiRequestListener(isSuccessfulResult, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, true);
+        makePCFPushRegistrationApiRequestListener(isSuccessfulResult, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, true, null);
+    }
+
+    private void makeListenersForSuccessfulRequestWithCustomHeaders(boolean isSuccessfulResult,
+                                                                    int expectedHttpStatusCode,
+                                                                    String expectedHttpMethod,
+                                                                    Set<String> expectedSubscribeTags,
+                                                                    Set<String> expectedUnsubscribeTags,
+                                                                    String previousPCFPushDeviceRegistrationId,
+                                                                    Map<String, String> expectedRequestHeaders) {
+
+        final String resultantJson = "{\"device_uuid\" : \"" + TEST_PCF_PUSH_DEVICE_REGISTRATION_ID + "\"}";
+        FakeHttpURLConnection.setResponseData(resultantJson);
+        FakeHttpURLConnection.setResponseCode(expectedHttpStatusCode);
+        makePCFPushRegistrationApiRequestListener(isSuccessfulResult, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, false, expectedRequestHeaders);
     }
 
     private void makeListenersForSuccessfulNullResultFromNetwork(String expectedHttpMethod,
@@ -317,7 +352,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
                                                                  String previousPCFPushDeviceRegistrationId) {
         FakeHttpURLConnection.setResponseData(null);
         FakeHttpURLConnection.setResponseCode(200);
-        makePCFPushRegistrationApiRequestListener(false, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, false);
+        makePCFPushRegistrationApiRequestListener(false, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, false, null);
     }
 
     private void makeListenersWithBadNetworkResponse(String expectedHttpMethod,
@@ -327,7 +362,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
 
         FakeHttpURLConnection.setResponseData("{{{{{{{");
         FakeHttpURLConnection.setResponseCode(200);
-        makePCFPushRegistrationApiRequestListener(false, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, false);
+        makePCFPushRegistrationApiRequestListener(false, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, false, null);
     }
 
     private void makeListenersWithNoDeviceUuidInResponse(String expectedHttpMethod,
@@ -337,7 +372,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
 
         FakeHttpURLConnection.setResponseData("{}");
         FakeHttpURLConnection.setResponseCode(200);
-        makePCFPushRegistrationApiRequestListener(false, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, false);
+        makePCFPushRegistrationApiRequestListener(false, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, false, null);
     }
 
     private void makeListenersFromFailedRequestFromNetwork(String exceptionText,
@@ -354,7 +389,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
         FakeHttpURLConnection.setConnectionException(exception);
         FakeHttpURLConnection.willThrowConnectionException(true);
         FakeHttpURLConnection.setResponseCode(expectedHttpStatusCode);
-        makePCFPushRegistrationApiRequestListener(false, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, false);
+        makePCFPushRegistrationApiRequestListener(false, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, false, null);
     }
 
     public void makePCFPushRegistrationApiRequestListener(final boolean isSuccessfulRequest,
@@ -362,7 +397,8 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
                                                           final Set<String> expectedSubscribeTags,
                                                           final Set<String> expectedUnsubscribeTags,
                                                           final String previousPCFPushDeviceRegistrationId,
-                                                          final boolean isTrustAllSslCertificates) {
+                                                          final boolean isTrustAllSslCertificates,
+                                                          final Map<String, String> expectedRequestHeaders) {
 
         listener = new PCFPushRegistrationListener() {
 
@@ -375,6 +411,14 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
                     assertTrue(FakeHttpURLConnection.getReceivedURL().toString().endsWith(previousPCFPushDeviceRegistrationId));
                 }
                 assertEquals(isTrustAllSslCertificates, FakeHttpURLConnection.didCallSetSSLSocketFactory());
+
+                if (expectedRequestHeaders != null) {
+                    final Map<String, String> actualRequestHeaders = FakeHttpURLConnection.getRequestPropertiesMap();
+                    for (Map.Entry<String, String> entry : expectedRequestHeaders.entrySet()) {
+                        assertTrue(actualRequestHeaders.containsKey(entry.getKey()));
+                        assertEquals(entry.getValue(), actualRequestHeaders.get(entry.getKey()));
+                    }
+                }
 
                 final byte[] requestData = FakeHttpURLConnection.getRequestData();
                 assertNotNull(requestData);
@@ -428,15 +472,19 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
     }
 
     private PushParameters getParameters() {
-        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null, true, false, null);
+        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null, true, false, null, null);
     }
 
     private PushParameters getParameters(Set<String> tags) {
-        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, tags, true, false, null);
+        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, tags, true, false, null, null);
     }
 
     private PushParameters getParameters(boolean trustAllSslCertificates) {
-        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null, true, trustAllSslCertificates, null);
+        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null, true, trustAllSslCertificates, null, null);
+    }
+
+    private PushParameters getParameters(Map<String, String> requestHeaders) {
+        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null, true, false, null, requestHeaders);
     }
 
     private Set<String> makeSet(String... strings) {

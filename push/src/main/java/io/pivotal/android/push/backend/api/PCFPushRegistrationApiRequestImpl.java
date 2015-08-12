@@ -100,6 +100,7 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
             final URL url = getURL(isUpdate, previousPCFPushDeviceRegistrationId, parameters);
             final HttpURLConnection urlConnection = getHttpURLConnection(url);
 
+            addCustomRequestHeaders(parameters, urlConnection);
             setupTrust(parameters, urlConnection);
 
             urlConnection.setDoOutput(true);
