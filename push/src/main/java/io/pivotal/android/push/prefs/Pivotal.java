@@ -19,8 +19,15 @@ public class Pivotal {
         public static final String GCM_SENDER_ID = "pivotal.push.gcmSenderId";
         public static final String PLATFORM_UUID = "pivotal.push.platformUuid";
         public static final String PLATFORM_SECRET = "pivotal.push.platformSecret";
-        public static final String TRUST_ALL_SSL_CERTIFICATES = "pivotal.push.trustAllSslCertificates";
+        public static final String SSL_CERT_VALIDATION_MODE = "pivotal.push.sslCertValidationMode";
         public static final String PINNED_SSL_CERTIFICATE_NAMES = "pivotal.push.pinnedSslCertificateNames";
+    }
+
+    public enum SslCertValidationMode {
+        DEFAULT,
+        TRUST_ALL,
+        PINNED,
+        CALLBACK
     }
 
     private static final String[] LOCATIONS = {
@@ -114,8 +121,23 @@ public class Pivotal {
         return getRequiredProperty(context, Keys.SERVICE_URL);
     }
 
-    public static boolean isTrustAllSslCertificates(Context context) {
-        return Boolean.parseBoolean(getOptionalProperty(context, Keys.TRUST_ALL_SSL_CERTIFICATES, "false"));
+    public static SslCertValidationMode getSslCertValidationMode(Context context) throws IllegalArgumentException {
+        final String s = getOptionalProperty(context, Keys.SSL_CERT_VALIDATION_MODE, "default");
+
+        if (s.equalsIgnoreCase("trustall") || s.equalsIgnoreCase("trust_all")) {
+            return SslCertValidationMode.TRUST_ALL;
+
+        } else if (s.equalsIgnoreCase("pinned")) {
+            return SslCertValidationMode.PINNED;
+
+        } else if (s.equalsIgnoreCase("callback")) {
+            return SslCertValidationMode.CALLBACK;
+
+        } else if (s.equalsIgnoreCase("default") || s.isEmpty()) {
+            return SslCertValidationMode.DEFAULT;
+        }
+
+        throw new IllegalArgumentException("Invalid pivotal.push.sslCertValidationMode '" + s + "'");
     }
 
     public static List<String> getPinnedSslCertificateNames(Context context) {

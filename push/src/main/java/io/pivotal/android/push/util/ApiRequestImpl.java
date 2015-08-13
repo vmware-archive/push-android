@@ -4,6 +4,9 @@
 package io.pivotal.android.push.util;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
+import android.os.Bundle;
 import android.util.Base64;
 
 import java.io.ByteArrayOutputStream;
@@ -29,15 +32,20 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
 import io.pivotal.android.push.PushParameters;
+import io.pivotal.android.push.prefs.Pivotal;
+import io.pivotal.android.push.receiver.CustomSslProvider;
 
 import static java.util.Collections.list;
 
 public class ApiRequestImpl {
+
+    public static final String CUSTOM_SSL_PROVIDER_META_DATA = "io.pivotal.android.push.CustomSslReceiver";
 
     protected NetworkWrapper networkWrapper;
     protected Context context;
@@ -112,18 +120,36 @@ public class ApiRequestImpl {
         }
     }
 
-    protected void setupTrust(PushParameters parameters, HttpURLConnection urlConnection) throws GeneralSecurityException, IOException {
+    protected void setupTrust(PushParameters parameters, HttpURLConnection urlConnection) throws GeneralSecurityException, IOException, IllegalAccessException, InstantiationException {
 
         if (urlConnection instanceof HttpsURLConnection) {
 
-            if (parameters.isTrustAllSslCertificates()) {
-                trustAllSslCertificates((HttpsURLConnection) urlConnection);
+            final HttpsURLConnection httpsURLConnection = (HttpsURLConnection) urlConnection;
 
-            } else if (parameters.getPinnedSslCertificateNames() != null && parameters.getPinnedSslCertificateNames().size() > 0) {
-                trustPinnedSslCertificates(context, parameters, (HttpsURLConnection) urlConnection);
+            if (parameters.getSslCertValidationMode() == Pivotal.SslCertValidationMode.TRUST_ALL) {
+                trustAllSslCertificates(httpsURLConnection);
+
+            } else if (parameters.getSslCertValidationMode() == Pivotal.SslCertValidationMode.PINNED && parameters.getPinnedSslCertificateNames() != null && parameters.getPinnedSslCertificateNames().size() > 0) {
+                trustPinnedSslCertificates(context, parameters, httpsURLConnection);
+
+            } else if (parameters.getSslCertValidationMode() == Pivotal.SslCertValidationMode.CALLBACK) {
+
+                Logger.w("Note: Using a custom callback for SSL authentication in PCF Push.");
+
+                final Class<? extends CustomSslProvider> customSslProviderClass = getCustomSslProviderClass(context);
+                final CustomSslProvider customSslProvider = customSslProviderClass.newInstance();
+                final SSLSocketFactory socketFactory = customSslProvider.getSSLSocketFactory();
+                final HostnameVerifier hostnameVerifier = customSslProvider.getHostnameVerifier();
+
+                if (socketFactory != null) {
+                    httpsURLConnection.setSSLSocketFactory(socketFactory);
+                }
+                if (hostnameVerifier != null)  {
+                    httpsURLConnection.setHostnameVerifier(hostnameVerifier);
+                }
 
             } else {
-                Logger.w("Note: Using system default SSL authenication in PCF Push.");
+                Logger.w("Note: Using system default SSL authentication in PCF Push.");
             }
         }
     }
@@ -147,8 +173,8 @@ public class ApiRequestImpl {
         SSLContext context = SSLContext.getInstance("TLS");
         context.init(null, trustAllCerts, null);
 
-        HttpsURLConnection httpsURLConnection = urlConnection;
-        httpsURLConnection.setSSLSocketFactory(context.getSocketFactory());
+        urlConnection.setSSLSocketFactory(context.getSocketFactory());
+        urlConnection.setHostnameVerifier(hv);
 
         Logger.w("Note: We trust all SSL certifications in PCF Push.");
     }
@@ -220,14 +246,12 @@ public class ApiRequestImpl {
                         return new X509Certificate[0];
                     }
                 }
-
         };
 
         SSLContext sslContext = SSLContext.getInstance("TLS");
         sslContext.init(null, trustPinnedManager, null);
 
-        HttpsURLConnection httpsURLConnection = urlConnection;
-        httpsURLConnection.setSSLSocketFactory(sslContext.getSocketFactory());
+        urlConnection.setSSLSocketFactory(sslContext.getSocketFactory());
 
         Logger.w("Note: Authenticating certificate in PCF Push.");
     }
@@ -272,5 +296,36 @@ public class ApiRequestImpl {
         }
 
         return keyStore;
+    }
+
+    public static Class<? extends CustomSslProvider> getCustomSslProviderClass(final Context context) {
+        try {
+            final Class<? extends CustomSslProvider> klass = ApiRequestImpl.findProviderClassName(context);
+            if (klass != null) return klass;
+        } catch (Exception e) {
+            Logger.ex(e);
+        }
+
+        return CustomSslProvider.class;
+    }
+
+    private static Class<? extends CustomSslProvider> findProviderClassName(final Context context) throws PackageManager.NameNotFoundException, ClassNotFoundException {
+        final PackageManager manager = context.getPackageManager();
+        final ApplicationInfo applicationInfo = manager.getApplicationInfo(context.getPackageName(), PackageManager.GET_META_DATA);
+        if (applicationInfo != null) {
+            final Bundle metaData = applicationInfo.metaData;
+            if (metaData != null) {
+                if (metaData.containsKey(CUSTOM_SSL_PROVIDER_META_DATA)) {
+                    final String klassName = metaData.getString(CUSTOM_SSL_PROVIDER_META_DATA);
+                    if (klassName != null) {
+                        final Class<?> klass = Class.forName(klassName);
+                        if (klass != null && CustomSslProvider.class.isAssignableFrom(klass)) {
+                            return (Class<? extends CustomSslProvider>) klass;
+                        }
+                    }
+                }
+            }
+        }
+        return null;
     }
 }

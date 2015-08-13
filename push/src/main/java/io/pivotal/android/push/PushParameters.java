@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.util.Util;
 
 /**
@@ -26,7 +27,7 @@ public class PushParameters {
     private final String deviceAlias;
     private final Set<String> tags;
     private final boolean areGeofencesEnabled;
-    private final boolean trustAllSslCertificates;
+    private final Pivotal.SslCertValidationMode sslCertValidationMode;
     private final List<String> pinnedSslCertificateNames;
     private final Map<String, String> requestHeaders;
 
@@ -38,18 +39,18 @@ public class PushParameters {
      * @param platformUuid   The "platform", as defined by Pivotal CF Mobile Services Push Services for your platform.  May not be null or empty.
      *                       See the "pivotal.push.platformUuid" property.
      * @param platformSecret The "platform secret", as defined by Pivotal CF Mobile Services Push Services for your platform.  May not be null or empty.
-*                       See the pivotal.push.platformSecret property.
+     *                       See the pivotal.push.platformSecret property.
      * @param serviceUrl     The Pivotal CF Mobile Services server used to provide push and related analytics services.
-*                       See the pivotal.push.serviceUrl" property.
+     *                       See the pivotal.push.serviceUrl" property.
      * @param deviceAlias    A developer-defined "device alias" which can be used to designate this device, or class.
-*                       of devices, in push or notification campaigns. May not be set to `null`. May be set to empty.
+     *                       of devices, in push or notification campaigns. May not be set to `null`. May be set to empty.
      * @param tags           A set of tags to register to.  You should always register all tags that you want to listen to, even if you have
-*                       already subscribed to them.  If you exclude any subscribed tags in a registration request, then those tags
-*                       will be unsubscribed.
-     * @param areGeofencesEnabled  Are geofences available (see the "pivotal.push.geofencesEnabled" property).
-     * @param trustAllSslCertificates  'true' if all SSL certificates should be trusted. You should use 'false' unless otherwise required.
+     *                       already subscribed to them.  If you exclude any subscribed tags in a registration request, then those tags
+     *                       will be unsubscribed.
+     * @param areGeofencesEnabled        Are geofences available (see the "pivotal.push.geofencesEnabled" property).
+     * @param sslCertValidationMode      The SSL validation mode (see documentation in the 'Pivotal.properties' file)
      * @param pinnedSslCertificateNames  The list of pinned SSL certificates.  May be null or empty.
-     * @param requestHeaders  The list of extra request headers to inject into the request
+     * @param requestHeaders             The list of extra request headers to inject into the request
      */
     public PushParameters(@NonNull String gcmSenderId,
                           @NonNull String platformUuid,
@@ -58,7 +59,7 @@ public class PushParameters {
                           @Nullable String deviceAlias,
                           @Nullable Set<String> tags,
                           boolean areGeofencesEnabled,
-                          boolean trustAllSslCertificates,
+                          Pivotal.SslCertValidationMode sslCertValidationMode,
                           @Nullable List<String> pinnedSslCertificateNames,
                           @Nullable Map<String, String> requestHeaders) {
 
@@ -69,7 +70,7 @@ public class PushParameters {
         this.deviceAlias = deviceAlias;
         this.tags = Util.lowercaseTags(tags);
         this.areGeofencesEnabled = areGeofencesEnabled;
-        this.trustAllSslCertificates = trustAllSslCertificates;
+        this.sslCertValidationMode = sslCertValidationMode;
         this.pinnedSslCertificateNames = pinnedSslCertificateNames;
         this.requestHeaders = requestHeaders;
     }
@@ -106,8 +107,8 @@ public class PushParameters {
         return pinnedSslCertificateNames != null ? Collections.unmodifiableList(pinnedSslCertificateNames) : null;
     }
 
-    public boolean isTrustAllSslCertificates() {
-        return trustAllSslCertificates;
+    public Pivotal.SslCertValidationMode getSslCertValidationMode() {
+        return sslCertValidationMode;
     }
 
     public Map<String, String> getRequestHeaders() {
@@ -122,7 +123,6 @@ public class PushParameters {
         PushParameters that = (PushParameters) o;
 
         if (areGeofencesEnabled != that.areGeofencesEnabled) return false;
-        if (trustAllSslCertificates != that.trustAllSslCertificates) return false;
         if (gcmSenderId != null ? !gcmSenderId.equals(that.gcmSenderId) : that.gcmSenderId != null)
             return false;
         if (platformUuid != null ? !platformUuid.equals(that.platformUuid) : that.platformUuid != null)
@@ -134,6 +134,7 @@ public class PushParameters {
         if (deviceAlias != null ? !deviceAlias.equals(that.deviceAlias) : that.deviceAlias != null)
             return false;
         if (tags != null ? !tags.equals(that.tags) : that.tags != null) return false;
+        if (sslCertValidationMode != that.sslCertValidationMode) return false;
         if (pinnedSslCertificateNames != null ? !pinnedSslCertificateNames.equals(that.pinnedSslCertificateNames) : that.pinnedSslCertificateNames != null)
             return false;
         return !(requestHeaders != null ? !requestHeaders.equals(that.requestHeaders) : that.requestHeaders != null);
@@ -149,7 +150,7 @@ public class PushParameters {
         result = 31 * result + (deviceAlias != null ? deviceAlias.hashCode() : 0);
         result = 31 * result + (tags != null ? tags.hashCode() : 0);
         result = 31 * result + (areGeofencesEnabled ? 1 : 0);
-        result = 31 * result + (trustAllSslCertificates ? 1 : 0);
+        result = 31 * result + (sslCertValidationMode != null ? sslCertValidationMode.hashCode() : 0);
         result = 31 * result + (pinnedSslCertificateNames != null ? pinnedSslCertificateNames.hashCode() : 0);
         result = 31 * result + (requestHeaders != null ? requestHeaders.hashCode() : 0);
         return result;

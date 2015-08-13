@@ -11,6 +11,7 @@ import java.util.Map;
 
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceResponseData;
+import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.util.DelayedLoop;
 import io.pivotal.android.push.util.FakeHttpURLConnection;
 import io.pivotal.android.push.util.FakeNetworkWrapper;
@@ -254,10 +255,10 @@ public class PCFPushGetGeofenceUpdatesApiRequestTest extends AndroidTestCase {
     }
 
     private PushParameters getParameters() {
-        return new PushParameters(null, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, null, null, true, false, null, null);
+        return new PushParameters(null, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, null, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
     }
 
     private PushParameters getParameters(Map<String, String> requestHeaders) {
-        return new PushParameters(null, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, null, null, true, false, null, requestHeaders);
+        return new PushParameters(null, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, null, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, requestHeaders);
     }
 }

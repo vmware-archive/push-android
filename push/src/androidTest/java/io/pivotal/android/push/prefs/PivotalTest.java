@@ -69,7 +69,51 @@ public class PivotalTest extends AndroidTestCase {
         assertTrue(names.contains("certificate.der"));
     }
 
-    public void testTrustAllSslCertificates() {
-        assertTrue(Pivotal.isTrustAllSslCertificates(getContext()));
+    public void testDefaultSslCertValidationMode1() {
+        setSslCertValidationModeInProperties(null);
+        assertEquals(Pivotal.SslCertValidationMode.DEFAULT, Pivotal.getSslCertValidationMode(getContext()));
+    }
+
+    public void testDefaultSslCertValidationMode2() {
+        setSslCertValidationModeInProperties("default");
+        assertEquals(Pivotal.SslCertValidationMode.DEFAULT, Pivotal.getSslCertValidationMode(getContext()));
+    }
+
+    public void testTrustAllSslCertValidationMode1() {
+        setSslCertValidationModeInProperties("trustall");
+        assertEquals(Pivotal.SslCertValidationMode.TRUST_ALL, Pivotal.getSslCertValidationMode(getContext()));
+    }
+
+    public void testTrustAllSslCertValidationMode2() {
+        setSslCertValidationModeInProperties("trust_all");
+        assertEquals(Pivotal.SslCertValidationMode.TRUST_ALL, Pivotal.getSslCertValidationMode(getContext()));
+    }
+
+    public void testPinnedSslCertValidationMode() {
+        setSslCertValidationModeInProperties("pinned");
+        assertEquals(Pivotal.SslCertValidationMode.PINNED, Pivotal.getSslCertValidationMode(getContext()));
+    }
+
+    public void testCallbackSslCertValidationMode() {
+        setSslCertValidationModeInProperties("callback");
+        assertEquals(Pivotal.SslCertValidationMode.CALLBACK, Pivotal.getSslCertValidationMode(getContext()));
+    }
+
+    public void testInvalidSslCertValidationMode() {
+        setSslCertValidationModeInProperties("invalid value chimps");
+        try {
+            Pivotal.getSslCertValidationMode(getContext());
+            fail("Should not have succeeded");
+        } catch(IllegalArgumentException e) {
+            // throw expected
+        }
+    }
+
+    private void setSslCertValidationModeInProperties(String sslCertValidationMode) {
+        final Properties p = new Properties();
+        if (sslCertValidationMode != null) {
+            p.put("pivotal.push.sslCertValidationMode", sslCertValidationMode);
+        }
+        Pivotal.setProperties(p);
     }
 }

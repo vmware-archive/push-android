@@ -25,6 +25,7 @@ import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
+import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.util.DelayedLoop;
 import io.pivotal.android.push.version.FakeVersionProvider;
@@ -141,7 +142,7 @@ public class RegistrationEngineTestParameters {
         final GeofenceEngine geofenceEngine = mock(GeofenceEngine.class);
         final GeofenceStatusUtil geofenceStatusUtil = mock(GeofenceStatusUtil.class);
         final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, PCFPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
-        final PushParameters parameters = new PushParameters(gcmSenderIdFromUser, platformUuidFromUser, platformSecretFromUser, serviceUrlFromUser, deviceAliasFromUser, tagsFromUser, areGeofencesEnabledFromUser, false, null, null);
+        final PushParameters parameters = new PushParameters(gcmSenderIdFromUser, platformUuidFromUser, platformSecretFromUser, serviceUrlFromUser, deviceAliasFromUser, tagsFromUser, areGeofencesEnabledFromUser, Pivotal.SslCertValidationMode.DEFAULT, null, null);
 
         doAnswer(new Answer<Void>() {
 
