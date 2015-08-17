@@ -59,4 +59,24 @@ public class PushPreferencesProviderImplTest extends AndroidTestCase {
         assertEquals("IS ONLY OKAY", savedHeaders.get("WINTER"));
         assertEquals("GOT THE RAIN", savedHeaders.get("SPRING"));
     }
+    
+    public void testSetSuccessiveRequestHeaders() {
+        final Map<String, String> requestHeaders1 = new HashMap<>();
+        requestHeaders1.put("SUMMER", "IS THE BEST");
+        preferences.setRequestHeaders(requestHeaders1);
+
+        final Map<String, String> savedHeaders1 = preferences.getRequestHeaders();
+        assertNotNull(savedHeaders1);
+        assertEquals(1, savedHeaders1.size());
+        assertEquals("IS THE BEST", savedHeaders1.get("SUMMER"));
+
+        final Map<String, String> requestHeaders2 = new HashMap<>();
+        requestHeaders2.put("WINTER", "IS ONLY OKAY");
+        preferences.setRequestHeaders(requestHeaders2);
+
+        final Map<String, String> savedHeaders2 = preferences.getRequestHeaders();
+        assertNotNull(savedHeaders2);
+        assertEquals(1, savedHeaders2.size());
+        assertEquals("IS ONLY OKAY", savedHeaders2.get("WINTER"));
+    }
 }

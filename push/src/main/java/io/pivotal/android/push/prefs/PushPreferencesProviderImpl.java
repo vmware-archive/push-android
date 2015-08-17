@@ -224,9 +224,8 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
     {
         final SharedPreferences prefs = getSharedPreferencesForRequestHeaders();
         final SharedPreferences.Editor editor = prefs.edit();
-        if (requestHeaders == null || requestHeaders.isEmpty()) {
-            editor.clear();
-        } else {
+        editor.clear();
+        if (requestHeaders != null && !requestHeaders.isEmpty()) {
             for (Map.Entry<String, String> entry : requestHeaders.entrySet()) {
                 if (entry.getKey() != null && entry.getValue() != null) {
                     editor.putString(entry.getKey(), entry.getValue());
