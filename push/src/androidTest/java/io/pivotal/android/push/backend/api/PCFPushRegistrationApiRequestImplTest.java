@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -153,10 +155,18 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
         assertTrue(delayedLoop.isSuccess());
     }
 
-    public void testSuccessfulNewDeviceRegistrationRequestSsl() {
+    public void testSuccessfulNewDeviceRegistrationRequestSslTrustAll() {
         makeListenersForSuccessfulRequestFromNetworkSsl(true, 200, HTTP_POST, null, null, null);
         final PCFPushRegistrationApiRequestImpl request = new PCFPushRegistrationApiRequestImpl(getContext(), networkWrapper);
         request.startNewDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, null, getParameters(Pivotal.SslCertValidationMode.TRUST_ALL), listener);
+        delayedLoop.startLoop();
+        assertTrue(delayedLoop.isSuccess());
+    }
+
+    public void testSuccessfulNewDeviceRegistrationRequestSslPinned() {
+        makeListenersForSuccessfulRequestFromNetworkSsl(true, 200, HTTP_POST, null, null, null);
+        final PCFPushRegistrationApiRequestImpl request = new PCFPushRegistrationApiRequestImpl(getContext(), networkWrapper);
+        request.startNewDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, null, getParameters(Pivotal.SslCertValidationMode.PINNED), listener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
@@ -317,7 +327,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
         final String resultantJson = "{\"device_uuid\" : \"" + TEST_PCF_PUSH_DEVICE_REGISTRATION_ID + "\"}";
         FakeHttpURLConnection.setResponseData(resultantJson);
         FakeHttpURLConnection.setResponseCode(expectedHttpStatusCode);
-        makePCFPushRegistrationApiRequestListener(isSuccessfulResult, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, false, null);
+        makePCFPushRegistrationApiRequestListener(isSuccessfulResult, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, true, null);
     }
 
     private void makeListenersForSuccessfulRequestFromNetworkSsl(boolean isSuccessfulResult,
@@ -330,7 +340,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
         final String resultantJson = "{\"device_uuid\" : \"" + TEST_PCF_PUSH_DEVICE_REGISTRATION_ID + "\"}";
         FakeHttpURLConnection.setResponseData(resultantJson);
         FakeHttpURLConnection.setResponseCode(expectedHttpStatusCode);
-        makePCFPushRegistrationApiRequestListener(isSuccessfulResult, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, true, null);
+        makePCFPushRegistrationApiRequestListener(isSuccessfulResult, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, false, null);
     }
 
     private void makeListenersForSuccessfulRequestWithCustomHeaders(boolean isSuccessfulResult,
@@ -344,7 +354,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
         final String resultantJson = "{\"device_uuid\" : \"" + TEST_PCF_PUSH_DEVICE_REGISTRATION_ID + "\"}";
         FakeHttpURLConnection.setResponseData(resultantJson);
         FakeHttpURLConnection.setResponseCode(expectedHttpStatusCode);
-        makePCFPushRegistrationApiRequestListener(isSuccessfulResult, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, false, expectedRequestHeaders);
+        makePCFPushRegistrationApiRequestListener(isSuccessfulResult, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, true, expectedRequestHeaders);
     }
 
     private void makeListenersForSuccessfulNullResultFromNetwork(String expectedHttpMethod,
@@ -353,7 +363,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
                                                                  String previousPCFPushDeviceRegistrationId) {
         FakeHttpURLConnection.setResponseData(null);
         FakeHttpURLConnection.setResponseCode(200);
-        makePCFPushRegistrationApiRequestListener(false, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, false, null);
+        makePCFPushRegistrationApiRequestListener(false, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, true, null);
     }
 
     private void makeListenersWithBadNetworkResponse(String expectedHttpMethod,
@@ -363,7 +373,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
 
         FakeHttpURLConnection.setResponseData("{{{{{{{");
         FakeHttpURLConnection.setResponseCode(200);
-        makePCFPushRegistrationApiRequestListener(false, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, false, null);
+        makePCFPushRegistrationApiRequestListener(false, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, true, null);
     }
 
     private void makeListenersWithNoDeviceUuidInResponse(String expectedHttpMethod,
@@ -373,7 +383,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
 
         FakeHttpURLConnection.setResponseData("{}");
         FakeHttpURLConnection.setResponseCode(200);
-        makePCFPushRegistrationApiRequestListener(false, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, false, null);
+        makePCFPushRegistrationApiRequestListener(false, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, true, null);
     }
 
     private void makeListenersFromFailedRequestFromNetwork(String exceptionText,
@@ -390,7 +400,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
         FakeHttpURLConnection.setConnectionException(exception);
         FakeHttpURLConnection.willThrowConnectionException(true);
         FakeHttpURLConnection.setResponseCode(expectedHttpStatusCode);
-        makePCFPushRegistrationApiRequestListener(false, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, false, null);
+        makePCFPushRegistrationApiRequestListener(false, expectedHttpMethod, expectedSubscribeTags, expectedUnsubscribeTags, previousPCFPushDeviceRegistrationId, true, null);
     }
 
     public void makePCFPushRegistrationApiRequestListener(final boolean isSuccessfulRequest,
@@ -398,7 +408,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
                                                           final Set<String> expectedSubscribeTags,
                                                           final Set<String> expectedUnsubscribeTags,
                                                           final String previousPCFPushDeviceRegistrationId,
-                                                          final boolean isTrustAllSslCertificates,
+                                                          final boolean isUsingDefaultSsl,
                                                           final Map<String, String> expectedRequestHeaders) {
 
         listener = new PCFPushRegistrationListener() {
@@ -411,7 +421,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
                 if (previousPCFPushDeviceRegistrationId != null) {
                     assertTrue(FakeHttpURLConnection.getReceivedURL().toString().endsWith(previousPCFPushDeviceRegistrationId));
                 }
-                assertEquals(isTrustAllSslCertificates, FakeHttpURLConnection.didCallSetSSLSocketFactory());
+                assertEquals(isUsingDefaultSsl, !FakeHttpURLConnection.didCallSetSSLSocketFactory());
 
                 if (expectedRequestHeaders != null) {
                     final Map<String, String> actualRequestHeaders = FakeHttpURLConnection.getRequestPropertiesMap();
@@ -473,19 +483,24 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
     }
 
     private PushParameters getParameters() {
-        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null, true);
+        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
     }
 
     private PushParameters getParameters(Set<String> tags) {
-        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, tags, true, Pivotal.SslCertValidationMode.DEFAULT, null, null, true);
+        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, tags, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
     }
 
     private PushParameters getParameters(Pivotal.SslCertValidationMode sslCertValidationMode) {
-        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null, true, sslCertValidationMode, null, null, true);
+        List<String> pinnedSslCertificateNames = null;
+        if (sslCertValidationMode == Pivotal.SslCertValidationMode.PINNED) {
+            pinnedSslCertificateNames = new LinkedList<>();
+            pinnedSslCertificateNames.add("DUMMY CERT");
+        }
+        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null, true, sslCertValidationMode, pinnedSslCertificateNames, null);
     }
 
     private PushParameters getParameters(Map<String, String> requestHeaders) {
-        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, requestHeaders, true);
+        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, requestHeaders);
     }
 
     private Set<String> makeSet(String... strings) {

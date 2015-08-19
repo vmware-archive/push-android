@@ -9,7 +9,6 @@ import java.util.Map;
 
 import io.pivotal.android.push.analytics.jobs.EnqueueEventJob;
 import io.pivotal.android.push.model.analytics.AnalyticsEvent;
-import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.service.AnalyticsEventService;
 import io.pivotal.android.push.util.Logger;
@@ -53,11 +52,12 @@ public class AnalyticsEventLogger {
     }
 
     public void logEvent(String eventType, Map<String, String> fields) {
-        if (Pivotal.getAreAnalyticsEnabled(context)) {
+        if (preferencesProvider.areAnalyticsEnabled()) {
             final AnalyticsEvent event = getEvent(eventType, fields);
             final EnqueueEventJob job = new EnqueueEventJob(event);
             final Intent intent = AnalyticsEventService.getIntentToRunJob(context, job);
             serviceStarter.startService(context, intent);
+            Logger.i("Logging analytics event: " + event);
         } else {
             Logger.w("Event not logged. Analytics is either not set up or disabled.");
         }
@@ -68,7 +68,6 @@ public class AnalyticsEventLogger {
         fields.put("receiptId", receiptId);
         fields.put("deviceUuid", preferencesProvider.getPCFPushDeviceRegistrationId());
         logEvent(PCF_PUSH_EVENT_TYPE_PUSH_NOTIFICATION_RECEIVED, fields);
-        Logger.i("Logging received remote notification for receiptId: " + receiptId);
     }
 
     public void logOpenedNotification(String receiptId) {
@@ -76,7 +75,6 @@ public class AnalyticsEventLogger {
         fields.put("receiptId", receiptId);
         fields.put("deviceUuid", preferencesProvider.getPCFPushDeviceRegistrationId());
         logEvent(PCF_PUSH_EVENT_TYPE_PUSH_NOTIFICATION_OPENED, fields);
-        Logger.i("Logging opened remote notification for receiptId: " + receiptId);
     }
 
     public void logGeofenceTriggered(String geofenceId, String locationId) {
@@ -85,7 +83,6 @@ public class AnalyticsEventLogger {
         fields.put("locationId", locationId);
         fields.put("deviceUuid", preferencesProvider.getPCFPushDeviceRegistrationId());
         logEvent(PCF_PUSH_EVENT_TYPE_GEOFENCE_LOCATION_TRIGGERED, fields);
-        Logger.i("Logging triggered geofenceId " + geofenceId + " and locationId " + locationId);
     }
 
     private AnalyticsEvent getEvent(String eventType, Map<String, String> fields) {

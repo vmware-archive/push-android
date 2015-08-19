@@ -6,12 +6,14 @@ package io.pivotal.android.push.prefs;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
 import io.pivotal.android.push.geofence.GeofenceEngine;
+import io.pivotal.android.push.version.Version;
 
 /**
  * Saves preferences to the SharedPreferences on the filesystem.
@@ -35,6 +37,10 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
     private static final String PROPERTY_TAGS = "tags";
     private static final String PROPERTY_GEOFENCE_UPDATE = "geofence_update";
     private static final String PROPERTY_ARE_GEOFENCES_ENABLED = "are_geofences_enabled";
+    private static final String PROPERTY_BACK_END_VERSION = "back_end_version";
+    private static final String PROPERTY_BACK_END_VERSION_TIME_POLLED = "back_end_version_time_polled";
+
+    private static final Version BACKEND_VERSION_WITH_ANALYTICS = new Version("1.3.2");
 
     private final Context context;
 
@@ -233,6 +239,59 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
             }
         }
         editor.commit();
+    }
+
+    @Override
+    public Version getBackEndVersion() {
+        final String s = getSharedPreferences().getString(PROPERTY_BACK_END_VERSION, null);
+        if (s != null) {
+            return new Version(s);
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public void setBackEndVersion(Version version) {
+        final SharedPreferences prefs = getSharedPreferences();
+        final SharedPreferences.Editor editor = prefs.edit();
+        if (version != null) {
+            editor.putString(PROPERTY_BACK_END_VERSION, version.toString());
+        } else {
+            editor.remove(PROPERTY_BACK_END_VERSION);
+        }
+        editor.commit();
+    }
+
+    @Override
+    public Date getBackEndVersionTimePolled() {
+        return new Date(getSharedPreferences().getLong(PROPERTY_BACK_END_VERSION_TIME_POLLED, 0));
+    }
+
+    @Override
+    public void setBackEndVersionTimePolled(Date timestamp) {
+        final SharedPreferences prefs = getSharedPreferences();
+        final SharedPreferences.Editor editor = prefs.edit();
+        if (timestamp != null) {
+            editor.putLong(PROPERTY_BACK_END_VERSION_TIME_POLLED, timestamp.getTime());
+        } else {
+            editor.remove(PROPERTY_BACK_END_VERSION_TIME_POLLED);
+        }
+        editor.commit();
+    }
+
+    @Override
+    public boolean areAnalyticsEnabled() {
+        if (!Pivotal.getAreAnalyticsEnabled(context)) {
+            return false;
+        } else {
+            final Version backendVersion = getBackEndVersion();
+            if (backendVersion == null) {
+                return false;
+            } else {
+                return backendVersion.compareTo(BACKEND_VERSION_WITH_ANALYTICS) >= 0;
+            }
+        }
     }
 
     private SharedPreferences getSharedPreferences() {

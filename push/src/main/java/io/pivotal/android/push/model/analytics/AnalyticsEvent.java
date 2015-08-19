@@ -252,7 +252,17 @@ public class AnalyticsEvent implements Parcelable {
         return result;
     }
 
-    // JSON helpers
+    @Override
+    public String toString() {
+        return "AnalyticsEvent{" +
+                "eventType='" + eventType + '\'' +
+                ", receiptId='" + receiptId + '\'' +
+                ", geofenceId='" + geofenceId + '\'' +
+                ", locationId='" + locationId + '\'' +
+                '}';
+    }
+
+// JSON helpers
 
     public static List<AnalyticsEvent> jsonStringToList(String str) {
         final Gson gson = new Gson();

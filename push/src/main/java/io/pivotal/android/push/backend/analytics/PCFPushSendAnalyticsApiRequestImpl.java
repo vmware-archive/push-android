@@ -13,13 +13,11 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
 
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.database.AnalyticsEventsStorage;
 import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 import io.pivotal.android.push.model.analytics.AnalyticsEventList;
-import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.util.ApiRequestImpl;
 import io.pivotal.android.push.util.Const;
@@ -28,8 +26,6 @@ import io.pivotal.android.push.util.NetworkWrapper;
 
 public class PCFPushSendAnalyticsApiRequestImpl extends ApiRequestImpl implements PCFPushSendAnalyticsApiRequest {
 
-    // Set to 'true' to test really send events to the server. The server does not accept these events right now.
-    private static final boolean POST_TO_BACK_END = false;
     private Context context;
     private AnalyticsEventsStorage eventsStorage;
     private PushPreferencesProvider preferencesProvider;
@@ -75,14 +71,15 @@ public class PCFPushSendAnalyticsApiRequestImpl extends ApiRequestImpl implement
 
     private void processRequest(List<Uri> uris, PCFPushSendAnalyticsListener listener) {
 
-        final PushParameters parameters = getParameters();
+        final PushParameters parameters = new PushParameters(context, preferencesProvider, null, null);
 
         OutputStream outputStream = null;
 
         try {
 
             final URL url = getUrl(parameters);
-            final HttpURLConnection urlConnection = getHttpURLConnection(url);
+            final HttpURLConnection urlConnection = getHttpURLConnection(url, parameters);
+
             urlConnection.addRequestProperty("Content-Type", "application/json");
             urlConnection.addRequestProperty("Authorization", getBasicAuthorizationValue(parameters));
             urlConnection.setRequestMethod("POST");
@@ -155,18 +152,5 @@ public class PCFPushSendAnalyticsApiRequestImpl extends ApiRequestImpl implement
     @Override
     public PCFPushSendAnalyticsApiRequest copy() {
         return new PCFPushSendAnalyticsApiRequestImpl(context, eventsStorage, preferencesProvider, networkWrapper);
-    }
-
-    private PushParameters getParameters() {
-        final String gcmSenderId = Pivotal.getGcmSenderId(context);
-        final String platformUuid = Pivotal.getPlatformUuid(context);
-        final String platformSecret = Pivotal.getPlatformSecret(context);
-        final String serviceUrl = Pivotal.getServiceUrl(context);
-        final Pivotal.SslCertValidationMode sslCertValidationMode = Pivotal.getSslCertValidationMode(context);
-        final boolean areGeofencesEnabled = preferencesProvider.areGeofencesEnabled();
-        final Map<String, String> requestHeaders = preferencesProvider.getRequestHeaders();
-        final List<String> pinnedCertificateNames = Pivotal.getPinnedSslCertificateNames(context);
-        final boolean areAnalyticsEnabled = Pivotal.getAreAnalyticsEnabled(context);
-        return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, null, null, areGeofencesEnabled, sslCertValidationMode, pinnedCertificateNames, requestHeaders, areAnalyticsEnabled);
     }
 }

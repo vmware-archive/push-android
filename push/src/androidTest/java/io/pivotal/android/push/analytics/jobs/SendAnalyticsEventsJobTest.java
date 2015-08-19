@@ -13,6 +13,12 @@ import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 
 public class SendAnalyticsEventsJobTest extends JobTest {
 
+    @Override
+    protected void setUp() throws Exception {
+        super.setUp();
+        alarmProvider.enableAlarm();
+    }
+
     public void testWithEmptyDatabase() throws InterruptedException {
 
         final SendAnalyticsEventsJob job = new SendAnalyticsEventsJob();
@@ -27,7 +33,8 @@ public class SendAnalyticsEventsJobTest extends JobTest {
 
         semaphore.acquire();
         Assert.assertEquals(0, eventsStorage.getNumberOfEvents());
-        assertFalse(backEndMessageReceiptApiRequest.wasRequestAttempted());
+        assertFalse(sendAnalyticsApiRequest.wasRequestAttempted());
+        assertFalse(alarmProvider.isAlarmEnabled());
     }
 
     public void testSuccessfulSend() throws InterruptedException {
@@ -37,8 +44,8 @@ public class SendAnalyticsEventsJobTest extends JobTest {
         final Uri uri3 = saveEventWithStatus(AnalyticsEvent.Status.POSTING_ERROR);
         final Uri uri4 = saveEventWithStatus(AnalyticsEvent.Status.POSTED);
 
-        backEndMessageReceiptApiRequest.setWillBeSuccessfulRequest(true);
-        backEndMessageReceiptApiRequest.setRequestHook(new FakePCFPushSendAnalyticsApiRequest.RequestHook() {
+        sendAnalyticsApiRequest.setWillBeSuccessfulRequest(true);
+        sendAnalyticsApiRequest.setRequestHook(new FakePCFPushSendAnalyticsApiRequest.RequestHook() {
 
             @Override
             public void onRequestMade(FakePCFPushSendAnalyticsApiRequest request, List<Uri> uris) {
@@ -70,8 +77,9 @@ public class SendAnalyticsEventsJobTest extends JobTest {
 
         semaphore.acquire();
         Assert.assertEquals(2, eventsStorage.getNumberOfEvents());
-        assertTrue(backEndMessageReceiptApiRequest.wasRequestAttempted());
-        Assert.assertEquals(2, backEndMessageReceiptApiRequest.numberOfEventsSent());
+        assertTrue(sendAnalyticsApiRequest.wasRequestAttempted());
+        Assert.assertEquals(2, sendAnalyticsApiRequest.numberOfEventsSent());
+        assertFalse(alarmProvider.isAlarmEnabled());
 
         assertEventHasStatus(uri2, AnalyticsEvent.Status.POSTING);
         assertEventHasStatus(uri4, AnalyticsEvent.Status.POSTED);
@@ -83,8 +91,8 @@ public class SendAnalyticsEventsJobTest extends JobTest {
 
         final Uri uri = saveEventWithStatus(AnalyticsEvent.Status.NOT_POSTED);
 
-        backEndMessageReceiptApiRequest.setWillBeSuccessfulRequest(false);
-        backEndMessageReceiptApiRequest.setRequestHook(new FakePCFPushSendAnalyticsApiRequest.RequestHook() {
+        sendAnalyticsApiRequest.setWillBeSuccessfulRequest(false);
+        sendAnalyticsApiRequest.setRequestHook(new FakePCFPushSendAnalyticsApiRequest.RequestHook() {
 
             @Override
             public void onRequestMade(FakePCFPushSendAnalyticsApiRequest request, List<Uri> uris) {
@@ -106,9 +114,10 @@ public class SendAnalyticsEventsJobTest extends JobTest {
 
         semaphore.acquire();
         Assert.assertEquals(1, eventsStorage.getNumberOfEvents());
-        assertTrue(backEndMessageReceiptApiRequest.wasRequestAttempted());
-        Assert.assertEquals(0, backEndMessageReceiptApiRequest.numberOfEventsSent());
+        assertTrue(sendAnalyticsApiRequest.wasRequestAttempted());
+        Assert.assertEquals(0, sendAnalyticsApiRequest.numberOfEventsSent());
         assertEventHasStatus(uri, AnalyticsEvent.Status.POSTING_ERROR);
+        assertTrue(alarmProvider.isAlarmEnabled());
     }
 
     public void testEquals() {

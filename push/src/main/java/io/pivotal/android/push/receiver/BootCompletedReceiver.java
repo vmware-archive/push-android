@@ -11,7 +11,6 @@ import io.pivotal.android.push.analytics.jobs.PrepareDatabaseJob;
 import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofencePersistentStore;
 import io.pivotal.android.push.geofence.GeofenceRegistrar;
-import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
 import io.pivotal.android.push.service.AnalyticsEventService;
@@ -28,7 +27,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
         Logger.i("Pivotal CF Push SDK received boot completed message.");
         reregisterGeofences(context);
 
-        if (Pivotal.getAreAnalyticsEnabled(context)) {
+        if (areAnalyticsEnabled(context)) {
             Logger.fd("Device boot detected for package '%s'. Starting AnalyticsEventService.", context.getPackageName());
             startEventService(context);
         } else {
@@ -57,6 +56,11 @@ public class BootCompletedReceiver extends BroadcastReceiver {
             };
             asyncTask.execute();
         }
+    }
+
+    private boolean areAnalyticsEnabled(Context context) {
+        final PushPreferencesProviderImpl preferences = new PushPreferencesProviderImpl(context);
+        return preferences.areAnalyticsEnabled();
     }
 
     private void startEventService(Context context) {

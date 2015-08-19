@@ -173,6 +173,8 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
             @Override
             public void onBackEndSendEventsSuccess() {
                 assertTrue(isSuccessfulRequest);
+                assertTrue(FakeHttpURLConnection.getRequestPropertiesMap().containsKey("Authorization"));
+                assertEquals("application/json", FakeHttpURLConnection.getRequestPropertiesMap().get("Content-Type"));
                 if (isSuccessfulRequest) {
                     delayedLoop.flagSuccess();
                 } else {
@@ -183,6 +185,8 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
             @Override
             public void onBackEndSendEventsFailed(String reason) {
                 assertFalse(isSuccessfulRequest);
+                assertTrue(FakeHttpURLConnection.getRequestPropertiesMap().containsKey("Authorization"));
+                assertEquals("application/json", FakeHttpURLConnection.getRequestPropertiesMap().get("Content-Type"));
                 if (isSuccessfulRequest) {
                     delayedLoop.flagFailure();
                 } else {

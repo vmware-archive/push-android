@@ -11,7 +11,6 @@ import io.pivotal.android.push.analytics.jobs.EnqueueEventJob;
 import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.prefs.Pivotal;
-import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.service.AnalyticsEventService;
 import io.pivotal.android.push.util.FakeServiceStarter;
 
@@ -29,7 +28,7 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
     private static HashMap<String, String> TEST_EVENT_FIELDS;
 
     private FakeServiceStarter serviceStarter;
-    private PushPreferencesProvider preferencesProvider;
+    private FakePushPreferencesProvider preferencesProvider;
 
     static {
         TEST_EVENT_FIELDS = new HashMap<>();
@@ -45,7 +44,7 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
         serviceStarter = new FakeServiceStarter();
         serviceStarter.setReturnedComponentName(new ComponentName(getContext(), AnalyticsEventService.class));
         preferencesProvider = new FakePushPreferencesProvider(null, TEST_EVENT_DEVICE_UUID_VALUE, 0, null, null, null, null, null, null, null, 0, false);
-
+        preferencesProvider.setAreAnalyticsEnabled(true);
     }
 
     public void testRequiresServiceStarter() {
@@ -131,7 +130,7 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
     }
 
     private AnalyticsEventLogger getEventLoggerWithAnalyticsDisabled() {
-        Pivotal.setProperties(getProperties(false));
+        preferencesProvider.setAreAnalyticsEnabled(false);
         return new AnalyticsEventLogger(serviceStarter, preferencesProvider, getContext());
     }
 

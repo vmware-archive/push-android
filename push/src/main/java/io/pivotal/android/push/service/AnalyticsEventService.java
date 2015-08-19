@@ -9,14 +9,17 @@ import java.util.List;
 import java.util.concurrent.Semaphore;
 
 import io.pivotal.android.push.analytics.jobs.BaseJob;
+import io.pivotal.android.push.analytics.jobs.CheckBackEndVersionJob;
 import io.pivotal.android.push.analytics.jobs.JobParams;
 import io.pivotal.android.push.analytics.jobs.JobResultListener;
 import io.pivotal.android.push.analytics.jobs.PrepareDatabaseJob;
+import io.pivotal.android.push.backend.analytics.PCFPushCheckBackEndVersionApiRequestImpl;
+import io.pivotal.android.push.backend.analytics.PCFPushCheckBackEndVersionApiRequestProvider;
 import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsApiRequestImpl;
 import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsApiRequestProvider;
+import io.pivotal.android.push.database.AnalyticsEventsStorage;
 import io.pivotal.android.push.database.DatabaseAnalyticsEventsStorage;
 import io.pivotal.android.push.database.DatabaseWrapper;
-import io.pivotal.android.push.database.AnalyticsEventsStorage;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
@@ -26,6 +29,7 @@ import io.pivotal.android.push.receiver.AnalyticsEventsSenderAlarmReceiver;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.NetworkWrapper;
 import io.pivotal.android.push.util.NetworkWrapperImpl;
+import io.pivotal.android.push.util.TimeProvider;
 
 public class AnalyticsEventService extends IntentService {
 
@@ -39,9 +43,11 @@ public class AnalyticsEventService extends IntentService {
     // Used by unit tests
     /* package */ static Semaphore semaphore = null;
     /* package */ static AnalyticsEventsStorage eventsStorage = null;
+    /* package */ static TimeProvider timeProvider;
     /* package */ static NetworkWrapper networkWrapper = null;
     /* package */ static AnalyticsEventsSenderAlarmProvider alarmProvider = null;
-    /* package */ static PCFPushSendAnalyticsApiRequestProvider requestProvider = null;
+    /* package */ static PCFPushSendAnalyticsApiRequestProvider sendAnalyticsRequestProvider = null;
+    /* package */ static PCFPushCheckBackEndVersionApiRequestProvider checkBackEndVersionRequestProvider = null;
     /* package */ static List<String> listOfCompletedJobs = null;
     /* package */ static PushPreferencesProvider pushPreferencesProvider;
 
@@ -74,14 +80,17 @@ public class AnalyticsEventService extends IntentService {
 
                 final ResultReceiver resultReceiver = getResultReceiver(intent);
 
-                if (Pivotal.getAreAnalyticsEnabled(this)) {
-                    if (hasJob(intent)) {
-                        final BaseJob job = getJobFromIntent(intent);
+                if (hasJob(intent)) {
+                    final BaseJob job = getJobFromIntent(intent);
+                    if (AnalyticsEventService.pushPreferencesProvider == null) {
+                        AnalyticsEventService.pushPreferencesProvider = new PushPreferencesProviderImpl(this);
+                    }
+                    if ((job instanceof CheckBackEndVersionJob && Pivotal.getAreAnalyticsEnabled(this)) || pushPreferencesProvider.areAnalyticsEnabled()) {
                         setupStatics(intent);
                         runJob(job, resultReceiver);
+                    } else {
+                        sendResult(ANALYTICS_DISABLED, resultReceiver);
                     }
-                } else {
-                    sendResult(ANALYTICS_DISABLED, resultReceiver);
                 }
             }
 
@@ -94,24 +103,28 @@ public class AnalyticsEventService extends IntentService {
 
         boolean needToCleanDatabase = false;
 
-        if (AnalyticsEventService.pushPreferencesProvider == null) {
-            AnalyticsEventService.pushPreferencesProvider = new PushPreferencesProviderImpl(this);
-        }
         if (AnalyticsEventService.eventsStorage == null) {
             needToCleanDatabase = setupDatabase();
         }
         if (AnalyticsEventService.alarmProvider == null) {
             AnalyticsEventService.alarmProvider = new AnalyticsEventsSenderAlarmProviderImpl(this);
         }
+        if (AnalyticsEventService.timeProvider == null) {
+            AnalyticsEventService.timeProvider = new TimeProvider();
+        }
         if (AnalyticsEventService.networkWrapper == null) {
             AnalyticsEventService.networkWrapper = new NetworkWrapperImpl();
         }
-        if (AnalyticsEventService.requestProvider == null) {
+        if (AnalyticsEventService.sendAnalyticsRequestProvider == null) {
             final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(this, AnalyticsEventService.eventsStorage, AnalyticsEventService.pushPreferencesProvider, AnalyticsEventService.networkWrapper);
-            AnalyticsEventService.requestProvider = new PCFPushSendAnalyticsApiRequestProvider(request);
+            AnalyticsEventService.sendAnalyticsRequestProvider = new PCFPushSendAnalyticsApiRequestProvider(request);
+        }
+        if (AnalyticsEventService.checkBackEndVersionRequestProvider == null) {
+            final PCFPushCheckBackEndVersionApiRequestImpl request = new PCFPushCheckBackEndVersionApiRequestImpl(this, AnalyticsEventService.pushPreferencesProvider, AnalyticsEventService.networkWrapper);
+            AnalyticsEventService.checkBackEndVersionRequestProvider = new PCFPushCheckBackEndVersionApiRequestProvider(request);
         }
 
-        if (!isIntentForCleanup(intent) && needToCleanDatabase) {
+        if (!isIntentForSetup(intent) && needToCleanDatabase) {
             cleanDatabase();
         }
     }
@@ -145,7 +158,7 @@ public class AnalyticsEventService extends IntentService {
         return resultReceiver;
     }
 
-    private boolean isIntentForCleanup(Intent intent) {
+    private boolean isIntentForSetup(Intent intent) {
         if (intent == null || !hasJob(intent)) {
             return false;
         }
@@ -155,7 +168,7 @@ public class AnalyticsEventService extends IntentService {
             return false;
         }
 
-        return (job instanceof PrepareDatabaseJob);
+        return (job instanceof PrepareDatabaseJob) || (job instanceof CheckBackEndVersionJob);
     }
 
     private boolean hasJob(Intent intent) {
@@ -199,11 +212,13 @@ public class AnalyticsEventService extends IntentService {
     private JobParams getJobParams(JobResultListener listener) {
         return new JobParams(this,
                 listener,
+                AnalyticsEventService.timeProvider,
                 AnalyticsEventService.networkWrapper,
                 AnalyticsEventService.eventsStorage,
                 AnalyticsEventService.pushPreferencesProvider,
                 AnalyticsEventService.alarmProvider,
-                AnalyticsEventService.requestProvider);
+                AnalyticsEventService.sendAnalyticsRequestProvider,
+                AnalyticsEventService.checkBackEndVersionRequestProvider);
     }
 
     // Used by unit tests
@@ -247,7 +262,8 @@ public class AnalyticsEventService extends IntentService {
         AnalyticsEventService.alarmProvider = null;
         AnalyticsEventService.networkWrapper = null;
         AnalyticsEventService.pushPreferencesProvider = null;
-        AnalyticsEventService.requestProvider = null;
+        AnalyticsEventService.sendAnalyticsRequestProvider = null;
+        AnalyticsEventService.checkBackEndVersionRequestProvider = null;
         AnalyticsEventService.listOfCompletedJobs = null;
     }
 }

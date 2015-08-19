@@ -3,10 +3,12 @@
  */
 package io.pivotal.android.push.prefs;
 
+import java.util.Date;
 import java.util.Map;
 import java.util.Set;
 
 import io.pivotal.android.push.geofence.GeofenceEngine;
+import io.pivotal.android.push.version.Version;
 
 public class FakePushPreferencesProvider implements PushPreferencesProvider {
 
@@ -22,6 +24,8 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     private Map<String, String> requestHeaders;
     private int appVersion;
     private long lastGeofenceUpdate = GeofenceEngine.NEVER_UPDATED_GEOFENCES;
+    private Version backEndVersion;
+    private Date backEndVersionTimePolled;
     private boolean areGeofencesEnabled;
     private boolean wasGcmDeviceRegistrationIdSaved = false;
     private boolean wasPCFPushDeviceRegistrationIdSaved = false;
@@ -35,6 +39,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     private boolean wasTagsSaved = false;
     private boolean wasLastGeofenceUpdateSaved = false;
     private boolean wasAreGeofencesEnabledSaved = false;
+    private boolean areAnalyticsEnabled = false;
 
     public FakePushPreferencesProvider() {
     }
@@ -64,6 +69,37 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
         this.lastGeofenceUpdate = lastGeofenceUpdateToLoad;
         this.areGeofencesEnabled = areGeofencesEnabled;
         this.tags = tagsToLoad;
+    }
+
+    public FakePushPreferencesProvider(String gcmDeviceRegistrationIdToLoad,
+                                       String pcfPushDeviceRegistrationIdToLoad,
+                                       int appVersionToLoad,
+                                       String gcmSenderIdToLoad,
+                                       String platformUuidToLoad,
+                                       String platformSecretToLoad,
+                                       String deviceAliasToLoad,
+                                       String packageNameToLoad,
+                                       String serviceUrlToLoad,
+                                       Set<String> tagsToLoad,
+                                       long lastGeofenceUpdateToLoad,
+                                       boolean areGeofencesEnabled,
+                                       Version backEndVersion,
+                                       Date backEndVersionTimePolled) {
+
+        this.gcmDeviceRegistrationId = gcmDeviceRegistrationIdToLoad;
+        this.pcfPushDeviceRegistrationId = pcfPushDeviceRegistrationIdToLoad;
+        this.appVersion = appVersionToLoad;
+        this.gcmSenderId = gcmSenderIdToLoad;
+        this.platformUuid = platformUuidToLoad;
+        this.platformSecret = platformSecretToLoad;
+        this.deviceAlias = deviceAliasToLoad;
+        this.packageName = packageNameToLoad;
+        this.serviceUrl = serviceUrlToLoad;
+        this.lastGeofenceUpdate = lastGeofenceUpdateToLoad;
+        this.areGeofencesEnabled = areGeofencesEnabled;
+        this.tags = tagsToLoad;
+        this.backEndVersion = backEndVersion;
+        this.backEndVersionTimePolled = backEndVersionTimePolled;
     }
 
     @Override
@@ -130,6 +166,16 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     public Map<String, String> getRequestHeaders()
     {
         return requestHeaders;
+    }
+
+    @Override
+    public Version getBackEndVersion() {
+        return backEndVersion;
+    }
+
+    @Override
+    public Date getBackEndVersionTimePolled() {
+        return backEndVersionTimePolled;
     }
 
     @Override
@@ -204,10 +250,29 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
         wasAreGeofencesEnabledSaved = true;
     }
 
+    public void setAreAnalyticsEnabled(boolean areAnalyticsEnabled) {
+        this.areAnalyticsEnabled = areAnalyticsEnabled;
+    }
+
     @Override
     public void setRequestHeaders(Map<String, String> requestHeaders)
     {
         this.requestHeaders = requestHeaders;
+    }
+
+    @Override
+    public void setBackEndVersion(Version version) {
+        this.backEndVersion = version;
+    }
+
+    @Override
+    public void setBackEndVersionTimePolled(Date timestamp) {
+        this.backEndVersionTimePolled = timestamp;
+    }
+
+    @Override
+    public boolean areAnalyticsEnabled() {
+        return areAnalyticsEnabled;
     }
 
     public boolean wasGcmDeviceRegistrationIdSaved() {

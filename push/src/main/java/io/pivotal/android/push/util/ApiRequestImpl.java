@@ -74,11 +74,13 @@ public class ApiRequestImpl {
         this.context = context;
     }
 
-    protected HttpURLConnection getHttpURLConnection(URL url) throws IOException {
+    protected HttpURLConnection getHttpURLConnection(URL url, PushParameters parameters) throws IOException, IllegalAccessException, GeneralSecurityException, InstantiationException {
         final HttpURLConnection urlConnection = networkWrapper.getHttpURLConnection(url);
         urlConnection.setReadTimeout(60000);
         urlConnection.setConnectTimeout(60000);
         urlConnection.setChunkedStreamingMode(0);
+        addCustomRequestHeaders(parameters, urlConnection);
+        setupTrust(parameters, urlConnection);
         return urlConnection;
     }
 
@@ -110,6 +112,9 @@ public class ApiRequestImpl {
         return (statusCode < 200 || statusCode >= 300);
     }
 
+    protected boolean isFatalStatusCode(int statusCode) {
+        return (statusCode >= 400 && statusCode < 500);
+    }
 
     protected void addCustomRequestHeaders(PushParameters parameters, HttpURLConnection urlConnection) {
         final Map<String, String> requestHeaders = parameters.getRequestHeaders();

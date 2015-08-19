@@ -32,10 +32,7 @@ public class PCFPushUnregisterDeviceApiRequestImpl extends ApiRequestImpl implem
         try {
             Logger.v("Making network request to the PCF Push server to unregister the device ID:" + pcfPushDeviceRegistrationId);
             final URL url = new URL(parameters.getServiceUrl() + "/" + Const.PCF_PUSH_REGISTRATION_REQUEST_ENDPOINT + "/" + pcfPushDeviceRegistrationId);
-            final HttpURLConnection urlConnection = getHttpURLConnection(url);
-
-            addCustomRequestHeaders(parameters, urlConnection);
-            setupTrust(parameters, urlConnection);
+            final HttpURLConnection urlConnection = getHttpURLConnection(url, parameters);
 
             urlConnection.setRequestMethod("DELETE");
             urlConnection.addRequestProperty("Authorization", ApiRequestImpl.getBasicAuthorizationValue(parameters));

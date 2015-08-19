@@ -4,6 +4,9 @@ import android.test.AndroidTestCase;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Properties;
+
+import io.pivotal.android.push.version.Version;
 
 public class PushPreferencesProviderImplTest extends AndroidTestCase {
 
@@ -19,6 +22,7 @@ public class PushPreferencesProviderImplTest extends AndroidTestCase {
     protected void tearDown() throws Exception {
         super.tearDown();
         preferences.clear();
+        Pivotal.setProperties(null);
     }
 
     public void testDefaultRequestHeadersShouldBeEmpty() {
@@ -79,4 +83,49 @@ public class PushPreferencesProviderImplTest extends AndroidTestCase {
         assertEquals(1, savedHeaders2.size());
         assertEquals("IS ONLY OKAY", savedHeaders2.get("WINTER"));
     }
+
+    public void testAreAnalyticsEnabled1() {
+        final Properties properties = new Properties();
+        properties.put("areAnalyticsEnabled", "false");
+        Pivotal.setProperties(properties);
+
+        assertFalse(preferences.areAnalyticsEnabled());
+    }
+
+    public void testAreAnalyticsEnabled2() {
+        final Properties properties = new Properties();
+        properties.put("areAnalyticsEnabled", "true");
+        Pivotal.setProperties(properties);
+
+        preferences.setBackEndVersion(null);
+        assertFalse(preferences.areAnalyticsEnabled());
+    }
+
+    public void testAreAnalyticsEnabled3() {
+        final Properties properties = new Properties();
+        properties.put("areAnalyticsEnabled", "true");
+        Pivotal.setProperties(properties);
+
+        preferences.setBackEndVersion(new Version("1.3.0"));
+        assertFalse(preferences.areAnalyticsEnabled());
+    }
+
+    public void testAreAnalyticsEnabled4() {
+        final Properties properties = new Properties();
+        properties.put("areAnalyticsEnabled", "true");
+        Pivotal.setProperties(properties);
+
+        preferences.setBackEndVersion(new Version("1.3.2"));
+        assertTrue(preferences.areAnalyticsEnabled());
+    }
+
+    public void testAreAnalyticsEnabled5() {
+        final Properties properties = new Properties();
+        properties.put("areAnalyticsEnabled", "true");
+        Pivotal.setProperties(properties);
+
+        preferences.setBackEndVersion(new Version("1.3.3"));
+        assertTrue(preferences.areAnalyticsEnabled());
+    }
+
 }

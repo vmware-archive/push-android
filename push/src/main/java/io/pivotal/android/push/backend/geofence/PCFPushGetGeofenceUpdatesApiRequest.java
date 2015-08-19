@@ -57,10 +57,7 @@ public class PCFPushGetGeofenceUpdatesApiRequest extends ApiRequestImpl {
         OutputStream outputStream = null;
         try {
             final URL url = getURL(timestamp, deviceUuid, parameters);
-            final HttpURLConnection urlConnection = getHttpURLConnection(url);
-
-            addCustomRequestHeaders(parameters, urlConnection);
-            setupTrust(parameters, urlConnection);
+            final HttpURLConnection urlConnection = getHttpURLConnection(url, parameters);
 
             urlConnection.setDoInput(true);
             urlConnection.setRequestMethod("GET");

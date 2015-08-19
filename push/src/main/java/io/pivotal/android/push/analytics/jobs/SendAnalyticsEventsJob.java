@@ -31,6 +31,7 @@ public class SendAnalyticsEventsJob extends BaseJob {
             setStatusForEvents(jobParams, uris, AnalyticsEvent.Status.POSTING);
             sendEvents(jobParams, uris);
         } else {
+            jobParams.alarmProvider.disableAlarm();
             sendJobResult(RESULT_NO_WORK_TO_DO, jobParams);
         }
     }
@@ -43,7 +44,7 @@ public class SendAnalyticsEventsJob extends BaseJob {
 
     private void sendEvents(final JobParams jobParams, final List<Uri> uris) {
 
-        final PCFPushSendAnalyticsApiRequest request = jobParams.requestProvider.getRequest();
+        final PCFPushSendAnalyticsApiRequest request = jobParams.sendAnalyticsRequestProvider.getRequest();
         request.startSendEvents(uris, new PCFPushSendAnalyticsListener() {
 
             public void onBackEndSendEventsSuccess() {

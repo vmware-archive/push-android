@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import io.pivotal.android.push.analytics.AnalyticsEventLogger;
+import io.pivotal.android.push.analytics.jobs.CheckBackEndVersionJob;
 import io.pivotal.android.push.analytics.jobs.PrepareDatabaseJob;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequest;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestImpl;
@@ -49,6 +50,7 @@ import io.pivotal.android.push.registration.SubscribeToTagsListener;
 import io.pivotal.android.push.registration.UnregistrationEngine;
 import io.pivotal.android.push.registration.UnregistrationListener;
 import io.pivotal.android.push.service.AnalyticsEventService;
+import io.pivotal.android.push.util.DebugUtil;
 import io.pivotal.android.push.util.FileHelper;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.NetworkWrapper;
@@ -167,13 +169,7 @@ public class Push {
         final GeofenceUpdater geofenceUpdater = new GeofenceUpdater(context, geofenceUpdatesApiRequest, geofenceEngine, pushPreferencesProvider);
         final GeofenceStatusUtil geofenceStatusUtil = new GeofenceStatusUtil(context);
 
-        if (Pivotal.getAreAnalyticsEnabled(context)) {
-            cleanupDatabase();
-        } else {
-            Logger.i("Pivotal PushSDK analytics is disabled.");
-            final AnalyticsEventsSenderAlarmProvider alarmProvider = new AnalyticsEventsSenderAlarmProviderImpl(context);
-            alarmProvider.disableAlarm();
-        }
+        checkAnalytics();
 
         verifyRegistrationArguments(parameters);
 
@@ -214,8 +210,7 @@ public class Push {
         final String serviceUrl = Pivotal.getServiceUrl(context);
         final Pivotal.SslCertValidationMode sslCertValidationMode = Pivotal.getSslCertValidationMode(context);
         final List<String> pinnedCertificateNames = Pivotal.getPinnedSslCertificateNames(context);
-        final boolean areAnalyticsEnabled = Pivotal.getAreAnalyticsEnabled(context);
-        return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, deviceAlias, tags, areGeofencesEnabled, sslCertValidationMode, pinnedCertificateNames, requestHeaders, areAnalyticsEnabled);
+        return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, deviceAlias, tags, areGeofencesEnabled, sslCertValidationMode, pinnedCertificateNames, requestHeaders);
     }
 
     private void verifyRegistrationArguments(@NonNull PushParameters parameters) {
@@ -233,6 +228,28 @@ public class Push {
         }
         if (parameters.getServiceUrl() == null) {
             throw new IllegalArgumentException("parameters.serviceUrl may not be null");
+        }
+    }
+
+    private void checkAnalytics() {
+        if (Pivotal.getAreAnalyticsEnabled(context)) {
+
+            final PushPreferencesProviderImpl preferencesProvider = new PushPreferencesProviderImpl(context);
+            final TimeProvider timeProvider = new TimeProvider();
+            final boolean isDebug = DebugUtil.getInstance(context).isDebuggable();
+
+            if (CheckBackEndVersionJob.isPollingTime(isDebug, timeProvider, preferencesProvider)) {
+                final CheckBackEndVersionJob job = new CheckBackEndVersionJob();
+                final Intent intent = AnalyticsEventService.getIntentToRunJob(context, job);
+                context.startService(intent);
+            }
+
+            cleanupDatabase();
+
+        } else {
+            Logger.i("Pivotal PushSDK analytics is disabled.");
+            final AnalyticsEventsSenderAlarmProvider alarmProvider = new AnalyticsEventsSenderAlarmProviderImpl(context);
+            alarmProvider.disableAlarm();
         }
     }
 
@@ -423,7 +440,12 @@ public class Push {
         preferences.setRequestHeaders(requestHeaders);
     }
 
-    // TODO - add documentation
+    /**
+     * Call this method to log an analytics event each time a notification has been opened.  You will need to pass the bundle containing the
+     * receiptId of the event.
+     *
+     * @param bundle  a mapping of values for the event instance.
+     */
     public void logOpenedNotification(Bundle bundle) {
         final ServiceStarter serviceStarter = new ServiceStarterImpl();
         final PushPreferencesProvider preferences = new PushPreferencesProviderImpl(context);
