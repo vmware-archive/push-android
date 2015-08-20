@@ -65,6 +65,9 @@ public class GeofenceService extends IntentService {
         Logger.setup(this);
 
         try {
+            if (pushPreferencesProvider == null) {
+                pushPreferencesProvider = new PushPreferencesProviderImpl(this);
+            }
             if (intent != null && pushPreferencesProvider.areGeofencesEnabled())  {
                 if (intent.getAction() != null) {
                     Logger.d("GeofenceService has received an intent: " + intent.getAction());
@@ -91,9 +94,6 @@ public class GeofenceService extends IntentService {
     }
 
     private void instantiateDependencies() {
-        if (pushPreferencesProvider == null) {
-            pushPreferencesProvider = new PushPreferencesProviderImpl(this);
-        }
         if (apiRequest == null) {
             final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
             apiRequest = new PCFPushGetGeofenceUpdatesApiRequest(this, networkWrapper);
