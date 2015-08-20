@@ -45,7 +45,7 @@ import static java.util.Collections.list;
 
 public class ApiRequestImpl {
 
-    public static final String CUSTOM_SSL_PROVIDER_META_DATA = "io.pivotal.android.push.CustomSslReceiver";
+    public static final String CUSTOM_SSL_PROVIDER_META_DATA = "io.pivotal.android.push.CustomSslProvider";
 
     protected NetworkWrapper networkWrapper;
     protected Context context;
