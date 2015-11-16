@@ -41,7 +41,7 @@ public class AnalyticsEventsSenderAlarmProviderImpl implements AnalyticsEventsSe
 
     private long getIntervalMillis() {
         if (DebugUtil.getInstance(context).isDebuggable()) {
-            return 60 * 1000; // 1 minute
+            return AlarmManager.INTERVAL_FIFTEEN_MINUTES;
         } else {
             return AlarmManager.INTERVAL_HOUR;
         }
