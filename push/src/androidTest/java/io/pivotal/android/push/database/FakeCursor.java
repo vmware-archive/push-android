@@ -178,6 +178,9 @@ public class FakeCursor implements Cursor {
 	}
 
 	@Override
+	public void setExtras(Bundle bundle) {}
+
+	@Override
 	public boolean isAfterLast() {
 		return false;
 	}
