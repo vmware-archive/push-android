@@ -6,6 +6,7 @@ package io.pivotal.android.push.util;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.os.Build;
 
 import com.google.gson.Gson;
 
@@ -68,8 +69,7 @@ public class Util {
      */
     public static void saveIdToFilesystem(Context context, String id, String idType) {
         if (DebugUtil.getInstance(context).isDebuggable()) {
-            int res = context.checkCallingOrSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE");
-            if (res == PackageManager.PERMISSION_GRANTED) {
+            if (hasExternalStoragePermission(context)) {
                 final PrintWriter pw;
                 try {
                     final File externalFilesDir = context.getExternalFilesDir(null);
@@ -95,8 +95,7 @@ public class Util {
 
     public static void saveJsonMapToFilesystem(Context context, List<Map<String, String>> map) {
         if (DebugUtil.getInstance(context).isDebuggable()) {
-            int res = context.checkCallingOrSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE");
-            if (res == PackageManager.PERMISSION_GRANTED) {
+            if (hasExternalStoragePermission(context)) {
                 FileWriter writer = null;
                 try {
                     final File externalFilesDir = context.getExternalFilesDir(null);
@@ -122,7 +121,16 @@ public class Util {
                     }
                 }
             }
-
         }
+    }
+
+    private static boolean hasExternalStoragePermission(Context context) {
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT) {
+            return true; // Explicit external storage permission no longer required on Android >= KITKAT
+        }
+
+        final int res = context.checkCallingOrSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE");
+        return res == PackageManager.PERMISSION_GRANTED;
     }
 }

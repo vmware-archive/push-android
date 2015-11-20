@@ -3,12 +3,19 @@
  */
 package io.pivotal.android.push;
 
+import android.Manifest;
+import android.app.Activity;
 import android.app.Application;
+import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 
 import java.util.List;
 import java.util.Map;
@@ -390,6 +397,92 @@ public class Push {
         }
         if (parameters.getServiceUrl() == null) {
             throw new IllegalArgumentException("parameters.serviceUrl may not be null");
+        }
+    }
+
+    /**
+     * Use the `requestPermissions` method to ensure that the Push SDK has permission to read the device location
+     * in order to monitor geofences.
+     *
+     * This method will check that the `ACCESS_FINE_LOCATION` permission has been granted.  If it has not been granted then
+     * it may display a dialog box to the user to request permission.  If the user has already denied this permission in
+     * the past then the `rationaleDialog` window will be displayed to the user.  You will need to provide this dialog box.
+     * The dialog box should contain text explaining to the user why the app wants permission to read the device location.
+     *
+     * You only need to call the `requestPermissions` method if you are using geofences and your application
+     * targets Android API 23 (Marshmallow) or greater.
+     *
+     * If using geofences then you should call `requestPermissions` prior to calling the `Push.init` method.
+     *
+     * If `requestPermissions` returns `true` then the permission for geofences has already been granted and
+     * you are free to call `Push.init` immediately with `geofencesEnabled` set to `true`.
+     *
+     * If `requestPermissions` returns `false` then the permission for geofences has not been granted yet.
+     * You must wait until Android calls the `onRequestPermissionsResults` method on your given Activity.  In this method
+     * you must check if permission was successfully granted.  Note that the same `requestCode` you passed to the
+     * `requestPermissions` method will be passed to `onRequestPermissionsResults`.  Example:
+     *
+     *     public class MyAwesomeActivity extends Activity implements ActivityCompat.OnRequestPermissionsResultCallback {
+     *
+     *         private static final int ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE = 1337; // your favourite integer
+     *
+     *         public void myInitMethod() {
+     *             Dialog myRationaleDialog = new AlertDialog.Builder(this)
+     *                 .setMessage("My Awesome App needs permission to read your device location in order to send you fun messages when you visit our location.")
+     *                 .setPositiveButton("OK", null)
+     *                 .create();
+     *
+     *             Push.getInstance(this).requestPermissions(this, ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE, myRationaleDialog);
+     *         }
+     *
+     *         public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+     *             super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+     *
+     *             if (requestCode == ACCESS_FINE_LOCATION_PERMISSION_REQUEST_CODE && permissions[0].equals(Manifest.permission.ACCESS_FINE_LOCATION)) {
+     *                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+     *                     // Call Push.init with geofencesEnabled == true
+     *                 } else {
+     *                     // Call Push.init with geofencesEnabled == false
+     *                 }
+     *             }
+     *         }
+     *
+     * @param activity         some activity that implements the `onRequestPermissionsResult` method.
+     * @param requestCode      some unique integer. This same integer will be passed to the `onRequestPermissionsResult` method by Android.
+     * @param rationaleDialog  a dialog box object that shows your user the reason that you'd like to track their location
+     * @return                 `true` if permission for ACCESS_FINE_LOCATION has already been granted. `false` if you need to wait until
+     *                         Android calls the `onRequestPermissionsResult` method to provide the permission request result.
+     */
+    public <T extends Activity & ActivityCompat.OnRequestPermissionsResultCallback> boolean requestPermissions(
+            @NonNull final T activity,
+            final int requestCode,
+            @NonNull final Dialog rationaleDialog) {
+
+        if (ContextCompat.checkSelfPermission(activity, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            if (ActivityCompat.shouldShowRequestPermissionRationale(activity, Manifest.permission.ACCESS_FINE_LOCATION)) {
+
+                rationaleDialog.setOnDismissListener(new DialogInterface.OnDismissListener() {
+
+                    @Override
+                    public void onDismiss(DialogInterface dialogInterface) {
+
+                        ActivityCompat.requestPermissions(activity,
+                                new String[] {Manifest.permission.ACCESS_FINE_LOCATION},
+                                requestCode);
+                    }
+                });
+
+                rationaleDialog.show();
+
+            } else {
+
+                ActivityCompat.requestPermissions(activity, new String[] {Manifest.permission.ACCESS_FINE_LOCATION}, requestCode);
+            }
+
+            return false;
+        } else {
+            return true;
         }
     }
 
