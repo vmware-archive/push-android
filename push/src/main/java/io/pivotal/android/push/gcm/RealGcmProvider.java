@@ -26,11 +26,13 @@ public class RealGcmProvider implements GcmProvider {
 
     @Override
     public String register(String... senderIds) throws IOException {
+        // TODO - the `register` method is deprecated. We need to update to use the new GoogleCloudMessaging methods.
         return gcm.register(senderIds);
     }
 
     @Override
     public void unregister() throws IOException {
+        // TODO - the `unregister` method is deprecated. We need to update to use the new GoogleCloudMessaging methods.
         gcm.unregister();
     }
 
