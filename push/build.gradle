@@ -1,7 +1,7 @@
 dependencies {
     compile 'com.google.code.gson:gson:2.4'
-    compile 'com.google.android.gms:play-services-location:8.3.0'
-    compile 'com.google.android.gms:play-services-gcm:8.3.0'
+    compile 'com.google.android.gms:play-services-location:8.1.0'
+    compile 'com.google.android.gms:play-services-gcm:8.1.0'
     compile 'com.android.support:support-annotations:23.1.1'
     compile 'com.android.support:appcompat-v7:23.1.1'
     androidTestCompile 'com.google.guava:guava:18.0'
@@ -9,6 +9,9 @@ dependencies {
     androidTestCompile 'com.google.dexmaker:dexmaker:1.2'
     androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.2'
 }
+
+// Note that Google Play Services 8.3.0 has a bug.  https://code.google.com/p/analytics-issues/issues/detail?id=784
+// We will continue to use Google Play Services 8.1.0 until the above bug is fixed.
 
 android {
     compileOptions {
