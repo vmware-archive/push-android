@@ -7,6 +7,7 @@ import android.test.AndroidTestCase;
 import java.util.HashMap;
 import java.util.Properties;
 
+import io.pivotal.android.push.BuildConfig;
 import io.pivotal.android.push.analytics.jobs.EnqueueEventJob;
 import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
@@ -100,6 +101,7 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
         assertEquals(AnalyticsEventLogger.PCF_PUSH_EVENT_TYPE_PUSH_NOTIFICATION_RECEIVED, getLoggedEvent().getEventType());
         assertEquals(TEST_EVENT_RECEIPT_ID_VALUE, getLoggedEvent().getReceiptId());
         assertEquals(TEST_EVENT_DEVICE_UUID_VALUE, getLoggedEvent().getDeviceUuid());
+        assertEquals(BuildConfig.VERSION_NAME, getLoggedEvent().getSdkVersion());
         assertNull(getLoggedEvent().getGeofenceId());
         assertNull(getLoggedEvent().getLocationId());
         assertNotNull(getLoggedEvent().getEventTime());
@@ -112,6 +114,7 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
         assertEquals(AnalyticsEventLogger.PCF_PUSH_EVENT_TYPE_PUSH_NOTIFICATION_OPENED, getLoggedEvent().getEventType());
         assertEquals(TEST_EVENT_RECEIPT_ID_VALUE, getLoggedEvent().getReceiptId());
         assertEquals(TEST_EVENT_DEVICE_UUID_VALUE, getLoggedEvent().getDeviceUuid());
+        assertEquals(BuildConfig.VERSION_NAME, getLoggedEvent().getSdkVersion());
         assertNull(getLoggedEvent().getGeofenceId());
         assertNull(getLoggedEvent().getLocationId());
         assertNotNull(getLoggedEvent().getEventTime());
@@ -125,6 +128,7 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
         assertEquals(TEST_EVENT_DEVICE_UUID_VALUE, getLoggedEvent().getDeviceUuid());
         assertEquals("57", getLoggedEvent().getGeofenceId());
         assertEquals("1337", getLoggedEvent().getLocationId());
+        assertEquals(BuildConfig.VERSION_NAME, getLoggedEvent().getSdkVersion());
         assertNull(getLoggedEvent().getReceiptId());
         assertNotNull(getLoggedEvent().getEventTime());
     }

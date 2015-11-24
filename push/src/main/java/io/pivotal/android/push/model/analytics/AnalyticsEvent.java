@@ -10,18 +10,11 @@ import com.google.gson.Gson;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
-import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.Date;
 import java.util.List;
 
 import io.pivotal.android.push.database.Database;
-import io.pivotal.android.push.util.Logger;
 
 public class AnalyticsEvent implements Parcelable {
 
@@ -33,6 +26,7 @@ public class AnalyticsEvent implements Parcelable {
         public static final String GEOFENCE_ID = "geofenceId";
         public static final String LOCATION_ID = "locationId";
         public static final String STATUS = "status";
+        public static final String SDK_VERSION = "sdkVersion";
     }
 
     public static class Status {
@@ -77,6 +71,8 @@ public class AnalyticsEvent implements Parcelable {
     @SerializedName(Columns.LOCATION_ID)
     private String locationId;
 
+    @SerializedName(Columns.SDK_VERSION)
+    private String sdkVersion;
 
     public AnalyticsEvent() {
     }
@@ -129,6 +125,10 @@ public class AnalyticsEvent implements Parcelable {
             setLocationId(cursor.getString(columnIndex));
         }
 
+        columnIndex = cursor.getColumnIndex(Columns.SDK_VERSION);
+        if (columnIndex >= 0) {
+            setSdkVersion(cursor.getString(columnIndex));
+        }
     }
 
     // Copy constructor
@@ -141,6 +141,7 @@ public class AnalyticsEvent implements Parcelable {
         this.deviceUuid = source.deviceUuid;
         this.geofenceId = source.geofenceId;
         this.locationId = source.locationId;
+        this.sdkVersion = source.sdkVersion;
     }
 
     public int getId() {
@@ -194,6 +195,14 @@ public class AnalyticsEvent implements Parcelable {
         this.locationId = locationId;
     }
 
+    public String getSdkVersion() {
+        return sdkVersion;
+    }
+
+    public void setSdkVersion(String sdkVersion) {
+        this.sdkVersion = sdkVersion;
+    }
+
     public String getEventType() {
         return eventType;
     }
@@ -236,6 +245,8 @@ public class AnalyticsEvent implements Parcelable {
             return false;
         if (geofenceId != null ? !geofenceId.equals(event.geofenceId) : event.geofenceId != null)
             return false;
+        if (sdkVersion != null ? !sdkVersion.equals(event.sdkVersion) : event.sdkVersion != null)
+            return false;
         return !(locationId != null ? !locationId.equals(event.locationId) : event.locationId != null);
 
     }
@@ -248,6 +259,7 @@ public class AnalyticsEvent implements Parcelable {
         result = 31 * result + (eventTime != null ? eventTime.hashCode() : 0);
         result = 31 * result + (deviceUuid != null ? deviceUuid.hashCode() : 0);
         result = 31 * result + (geofenceId != null ? geofenceId.hashCode() : 0);
+        result = 31 * result + (sdkVersion != null ? sdkVersion.hashCode() : 0);
         result = 31 * result + (locationId != null ? locationId.hashCode() : 0);
         return result;
     }
@@ -259,6 +271,7 @@ public class AnalyticsEvent implements Parcelable {
                 ", receiptId='" + receiptId + '\'' +
                 ", geofenceId='" + geofenceId + '\'' +
                 ", locationId='" + locationId + '\'' +
+                ", sdkVersion='" + sdkVersion + '\'' +
                 '}';
     }
 
@@ -298,6 +311,7 @@ public class AnalyticsEvent implements Parcelable {
         cv.put(Columns.DEVICE_UUID, getDeviceUuid());
         cv.put(Columns.GEOFENCE_ID, getGeofenceId());
         cv.put(Columns.LOCATION_ID, getLocationId());
+        cv.put(Columns.SDK_VERSION, getSdkVersion());
         cv.put(Columns.STATUS, getStatus());
 
         return cv;
@@ -323,17 +337,20 @@ public class AnalyticsEvent implements Parcelable {
         sb.append("' TEXT, '");
         sb.append(Columns.LOCATION_ID);
         sb.append("' TEXT, '");
+        sb.append(Columns.SDK_VERSION);
+        sb.append("' TEXT, '");
         sb.append(Columns.STATUS);
         sb.append("' INT);");
         return sb.toString();
     }
 
     public static String getDropTableSqlStatement() {
-        final StringBuilder sb = new StringBuilder();
-        sb.append("DROP TABLE IF EXISTS '");
-        sb.append(Database.EVENTS_TABLE_NAME);
-        sb.append("';");
-        return sb.toString();
+        return "DROP TABLE IF EXISTS '" + Database.EVENTS_TABLE_NAME + "';";
+    }
+
+    public static String getMigrateVersion1ToVersion2Statement() {
+        return "ALTER TABLE '" + Database.EVENTS_TABLE_NAME + "' " +
+                "ADD COLUMN '" + Columns.SDK_VERSION + "' TEXT;";
     }
 
     public static int getRowIdFromCursor(final Cursor cursor) {
@@ -343,71 +360,6 @@ public class AnalyticsEvent implements Parcelable {
         }
         final int id = cursor.getInt(idColumn);
         return id;
-    }
-
-    // Serializable helpers
-
-    public static Serializable deserialize(byte[] bytes) {
-
-        ByteArrayInputStream byteStream = null;
-        ObjectInputStream in = null;
-
-        try {
-            byteStream = new ByteArrayInputStream(bytes);
-            in = new ObjectInputStream(byteStream);
-            return (Serializable) in.readObject();
-
-        } catch (IOException i) {
-            Logger.ex("Error deserializing data: ", i);
-        } catch (ClassNotFoundException c) {
-            Logger.ex("Error deserializing data: ", c);
-        } finally {
-            if (in != null) {
-                try {
-                    in.close();
-                } catch (IOException e) {
-                }
-            }
-            if (byteStream != null) {
-                try {
-                    byteStream.close();
-                } catch (IOException e) {
-                }
-            }
-        }
-
-        return null;
-    }
-
-    public static byte[] serialize(Serializable data) {
-
-        ByteArrayOutputStream byteStream = null;
-        ObjectOutputStream out = null;
-
-        try {
-            byteStream = new ByteArrayOutputStream();
-            out = new ObjectOutputStream(byteStream);
-            out.writeObject(data);
-            return byteStream.toByteArray();
-
-        } catch (IOException i) {
-            Logger.w("Warning: Serializable object didn't serialize.");
-        } finally {
-            if (out != null) {
-                try {
-                    out.close();
-                } catch (IOException e) {
-                }
-            }
-            if (byteStream != null) {
-                try {
-                    byteStream.close();
-                } catch (IOException e) {
-                }
-            }
-        }
-
-        return null;
     }
 
     // Parcelable stuff
@@ -432,6 +384,7 @@ public class AnalyticsEvent implements Parcelable {
         receiptId = in.readString();
         geofenceId = in.readString();
         locationId = in.readString();
+        sdkVersion = in.readString();
     }
 
     @Override
@@ -449,5 +402,6 @@ public class AnalyticsEvent implements Parcelable {
         out.writeString(receiptId);
         out.writeString(geofenceId);
         out.writeString(locationId);
+        out.writeString(sdkVersion);
     }
 }

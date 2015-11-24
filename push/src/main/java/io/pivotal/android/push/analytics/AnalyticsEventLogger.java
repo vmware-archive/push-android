@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+import io.pivotal.android.push.BuildConfig;
 import io.pivotal.android.push.analytics.jobs.EnqueueEventJob;
 import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
@@ -93,6 +94,7 @@ public class AnalyticsEventLogger {
         event.setDeviceUuid(fields.get("deviceUuid"));
         event.setGeofenceId(fields.get("geofenceId"));
         event.setLocationId(fields.get("locationId"));
+        event.setSdkVersion(BuildConfig.VERSION_NAME);
         event.setStatus(AnalyticsEvent.Status.NOT_POSTED);
         return event;
     }
