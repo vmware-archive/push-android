@@ -1,10 +1,13 @@
 package io.pivotal.android.push.geofence;
 
+import android.Manifest;
 import android.app.Application;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.content.ContextCompat;
 
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
@@ -120,6 +123,12 @@ public class GeofenceRegistrar {
     private void monitorGeofences(final List<Geofence> geofences, final List<Map<String, String>> serializableGeofences) {
 
         if (geofences == null) {
+            return;
+        }
+
+        // Check permissions
+        if (ContextCompat.checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            Logger.w("Permission to read the device location has been revoked. Not monitoring geofences.");
             return;
         }
 
