@@ -25,7 +25,7 @@ public class SendAnalyticsEventsJob extends BaseJob {
     public void run(JobParams jobParams) {
 
         final List<Uri> uris = getUnpostedEvents(jobParams);
-        Logger.fd("SendEventsJob: package %s: events available to send: %d", getPackageName(jobParams), uris.size());
+        Logger.fd("SendAnalyticsEventsJob: package %s: events available to send: %d", getPackageName(jobParams), uris.size());
 
         if (uris.size() > 0) {
             setStatusForEvents(jobParams, uris, AnalyticsEvent.Status.POSTING);

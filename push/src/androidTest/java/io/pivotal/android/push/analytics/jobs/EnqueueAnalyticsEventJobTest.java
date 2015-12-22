@@ -13,7 +13,7 @@ public class EnqueueAnalyticsEventJobTest extends JobTest {
 
     public void testRequiresEvent() {
         try {
-            new EnqueueEventJob(null);
+            new EnqueueAnalyticsEventJob(null);
             fail();
         } catch (IllegalArgumentException e) {
             // success
@@ -27,7 +27,7 @@ public class EnqueueAnalyticsEventJobTest extends JobTest {
         assertFalse(alarmProvider.isAlarmEnabled());
 
         // Run job
-        final EnqueueEventJob job = new EnqueueEventJob(event1);
+        final EnqueueAnalyticsEventJob job = new EnqueueAnalyticsEventJob(event1);
         job.run(getJobParams(new JobResultListener() {
 
             @Override
@@ -50,6 +50,36 @@ public class EnqueueAnalyticsEventJobTest extends JobTest {
         assertTrue(alarmProvider.isAlarmEnabled());
     }
 
+    public void testEnqueuesHeartbeat() throws InterruptedException {
+
+        // Setup environment
+        Assert.assertEquals(0, eventsStorage.getNumberOfEvents());
+        assertFalse(alarmProvider.isAlarmEnabled());
+
+        // Run job
+        final EnqueueAnalyticsEventJob job = new EnqueueAnalyticsEventJob(heartbeatEvent);
+        job.run(getJobParams(new JobResultListener() {
+
+            @Override
+            public void onJobComplete(int resultCode) {
+                assertEquals(RESULT_SUCCESS, resultCode);
+                semaphore.release();
+            }
+        }));
+
+        semaphore.acquire();
+
+        // Ensure event made it into the database
+        Assert.assertEquals(1, eventsStorage.getNumberOfEvents());
+        final List<Uri> uris = eventsStorage.getEventUris();
+        assertEquals(1, uris.size());
+        final AnalyticsEvent savedEvent = eventsStorage.readEvent(uris.get(0));
+        assertEquals(heartbeatEvent, savedEvent);
+
+        // Ensure alarm was enabled
+        assertTrue(alarmProvider.isAlarmEnabledImmediately());
+    }
+
     public void testSaveFails() throws InterruptedException {
 
         // Setup environment
@@ -58,12 +88,12 @@ public class EnqueueAnalyticsEventJobTest extends JobTest {
         assertFalse(alarmProvider.isAlarmEnabled());
 
         // Run job
-        final EnqueueEventJob job = new EnqueueEventJob(event1);
+        final EnqueueAnalyticsEventJob job = new EnqueueAnalyticsEventJob(event1);
         job.run(getJobParams(new JobResultListener() {
 
             @Override
             public void onJobComplete(int resultCode) {
-                assertEquals(EnqueueEventJob.RESULT_COULD_NOT_SAVE_EVENT_TO_STORAGE, resultCode);
+                assertEquals(EnqueueAnalyticsEventJob.RESULT_COULD_NOT_SAVE_EVENT_TO_STORAGE, resultCode);
                 semaphore.release();
             }
         }));
@@ -78,22 +108,22 @@ public class EnqueueAnalyticsEventJobTest extends JobTest {
     }
 
     public void testEquals() {
-        final EnqueueEventJob job1 = new EnqueueEventJob(event1);
-        final EnqueueEventJob job2 = new EnqueueEventJob(event1);
+        final EnqueueAnalyticsEventJob job1 = new EnqueueAnalyticsEventJob(event1);
+        final EnqueueAnalyticsEventJob job2 = new EnqueueAnalyticsEventJob(event1);
         assertEquals(event1, event1);
         assertEquals(job1, job2);
     }
 
     public void testNotEquals() {
-        final EnqueueEventJob job1 = new EnqueueEventJob(event1);
-        final EnqueueEventJob job2 = new EnqueueEventJob(event2);
+        final EnqueueAnalyticsEventJob job1 = new EnqueueAnalyticsEventJob(event1);
+        final EnqueueAnalyticsEventJob job2 = new EnqueueAnalyticsEventJob(event2);
         MoreAsserts.assertNotEqual(event1, event2);
         MoreAsserts.assertNotEqual(job1, job2);
     }
 
     public void testParcelsData() {
-        final EnqueueEventJob inputJob = new EnqueueEventJob(event1);
-        final EnqueueEventJob outputJob = getJobViaParcel(inputJob);
+        final EnqueueAnalyticsEventJob inputJob = new EnqueueAnalyticsEventJob(event1);
+        final EnqueueAnalyticsEventJob outputJob = getJobViaParcel(inputJob);
         assertNotNull(outputJob);
         assertEquals(inputJob, outputJob);
     }

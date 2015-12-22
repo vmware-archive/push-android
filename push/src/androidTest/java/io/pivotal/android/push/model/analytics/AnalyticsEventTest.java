@@ -12,6 +12,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.TimeZone;
 
+import io.pivotal.android.push.analytics.AnalyticsEventLogger;
+
 public class AnalyticsEventTest extends AndroidTestCase {
 
     private static final String TEST_RECEIPT_ID_1 = "RECEIPT-ID-1";
@@ -215,5 +217,13 @@ public class AnalyticsEventTest extends AndroidTestCase {
         final Calendar cal = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
         cal.set(TEST_YEAR_2, TEST_MONTH_2, TEST_DAY_2, TEST_HOUR_2, TEST_MINUTE_2, TEST_SECOND_2);
         return cal.getTime();
+    }
+
+    public static AnalyticsEvent getHeartbeatEvent() {
+        final AnalyticsEvent event = new AnalyticsEvent();
+        event.setReceiptId(TEST_RECEIPT_ID_3);
+        event.setEventTime(getTestDate2());
+        event.setEventType(AnalyticsEventLogger.PCF_PUSH_EVENT_TYPE_HEARTBEAT);
+        return event;
     }
 }

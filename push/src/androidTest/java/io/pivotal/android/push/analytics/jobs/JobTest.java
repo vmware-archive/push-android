@@ -30,6 +30,7 @@ public abstract class JobTest extends AndroidTestCase {
 
     protected AnalyticsEvent event1;
     protected AnalyticsEvent event2;
+    protected AnalyticsEvent heartbeatEvent;
     protected FakeAnalyticsEventsStorage eventsStorage;
     protected TimeProvider timeProvider;
     protected FakeNetworkWrapper networkWrapper;
@@ -47,6 +48,7 @@ public abstract class JobTest extends AndroidTestCase {
         System.setProperty("dexmaker.dexcache", mContext.getCacheDir().getPath());
         event1 = AnalyticsEventTest.getEvent1();
         event2 = AnalyticsEventTest.getEvent2();
+        heartbeatEvent = AnalyticsEventTest.getHeartbeatEvent();
         eventsStorage = new FakeAnalyticsEventsStorage();
         timeProvider = mock(TimeProvider.class);
         networkWrapper = new FakeNetworkWrapper();

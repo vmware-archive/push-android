@@ -3,16 +3,17 @@ package io.pivotal.android.push.analytics.jobs;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import io.pivotal.android.push.analytics.AnalyticsEventLogger;
 import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 import io.pivotal.android.push.util.Logger;
 
-public class EnqueueEventJob extends BaseJob {
+public class EnqueueAnalyticsEventJob extends BaseJob {
 
     public static final int RESULT_COULD_NOT_SAVE_EVENT_TO_STORAGE = 200;
 
     private AnalyticsEvent event;
 
-    public EnqueueEventJob(AnalyticsEvent event) {
+    public EnqueueAnalyticsEventJob(AnalyticsEvent event) {
         super();
         verifyArguments(event);
         saveArguments(event);
@@ -35,10 +36,10 @@ public class EnqueueEventJob extends BaseJob {
     @Override
     public void run(JobParams jobParams) {
         if (saveEvent(jobParams)) {
-            enableAlarm(jobParams);
+            enableAlarm(jobParams, event);
             sendJobResult(JobResultListener.RESULT_SUCCESS, jobParams);
         } else {
-            sendJobResult(EnqueueEventJob.RESULT_COULD_NOT_SAVE_EVENT_TO_STORAGE, jobParams);
+            sendJobResult(EnqueueAnalyticsEventJob.RESULT_COULD_NOT_SAVE_EVENT_TO_STORAGE, jobParams);
         }
     }
 
@@ -53,8 +54,16 @@ public class EnqueueEventJob extends BaseJob {
         }
     }
 
-    private void enableAlarm(JobParams jobParams) {
-        jobParams.alarmProvider.enableAlarmIfDisabled();
+    private void enableAlarm(JobParams jobParams, AnalyticsEvent event) {
+        if (isHeartbeatEvent(event)) {
+            jobParams.alarmProvider.enableAlarmIfDisabled();
+        } else {
+            jobParams.alarmProvider.enableAlarmImmediatelyIfDisabled();
+        }
+    }
+
+    private boolean isHeartbeatEvent(AnalyticsEvent event) {
+        return (event != null) && (event.getEventType().equalsIgnoreCase(AnalyticsEventLogger.PCF_PUSH_EVENT_TYPE_HEARTBEAT));
     }
 
     @Override
@@ -63,11 +72,11 @@ public class EnqueueEventJob extends BaseJob {
             return false;
         }
 
-        if (!(o instanceof EnqueueEventJob)) {
+        if (!(o instanceof EnqueueAnalyticsEventJob)) {
             return false;
         }
 
-        final EnqueueEventJob otherJob = (EnqueueEventJob) o;
+        final EnqueueAnalyticsEventJob otherJob = (EnqueueAnalyticsEventJob) o;
 
         if (event == null && otherJob.event != null) {
             return false;
@@ -84,18 +93,18 @@ public class EnqueueEventJob extends BaseJob {
 
     // Parcelable stuff
 
-    public static final Parcelable.Creator<EnqueueEventJob> CREATOR = new Parcelable.Creator<EnqueueEventJob>() {
+    public static final Parcelable.Creator<EnqueueAnalyticsEventJob> CREATOR = new Parcelable.Creator<EnqueueAnalyticsEventJob>() {
 
-        public EnqueueEventJob createFromParcel(Parcel in) {
-            return new EnqueueEventJob(in);
+        public EnqueueAnalyticsEventJob createFromParcel(Parcel in) {
+            return new EnqueueAnalyticsEventJob(in);
         }
 
-        public EnqueueEventJob[] newArray(int size) {
-            return new EnqueueEventJob[size];
+        public EnqueueAnalyticsEventJob[] newArray(int size) {
+            return new EnqueueAnalyticsEventJob[size];
         }
     };
 
-    private EnqueueEventJob(Parcel in) {
+    private EnqueueAnalyticsEventJob(Parcel in) {
         super(in);
         event = readEventFromParcel(in);
     }

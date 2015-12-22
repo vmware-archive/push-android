@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Properties;
 
 import io.pivotal.android.push.BuildConfig;
-import io.pivotal.android.push.analytics.jobs.EnqueueEventJob;
+import io.pivotal.android.push.analytics.jobs.EnqueueAnalyticsEventJob;
 import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.prefs.Pivotal;
@@ -133,6 +133,20 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
         assertNotNull(getLoggedEvent().getEventTime());
     }
 
+    public void testLogHeartbeatEvent() {
+        final AnalyticsEventLogger eventLogger = getEventLoggerWithAnalyticsEnabled();
+        eventLogger.logReceivedHeartbeat(TEST_EVENT_RECEIPT_ID_VALUE);
+        assertTrue(serviceStarter.wasStarted());
+        assertEquals(AnalyticsEventLogger.PCF_PUSH_EVENT_TYPE_HEARTBEAT, getLoggedEvent().getEventType());
+        assertEquals(TEST_EVENT_RECEIPT_ID_VALUE, getLoggedEvent().getReceiptId());
+        assertEquals(TEST_EVENT_DEVICE_UUID_VALUE, getLoggedEvent().getDeviceUuid());
+        assertEquals(BuildConfig.VERSION_NAME, getLoggedEvent().getSdkVersion());
+        assertNull(getLoggedEvent().getGeofenceId());
+        assertNull(getLoggedEvent().getLocationId());
+        assertNotNull(getLoggedEvent().getEventTime());
+        assertEquals(AnalyticsEventLogger.PCF_PUSH_EVENT_TYPE_HEARTBEAT, getLoggedEvent().getEventType());
+    }
+
     private AnalyticsEventLogger getEventLoggerWithAnalyticsDisabled() {
         preferencesProvider.setAreAnalyticsEnabled(false);
         return new AnalyticsEventLogger(serviceStarter, preferencesProvider, getContext());
@@ -145,7 +159,7 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
 
     private AnalyticsEvent getLoggedEvent() {
         final Intent intent = serviceStarter.getStartedIntent();
-        final EnqueueEventJob job = intent.getParcelableExtra(AnalyticsEventService.KEY_JOB);
+        final EnqueueAnalyticsEventJob job = intent.getParcelableExtra(AnalyticsEventService.KEY_JOB);
         return job.getEvent();
     }
 

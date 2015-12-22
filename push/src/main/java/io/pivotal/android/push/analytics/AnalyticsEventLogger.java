@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import io.pivotal.android.push.BuildConfig;
-import io.pivotal.android.push.analytics.jobs.EnqueueEventJob;
+import io.pivotal.android.push.analytics.jobs.EnqueueAnalyticsEventJob;
 import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.service.AnalyticsEventService;
@@ -20,6 +20,7 @@ public class AnalyticsEventLogger {
     public static final String PCF_PUSH_EVENT_TYPE_PUSH_NOTIFICATION_RECEIVED = "pcf_push_event_type_push_notification_received";
     public static final String PCF_PUSH_EVENT_TYPE_PUSH_NOTIFICATION_OPENED = "pcf_push_event_type_push_notification_opened";
     public static final String PCF_PUSH_EVENT_TYPE_GEOFENCE_LOCATION_TRIGGERED = "pcf_push_event_type_geofence_location_triggered";
+    public static final String PCF_PUSH_EVENT_TYPE_HEARTBEAT = "pcf_push_event_type_heartbeat";
 
     private Context context;
     private ServiceStarter serviceStarter;
@@ -55,7 +56,7 @@ public class AnalyticsEventLogger {
     public void logEvent(String eventType, Map<String, String> fields) {
         if (preferencesProvider.areAnalyticsEnabled()) {
             final AnalyticsEvent event = getEvent(eventType, fields);
-            final EnqueueEventJob job = new EnqueueEventJob(event);
+            final EnqueueAnalyticsEventJob job = new EnqueueAnalyticsEventJob(event);
             final Intent intent = AnalyticsEventService.getIntentToRunJob(context, job);
             serviceStarter.startService(context, intent);
             Logger.i("Logging analytics event: " + event);
@@ -97,5 +98,12 @@ public class AnalyticsEventLogger {
         event.setSdkVersion(BuildConfig.VERSION_NAME);
         event.setStatus(AnalyticsEvent.Status.NOT_POSTED);
         return event;
+    }
+
+    public void logReceivedHeartbeat(String receiptId) {
+        Map<String, String> fields = new HashMap<>();
+        fields.put("receiptId", receiptId);
+        fields.put("deviceUuid", preferencesProvider.getPCFPushDeviceRegistrationId());
+        logEvent(PCF_PUSH_EVENT_TYPE_HEARTBEAT, fields);
     }
 }

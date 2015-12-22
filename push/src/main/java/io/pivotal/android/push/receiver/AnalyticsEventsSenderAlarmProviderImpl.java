@@ -23,9 +23,19 @@ public class AnalyticsEventsSenderAlarmProviderImpl implements AnalyticsEventsSe
 
     @Override
     public synchronized void enableAlarm() {
+        final long triggerMillis = getTriggerMillis();
+        enableAlarmWithTriggerTime(triggerMillis);
+    }
+
+    @Override
+    public void enableAlarmImmediately() {
+        final long triggerMillis = SystemClock.elapsedRealtime();
+        enableAlarmWithTriggerTime(triggerMillis);
+    }
+
+    private void enableAlarmWithTriggerTime(long triggerMillis) {
         final PendingIntent intent = AnalyticsEventsSenderAlarmReceiver.getPendingIntent(context, PendingIntent.FLAG_UPDATE_CURRENT);
         final AlarmManager alarmManager = getAlarmManager();
-        final long triggerMillis = getTriggerMillis();
         final long intervalMillis = getIntervalMillis();
         Logger.fd("Events sender alarm enabled. Trigger time is in %d ms. Interval is %d ms.", triggerMillis - SystemClock.elapsedRealtime(), intervalMillis);
         alarmManager.setInexactRepeating(AlarmManager.ELAPSED_REALTIME_WAKEUP, triggerMillis, intervalMillis, intent);
@@ -72,6 +82,13 @@ public class AnalyticsEventsSenderAlarmProviderImpl implements AnalyticsEventsSe
     public synchronized void enableAlarmIfDisabled() {
         if (!isAlarmEnabled()) {
             enableAlarm();
+        }
+    }
+
+    @Override
+    public void enableAlarmImmediatelyIfDisabled() {
+        if (!isAlarmEnabled()) {
+            enableAlarmImmediately();
         }
     }
 

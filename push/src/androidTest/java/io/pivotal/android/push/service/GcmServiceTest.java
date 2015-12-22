@@ -44,6 +44,7 @@ public class GcmServiceTest extends AndroidTestCase {
 
     private static final String TEST_MESSAGE = "some fancy message";
     private static final String TEST_RECEIPT_ID = "TEST_RECEIPT_ID";
+    private static final String TEST_TIMESTAMP = "1234567890";
     private static final Geofence GEOFENCE_1 = makeGeofence(-43.5,   61.5, 150.0f, "PCF_5_99",  Geofence.GEOFENCE_TRANSITION_ENTER, Geofence.NEVER_EXPIRE);
     private static final Geofence GEOFENCE_2 = makeGeofence( 53.5,  -91.5, 120.0f, "PCF_11_66", Geofence.GEOFENCE_TRANSITION_EXIT,  Geofence.NEVER_EXPIRE);
     private static final Geofence GEOFENCE_3 = makeGeofence( 53.5,  -91.5, 120.0f, "PCF_44_66", Geofence.GEOFENCE_TRANSITION_EXIT,  Geofence.NEVER_EXPIRE);
@@ -130,6 +131,22 @@ public class GcmServiceTest extends AndroidTestCase {
         service.assertTimesGeofenceExited(0);
         service.onDestroy();
         verify(eventLogger, times(1)).logReceivedNotification(TEST_RECEIPT_ID);
+        verifyZeroInteractions(store);
+        verifyNoMoreInteractions(eventLogger);
+    }
+
+    public void testMessageHeartbeatReceivedWithReceiptId() throws InterruptedException {
+        final Intent intent = createHeartbeatReceivedIntent(TEST_TIMESTAMP, TEST_RECEIPT_ID);
+        final FakeGcmService service = startService(FakeGcmService.class);
+        when(helper.isGeofencingEvent()).thenReturn(false);
+        service.onHandleIntent(intent);
+        service.assertMessageReceived(false);
+        service.assertMessageSendError(false);
+        service.assertMessageDeleted(false);
+        service.assertTimesGeofenceEntered(0);
+        service.assertTimesGeofenceExited(0);
+        service.onDestroy();
+        verify(eventLogger, times(1)).logReceivedHeartbeat(TEST_RECEIPT_ID);
         verifyZeroInteractions(store);
         verifyNoMoreInteractions(eventLogger);
     }
@@ -371,6 +388,17 @@ public class GcmServiceTest extends AndroidTestCase {
         intent.setAction("com.google.android.c2dm.intent.RECEIVE");
         intent.putExtra("message_type", GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE);
         intent.putExtra(GcmService.KEY_MESSAGE, message);
+        if (receiptId != null) {
+            intent.putExtra("receiptId", receiptId);
+        }
+        return intent;
+    }
+
+    private Intent createHeartbeatReceivedIntent(final String timestamp, String receiptId) {
+        final Intent intent = new Intent(getContext(), FakeGcmService.class);
+        intent.setAction("com.google.android.c2dm.intent.RECEIVE");
+        intent.putExtra("message_type", GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE);
+        intent.putExtra(GcmService.KEY_HEARTBEAT, timestamp);
         if (receiptId != null) {
             intent.putExtra("receiptId", receiptId);
         }

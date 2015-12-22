@@ -38,6 +38,7 @@ public class GcmService extends IntentService {
     public static final String GEOFENCE_TRANSITION_KEY = "com.google.android.location.intent.extra.transition";
     public static final String KEY_MESSAGE = "message";
     public static final String KEY_RECEIPT_ID = "receiptId";
+    public static final String KEY_HEARTBEAT = "pcf.push.heartbeat.sentAt";
 
     private GeofenceHelper helper;
     private GeofenceEngine engine;
@@ -136,9 +137,15 @@ public class GcmService extends IntentService {
             }
 
         } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-            Logger.i("GcmService has received a push message.");
-            enqueueMessageReceivedEvent(intent);
-            onReceiveMessage(extras);
+            if (extras.containsKey(KEY_HEARTBEAT)) {
+                Logger.i("GcmService has received a heartbeat push message.");
+                enqueueHeartbeatReceivedEvent(intent);
+
+            } else {
+                Logger.i("GcmService has received a push message.");
+                enqueueMessageReceivedEvent(intent);
+                onReceiveMessage(extras);
+            }
 
         } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
             Logger.i("GcmService has received a DELETED push message.");
@@ -251,6 +258,16 @@ public class GcmService extends IntentService {
         } else {
             Logger.w("Note: notification has no receiptId. No analytics event will be logged for receiving this notification.");
         }
+    }
+
+    private void enqueueHeartbeatReceivedEvent(Intent intent) {
+        final String receiptId = intent.getStringExtra(KEY_RECEIPT_ID);
+        if (receiptId != null) {
+            eventLogger.logReceivedHeartbeat(receiptId);
+        } else {
+            Logger.w("Note: heartbeat has no receiptId. No analytics event will be logged for receiving this notification.");
+        }
+
     }
 
     // Intended to be overridden by application
