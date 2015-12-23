@@ -186,4 +186,26 @@ public class FakeAnalyticsEventsStorageTest extends AndroidTestCase {
 		assertTrue(uri3.equals(uris4.get(0)) || uri3.equals(uris4.get(1)));
 		assertFalse(uris4.get(0).equals(uris4.get(1)));
 	}
+
+	public void testGetEventsWithType() {
+		EVENT_1.setEventType("A");
+		EVENT_2.setEventType("B");
+		EVENT_3.setEventType("A");
+		final Uri uri1 = storage.saveEvent(EVENT_1);
+		final Uri uri2 = storage.saveEvent(EVENT_2);
+		final Uri uri3 = storage.saveEvent(EVENT_3);
+
+		final List<Uri> uris1 = storage.getEventUrisWithType("Blerg");
+		assertEquals(0, uris1.size());
+
+		final List<Uri> uris2 = storage.getEventUrisWithType("A");
+		assertEquals(2, uris2.size());
+		assertTrue(uri1.equals(uris2.get(0)) || uri1.equals(uris2.get(1)));
+		assertTrue(uri3.equals(uris2.get(0)) || uri3.equals(uris2.get(1)));
+		assertFalse(uris2.get(0).equals(uris2.get(1)));
+
+		final List<Uri> uris3 = storage.getEventUrisWithType("B");
+		assertEquals(1, uris3.size());
+		assertEquals(uri2, uris3.get(0));
+	}
 }

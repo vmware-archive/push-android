@@ -64,7 +64,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
     }
 
     private void startEventService(Context context) {
-        final PrepareDatabaseJob job = new PrepareDatabaseJob();
+        final PrepareDatabaseJob job = new PrepareDatabaseJob(true);
         final Intent intent = AnalyticsEventService.getIntentToRunJob(context, job);
         context.startService(intent);
     }

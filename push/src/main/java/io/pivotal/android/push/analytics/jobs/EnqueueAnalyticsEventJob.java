@@ -3,7 +3,6 @@ package io.pivotal.android.push.analytics.jobs;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-import io.pivotal.android.push.analytics.AnalyticsEventLogger;
 import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 import io.pivotal.android.push.util.Logger;
 
@@ -34,9 +33,8 @@ public class EnqueueAnalyticsEventJob extends BaseJob {
     }
 
     @Override
-    public void run(JobParams jobParams) {
+    public void run(final JobParams jobParams) {
         if (saveEvent(jobParams)) {
-            enableAlarm(jobParams, event);
             sendJobResult(JobResultListener.RESULT_SUCCESS, jobParams);
         } else {
             sendJobResult(EnqueueAnalyticsEventJob.RESULT_COULD_NOT_SAVE_EVENT_TO_STORAGE, jobParams);
@@ -52,18 +50,6 @@ public class EnqueueAnalyticsEventJob extends BaseJob {
         } else {
             return false;
         }
-    }
-
-    private void enableAlarm(JobParams jobParams, AnalyticsEvent event) {
-        if (isHeartbeatEvent(event)) {
-            jobParams.alarmProvider.enableAlarmIfDisabled();
-        } else {
-            jobParams.alarmProvider.enableAlarmImmediatelyIfDisabled();
-        }
-    }
-
-    private boolean isHeartbeatEvent(AnalyticsEvent event) {
-        return (event != null) && (event.getEventType().equalsIgnoreCase(AnalyticsEventLogger.PCF_PUSH_EVENT_TYPE_HEARTBEAT));
     }
 
     @Override

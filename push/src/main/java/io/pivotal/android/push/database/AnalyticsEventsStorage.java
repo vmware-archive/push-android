@@ -32,6 +32,15 @@ public interface AnalyticsEventsStorage {
     public List<Uri> getEventUrisWithStatus(int status);
 
     /**
+     * Gets the list of {@link AnalyticsEvent} URIs from the backing store with
+     * the given type.
+     *
+     * @param eventType   The eventType to be searched for
+     * @return  the list of {@link AnalyticsEvent} {@link Uri} objects currently in the backing store with the given eventType.
+     */
+    public List<Uri> getEventUrisWithType(String eventType);
+
+    /**
      * Gets the {@link AnalyticsEvent} with the given {@link Uri} from the backing store.
      * @param uri  the {@link android.net.Uri} of the {@link AnalyticsEvent} object to read
      * @return  the {@link AnalyticsEvent} object

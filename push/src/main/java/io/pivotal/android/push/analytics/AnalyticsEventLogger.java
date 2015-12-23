@@ -9,6 +9,7 @@ import java.util.Map;
 
 import io.pivotal.android.push.BuildConfig;
 import io.pivotal.android.push.analytics.jobs.EnqueueAnalyticsEventJob;
+import io.pivotal.android.push.analytics.jobs.SendAnalyticsEventsJob;
 import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.service.AnalyticsEventService;
@@ -49,22 +50,6 @@ public class AnalyticsEventLogger {
         this.context = context;
     }
 
-    public void logEvent(String eventType) {
-        logEvent(eventType, null);
-    }
-
-    public void logEvent(String eventType, Map<String, String> fields) {
-        if (preferencesProvider.areAnalyticsEnabled()) {
-            final AnalyticsEvent event = getEvent(eventType, fields);
-            final EnqueueAnalyticsEventJob job = new EnqueueAnalyticsEventJob(event);
-            final Intent intent = AnalyticsEventService.getIntentToRunJob(context, job);
-            serviceStarter.startService(context, intent);
-            Logger.i("Logging analytics event: " + event);
-        } else {
-            Logger.w("Event not logged. Analytics is either not set up or disabled.");
-        }
-    }
-
     public void logReceivedNotification(String receiptId) {
         Map<String, String> fields = new HashMap<>();
         fields.put("receiptId", receiptId);
@@ -87,6 +72,23 @@ public class AnalyticsEventLogger {
         logEvent(PCF_PUSH_EVENT_TYPE_GEOFENCE_LOCATION_TRIGGERED, fields);
     }
 
+    public void logReceivedHeartbeat(String receiptId) {
+        final Map<String, String> fields = new HashMap<>();
+        fields.put("receiptId", receiptId);
+        fields.put("deviceUuid", preferencesProvider.getPCFPushDeviceRegistrationId());
+        logEvent(PCF_PUSH_EVENT_TYPE_HEARTBEAT, fields);
+    }
+
+    public void logEvent(String eventType, Map<String, String> fields) {
+        if (preferencesProvider.areAnalyticsEnabled()) {
+            final AnalyticsEvent event = getEvent(eventType, fields);
+            enqueueAnalyticsEventJob(event);
+            enqueueSendEventsJob();
+        } else {
+            Logger.w("Event not logged. Analytics is either not set up or disabled.");
+        }
+    }
+
     private AnalyticsEvent getEvent(String eventType, Map<String, String> fields) {
         final AnalyticsEvent event = new AnalyticsEvent();
         event.setEventType(eventType);
@@ -100,10 +102,17 @@ public class AnalyticsEventLogger {
         return event;
     }
 
-    public void logReceivedHeartbeat(String receiptId) {
-        Map<String, String> fields = new HashMap<>();
-        fields.put("receiptId", receiptId);
-        fields.put("deviceUuid", preferencesProvider.getPCFPushDeviceRegistrationId());
-        logEvent(PCF_PUSH_EVENT_TYPE_HEARTBEAT, fields);
+    private void enqueueAnalyticsEventJob(AnalyticsEvent event) {
+        Logger.i("Logging analytics event: " + event);
+        final EnqueueAnalyticsEventJob job = new EnqueueAnalyticsEventJob(event);
+        final Intent intent = AnalyticsEventService.getIntentToRunJob(context, job);
+        serviceStarter.startService(context, intent);
+    }
+
+    private void enqueueSendEventsJob() {
+        Logger.i("Enqueueing SendAnalyticsEventsJob.");
+        final SendAnalyticsEventsJob job = new SendAnalyticsEventsJob();
+        final Intent intent = AnalyticsEventService.getIntentToRunJob(context, job);
+        serviceStarter.startService(context, intent);
     }
 }

@@ -129,7 +129,15 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
 
         } catch (Exception e) {
             Logger.ex("PCF Push device registration attempt failed", e);
-            listener.onPCFPushRegistrationFailed(e.getLocalizedMessage());
+            if (e.getLocalizedMessage() != null) {
+                listener.onPCFPushRegistrationFailed(e.getLocalizedMessage());
+            } else {
+                if (e != null) {
+                    listener.onPCFPushRegistrationFailed(e.toString());
+                } else {
+                    listener.onPCFPushRegistrationFailed(null);
+                }
+            }
         }
 
         finally {

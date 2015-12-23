@@ -264,7 +264,7 @@ public class Push {
         if (!wasDatabaseCleanupJobRun) {
 
             // If the process has just been initialized, then run the PrepareDatabaseJob in order to prepare the database
-            final PrepareDatabaseJob job = new PrepareDatabaseJob();
+            final PrepareDatabaseJob job = new PrepareDatabaseJob(true);
             final Intent intent = AnalyticsEventService.getIntentToRunJob(context, job);
             context.startService(intent);
 

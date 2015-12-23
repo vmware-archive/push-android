@@ -26,6 +26,7 @@ import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.receiver.FakeAnalyticsEventsSenderAlarmProvider;
 import io.pivotal.android.push.util.FakeNetworkWrapper;
+import io.pivotal.android.push.util.FakeServiceStarter;
 
 public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventService> {
 
@@ -61,6 +62,7 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
         final FakeAnalyticsEventsStorage eventsStorage = new FakeAnalyticsEventsStorage();
         final FakePCFPushSendAnalyticsApiRequest apiRequest = new FakePCFPushSendAnalyticsApiRequest();
         final FakePCFPushCheckBackEndVersionApiRequest checkBackEndVersionApiRequest = new FakePCFPushCheckBackEndVersionApiRequest();
+        final FakeServiceStarter serviceStarter = new FakeServiceStarter();
 
         pushPreferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null, null, 0, false);
         pushPreferencesProvider.setAreAnalyticsEnabled(true);
@@ -73,6 +75,7 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
 
         AnalyticsEventService.semaphore = new Semaphore(0);
         AnalyticsEventService.networkWrapper = networkWrapper;
+        AnalyticsEventService.serviceStarter = serviceStarter;
         AnalyticsEventService.eventsStorage = eventsStorage;
         AnalyticsEventService.pushPreferencesProvider = pushPreferencesProvider;
         AnalyticsEventService.sendAnalyticsRequestProvider = new PCFPushSendAnalyticsApiRequestProvider(apiRequest);
@@ -87,6 +90,7 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
     protected void tearDown() throws Exception {
         AnalyticsEventService.semaphore = null;
         AnalyticsEventService.networkWrapper = null;
+        AnalyticsEventService.serviceStarter = null;
         AnalyticsEventService.eventsStorage = null;
         AnalyticsEventService.pushPreferencesProvider = null;
         AnalyticsEventService.alarmProvider = null;
@@ -184,7 +188,7 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
         startService(intent);
         AnalyticsEventService.semaphore.acquire();
         assertEquals(2, listOfCompletedJobs.size());
-        Assert.assertEquals(new PrepareDatabaseJob().toString(), listOfCompletedJobs.get(0));
+        Assert.assertEquals(new PrepareDatabaseJob(true).toString(), listOfCompletedJobs.get(0));
         assertEquals(inputJob.toString(), listOfCompletedJobs.get(1));
     }
 

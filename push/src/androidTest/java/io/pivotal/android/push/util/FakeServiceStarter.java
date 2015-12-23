@@ -4,11 +4,14 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class FakeServiceStarter implements ServiceStarter {
 
     private ComponentName componentName;
     private boolean wasStarted;
-    private Intent startedIntent;
+    private List<Intent> startedIntents = new LinkedList<>();
 
     public void setReturnedComponentName(ComponentName componentName) {
         this.componentName = componentName;
@@ -18,14 +21,14 @@ public class FakeServiceStarter implements ServiceStarter {
         return wasStarted;
     }
 
-    public Intent getStartedIntent() {
-        return startedIntent;
+    public List<Intent> getStartedIntents() {
+        return startedIntents;
     }
 
     @Override
     public ComponentName startService(Context context, Intent service) {
         wasStarted = true;
-        startedIntent = service;
+        startedIntents.add(service);
         return componentName;
     }
 }

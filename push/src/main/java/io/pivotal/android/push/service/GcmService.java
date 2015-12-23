@@ -76,7 +76,6 @@ public class GcmService extends IntentService {
         Logger.fd("GcmService has received an event.");
 
         try {
-
             if (intent != null) {
                 initializeDependencies(intent);
                 onReceive(intent);
@@ -267,7 +266,6 @@ public class GcmService extends IntentService {
         } else {
             Logger.w("Note: heartbeat has no receiptId. No analytics event will be logged for receiving this notification.");
         }
-
     }
 
     // Intended to be overridden by application

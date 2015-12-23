@@ -8,7 +8,9 @@ import java.util.HashMap;
 import java.util.Properties;
 
 import io.pivotal.android.push.BuildConfig;
+import io.pivotal.android.push.analytics.jobs.BaseJob;
 import io.pivotal.android.push.analytics.jobs.EnqueueAnalyticsEventJob;
+import io.pivotal.android.push.analytics.jobs.SendAnalyticsEventsJob;
 import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.prefs.Pivotal;
@@ -85,7 +87,7 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
         final AnalyticsEventLogger eventLogger = getEventLoggerWithAnalyticsEnabled();
         eventLogger.logEvent(TEST_EVENT_TYPE, TEST_EVENT_FIELDS);
         assertTrue(serviceStarter.wasStarted());
-        assertEquals(TEST_EVENT_TYPE, getLoggedEvent().getEventType());
+        assertEquals(TEST_EVENT_TYPE, getLoggedEvent(0).getEventType());
     }
 
     public void testLogEventDataAnalyticsDisabled() {
@@ -98,53 +100,68 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
         final AnalyticsEventLogger eventLogger = getEventLoggerWithAnalyticsEnabled();
         eventLogger.logReceivedNotification(TEST_EVENT_RECEIPT_ID_VALUE);
         assertTrue(serviceStarter.wasStarted());
-        assertEquals(AnalyticsEventLogger.PCF_PUSH_EVENT_TYPE_PUSH_NOTIFICATION_RECEIVED, getLoggedEvent().getEventType());
-        assertEquals(TEST_EVENT_RECEIPT_ID_VALUE, getLoggedEvent().getReceiptId());
-        assertEquals(TEST_EVENT_DEVICE_UUID_VALUE, getLoggedEvent().getDeviceUuid());
-        assertEquals(BuildConfig.VERSION_NAME, getLoggedEvent().getSdkVersion());
-        assertNull(getLoggedEvent().getGeofenceId());
-        assertNull(getLoggedEvent().getLocationId());
-        assertNotNull(getLoggedEvent().getEventTime());
+        assertNumberOfServiceIntents(2);
+        assertEquals(AnalyticsEventLogger.PCF_PUSH_EVENT_TYPE_PUSH_NOTIFICATION_RECEIVED, getLoggedEvent(0).getEventType());
+        assertEquals(TEST_EVENT_RECEIPT_ID_VALUE, getLoggedEvent(0).getReceiptId());
+        assertEquals(TEST_EVENT_DEVICE_UUID_VALUE, getLoggedEvent(0).getDeviceUuid());
+        assertEquals(BuildConfig.VERSION_NAME, getLoggedEvent(0).getSdkVersion());
+        assertNull(getLoggedEvent(0).getGeofenceId());
+        assertNull(getLoggedEvent(0).getLocationId());
+        assertNotNull(getLoggedEvent(0).getEventTime());
+        assertTrue(getJob(0) instanceof EnqueueAnalyticsEventJob);
+        assertTrue(getJob(1) instanceof SendAnalyticsEventsJob);
     }
 
     public void testLogEventNotificationOpened() {
         final AnalyticsEventLogger eventLogger = getEventLoggerWithAnalyticsEnabled();
         eventLogger.logOpenedNotification(TEST_EVENT_RECEIPT_ID_VALUE);
         assertTrue(serviceStarter.wasStarted());
-        assertEquals(AnalyticsEventLogger.PCF_PUSH_EVENT_TYPE_PUSH_NOTIFICATION_OPENED, getLoggedEvent().getEventType());
-        assertEquals(TEST_EVENT_RECEIPT_ID_VALUE, getLoggedEvent().getReceiptId());
-        assertEquals(TEST_EVENT_DEVICE_UUID_VALUE, getLoggedEvent().getDeviceUuid());
-        assertEquals(BuildConfig.VERSION_NAME, getLoggedEvent().getSdkVersion());
-        assertNull(getLoggedEvent().getGeofenceId());
-        assertNull(getLoggedEvent().getLocationId());
-        assertNotNull(getLoggedEvent().getEventTime());
+        assertNumberOfServiceIntents(2);
+        assertEquals(AnalyticsEventLogger.PCF_PUSH_EVENT_TYPE_PUSH_NOTIFICATION_OPENED, getLoggedEvent(0).getEventType());
+        assertEquals(TEST_EVENT_RECEIPT_ID_VALUE, getLoggedEvent(0).getReceiptId());
+        assertEquals(TEST_EVENT_DEVICE_UUID_VALUE, getLoggedEvent(0).getDeviceUuid());
+        assertEquals(BuildConfig.VERSION_NAME, getLoggedEvent(0).getSdkVersion());
+        assertNull(getLoggedEvent(0).getGeofenceId());
+        assertNull(getLoggedEvent(0).getLocationId());
+        assertNotNull(getLoggedEvent(0).getEventTime());
+        assertTrue(getJob(0) instanceof EnqueueAnalyticsEventJob);
+        assertTrue(getJob(1) instanceof SendAnalyticsEventsJob);
     }
 
     public void testLogEventGeofenceTriggered() {
         final AnalyticsEventLogger eventLogger = getEventLoggerWithAnalyticsEnabled();
         eventLogger.logGeofenceTriggered("57", "1337");
         assertTrue(serviceStarter.wasStarted());
-        assertEquals(AnalyticsEventLogger.PCF_PUSH_EVENT_TYPE_GEOFENCE_LOCATION_TRIGGERED, getLoggedEvent().getEventType());
-        assertEquals(TEST_EVENT_DEVICE_UUID_VALUE, getLoggedEvent().getDeviceUuid());
-        assertEquals("57", getLoggedEvent().getGeofenceId());
-        assertEquals("1337", getLoggedEvent().getLocationId());
-        assertEquals(BuildConfig.VERSION_NAME, getLoggedEvent().getSdkVersion());
-        assertNull(getLoggedEvent().getReceiptId());
-        assertNotNull(getLoggedEvent().getEventTime());
+        assertEquals(AnalyticsEventLogger.PCF_PUSH_EVENT_TYPE_GEOFENCE_LOCATION_TRIGGERED, getLoggedEvent(0).getEventType());
+        assertNumberOfServiceIntents(2);
+        assertEquals(TEST_EVENT_DEVICE_UUID_VALUE, getLoggedEvent(0).getDeviceUuid());
+        assertEquals("57", getLoggedEvent(0).getGeofenceId());
+        assertEquals("1337", getLoggedEvent(0).getLocationId());
+        assertEquals(BuildConfig.VERSION_NAME, getLoggedEvent(0).getSdkVersion());
+        assertNull(getLoggedEvent(0).getReceiptId());
+        assertNotNull(getLoggedEvent(0).getEventTime());
+        assertTrue(getJob(0) instanceof EnqueueAnalyticsEventJob);
+        assertTrue(getJob(1) instanceof SendAnalyticsEventsJob);
     }
 
     public void testLogHeartbeatEvent() {
         final AnalyticsEventLogger eventLogger = getEventLoggerWithAnalyticsEnabled();
         eventLogger.logReceivedHeartbeat(TEST_EVENT_RECEIPT_ID_VALUE);
         assertTrue(serviceStarter.wasStarted());
-        assertEquals(AnalyticsEventLogger.PCF_PUSH_EVENT_TYPE_HEARTBEAT, getLoggedEvent().getEventType());
-        assertEquals(TEST_EVENT_RECEIPT_ID_VALUE, getLoggedEvent().getReceiptId());
-        assertEquals(TEST_EVENT_DEVICE_UUID_VALUE, getLoggedEvent().getDeviceUuid());
-        assertEquals(BuildConfig.VERSION_NAME, getLoggedEvent().getSdkVersion());
-        assertNull(getLoggedEvent().getGeofenceId());
-        assertNull(getLoggedEvent().getLocationId());
-        assertNotNull(getLoggedEvent().getEventTime());
-        assertEquals(AnalyticsEventLogger.PCF_PUSH_EVENT_TYPE_HEARTBEAT, getLoggedEvent().getEventType());
+        assertNumberOfServiceIntents(2);
+        assertEquals(AnalyticsEventLogger.PCF_PUSH_EVENT_TYPE_HEARTBEAT, getLoggedEvent(0).getEventType());
+        assertEquals(TEST_EVENT_RECEIPT_ID_VALUE, getLoggedEvent(0).getReceiptId());
+        assertEquals(TEST_EVENT_DEVICE_UUID_VALUE, getLoggedEvent(0).getDeviceUuid());
+        assertEquals(BuildConfig.VERSION_NAME, getLoggedEvent(0).getSdkVersion());
+        assertNull(getLoggedEvent(0).getGeofenceId());
+        assertNull(getLoggedEvent(0).getLocationId());
+        assertNotNull(getLoggedEvent(0).getEventTime());
+        assertTrue(getJob(0) instanceof EnqueueAnalyticsEventJob);
+        assertTrue(getJob(1) instanceof SendAnalyticsEventsJob);
+    }
+
+    private void assertNumberOfServiceIntents(int expected) {
+        assertEquals(expected, serviceStarter.getStartedIntents().size());
     }
 
     private AnalyticsEventLogger getEventLoggerWithAnalyticsDisabled() {
@@ -157,10 +174,18 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
         return new AnalyticsEventLogger(serviceStarter, preferencesProvider, getContext());
     }
 
-    private AnalyticsEvent getLoggedEvent() {
-        final Intent intent = serviceStarter.getStartedIntent();
-        final EnqueueAnalyticsEventJob job = intent.getParcelableExtra(AnalyticsEventService.KEY_JOB);
+    private AnalyticsEvent getLoggedEvent(int intentNumber) {
+        final EnqueueAnalyticsEventJob job = getJob(intentNumber);
         return job.getEvent();
+    }
+
+    private <T extends BaseJob> T getJob(int intentNumber) {
+        final Intent intent = getServiceIntent(intentNumber);
+        return intent.getParcelableExtra(AnalyticsEventService.KEY_JOB);
+    }
+
+    private Intent getServiceIntent(int intentNumber) {
+        return serviceStarter.getStartedIntents().get(intentNumber);
     }
 
     private Properties getProperties(boolean areAnalyticsEnabled) {

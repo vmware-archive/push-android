@@ -24,7 +24,6 @@ public class EnqueueAnalyticsEventJobTest extends JobTest {
 
         // Setup environment
         Assert.assertEquals(0, eventsStorage.getNumberOfEvents());
-        assertFalse(alarmProvider.isAlarmEnabled());
 
         // Run job
         final EnqueueAnalyticsEventJob job = new EnqueueAnalyticsEventJob(event1);
@@ -45,16 +44,12 @@ public class EnqueueAnalyticsEventJobTest extends JobTest {
         assertEquals(1, uris.size());
         final AnalyticsEvent savedEvent = eventsStorage.readEvent(uris.get(0));
         assertEquals(event1, savedEvent);
-
-        // Ensure alarm was enabled
-        assertTrue(alarmProvider.isAlarmEnabled());
     }
 
     public void testEnqueuesHeartbeat() throws InterruptedException {
 
         // Setup environment
         Assert.assertEquals(0, eventsStorage.getNumberOfEvents());
-        assertFalse(alarmProvider.isAlarmEnabled());
 
         // Run job
         final EnqueueAnalyticsEventJob job = new EnqueueAnalyticsEventJob(heartbeatEvent);
@@ -75,9 +70,6 @@ public class EnqueueAnalyticsEventJobTest extends JobTest {
         assertEquals(1, uris.size());
         final AnalyticsEvent savedEvent = eventsStorage.readEvent(uris.get(0));
         assertEquals(heartbeatEvent, savedEvent);
-
-        // Ensure alarm was enabled
-        assertTrue(alarmProvider.isAlarmEnabledImmediately());
     }
 
     public void testSaveFails() throws InterruptedException {
@@ -85,7 +77,6 @@ public class EnqueueAnalyticsEventJobTest extends JobTest {
         // Setup environment
         eventsStorage.setWillSaveFail(true);
         Assert.assertEquals(0, eventsStorage.getNumberOfEvents());
-        assertFalse(alarmProvider.isAlarmEnabled());
 
         // Run job
         final EnqueueAnalyticsEventJob job = new EnqueueAnalyticsEventJob(event1);
@@ -102,9 +93,6 @@ public class EnqueueAnalyticsEventJobTest extends JobTest {
 
         // Ensure event did not made it into the database
         Assert.assertEquals(0, eventsStorage.getNumberOfEvents());
-
-        // Ensure alarm was not enabled
-        assertFalse(alarmProvider.isAlarmEnabled());
     }
 
     public void testEquals() {

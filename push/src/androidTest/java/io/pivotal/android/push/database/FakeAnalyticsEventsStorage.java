@@ -17,7 +17,7 @@ public class FakeAnalyticsEventsStorage implements AnalyticsEventsStorage {
     private boolean willSaveFail;
 
     public FakeAnalyticsEventsStorage() {
-        events = new HashMap<Uri, AnalyticsEvent>();
+        events = new HashMap<>();
     }
 
     public void setWillSaveFail(boolean willSaveFail) {
@@ -45,7 +45,7 @@ public class FakeAnalyticsEventsStorage implements AnalyticsEventsStorage {
      */
     @Override
     public List<Uri> getEventUris() {
-        return new LinkedList<Uri>(events.keySet());
+        return new LinkedList<>(events.keySet());
     }
 
     /**
@@ -55,8 +55,20 @@ public class FakeAnalyticsEventsStorage implements AnalyticsEventsStorage {
      */
     @Override
     public List<Uri> getEventUrisWithStatus(int status) {
-        final List<Uri> result = new LinkedList<Uri>();
+        final List<Uri> result = new LinkedList<>();
         getEventUrisWithStatusForEventType(status, result);
+        return result;
+    }
+
+    @Override
+    public List<Uri> getEventUrisWithType(String eventType) {
+        final List<Uri> result = new LinkedList<>();
+        for (final Uri uri : events.keySet()) {
+            final AnalyticsEvent event = events.get(uri);
+            if (event.getEventType().equalsIgnoreCase(eventType)) {
+                result.add(uri);
+            }
+        }
         return result;
     }
 

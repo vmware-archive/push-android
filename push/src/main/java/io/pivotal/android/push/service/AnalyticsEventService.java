@@ -10,9 +10,11 @@ import java.util.concurrent.Semaphore;
 
 import io.pivotal.android.push.analytics.jobs.BaseJob;
 import io.pivotal.android.push.analytics.jobs.CheckBackEndVersionJob;
+import io.pivotal.android.push.analytics.jobs.EnqueueAnalyticsEventJob;
 import io.pivotal.android.push.analytics.jobs.JobParams;
 import io.pivotal.android.push.analytics.jobs.JobResultListener;
 import io.pivotal.android.push.analytics.jobs.PrepareDatabaseJob;
+import io.pivotal.android.push.analytics.jobs.SendAnalyticsEventsJob;
 import io.pivotal.android.push.backend.analytics.PCFPushCheckBackEndVersionApiRequestImpl;
 import io.pivotal.android.push.backend.analytics.PCFPushCheckBackEndVersionApiRequestProvider;
 import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsApiRequestImpl;
@@ -29,6 +31,8 @@ import io.pivotal.android.push.receiver.AnalyticsEventsSenderAlarmReceiver;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.NetworkWrapper;
 import io.pivotal.android.push.util.NetworkWrapperImpl;
+import io.pivotal.android.push.util.ServiceStarter;
+import io.pivotal.android.push.util.ServiceStarterImpl;
 import io.pivotal.android.push.util.TimeProvider;
 
 public class AnalyticsEventService extends IntentService {
@@ -45,6 +49,7 @@ public class AnalyticsEventService extends IntentService {
     /* package */ static AnalyticsEventsStorage eventsStorage = null;
     /* package */ static TimeProvider timeProvider;
     /* package */ static NetworkWrapper networkWrapper = null;
+    /* package */ static ServiceStarter serviceStarter = null;
     /* package */ static AnalyticsEventsSenderAlarmProvider alarmProvider = null;
     /* package */ static PCFPushSendAnalyticsApiRequestProvider sendAnalyticsRequestProvider = null;
     /* package */ static PCFPushCheckBackEndVersionApiRequestProvider checkBackEndVersionRequestProvider = null;
@@ -115,6 +120,9 @@ public class AnalyticsEventService extends IntentService {
         if (AnalyticsEventService.networkWrapper == null) {
             AnalyticsEventService.networkWrapper = new NetworkWrapperImpl();
         }
+        if (AnalyticsEventService.serviceStarter == null) {
+            AnalyticsEventService.serviceStarter = new ServiceStarterImpl();
+        }
         if (AnalyticsEventService.sendAnalyticsRequestProvider == null) {
             final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(this, AnalyticsEventService.eventsStorage, AnalyticsEventService.pushPreferencesProvider, AnalyticsEventService.networkWrapper);
             AnalyticsEventService.sendAnalyticsRequestProvider = new PCFPushSendAnalyticsApiRequestProvider(request);
@@ -125,7 +133,9 @@ public class AnalyticsEventService extends IntentService {
         }
 
         if (!isIntentForSetup(intent) && needToCleanDatabase) {
-            cleanDatabase();
+            Logger.i("Instantiating database.");
+            final BaseJob referringJob = getJobFromIntent(intent);
+            cleanDatabase(referringJob);
         }
     }
 
@@ -143,8 +153,9 @@ public class AnalyticsEventService extends IntentService {
         return wasDatabaseInstanceCreated;
     }
 
-    private void cleanDatabase() {
-        final PrepareDatabaseJob job = new PrepareDatabaseJob();
+    private void cleanDatabase(final BaseJob referringJob) {
+        final boolean canSendEvents = !(referringJob instanceof EnqueueAnalyticsEventJob) && !(referringJob instanceof SendAnalyticsEventsJob);
+        final PrepareDatabaseJob job = new PrepareDatabaseJob(canSendEvents);
         runJob(job, null); // no result receiver used in this hard-coded job
     }
 
@@ -214,6 +225,7 @@ public class AnalyticsEventService extends IntentService {
                 listener,
                 AnalyticsEventService.timeProvider,
                 AnalyticsEventService.networkWrapper,
+                AnalyticsEventService.serviceStarter,
                 AnalyticsEventService.eventsStorage,
                 AnalyticsEventService.pushPreferencesProvider,
                 AnalyticsEventService.alarmProvider,
@@ -261,6 +273,7 @@ public class AnalyticsEventService extends IntentService {
         AnalyticsEventService.eventsStorage = null;
         AnalyticsEventService.alarmProvider = null;
         AnalyticsEventService.networkWrapper = null;
+        AnalyticsEventService.serviceStarter = null;
         AnalyticsEventService.pushPreferencesProvider = null;
         AnalyticsEventService.sendAnalyticsRequestProvider = null;
         AnalyticsEventService.checkBackEndVersionRequestProvider = null;

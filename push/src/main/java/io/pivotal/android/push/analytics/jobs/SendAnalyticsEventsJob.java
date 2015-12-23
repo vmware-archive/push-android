@@ -58,6 +58,7 @@ public class SendAnalyticsEventsJob extends BaseJob {
             @Override
             public void onBackEndSendEventsFailed(String reason) {
                 setStatusForEvents(jobParams, uris, AnalyticsEvent.Status.POSTING_ERROR);
+                jobParams.alarmProvider.enableAlarmIfDisabled();
                 sendJobResult(RESULT_FAILED_TO_SEND_RECEIPTS, jobParams);
             }
         });

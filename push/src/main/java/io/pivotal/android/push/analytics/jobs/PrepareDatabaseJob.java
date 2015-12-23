@@ -1,5 +1,6 @@
 package io.pivotal.android.push.analytics.jobs;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -7,18 +8,24 @@ import android.os.Parcelable;
 import java.util.List;
 
 import io.pivotal.android.push.model.analytics.AnalyticsEvent;
+import io.pivotal.android.push.service.AnalyticsEventService;
 import io.pivotal.android.push.util.Logger;
 
 public class PrepareDatabaseJob extends BaseJob {
 
-    public PrepareDatabaseJob() {
+    private boolean canSendEvents;
+
+    public PrepareDatabaseJob(boolean canSendEvents) {
         super();
+        this.canSendEvents = canSendEvents;
     }
 
     @Override
     public void run(JobParams jobParams) {
         cleanupDatabase(jobParams);
-        enableAlarmIfRequired(jobParams);
+        if (canSendEvents) {
+            sendEventsIfRequired(jobParams);
+        }
         jobParams.listener.onJobComplete(JobResultListener.RESULT_SUCCESS);
     }
 
@@ -51,17 +58,23 @@ public class PrepareDatabaseJob extends BaseJob {
         return uris.size();
     }
 
-    private void enableAlarmIfRequired(JobParams jobParams) {
+    private void sendEventsIfRequired(JobParams jobParams) {
         int numberOfPendingMessageReceipts = 0;
         numberOfPendingMessageReceipts += jobParams.eventsStorage.getEventUrisWithStatus(AnalyticsEvent.Status.NOT_POSTED).size();
         numberOfPendingMessageReceipts += jobParams.eventsStorage.getEventUrisWithStatus(AnalyticsEvent.Status.POSTING_ERROR).size();
         if (numberOfPendingMessageReceipts > 0) {
-            Logger.fd("PrepareDatabaseJob: There are %d events(s) queued for sending. Enabling alarm.", numberOfPendingMessageReceipts);
-            jobParams.alarmProvider.enableAlarmIfDisabled();
+            Logger.fd("PrepareDatabaseJob: There are %d events(s) queued for sending. Enqueueing SendAnalyticsEventsJob.", numberOfPendingMessageReceipts);
+            enqueueSendEventsJob(jobParams);
         } else {
             Logger.d("PrepareDatabaseJob: There are no events queued for sending. Disabling alarm.");
             jobParams.alarmProvider.disableAlarm();
         }
+    }
+
+    private void enqueueSendEventsJob(JobParams jobParams) {
+        final SendAnalyticsEventsJob job = new SendAnalyticsEventsJob();
+        final Intent intent = AnalyticsEventService.getIntentToRunJob(jobParams.context, job);
+        jobParams.serviceStarter.startService(jobParams.context, intent);
     }
 
     @Override
@@ -72,7 +85,7 @@ public class PrepareDatabaseJob extends BaseJob {
         if (!(o instanceof PrepareDatabaseJob)) {
             return false;
         }
-        return true;
+        return canSendEvents == ((PrepareDatabaseJob) o).canSendEvents;
     }
 
     // Parcelable stuff
@@ -90,10 +103,12 @@ public class PrepareDatabaseJob extends BaseJob {
 
     private PrepareDatabaseJob(Parcel in) {
         super(in);
+        canSendEvents = in.readInt() != 0;
     }
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
         super.writeToParcel(out, flags);
+        out.writeInt(canSendEvents ? 1 : 0);
     }
 }

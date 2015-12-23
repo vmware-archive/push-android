@@ -20,6 +20,7 @@ import io.pivotal.android.push.model.analytics.AnalyticsEventTest;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.receiver.FakeAnalyticsEventsSenderAlarmProvider;
 import io.pivotal.android.push.util.FakeNetworkWrapper;
+import io.pivotal.android.push.util.FakeServiceStarter;
 import io.pivotal.android.push.util.TimeProvider;
 
 import static org.mockito.Mockito.mock;
@@ -34,6 +35,7 @@ public abstract class JobTest extends AndroidTestCase {
     protected FakeAnalyticsEventsStorage eventsStorage;
     protected TimeProvider timeProvider;
     protected FakeNetworkWrapper networkWrapper;
+    protected FakeServiceStarter serviceStarter;
     protected FakePushPreferencesProvider preferencesProvider;
     protected FakeAnalyticsEventsSenderAlarmProvider alarmProvider;
     protected FakePCFPushSendAnalyticsApiRequest sendAnalyticsApiRequest;
@@ -52,6 +54,7 @@ public abstract class JobTest extends AndroidTestCase {
         eventsStorage = new FakeAnalyticsEventsStorage();
         timeProvider = mock(TimeProvider.class);
         networkWrapper = new FakeNetworkWrapper();
+        serviceStarter = new FakeServiceStarter();
         alarmProvider = new FakeAnalyticsEventsSenderAlarmProvider();
         preferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, TEST_SERVICE_URL, null, 0, false);
         sendAnalyticsApiRequest = new FakePCFPushSendAnalyticsApiRequest();
@@ -61,7 +64,7 @@ public abstract class JobTest extends AndroidTestCase {
     }
 
     protected JobParams getJobParams(JobResultListener listener) {
-        return new JobParams(getContext(), listener, timeProvider, networkWrapper, eventsStorage, preferencesProvider, alarmProvider, sendAnalyticsApiRequestProvider, checkBackEndVersionRequestProvider);
+        return new JobParams(getContext(), listener, timeProvider, networkWrapper, serviceStarter, eventsStorage, preferencesProvider, alarmProvider, sendAnalyticsApiRequestProvider, checkBackEndVersionRequestProvider);
     }
 
     protected Uri saveEventWithStatus(int status) {

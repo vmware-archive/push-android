@@ -31,6 +31,11 @@ public class DatabaseAnalyticsEventsStorage implements AnalyticsEventsStorage {
         return getGeneralQuery(null, "status = ?", new String[] { String.valueOf(status) }, null);
 	}
 
+	@Override
+	public List<Uri> getEventUrisWithType(String eventType) {
+		return getGeneralQuery(null, "eventType = ?", new String[] { eventType }, null);
+	}
+
 	private List<Uri> getGeneralQuery(String[] projection, String selection, String[] selectionArgs, String sortOrder) {
 		Cursor cursor = null;
 		try {
@@ -44,7 +49,7 @@ public class DatabaseAnalyticsEventsStorage implements AnalyticsEventsStorage {
 	}
 
 	private List<Uri> getEventUrisFromCursor(final Cursor cursor) {
-		final List<Uri> uris = new LinkedList<Uri>();
+		final List<Uri> uris = new LinkedList<>();
 		if (cursor != null) {
 			for (cursor.moveToFirst(); !cursor.isAfterLast(); cursor.moveToNext()) {
 				final int id = AnalyticsEvent.getRowIdFromCursor(cursor);
