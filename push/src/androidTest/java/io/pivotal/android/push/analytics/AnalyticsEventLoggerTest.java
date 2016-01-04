@@ -28,6 +28,7 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
     private static final String TEST_EVENT_DEVICE_UUID_VALUE = "SOME_DEVICE_UUID";
     private static final String TEST_EVENT_GEOFENCE_ID_VALUE = "SOME_GEOFENCE_ID";
     private static final String TEST_EVENT_LOCATION_ID_VALUE = "SOME_LOCATION_ID";
+    private static final String TEST_EVENT_PLATFORM_UUID_VALUE = "SOME-PLATFORM-UUID-VALUE";
     private static HashMap<String, String> TEST_EVENT_FIELDS;
 
     private FakeServiceStarter serviceStarter;
@@ -46,7 +47,7 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
         super.setUp();
         serviceStarter = new FakeServiceStarter();
         serviceStarter.setReturnedComponentName(new ComponentName(getContext(), AnalyticsEventService.class));
-        preferencesProvider = new FakePushPreferencesProvider(null, TEST_EVENT_DEVICE_UUID_VALUE, 0, null, null, null, null, null, null, null, 0, false);
+        preferencesProvider = new FakePushPreferencesProvider(null, TEST_EVENT_DEVICE_UUID_VALUE, 0, null, TEST_EVENT_PLATFORM_UUID_VALUE, null, null, null, null, null, 0, false);
         preferencesProvider.setAreAnalyticsEnabled(true);
     }
 
@@ -105,6 +106,8 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
         assertEquals(TEST_EVENT_RECEIPT_ID_VALUE, getLoggedEvent(0).getReceiptId());
         assertEquals(TEST_EVENT_DEVICE_UUID_VALUE, getLoggedEvent(0).getDeviceUuid());
         assertEquals(BuildConfig.VERSION_NAME, getLoggedEvent(0).getSdkVersion());
+        assertEquals("android", getLoggedEvent(0).getPlatformType());
+        assertEquals(TEST_EVENT_PLATFORM_UUID_VALUE, getLoggedEvent(0).getPlatformUuid());
         assertNull(getLoggedEvent(0).getGeofenceId());
         assertNull(getLoggedEvent(0).getLocationId());
         assertNotNull(getLoggedEvent(0).getEventTime());
@@ -121,6 +124,8 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
         assertEquals(TEST_EVENT_RECEIPT_ID_VALUE, getLoggedEvent(0).getReceiptId());
         assertEquals(TEST_EVENT_DEVICE_UUID_VALUE, getLoggedEvent(0).getDeviceUuid());
         assertEquals(BuildConfig.VERSION_NAME, getLoggedEvent(0).getSdkVersion());
+        assertEquals("android", getLoggedEvent(0).getPlatformType());
+        assertEquals(TEST_EVENT_PLATFORM_UUID_VALUE, getLoggedEvent(0).getPlatformUuid());
         assertNull(getLoggedEvent(0).getGeofenceId());
         assertNull(getLoggedEvent(0).getLocationId());
         assertNotNull(getLoggedEvent(0).getEventTime());
@@ -138,6 +143,8 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
         assertEquals("57", getLoggedEvent(0).getGeofenceId());
         assertEquals("1337", getLoggedEvent(0).getLocationId());
         assertEquals(BuildConfig.VERSION_NAME, getLoggedEvent(0).getSdkVersion());
+        assertEquals("android", getLoggedEvent(0).getPlatformType());
+        assertEquals(TEST_EVENT_PLATFORM_UUID_VALUE, getLoggedEvent(0).getPlatformUuid());
         assertNull(getLoggedEvent(0).getReceiptId());
         assertNotNull(getLoggedEvent(0).getEventTime());
         assertTrue(getJob(0) instanceof EnqueueAnalyticsEventJob);
@@ -153,6 +160,8 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
         assertEquals(TEST_EVENT_RECEIPT_ID_VALUE, getLoggedEvent(0).getReceiptId());
         assertEquals(TEST_EVENT_DEVICE_UUID_VALUE, getLoggedEvent(0).getDeviceUuid());
         assertEquals(BuildConfig.VERSION_NAME, getLoggedEvent(0).getSdkVersion());
+        assertEquals("android", getLoggedEvent(0).getPlatformType());
+        assertEquals(TEST_EVENT_PLATFORM_UUID_VALUE, getLoggedEvent(0).getPlatformUuid());
         assertNull(getLoggedEvent(0).getGeofenceId());
         assertNull(getLoggedEvent(0).getLocationId());
         assertNotNull(getLoggedEvent(0).getEventTime());

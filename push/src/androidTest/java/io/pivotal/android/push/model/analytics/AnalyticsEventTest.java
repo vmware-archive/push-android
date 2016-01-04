@@ -183,11 +183,23 @@ public class AnalyticsEventTest extends AndroidTestCase {
         assertNull(str);
     }
 
+    public void testMigrationCommands() {
+        assertEquals(0, AnalyticsEvent.getDatabaseMigrationCommands(1, 1).size());
+        assertEquals(0, AnalyticsEvent.getDatabaseMigrationCommands(2, 2).size());
+        assertEquals(0, AnalyticsEvent.getDatabaseMigrationCommands(3, 3).size());
+        assertEquals(1, AnalyticsEvent.getDatabaseMigrationCommands(1, 2).size());
+        assertEquals(2, AnalyticsEvent.getDatabaseMigrationCommands(2, 3).size());
+        assertEquals(3, AnalyticsEvent.getDatabaseMigrationCommands(1, 3).size());
+    }
+
     public static AnalyticsEvent getEvent1() {
         final AnalyticsEvent event = new AnalyticsEvent();
         event.setReceiptId(TEST_RECEIPT_ID_1);
         event.setEventTime(getTestDate1());
         event.setEventType(DummyEvent.EVENT_TYPE);
+        event.setPlatformType("android");
+        event.setPlatformUuid("111-222-333");
+        event.setSdkVersion("1.0");
         return event;
     }
 
@@ -196,6 +208,9 @@ public class AnalyticsEventTest extends AndroidTestCase {
         event.setReceiptId(TEST_RECEIPT_ID_2);
         event.setEventTime(getTestDate1());
         event.setEventType(SOME_OTHER_EVENT_TYPE);
+        event.setPlatformType("android");
+        event.setPlatformUuid("222-333-444");
+        event.setSdkVersion("2.0");
         return event;
     }
 
@@ -204,6 +219,9 @@ public class AnalyticsEventTest extends AndroidTestCase {
         event.setReceiptId(TEST_RECEIPT_ID_3);
         event.setEventTime(getTestDate2());
         event.setEventType(TEST_EVENT_TYPE_3);
+        event.setPlatformType("android");
+        event.setPlatformUuid("333-444-555");
+        event.setSdkVersion("3.0");
         return event;
     }
 

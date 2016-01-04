@@ -17,7 +17,7 @@ public class DatabaseAnalyticsEventsStorage implements AnalyticsEventsStorage {
 
 	@Override
 	public Uri saveEvent(AnalyticsEvent event) {
-		final ContentValues contentValues = event.getContentValues();
+		final ContentValues contentValues = event.getContentValues(Database.DATABASE_VERSION);
 		final Uri uri = DatabaseWrapper.insert(Database.EVENTS_CONTENT_URI, contentValues);
 		return uri;
 	}

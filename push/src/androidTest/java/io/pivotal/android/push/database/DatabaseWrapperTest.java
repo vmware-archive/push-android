@@ -116,7 +116,7 @@ public class DatabaseWrapperTest extends AndroidTestCase {
 		assertFalse(EVENT_1.getStatus() == event.getStatus());
 
 		// Update the Event in the table
-		final int rowsAffected = DatabaseWrapper.update(uri, event.getContentValues(), null, null);
+		final int rowsAffected = DatabaseWrapper.update(uri, event.getContentValues(Database.DATABASE_VERSION), null, null);
 		assertEquals(1, rowsAffected);
 
 		// Read the Event back and verify that it was updated
@@ -136,7 +136,7 @@ public class DatabaseWrapperTest extends AndroidTestCase {
 		assertFalse(EVENT_1.equals(EVENT_2));
 
 		// Update them all at once
-		final int rowsAffected = DatabaseWrapper.update(Database.EVENTS_CONTENT_URI, EVENT_2.getContentValues(), null, null);
+		final int rowsAffected = DatabaseWrapper.update(Database.EVENTS_CONTENT_URI, EVENT_2.getContentValues(Database.DATABASE_VERSION), null, null);
 		assertEquals(3, rowsAffected);
 
 		// Read them all back and verify they were updated
@@ -174,7 +174,7 @@ public class DatabaseWrapperTest extends AndroidTestCase {
 		assertEquals(EVENT_1, event1);
 		event1.setStatus(AnalyticsEvent.Status.POSTED);
 		assertFalse(EVENT_1.getStatus() == event1.getStatus());
-		final int rowsAffected1 = DatabaseWrapper.update(uri1, event1.getContentValues(), null, null);
+		final int rowsAffected1 = DatabaseWrapper.update(uri1, event1.getContentValues(Database.DATABASE_VERSION), null, null);
 		assertEquals(1, rowsAffected1);
 
 		// Assert that the update record was modified correctly after reading back
@@ -245,7 +245,7 @@ public class DatabaseWrapperTest extends AndroidTestCase {
 	}
 
 	private Uri insertEvent(AnalyticsEvent event) {
-		final Uri uri = DatabaseWrapper.insert(Database.EVENTS_CONTENT_URI, event.getContentValues());
+		final Uri uri = DatabaseWrapper.insert(Database.EVENTS_CONTENT_URI, event.getContentValues(Database.DATABASE_VERSION));
 		assertNotNull(uri);
 		return uri;
 	}
@@ -264,13 +264,13 @@ public class DatabaseWrapperTest extends AndroidTestCase {
 	}
 
 	public void testBadInsert() {
-		ContentValues values = EVENT_1.getContentValues();
+		ContentValues values = EVENT_1.getContentValues(Database.DATABASE_VERSION);
 		values.put(BaseColumns._ID, "THIS AIN'T NO ID");
 		assertNull(DatabaseWrapper.insert(Database.EVENTS_CONTENT_URI, values));
 	}
 
 	public void testBadUpdate() {
-		ContentValues values = EVENT_1.getContentValues();
+		ContentValues values = EVENT_1.getContentValues(Database.DATABASE_VERSION);
 		final Uri uri = DatabaseWrapper.insert(Database.EVENTS_CONTENT_URI, values);
 		assertNotNull(uri);
 		values.put(BaseColumns._ID, "THIS AIN'T NO ID");

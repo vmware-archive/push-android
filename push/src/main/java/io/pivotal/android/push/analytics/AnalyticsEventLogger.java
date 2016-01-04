@@ -98,6 +98,8 @@ public class AnalyticsEventLogger {
         event.setGeofenceId(fields.get("geofenceId"));
         event.setLocationId(fields.get("locationId"));
         event.setSdkVersion(BuildConfig.VERSION_NAME);
+        event.setPlatformType("android");
+        event.setPlatformUuid(preferencesProvider.getPlatformUuid());
         event.setStatus(AnalyticsEvent.Status.NOT_POSTED);
         return event;
     }

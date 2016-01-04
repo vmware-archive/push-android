@@ -11,7 +11,9 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 
 import io.pivotal.android.push.database.Database;
@@ -27,6 +29,8 @@ public class AnalyticsEvent implements Parcelable {
         public static final String LOCATION_ID = "locationId";
         public static final String STATUS = "status";
         public static final String SDK_VERSION = "sdkVersion";
+        public static final String PLATFORM_TYPE = "platformType";
+        public static final String PLATFORM_UUID = "platformUuid";
     }
 
     public static class Status {
@@ -73,6 +77,12 @@ public class AnalyticsEvent implements Parcelable {
 
     @SerializedName(Columns.SDK_VERSION)
     private String sdkVersion;
+
+    @SerializedName(Columns.PLATFORM_TYPE)
+    private String platformType;
+
+    @SerializedName(Columns.PLATFORM_UUID)
+    private String platformUuid;
 
     public AnalyticsEvent() {
     }
@@ -129,6 +139,16 @@ public class AnalyticsEvent implements Parcelable {
         if (columnIndex >= 0) {
             setSdkVersion(cursor.getString(columnIndex));
         }
+
+        columnIndex = cursor.getColumnIndex(Columns.PLATFORM_TYPE);
+        if (columnIndex >= 0) {
+            setPlatformType(cursor.getString(columnIndex));
+        }
+
+        columnIndex = cursor.getColumnIndex(Columns.PLATFORM_UUID);
+        if (columnIndex >= 0) {
+            setPlatformUuid(cursor.getString(columnIndex));
+        }
     }
 
     // Copy constructor
@@ -142,6 +162,8 @@ public class AnalyticsEvent implements Parcelable {
         this.geofenceId = source.geofenceId;
         this.locationId = source.locationId;
         this.sdkVersion = source.sdkVersion;
+        this.platformType = source.platformType;
+        this.platformUuid = source.platformUuid;
     }
 
     public int getId() {
@@ -227,27 +249,47 @@ public class AnalyticsEvent implements Parcelable {
         }
     }
 
+    public String getPlatformType() {
+        return platformType;
+    }
+
+    public void setPlatformType(String platformType) {
+        this.platformType = platformType;
+    }
+
+    public String getPlatformUuid() {
+        return platformUuid;
+    }
+
+    public void setPlatformUuid(String platformUuid) {
+        this.platformUuid = platformUuid;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        AnalyticsEvent event = (AnalyticsEvent) o;
+        AnalyticsEvent that = (AnalyticsEvent) o;
 
-        if (status != event.status) return false;
-        if (receiptId != null ? !receiptId.equals(event.receiptId) : event.receiptId != null)
+        if (status != that.status) return false;
+        if (receiptId != null ? !receiptId.equals(that.receiptId) : that.receiptId != null)
             return false;
-        if (eventType != null ? !eventType.equals(event.eventType) : event.eventType != null)
+        if (eventType != null ? !eventType.equals(that.eventType) : that.eventType != null)
             return false;
-        if (eventTime != null ? !eventTime.equals(event.eventTime) : event.eventTime != null)
+        if (eventTime != null ? !eventTime.equals(that.eventTime) : that.eventTime != null)
             return false;
-        if (deviceUuid != null ? !deviceUuid.equals(event.deviceUuid) : event.deviceUuid != null)
+        if (deviceUuid != null ? !deviceUuid.equals(that.deviceUuid) : that.deviceUuid != null)
             return false;
-        if (geofenceId != null ? !geofenceId.equals(event.geofenceId) : event.geofenceId != null)
+        if (geofenceId != null ? !geofenceId.equals(that.geofenceId) : that.geofenceId != null)
             return false;
-        if (sdkVersion != null ? !sdkVersion.equals(event.sdkVersion) : event.sdkVersion != null)
+        if (locationId != null ? !locationId.equals(that.locationId) : that.locationId != null)
             return false;
-        return !(locationId != null ? !locationId.equals(event.locationId) : event.locationId != null);
+        if (sdkVersion != null ? !sdkVersion.equals(that.sdkVersion) : that.sdkVersion != null)
+            return false;
+        if (platformType != null ? !platformType.equals(that.platformType) : that.platformType != null)
+            return false;
+        return !(platformUuid != null ? !platformUuid.equals(that.platformUuid) : that.platformUuid != null);
 
     }
 
@@ -259,19 +301,25 @@ public class AnalyticsEvent implements Parcelable {
         result = 31 * result + (eventTime != null ? eventTime.hashCode() : 0);
         result = 31 * result + (deviceUuid != null ? deviceUuid.hashCode() : 0);
         result = 31 * result + (geofenceId != null ? geofenceId.hashCode() : 0);
-        result = 31 * result + (sdkVersion != null ? sdkVersion.hashCode() : 0);
         result = 31 * result + (locationId != null ? locationId.hashCode() : 0);
+        result = 31 * result + (sdkVersion != null ? sdkVersion.hashCode() : 0);
+        result = 31 * result + (platformType != null ? platformType.hashCode() : 0);
+        result = 31 * result + (platformUuid != null ? platformUuid.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
         return "AnalyticsEvent{" +
-                "eventType='" + eventType + '\'' +
-                ", receiptId='" + receiptId + '\'' +
+                "receiptId='" + receiptId + '\'' +
+                ", eventType='" + eventType + '\'' +
+                ", eventTime='" + eventTime + '\'' +
+                ", deviceUuid='" + deviceUuid + '\'' +
                 ", geofenceId='" + geofenceId + '\'' +
                 ", locationId='" + locationId + '\'' +
                 ", sdkVersion='" + sdkVersion + '\'' +
+                ", platformType='" + platformType + '\'' +
+                ", platformUuid='" + platformUuid + '\'' +
                 '}';
     }
 
@@ -280,8 +328,7 @@ public class AnalyticsEvent implements Parcelable {
     public static List<AnalyticsEvent> jsonStringToList(String str) {
         final Gson gson = new Gson();
         final Type type = getTypeToken();
-        final List list = gson.fromJson(str, type);
-        return list;
+        return gson.fromJson(str, type);
     }
 
     public static String listToJsonString(List<AnalyticsEvent> list) {
@@ -290,8 +337,7 @@ public class AnalyticsEvent implements Parcelable {
         } else {
             final Gson gson = new Gson();
             final Type type = getTypeToken();
-            final String str = gson.toJson(list, type);
-            return str;
+            return gson.toJson(list, type);
         }
     }
 
@@ -301,7 +347,7 @@ public class AnalyticsEvent implements Parcelable {
 
     // Database helpers
 
-    public ContentValues getContentValues() {
+    public ContentValues getContentValues(int databaseVersion) {
         // NOTE - do not save the 'id' field to the ContentValues. Let the database
         // figure out the 'id' itself.
         final ContentValues cv = new ContentValues();
@@ -311,13 +357,21 @@ public class AnalyticsEvent implements Parcelable {
         cv.put(Columns.DEVICE_UUID, getDeviceUuid());
         cv.put(Columns.GEOFENCE_ID, getGeofenceId());
         cv.put(Columns.LOCATION_ID, getLocationId());
-        cv.put(Columns.SDK_VERSION, getSdkVersion());
         cv.put(Columns.STATUS, getStatus());
+
+        if (databaseVersion >= 2) {
+            cv.put(Columns.SDK_VERSION, getSdkVersion());
+        }
+
+        if (databaseVersion >= 3) {
+            cv.put(Columns.PLATFORM_TYPE, getPlatformType());
+            cv.put(Columns.PLATFORM_UUID, getPlatformUuid());
+        }
 
         return cv;
     }
 
-    public static String getCreateTableSqlStatement() {
+    public static String getCreateTableSqlStatement(int databaseVersion) {
         final StringBuilder sb = new StringBuilder();
         sb.append("CREATE TABLE IF NOT EXISTS ");
         sb.append('\'');
@@ -337,8 +391,16 @@ public class AnalyticsEvent implements Parcelable {
         sb.append("' TEXT, '");
         sb.append(Columns.LOCATION_ID);
         sb.append("' TEXT, '");
-        sb.append(Columns.SDK_VERSION);
-        sb.append("' TEXT, '");
+        if (databaseVersion >= 2) {
+            sb.append(Columns.SDK_VERSION);
+            sb.append("' TEXT, '");
+        }
+        if (databaseVersion >= 3) {
+            sb.append(Columns.PLATFORM_TYPE);
+            sb.append("' TEXT, '");
+            sb.append(Columns.PLATFORM_UUID);
+            sb.append("' TEXT, '");
+        }
         sb.append(Columns.STATUS);
         sb.append("' INT);");
         return sb.toString();
@@ -348,9 +410,40 @@ public class AnalyticsEvent implements Parcelable {
         return "DROP TABLE IF EXISTS '" + Database.EVENTS_TABLE_NAME + "';";
     }
 
-    public static String getMigrateVersion1ToVersion2Statement() {
-        return "ALTER TABLE '" + Database.EVENTS_TABLE_NAME + "' " +
-                "ADD COLUMN '" + Columns.SDK_VERSION + "' TEXT;";
+    public static List<String> getDatabaseMigrationCommands(int oldVersion, int newVersion) {
+
+        final List<String> upgradeStatements = new LinkedList<>();
+
+        if (oldVersion > newVersion) {
+            return null;
+
+        } else if (oldVersion == newVersion) {
+            return upgradeStatements;
+
+        } else if (oldVersion == 1 && newVersion == 2) {
+
+            upgradeStatements.addAll(AnalyticsEvent.getMigrateVersion1ToVersion2Statement());
+
+        } else if (oldVersion == 2 && newVersion == 3) {
+
+            upgradeStatements.addAll(AnalyticsEvent.getMigrateVersion2ToVersion3Statement());
+
+        } else if (oldVersion == 1 && newVersion == 3) {
+
+            upgradeStatements.addAll(AnalyticsEvent.getMigrateVersion1ToVersion2Statement());
+            upgradeStatements.addAll(AnalyticsEvent.getMigrateVersion2ToVersion3Statement());
+        }
+
+        return upgradeStatements;
+    }
+
+    private static List<String> getMigrateVersion1ToVersion2Statement() {
+        return Arrays.asList("ALTER TABLE '" + Database.EVENTS_TABLE_NAME + "' " + "ADD COLUMN '" + Columns.SDK_VERSION + "' TEXT;");
+    }
+
+    private static List<String> getMigrateVersion2ToVersion3Statement() {
+        return Arrays.asList("ALTER TABLE '" + Database.EVENTS_TABLE_NAME + "' " + "ADD COLUMN '" + Columns.PLATFORM_TYPE + "' TEXT;",
+                "ALTER TABLE '" + Database.EVENTS_TABLE_NAME + "' " + "ADD COLUMN '" + Columns.PLATFORM_UUID + "' TEXT;");
     }
 
     public static int getRowIdFromCursor(final Cursor cursor) {
@@ -385,6 +478,8 @@ public class AnalyticsEvent implements Parcelable {
         geofenceId = in.readString();
         locationId = in.readString();
         sdkVersion = in.readString();
+        platformType = in.readString();
+        platformUuid = in.readString();
     }
 
     @Override
@@ -403,5 +498,7 @@ public class AnalyticsEvent implements Parcelable {
         out.writeString(geofenceId);
         out.writeString(locationId);
         out.writeString(sdkVersion);
+        out.writeString(platformType);
+        out.writeString(platformUuid);
     }
 }

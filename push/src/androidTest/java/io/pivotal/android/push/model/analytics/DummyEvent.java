@@ -1,6 +1,7 @@
 package io.pivotal.android.push.model.analytics;
 
 import java.util.Date;
+import java.util.UUID;
 
 public class DummyEvent {
 
@@ -17,6 +18,9 @@ public class DummyEvent {
         event.setDeviceUuid(deviceUuid);
         event.setEventTime(time);
         event.setStatus(AnalyticsEvent.Status.NOT_POSTED);
+        event.setPlatformType("android");
+        event.setPlatformUuid(UUID.randomUUID().toString());
+        event.setSdkVersion("1.0");
         return event;
     }
 }

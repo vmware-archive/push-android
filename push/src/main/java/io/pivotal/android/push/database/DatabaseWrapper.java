@@ -43,7 +43,7 @@ public class DatabaseWrapper {
         synchronized (lock) {
             if (database == null) {
                 final DebugCursorFactory factory = new DebugCursorFactory();
-                final Database databaseHelper = new Database(context, factory);
+                final Database databaseHelper = new Database(context, factory, Database.DATABASE_VERSION);
                 database = databaseHelper.getWritableDatabase();
 
                 final long maxDatabaseSize;
