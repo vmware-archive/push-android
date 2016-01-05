@@ -16,8 +16,8 @@ buildscript {
 }
 
 ext {
-    pushSdkVersionCode = 7
-    pushSdkVersionName = "1.4.0"
+    pushSdkVersionCode = 8
+    pushSdkVersionName = "1.5.0"
     isSnapshot = false
 }
 
