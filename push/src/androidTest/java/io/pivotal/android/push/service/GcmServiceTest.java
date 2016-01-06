@@ -79,6 +79,7 @@ public class GcmServiceTest extends AndroidTestCase {
         final FakeGcmService service = startService(FakeGcmService.class);
         service.onHandleIntent(null);
         service.assertMessageReceived(false);
+        service.assertHeartbeatReceived(false);
         service.assertMessageSendError(false);
         service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
@@ -95,6 +96,7 @@ public class GcmServiceTest extends AndroidTestCase {
         when(helper.isGeofencingEvent()).thenReturn(false);
         service.onHandleIntent(intent);
         service.assertMessageReceived(false);
+        service.assertHeartbeatReceived(false);
         service.assertMessageSendError(false);
         service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
@@ -110,6 +112,7 @@ public class GcmServiceTest extends AndroidTestCase {
         when(helper.isGeofencingEvent()).thenReturn(false);
         service.onHandleIntent(intent);
         service.assertMessageContent(TEST_MESSAGE);
+        service.assertHeartbeatReceived(false);
         service.assertMessageSendError(false);
         service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
@@ -125,6 +128,7 @@ public class GcmServiceTest extends AndroidTestCase {
         when(helper.isGeofencingEvent()).thenReturn(false);
         service.onHandleIntent(intent);
         service.assertMessageContent(TEST_MESSAGE);
+        service.assertHeartbeatReceived(false);
         service.assertMessageSendError(false);
         service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
@@ -141,6 +145,7 @@ public class GcmServiceTest extends AndroidTestCase {
         when(helper.isGeofencingEvent()).thenReturn(false);
         service.onHandleIntent(intent);
         service.assertMessageReceived(false);
+        service.assertHeartbeatReceived(true);
         service.assertMessageSendError(false);
         service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
@@ -156,6 +161,7 @@ public class GcmServiceTest extends AndroidTestCase {
         final FakeGcmService service = startService(FakeGcmService.class);
         when(helper.isGeofencingEvent()).thenReturn(false);
         service.onHandleIntent(intent);
+        service.assertHeartbeatReceived(false);
         service.assertMessageSendError(false);
         service.assertMessageDeleted(true);
         service.assertTimesGeofenceEntered(0);
@@ -170,6 +176,7 @@ public class GcmServiceTest extends AndroidTestCase {
         final FakeGcmService service = startService(FakeGcmService.class);
         when(helper.isGeofencingEvent()).thenReturn(false);
         service.onHandleIntent(intent);
+        service.assertHeartbeatReceived(false);
         service.assertMessageSendError(true);
         service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
@@ -185,6 +192,7 @@ public class GcmServiceTest extends AndroidTestCase {
         final FakeGcmService service = startService(FakeGcmService.class, context, getPreferences(true, (String)null));
         when(helper.isGeofencingEvent()).thenReturn(false);
         service.onHandleIntent(intent);
+        service.assertHeartbeatReceived(false);
         service.assertMessageSendError(false);
         service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
@@ -204,6 +212,7 @@ public class GcmServiceTest extends AndroidTestCase {
         final FakeGcmService service = startService(FakeGcmService.class, context, getPreferences(false, (String)null));
         when(helper.isGeofencingEvent()).thenReturn(false);
         service.onHandleIntent(intent);
+        service.assertHeartbeatReceived(false);
         service.assertMessageSendError(false);
         service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
@@ -224,6 +233,7 @@ public class GcmServiceTest extends AndroidTestCase {
         when(helper.getGeofences()).thenReturn(GEOFENCE_LIST_ENTER);
         when(store.getGeofenceData(5L)).thenReturn(GEOFENCE_DATA_LIST.get(5L));
         service.onHandleIntent(intent);
+        service.assertHeartbeatReceived(false);
         service.assertMessageSendError(false);
         service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(1);
@@ -245,6 +255,7 @@ public class GcmServiceTest extends AndroidTestCase {
         when(helper.isGeofencingEvent()).thenReturn(true);
         when(helper.getGeofenceTransition()).thenReturn(Geofence.GEOFENCE_TRANSITION_ENTER);
         service.onHandleIntent(intent);
+        service.assertHeartbeatReceived(false);
         service.assertMessageSendError(false);
         service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
@@ -263,6 +274,7 @@ public class GcmServiceTest extends AndroidTestCase {
         when(helper.getGeofences()).thenReturn(GEOFENCE_LIST_ENTER);
         when(store.getGeofenceData(5L)).thenReturn(null);
         service.onHandleIntent(intent);
+        service.assertHeartbeatReceived(false);
         service.assertMessageSendError(false);
         service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
@@ -284,6 +296,7 @@ public class GcmServiceTest extends AndroidTestCase {
         when(helper.getGeofences()).thenReturn(GEOFENCE_LIST_EXIT_1);
         when(store.getGeofenceData(11L)).thenReturn(GEOFENCE_DATA_LIST.get(11L));
         service.onHandleIntent(intent);
+        service.assertHeartbeatReceived(false);
         service.assertMessageSendError(false);
         service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
@@ -306,6 +319,7 @@ public class GcmServiceTest extends AndroidTestCase {
         when(helper.getGeofenceTransition()).thenReturn(Geofence.GEOFENCE_TRANSITION_EXIT);
         when(helper.getGeofences()).thenReturn(GEOFENCE_LIST_EXIT_1);
         service.onHandleIntent(intent);
+        service.assertHeartbeatReceived(false);
         service.assertMessageSendError(false);
         service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
@@ -324,6 +338,7 @@ public class GcmServiceTest extends AndroidTestCase {
         when(helper.getGeofences()).thenReturn(GEOFENCE_LIST_EXIT_1);
         when(store.getGeofenceData(11L)).thenReturn(null);
         service.onHandleIntent(intent);
+        service.assertHeartbeatReceived(false);
         service.assertMessageSendError(false);
         service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
@@ -346,6 +361,7 @@ public class GcmServiceTest extends AndroidTestCase {
         expectedLocationsToClear.putLocation(GEOFENCE_DATA_LIST.get(49L), 1);
         setupMultipleEvents();
         service.onHandleIntent(intent);
+        service.assertHeartbeatReceived(false);
         service.assertMessageSendError(false);
         service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
@@ -515,6 +531,7 @@ public class GcmServiceTest extends AndroidTestCase {
         private boolean messageDeleted = false;
         private boolean messageSendError = false;
         private boolean messageReceived = false;
+        private boolean heartbeatReceived = false;
         private List<String> enteredGeofencesMessages = new ArrayList<>();
         private List<String> exitedGeofencesMessages = new ArrayList<>();
         private int timesEnteredGeofences = 0;
@@ -533,6 +550,12 @@ public class GcmServiceTest extends AndroidTestCase {
         @Override
         public void onReceiveMessage(final Bundle payload) {
             messageReceived = true;
+            bundle = payload;
+        }
+
+        @Override
+        public void onReceiveHeartbeat(Bundle payload) {
+            heartbeatReceived = true;
             bundle = payload;
         }
 
@@ -569,6 +592,10 @@ public class GcmServiceTest extends AndroidTestCase {
 
         public void assertMessageReceived(final boolean expected) {
             assertEquals(expected, messageReceived);
+        }
+
+        public void assertHeartbeatReceived(final boolean expected) {
+            assertEquals(expected, heartbeatReceived);
         }
 
         public void assertMessageDeleted(final boolean expected) {

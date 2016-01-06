@@ -139,6 +139,7 @@ public class GcmService extends IntentService {
             if (extras.containsKey(KEY_HEARTBEAT)) {
                 Logger.i("GcmService has received a heartbeat push message.");
                 enqueueHeartbeatReceivedEvent(intent);
+                onReceiveHeartbeat(extras);
 
             } else {
                 Logger.i("GcmService has received a push message.");
@@ -282,6 +283,9 @@ public class GcmService extends IntentService {
 
     // Intended to be overridden by application
     public void onGeofenceExit(final Bundle payload) {}
+
+    // Intended to be overridded by application
+    public void onReceiveHeartbeat(final Bundle payload) {}
 
     public boolean isGeofencingEvent(Intent intent) {
         return (intent != null && helper.isGeofencingEvent());
