@@ -38,7 +38,7 @@ public class GcmService extends IntentService {
     public static final String GEOFENCE_TRANSITION_KEY = "com.google.android.location.intent.extra.transition";
     public static final String KEY_MESSAGE = "message";
     public static final String KEY_RECEIPT_ID = "receiptId";
-    public static final String KEY_HEARTBEAT = "pcf.push.heartbeat.sentAt";
+    public static final String KEY_HEARTBEAT = "pcf.push.heartbeat.sentToDeviceAt";
 
     private GeofenceHelper helper;
     private GeofenceEngine engine;
