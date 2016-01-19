@@ -10,10 +10,6 @@ dependencies {
     androidTestCompile 'com.google.dexmaker:dexmaker-mockito:1.2'
 }
 
-task(printVersion) << {
-    println "My version is: " + pushSdkVersionName
-}
-
 // Note that Google Play Services 8.3.0 has a bug.  https://code.google.com/p/analytics-issues/issues/detail?id=784
 // We will continue to use Google Play Services 8.1.0 until the above bug is fixed.
 

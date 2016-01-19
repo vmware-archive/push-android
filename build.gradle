@@ -21,7 +21,8 @@ ext {
     isSnapshot = false
 }
 
-allprojects {
+subprojects {
+
     apply plugin: 'maven'
 
     group = "io.pivotal.android"
@@ -35,9 +36,7 @@ allprojects {
     repositories {
         mavenCentral()
     }
-}
 
-subprojects {
     apply plugin: 'android-library'
 
     android {
@@ -84,5 +83,9 @@ subprojects {
 //                authentication(userName: MAVEN_USER, password: MAVEN_PASS)
 //            }
         }
+    }
+
+    task(printVersion) << {
+        println "My version is: " + pushSdkVersionName
     }
 }
