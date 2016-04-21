@@ -252,6 +252,7 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
         data.setDeviceManufacturer(Build.MANUFACTURER);
         data.setOsVersion(Build.VERSION.RELEASE);
         data.setRegistrationToken(deviceRegistrationId);
+        data.setCustomUserId(parameters.getCustomUserId());
         return data;
     }
 

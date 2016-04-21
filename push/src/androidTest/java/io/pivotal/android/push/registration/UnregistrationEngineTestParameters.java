@@ -45,6 +45,7 @@ public class UnregistrationEngineTestParameters {
     private static final String PLATFORM_UUID_IN_PREFS = "VARIANT UUID";
     private static final String PLATFORM_SECRET_IN_PREFS = "VARIANT SECRET";
     private static final String DEVICE_ALIAS_IN_PREFS = "DEVICE ALIAS";
+    private static final String CUSTOM_USER_ID_IN_PREFS = "CUSTOM USER ID";
     private static final int APP_VERSION_IN_PREFS = 99;
     private static final String GCM_DEVICE_ID_IN_PREFS = "GCM DEVICE ID";
     private static final String PACKAGE_NAME_IN_PREFS = "PACKAGE.NAME";
@@ -117,7 +118,7 @@ public class UnregistrationEngineTestParameters {
         }).when(geofenceUpdater).clearGeofencesFromStoreOnly(any(GeofenceUpdater.GeofenceUpdaterListener.class));
 
         if (startingPCFPushDeviceRegistrationIdInPrefs == null) {
-            pushPreferencesProvider = new FakePushPreferencesProvider(null, startingPCFPushDeviceRegistrationIdInPrefs, -1, null, null, null, null, null, null, null, lastGeofenceUpdateTimeInPrefs, areGeofencesEnabledInPrefs);
+            pushPreferencesProvider = new FakePushPreferencesProvider(null, startingPCFPushDeviceRegistrationIdInPrefs, -1, null, null, null, null, null, null, null, null, lastGeofenceUpdateTimeInPrefs, areGeofencesEnabledInPrefs);
         } else {
             pushPreferencesProvider = new FakePushPreferencesProvider(GCM_DEVICE_ID_IN_PREFS,
                     startingPCFPushDeviceRegistrationIdInPrefs,
@@ -126,6 +127,7 @@ public class UnregistrationEngineTestParameters {
                     PLATFORM_UUID_IN_PREFS,
                     PLATFORM_SECRET_IN_PREFS,
                     DEVICE_ALIAS_IN_PREFS,
+                    CUSTOM_USER_ID_IN_PREFS,
                     PACKAGE_NAME_IN_PREFS,
                     SERVICE_URL_IN_PREFS,
                     TAGS_IN_PREFS,
@@ -176,6 +178,7 @@ public class UnregistrationEngineTestParameters {
         if (pcfPushDeviceRegistrationIdResultant == null) {
             AndroidTestCase.assertNull(pushPreferencesProvider.getPCFPushDeviceRegistrationId());
             AndroidTestCase.assertNull(pushPreferencesProvider.getDeviceAlias());
+            AndroidTestCase.assertNull(pushPreferencesProvider.getCustomUserId());
             AndroidTestCase.assertNull(pushPreferencesProvider.getPlatformSecret());
             AndroidTestCase.assertNull(pushPreferencesProvider.getPlatformSecret());
             AndroidTestCase.assertNull(pushPreferencesProvider.getServiceUrl());
@@ -183,6 +186,7 @@ public class UnregistrationEngineTestParameters {
         } else {
             AndroidTestCase.assertNotNull(pushPreferencesProvider.getPCFPushDeviceRegistrationId());
             AndroidTestCase.assertNotNull(pushPreferencesProvider.getDeviceAlias());
+            AndroidTestCase.assertNotNull(pushPreferencesProvider.getCustomUserId());
             AndroidTestCase.assertNotNull(pushPreferencesProvider.getPlatformSecret());
             AndroidTestCase.assertNotNull(pushPreferencesProvider.getPlatformSecret());
             AndroidTestCase.assertNotNull(pushPreferencesProvider.getServiceUrl());

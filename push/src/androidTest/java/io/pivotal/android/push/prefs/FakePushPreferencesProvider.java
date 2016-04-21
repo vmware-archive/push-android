@@ -18,6 +18,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     private String platformUuid;
     private String platformSecret;
     private String deviceAlias;
+    private String customUserId;
     private String packageName;
     private String serviceUrl;
     private Set<String> tags;
@@ -34,6 +35,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     private boolean wasPlatformUuidSaved = false;
     private boolean wasPlatformSecretSaved = false;
     private boolean wasDeviceAliasSaved = false;
+    private boolean wasCustomUserIdSaved = false;
     private boolean wasPackageNameSaved = false;
     private boolean wasServiceUrlSaved = false;
     private boolean wasTagsSaved = false;
@@ -51,6 +53,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
                                        String platformUuidToLoad,
                                        String platformSecretToLoad,
                                        String deviceAliasToLoad,
+                                       String customUserIdToLoad,
                                        String packageNameToLoad,
                                        String serviceUrlToLoad,
                                        Set<String> tagsToLoad,
@@ -64,6 +67,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
         this.platformUuid = platformUuidToLoad;
         this.platformSecret = platformSecretToLoad;
         this.deviceAlias = deviceAliasToLoad;
+        this.customUserId = customUserIdToLoad;
         this.packageName = packageNameToLoad;
         this.serviceUrl = serviceUrlToLoad;
         this.lastGeofenceUpdate = lastGeofenceUpdateToLoad;
@@ -78,6 +82,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
                                        String platformUuidToLoad,
                                        String platformSecretToLoad,
                                        String deviceAliasToLoad,
+                                       String customUserIdToLoad,
                                        String packageNameToLoad,
                                        String serviceUrlToLoad,
                                        Set<String> tagsToLoad,
@@ -93,6 +98,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
         this.platformUuid = platformUuidToLoad;
         this.platformSecret = platformSecretToLoad;
         this.deviceAlias = deviceAliasToLoad;
+        this.customUserId = customUserIdToLoad;
         this.packageName = packageNameToLoad;
         this.serviceUrl = serviceUrlToLoad;
         this.lastGeofenceUpdate = lastGeofenceUpdateToLoad;
@@ -135,6 +141,10 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     @Override
     public String getDeviceAlias() {
         return deviceAlias;
+    }
+
+    public String getCustomUserId() {
+        return customUserId;
     }
 
     @Override
@@ -220,6 +230,11 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
         wasDeviceAliasSaved = true;
     }
 
+    public void setCustomUserId(String customUserId) {
+        this.customUserId = customUserId;
+        wasCustomUserIdSaved = true;
+    }
+
     @Override
     public void setPackageName(String packageName) {
         this.packageName = packageName;
@@ -301,6 +316,10 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
 
     public boolean wasDeviceAliasSaved() {
         return wasDeviceAliasSaved;
+    }
+
+    public boolean wasCustomUserIdSaved() {
+        return wasCustomUserIdSaved;
     }
 
     public boolean isWasPackageNameSaved() {

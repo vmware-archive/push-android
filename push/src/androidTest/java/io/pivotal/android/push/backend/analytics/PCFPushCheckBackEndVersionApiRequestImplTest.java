@@ -34,7 +34,7 @@ public class PCFPushCheckBackEndVersionApiRequestImplTest extends AndroidTestCas
         super.setUp();
         networkWrapper = new FakeNetworkWrapper();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
-        preferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, TEST_SERVICE_URL, null, 0, true);
+        preferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null, TEST_SERVICE_URL, null, 0, true);
         FakeHttpURLConnection.reset();
     }
 
@@ -187,6 +187,6 @@ public class PCFPushCheckBackEndVersionApiRequestImplTest extends AndroidTestCas
     }
 
     private PushParameters getParameters() {
-        return new PushParameters(null, null, null, TEST_SERVICE_URL, null, null, false, Pivotal.SslCertValidationMode.DEFAULT, null, null);
+        return new PushParameters(null, null, null, TEST_SERVICE_URL, null, null, null, false, Pivotal.SslCertValidationMode.DEFAULT, null, null);
     }
 }

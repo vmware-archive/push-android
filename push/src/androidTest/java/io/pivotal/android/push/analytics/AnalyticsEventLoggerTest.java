@@ -47,7 +47,7 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
         super.setUp();
         serviceStarter = new FakeServiceStarter();
         serviceStarter.setReturnedComponentName(new ComponentName(getContext(), AnalyticsEventService.class));
-        preferencesProvider = new FakePushPreferencesProvider(null, TEST_EVENT_DEVICE_UUID_VALUE, 0, null, TEST_EVENT_PLATFORM_UUID_VALUE, null, null, null, null, null, 0, false);
+        preferencesProvider = new FakePushPreferencesProvider(null, TEST_EVENT_DEVICE_UUID_VALUE, 0, null, TEST_EVENT_PLATFORM_UUID_VALUE, null, null, null, null, null, null, 0, false);
         preferencesProvider.setAreAnalyticsEnabled(true);
     }
 

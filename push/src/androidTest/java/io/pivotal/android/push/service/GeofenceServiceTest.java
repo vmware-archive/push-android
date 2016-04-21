@@ -178,7 +178,7 @@ public class GeofenceServiceTest extends AndroidTestCase {
     }
 
     private FakePushPreferencesProvider getPreferences(long timestamp, boolean areGeofencesEnabled) {
-        return new FakePushPreferencesProvider("", TEST_DEVICE_UUID, 0, "", "", "", "", "", "", null, timestamp, areGeofencesEnabled);
+        return new FakePushPreferencesProvider("", TEST_DEVICE_UUID, 0, "", "", "", "", "", "", "", null, timestamp, areGeofencesEnabled);
     }
 
     private Properties getProperties() {

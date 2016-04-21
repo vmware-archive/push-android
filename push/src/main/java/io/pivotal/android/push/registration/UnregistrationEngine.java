@@ -173,11 +173,11 @@ public class UnregistrationEngine {
         pushPreferencesProvider.setAppVersion(-1);
     }
 
-    private void unregisterDeviceWithPCFPush(final String pcfPushDeviceRegistrationId, PushParameters parameters, final UnregistrationListener listener) {
-        if (pcfPushDeviceRegistrationId != null) {
+    private void unregisterDeviceWithPCFPush(final String registrationId, PushParameters parameters, final UnregistrationListener listener) {
+        if (registrationId != null) {
             Logger.i("Initiating device unregistration with PCF Push.");
-            final PCFPushUnregisterDeviceApiRequest PCFPushUnregisterDeviceApiRequest = PCFPushUnregisterDeviceApiRequestProvider.getRequest();
-            PCFPushUnregisterDeviceApiRequest.startUnregisterDevice(pcfPushDeviceRegistrationId, parameters, getPCFPushUnregisterDeviceListener(listener));
+            final PCFPushUnregisterDeviceApiRequest request = PCFPushUnregisterDeviceApiRequestProvider.getRequest();
+            request.startUnregisterDevice(registrationId, parameters, getPCFPushUnregisterDeviceListener(listener));
         } else {
             if (shouldClearGeofences()) {
                 clearGeofences(listener);
@@ -224,6 +224,7 @@ public class UnregistrationEngine {
         pushPreferencesProvider.setPlatformUuid(null);
         pushPreferencesProvider.setPlatformSecret(null);
         pushPreferencesProvider.setDeviceAlias(null);
+        pushPreferencesProvider.setCustomUserId(null);
         pushPreferencesProvider.setServiceUrl(null);
         pushPreferencesProvider.setTags(null);
     }

@@ -33,6 +33,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
     private static final String TEST_PLATFORM_UUID = "TEST_PLATFORM_UUID";
     private static final String TEST_PLATFORM_SECRET = "TEST_PLATFORM_SECRET";
     private static final String TEST_DEVICE_ALIAS = "TEST_DEVICE_ALIAS";
+    private static final String TEST_CUSTOM_USER_ID = "TEST_CUSTOM_USER_ID";
     private static final String TEST_SERVICE_URL = "http://test.com";
     private static final String TEST_BASE64_ENCODED_AUTHORIZATION = "VEVTVF9QTEFURk9STV9VVUlEOlRFU1RfUExBVEZPUk1fU0VDUkVU";
     private static final String HTTP_POST = "POST";
@@ -483,11 +484,11 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
     }
 
     private PushParameters getParameters() {
-        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
+        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, TEST_CUSTOM_USER_ID, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
     }
 
     private PushParameters getParameters(Set<String> tags) {
-        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, tags, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
+        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, TEST_CUSTOM_USER_ID, tags, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
     }
 
     private PushParameters getParameters(Pivotal.SslCertValidationMode sslCertValidationMode) {
@@ -496,11 +497,11 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
             pinnedSslCertificateNames = new LinkedList<>();
             pinnedSslCertificateNames.add("DUMMY CERT");
         }
-        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null, true, sslCertValidationMode, pinnedSslCertificateNames, null);
+        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, TEST_CUSTOM_USER_ID, null, true, sslCertValidationMode, pinnedSslCertificateNames, null);
     }
 
     private PushParameters getParameters(Map<String, String> requestHeaders) {
-        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, requestHeaders);
+        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, TEST_CUSTOM_USER_ID, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, requestHeaders);
     }
 
     private Set<String> makeSet(String... strings) {

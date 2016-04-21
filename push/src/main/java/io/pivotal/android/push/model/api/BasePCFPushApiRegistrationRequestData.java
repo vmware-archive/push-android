@@ -26,6 +26,9 @@ public abstract class BasePCFPushApiRegistrationRequestData {
     @SerializedName("registration_token")
     private String registrationToken;
 
+    @SerializedName("custom_user_id")
+    private String customUserId;
+
     public String getDeviceAlias() {
         return deviceAlias;
     }
@@ -72,5 +75,13 @@ public abstract class BasePCFPushApiRegistrationRequestData {
 
     public void setRegistrationToken(String registrationToken) {
         this.registrationToken = registrationToken;
+    }
+
+    public String getCustomUserId() {
+        return customUserId;
+    }
+
+    public void setCustomUserId(String customUserId) {
+        this.customUserId = customUserId;
     }
 }

@@ -40,7 +40,7 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
         eventsStorage = new FakeAnalyticsEventsStorage();
         networkWrapper = new FakeNetworkWrapper();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
-        preferencesProvider = new FakePushPreferencesProvider(null, null, 0, TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_DEVICE_ALIAS, null, TEST_SERVICE_URL, null, 0, true);
+        preferencesProvider = new FakePushPreferencesProvider(null, null, 0, TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_DEVICE_ALIAS, null, null, TEST_SERVICE_URL, null, 0, true);
         FakeHttpURLConnection.reset();
         emptyList = new LinkedList<>();
         listWithOneItem = new LinkedList<>();

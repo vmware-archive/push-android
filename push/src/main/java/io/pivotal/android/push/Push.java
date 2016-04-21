@@ -129,7 +129,6 @@ public class Push {
      * the last successful registration then the device will be re-registered with the new parameters.  Only
      * one registration attempt will run at a time: if some attempt is currently in progress, then this request
      * will only start after the first attempt completes.
-     *
      * @param deviceAlias Provides the device alias for registration.  This is optional and may be null
      * @param tags Provides the list of tags for registration.  This is optional and may be null.
      */
@@ -139,19 +138,39 @@ public class Push {
         startRegistration(deviceAlias, tags, areGeofencesEnabled, null);
     }
 
+
     /**
      * Asynchronously registers the device and application for receiving push notifications.  If the application
      * is already registered then will do nothing.  If some of the registration parameters are different then
      * the last successful registration then the device will be re-registered with the new parameters.  Only
      * one registration attempt will run at a time: if some attempt is currently in progress, then this request
      * will only start after the first attempt completes.
-     *
      * @param deviceAlias Provides the device alias for registration.  This is optional and may be null.
      * @param tags Provides the list of tags for registration.  This is optional and may be null.
+     * @param areGeofencesEnabled Should Push use geofences?  If 'yes' then you must ask the user for permission before calling `startRegistration`.
      * @param listener Optional listener for receiving a callback after registration finishes. This callback may
-     *                 be called on a background thread.  May be null.
      */
     public void startRegistration(@Nullable final String deviceAlias,
+                                  @Nullable final Set<String> tags,
+                                  final boolean areGeofencesEnabled,
+                                  @Nullable final RegistrationListener listener) {
+        startRegistration(deviceAlias, null, tags, areGeofencesEnabled, listener);
+    }
+
+    /**
+     * Asynchronously registers the device and application for receiving push notifications.  If the application
+     * is already registered then will do nothing.  If some of the registration parameters are different then
+     * the last successful registration then the device will be re-registered with the new parameters.  Only
+     * one registration attempt will run at a time: if some attempt is currently in progress, then this request
+     * will only start after the first attempt completes.
+     * @param deviceAlias Provides the device alias for registration.  This is optional and may be null.
+     * @param customUserId Provides a custom user ID that can be used to identify the user using the device. This field is optional and may be null.
+     * @param tags Provides the list of tags for registration.  This is optional and may be null.
+     * @param areGeofencesEnabled Should Push use geofences?  If 'yes' then you must ask the user for permission before calling `startRegistration`.
+     * @param listener Optional listener for receiving a callback after registration finishes. This callback may
+     */
+    public void startRegistration(@Nullable final String deviceAlias,
+                                  @Nullable final String customUserId,
                                   @Nullable final Set<String> tags,
                                   final boolean areGeofencesEnabled,
                                   @Nullable final RegistrationListener listener) {
@@ -166,7 +185,7 @@ public class Push {
         final PCFPushRegistrationApiRequest dummyPCFPushRegistrationApiRequest = new PCFPushRegistrationApiRequestImpl(context, networkWrapper);
         final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(dummyPCFPushRegistrationApiRequest);
         final VersionProvider versionProvider = new VersionProviderImpl(context);
-        final PushParameters parameters = getPushParameters(deviceAlias, tags, areGeofencesEnabled, pushPreferencesProvider.getRequestHeaders());
+        final PushParameters parameters = getPushParameters(deviceAlias, customUserId, tags, areGeofencesEnabled, pushPreferencesProvider.getRequestHeaders());
         final PCFPushGetGeofenceUpdatesApiRequest geofenceUpdatesApiRequest = new PCFPushGetGeofenceUpdatesApiRequest(context, networkWrapper);
         final GeofenceRegistrar geofenceRegistrar = new GeofenceRegistrar(context);
         final FileHelper fileHelper = new FileHelper(context);
@@ -207,6 +226,7 @@ public class Push {
     }
 
     private PushParameters getPushParameters(@Nullable String deviceAlias,
+                                             @Nullable String customUserId,
                                              @Nullable Set<String> tags,
                                              boolean areGeofencesEnabled,
                                              @Nullable Map<String, String> requestHeaders) {
@@ -217,7 +237,7 @@ public class Push {
         final String serviceUrl = Pivotal.getServiceUrl(context);
         final Pivotal.SslCertValidationMode sslCertValidationMode = Pivotal.getSslCertValidationMode(context);
         final List<String> pinnedCertificateNames = Pivotal.getPinnedSslCertificateNames(context);
-        return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, deviceAlias, tags, areGeofencesEnabled, sslCertValidationMode, pinnedCertificateNames, requestHeaders);
+        return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, deviceAlias, customUserId, tags, areGeofencesEnabled, sslCertValidationMode, pinnedCertificateNames, requestHeaders);
     }
 
     private void verifyRegistrationArguments(@NonNull PushParameters parameters) {
@@ -315,9 +335,10 @@ public class Push {
 
         final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
         final String deviceAlias = pushPreferencesProvider.getDeviceAlias();
+        final String customUserId = pushPreferencesProvider.getCustomUserId();
         final boolean areGeofencesEnabled = pushPreferencesProvider.areGeofencesEnabled();
 
-        startRegistration(deviceAlias, tags, areGeofencesEnabled, new RegistrationListener() {
+        startRegistration(deviceAlias, customUserId, tags, areGeofencesEnabled, new RegistrationListener() {
             @Override
             public void onRegistrationComplete() {
                 if (subscribeToTagsListener != null) {
@@ -351,7 +372,7 @@ public class Push {
         final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
         final boolean areGeofencesEnabled = pushPreferencesProvider.areGeofencesEnabled();
 
-        final PushParameters parameters = getPushParameters(null, null, areGeofencesEnabled, pushPreferencesProvider.getRequestHeaders());
+        final PushParameters parameters = getPushParameters(null, null, null, areGeofencesEnabled, pushPreferencesProvider.getRequestHeaders());
         verifyUnregistrationArguments(parameters);
 
         final GcmProvider gcmProvider = new RealGcmProvider(context);

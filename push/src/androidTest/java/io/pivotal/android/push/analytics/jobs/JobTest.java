@@ -56,7 +56,7 @@ public abstract class JobTest extends AndroidTestCase {
         networkWrapper = new FakeNetworkWrapper();
         serviceStarter = new FakeServiceStarter();
         alarmProvider = new FakeAnalyticsEventsSenderAlarmProvider();
-        preferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, TEST_SERVICE_URL, null, 0, false);
+        preferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null, TEST_SERVICE_URL, null, 0, false);
         sendAnalyticsApiRequest = new FakePCFPushSendAnalyticsApiRequest();
         checkBackEndVersionApiRequest = new FakePCFPushCheckBackEndVersionApiRequest();
         sendAnalyticsApiRequestProvider = new PCFPushSendAnalyticsApiRequestProvider(sendAnalyticsApiRequest);

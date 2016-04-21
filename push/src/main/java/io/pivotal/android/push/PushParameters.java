@@ -27,6 +27,7 @@ public class PushParameters {
     private final String platformSecret;
     private final String serviceUrl;
     private final String deviceAlias;
+    private final String customUserId;
     private final Set<String> tags;
     private final boolean areGeofencesEnabled;
     private final Pivotal.SslCertValidationMode sslCertValidationMode;
@@ -46,6 +47,8 @@ public class PushParameters {
      *                       See the pivotal.push.serviceUrl" property.
      * @param deviceAlias    A developer-defined "device alias" which can be used to designate this device, or class.
      *                       of devices, in push or notification campaigns. May not be set to `null`. May be set to empty.
+     * @param customUserId     A developer-defined "custom user ID" which can be used to identify the user using this device.
+     *                       Can be used to associate multiple devices with the same user if the share a custom user ID. May be set to null or empty.
      * @param tags           A set of tags to register to.  You should always register all tags that you want to listen to, even if you have
      *                       already subscribed to them.  If you exclude any subscribed tags in a registration request, then those tags
      *                       will be unsubscribed.
@@ -61,6 +64,7 @@ public class PushParameters {
                           @NonNull String platformSecret,
                           @NonNull String serviceUrl,
                           @Nullable String deviceAlias,
+                          @Nullable String customUserId,
                           @Nullable Set<String> tags,
                           boolean areGeofencesEnabled,
                           Pivotal.SslCertValidationMode sslCertValidationMode,
@@ -72,6 +76,7 @@ public class PushParameters {
         this.platformSecret = platformSecret;
         this.serviceUrl = serviceUrl;
         this.deviceAlias = deviceAlias;
+        this.customUserId = customUserId;
         this.tags = Util.lowercaseTags(tags);
         this.areGeofencesEnabled = areGeofencesEnabled;
         this.sslCertValidationMode = sslCertValidationMode;
@@ -97,6 +102,7 @@ public class PushParameters {
         this.requestHeaders = preferencesProvider.getRequestHeaders();
         this.tags = Util.lowercaseTags(tags);
         this.deviceAlias = deviceAlias;
+        this.customUserId = preferencesProvider.getCustomUserId();
     }
 
     public String getGcmSenderId() {
@@ -117,6 +123,10 @@ public class PushParameters {
 
     public String getDeviceAlias() {
         return deviceAlias;
+    }
+
+    public String getCustomUserId() {
+        return customUserId;
     }
 
     public Set<String> getTags() {
@@ -157,11 +167,14 @@ public class PushParameters {
             return false;
         if (deviceAlias != null ? !deviceAlias.equals(that.deviceAlias) : that.deviceAlias != null)
             return false;
+        if (customUserId != null ? !customUserId.equals(that.customUserId) : that.customUserId != null)
+            return false;
         if (tags != null ? !tags.equals(that.tags) : that.tags != null) return false;
         if (sslCertValidationMode != that.sslCertValidationMode) return false;
         if (pinnedSslCertificateNames != null ? !pinnedSslCertificateNames.equals(that.pinnedSslCertificateNames) : that.pinnedSslCertificateNames != null)
             return false;
-        return !(requestHeaders != null ? !requestHeaders.equals(that.requestHeaders) : that.requestHeaders != null);
+        return requestHeaders != null ? requestHeaders.equals(that.requestHeaders) : that.requestHeaders == null;
+
     }
 
     @Override
@@ -171,6 +184,7 @@ public class PushParameters {
         result = 31 * result + (platformSecret != null ? platformSecret.hashCode() : 0);
         result = 31 * result + (serviceUrl != null ? serviceUrl.hashCode() : 0);
         result = 31 * result + (deviceAlias != null ? deviceAlias.hashCode() : 0);
+        result = 31 * result + (customUserId != null ? customUserId.hashCode() : 0);
         result = 31 * result + (tags != null ? tags.hashCode() : 0);
         result = 31 * result + (areGeofencesEnabled ? 1 : 0);
         result = 31 * result + (sslCertValidationMode != null ? sslCertValidationMode.hashCode() : 0);

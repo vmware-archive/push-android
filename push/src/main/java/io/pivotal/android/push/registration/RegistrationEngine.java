@@ -80,6 +80,7 @@ public class RegistrationEngine {
     private String previousPlatformUuid;
     private String previousPlatformSecret;
     private String previousDeviceAlias;
+    private String previousCustomUserId;
     private String previousServiceUrl;
 
     /**
@@ -211,6 +212,7 @@ public class RegistrationEngine {
         this.previousPlatformUuid = pushPreferencesProvider.getPlatformUuid();
         this.previousPlatformSecret = pushPreferencesProvider.getPlatformSecret();
         this.previousDeviceAlias = pushPreferencesProvider.getDeviceAlias();
+        this.previousCustomUserId = pushPreferencesProvider.getCustomUserId();
         this.previousServiceUrl = pushPreferencesProvider.getServiceUrl();
     }
 
@@ -386,8 +388,11 @@ public class RegistrationEngine {
     private boolean areRegistrationParametersUpdated(PushParameters parameters) {
         final boolean isPreviousDeviceAliasEmpty = previousDeviceAlias == null || previousDeviceAlias.isEmpty();
         final boolean isNewDeviceAliasEmpty = parameters.getDeviceAlias() == null || parameters.getDeviceAlias().isEmpty();
+        final boolean isPreviousCustomUserIdEmpty = previousCustomUserId == null || previousCustomUserId.isEmpty();
+        final boolean isNewCustomUserIdEmpty = parameters.getCustomUserId() == null || parameters.getCustomUserId().isEmpty();
         final boolean isDeviceAliasUpdated = (isPreviousDeviceAliasEmpty && !isNewDeviceAliasEmpty) || (!isPreviousDeviceAliasEmpty && isNewDeviceAliasEmpty) || (!isNewDeviceAliasEmpty && !parameters.getDeviceAlias().equals(previousDeviceAlias));
-        return isDeviceAliasUpdated;
+        final boolean isCustomUserIdUpdated = (isPreviousCustomUserIdEmpty && !isNewCustomUserIdEmpty) || (!isPreviousCustomUserIdEmpty && isNewCustomUserIdEmpty) || (!isNewCustomUserIdEmpty && !parameters.getCustomUserId().equals(previousCustomUserId));
+        return isDeviceAliasUpdated || isCustomUserIdUpdated;
     }
 
     private boolean isPlatformUpdated(PushParameters parameters) {
@@ -571,6 +576,7 @@ public class RegistrationEngine {
                 pushPreferencesProvider.setPlatformUuid(parameters.getPlatformUuid());
                 pushPreferencesProvider.setPlatformSecret(parameters.getPlatformSecret());
                 pushPreferencesProvider.setDeviceAlias(parameters.getDeviceAlias());
+                pushPreferencesProvider.setCustomUserId(parameters.getCustomUserId());
                 pushPreferencesProvider.setServiceUrl(parameters.getServiceUrl());
                 pushPreferencesProvider.setTags(parameters.getTags());
                 Logger.v("Saving tags: " + parameters.getTags());
@@ -643,6 +649,7 @@ public class RegistrationEngine {
                 pushPreferencesProvider.setPlatformUuid(parameters.getPlatformUuid());
                 pushPreferencesProvider.setPlatformSecret(parameters.getPlatformSecret());
                 pushPreferencesProvider.setDeviceAlias(parameters.getDeviceAlias());
+                pushPreferencesProvider.setCustomUserId(parameters.getCustomUserId());
                 pushPreferencesProvider.setServiceUrl(parameters.getServiceUrl());
                 pushPreferencesProvider.setTags(parameters.getTags());
                 Logger.v("Saving tags: " + parameters.getTags());
@@ -763,6 +770,7 @@ public class RegistrationEngine {
         pushPreferencesProvider.setPlatformUuid(null);
         pushPreferencesProvider.setPlatformSecret(null);
         pushPreferencesProvider.setDeviceAlias(null);
+        pushPreferencesProvider.setCustomUserId(null);
         pushPreferencesProvider.setServiceUrl(null);
         pushPreferencesProvider.setTags(null);
     }

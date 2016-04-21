@@ -73,5 +73,9 @@ public interface PushPreferencesProvider {
 
     void setBackEndVersionTimePolled(Date timestamp);
 
+    String getCustomUserId();
+
+    void setCustomUserId(String customUserId);
+
     boolean areAnalyticsEnabled();
 }

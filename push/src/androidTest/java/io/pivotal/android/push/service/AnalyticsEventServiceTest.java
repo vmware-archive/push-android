@@ -64,7 +64,7 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
         final FakePCFPushCheckBackEndVersionApiRequest checkBackEndVersionApiRequest = new FakePCFPushCheckBackEndVersionApiRequest();
         final FakeServiceStarter serviceStarter = new FakeServiceStarter();
 
-        pushPreferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null, null, 0, false);
+        pushPreferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null, null, null, 0, false);
         pushPreferencesProvider.setAreAnalyticsEnabled(true);
 
         testResultReceiver = new TestResultReceiver(null);

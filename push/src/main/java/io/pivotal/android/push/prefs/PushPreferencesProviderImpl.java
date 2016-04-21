@@ -39,6 +39,7 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
     private static final String PROPERTY_ARE_GEOFENCES_ENABLED = "are_geofences_enabled";
     private static final String PROPERTY_BACK_END_VERSION = "back_end_version";
     private static final String PROPERTY_BACK_END_VERSION_TIME_POLLED = "back_end_version_time_polled";
+    private static final String PROPERTY_CUSTOM_USER_ID = "custom_user_id";
 
     private static final Version BACKEND_VERSION_WITH_ANALYTICS = new Version("1.3.2");
 
@@ -277,6 +278,17 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
         } else {
             editor.remove(PROPERTY_BACK_END_VERSION_TIME_POLLED);
         }
+        editor.commit();
+    }
+
+    public String getCustomUserId() {
+        return getSharedPreferences().getString(PROPERTY_CUSTOM_USER_ID, null);
+    }
+
+    public void setCustomUserId(String customUserId) {
+        final SharedPreferences prefs = getSharedPreferences();
+        final SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(PROPERTY_CUSTOM_USER_ID, customUserId);
         editor.commit();
     }
 

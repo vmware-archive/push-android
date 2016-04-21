@@ -457,7 +457,7 @@ public class GcmServiceTest extends AndroidTestCase {
         } else {
             set = null;
         }
-        return new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null, set, 0, areGeofencesEnabled);
+        return new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null, null, set, 0, areGeofencesEnabled);
     }
 
     private Properties getProperties() {

@@ -138,7 +138,7 @@ public class VersionTest extends AndroidTestCase {
         assertVersionsEqual("1.3.3.7", "1.3.3.7");
     }
 
-    public void testNull(String s1, String s2) {
+    public void testNull() {
         try {
             new Version(null);
         } catch (IllegalArgumentException e) {

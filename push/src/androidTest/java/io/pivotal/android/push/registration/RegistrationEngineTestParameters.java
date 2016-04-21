@@ -59,6 +59,8 @@ public class RegistrationEngineTestParameters {
     private String platformSecretFromUser = "S";
     private String deviceAliasInPrefs = null;
     private String deviceAliasFromUser = "S";
+    private String customUserIdInPrefs = null;
+    private String customUserIdFromUser = null;
     private String serviceUrlInPrefs = null;
     private String serviceUrlFromUser = null;
     private String packageNameInPrefs = null;
@@ -69,6 +71,7 @@ public class RegistrationEngineTestParameters {
     private String finalPlatformUuidInPrefs = null;
     private String finalPlatformSecretInPrefs = null;
     private String finalDeviceAliasInPrefs = null;
+    private String finalCustomUserIdInPrefs = null;
     private String finalPackageNameInPrefs = null;
     private String finalServiceUrlInPrefs = null;
     private Set<String> tagsFromUser = null;
@@ -88,6 +91,7 @@ public class RegistrationEngineTestParameters {
     private boolean shouldPlatformUuidHaveBeenSaved = false;
     private boolean shouldPlatformSecretHaveBeenSaved = false;
     private boolean shouldDeviceAliasHaveBeenSaved = false;
+    private boolean shouldCustomUserIdHaveBeenSaved = false;
     private boolean shouldTagsHaveBeenSaved = false;
     private boolean shouldPCFPushDeviceRegistrationBeSuccessful = false;
     private boolean shouldPCFPushNewRegistrationHaveBeenCalled = false;
@@ -130,7 +134,7 @@ public class RegistrationEngineTestParameters {
         }
 
         final FakeGcmProvider gcmProvider = new FakeGcmProvider(gcmDeviceRegistrationIdFromServer, !shouldGcmDeviceRegistrationBeSuccessful, !shouldGcmDeviceUnregistrationBeSuccessful);
-        final FakePushPreferencesProvider pushPreferencesProvider = new FakePushPreferencesProvider(gcmDeviceRegistrationIdInPrefs, pcfPushDeviceRegistrationIdInPrefs, appVersionInPrefs, gcmSenderIdInPrefs, platformUuidInPrefs, platformSecretInPrefs, deviceAliasInPrefs, packageNameInPrefs, serviceUrlInPrefs, tagsInPrefs, geofenceUpdateTimestampInPrefs, areGeofencesEnabledInPrefs);
+        final FakePushPreferencesProvider pushPreferencesProvider = new FakePushPreferencesProvider(gcmDeviceRegistrationIdInPrefs, pcfPushDeviceRegistrationIdInPrefs, appVersionInPrefs, gcmSenderIdInPrefs, platformUuidInPrefs, platformSecretInPrefs, deviceAliasInPrefs, customUserIdInPrefs, packageNameInPrefs, serviceUrlInPrefs, tagsInPrefs, geofenceUpdateTimestampInPrefs, areGeofencesEnabledInPrefs);
         final FakeGcmRegistrationApiRequest gcmRegistrationApiRequest = new FakeGcmRegistrationApiRequest(gcmProvider);
         final GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider = new GcmRegistrationApiRequestProvider(gcmRegistrationApiRequest);
         final FakeGcmUnregistrationApiRequest gcmUnregistrationApiRequest = new FakeGcmUnregistrationApiRequest(gcmProvider);
@@ -142,7 +146,7 @@ public class RegistrationEngineTestParameters {
         final GeofenceEngine geofenceEngine = mock(GeofenceEngine.class);
         final GeofenceStatusUtil geofenceStatusUtil = mock(GeofenceStatusUtil.class);
         final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, PCFPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
-        final PushParameters parameters = new PushParameters(gcmSenderIdFromUser, platformUuidFromUser, platformSecretFromUser, serviceUrlFromUser, deviceAliasFromUser, tagsFromUser, areGeofencesEnabledFromUser, Pivotal.SslCertValidationMode.DEFAULT, null, null);
+        final PushParameters parameters = new PushParameters(gcmSenderIdFromUser, platformUuidFromUser, platformSecretFromUser, serviceUrlFromUser, deviceAliasFromUser, customUserIdFromUser, tagsFromUser, areGeofencesEnabledFromUser, Pivotal.SslCertValidationMode.DEFAULT, null, null);
 
         doAnswer(new Answer<Void>() {
 
@@ -235,6 +239,7 @@ public class RegistrationEngineTestParameters {
         AndroidTestCase.assertEquals(shouldPlatformUuidHaveBeenSaved, pushPreferencesProvider.wasPlatformUuidSaved());
         AndroidTestCase.assertEquals(shouldPlatformSecretHaveBeenSaved, pushPreferencesProvider.wasPlatformSecretSaved());
         AndroidTestCase.assertEquals(shouldDeviceAliasHaveBeenSaved, pushPreferencesProvider.wasDeviceAliasSaved());
+        AndroidTestCase.assertEquals(shouldCustomUserIdHaveBeenSaved, pushPreferencesProvider.wasCustomUserIdSaved());
         AndroidTestCase.assertEquals(shouldPackageNameHaveBeenSaved, pushPreferencesProvider.isWasPackageNameSaved());
         AndroidTestCase.assertEquals(shouldServiceUrlHaveBeenSaved, pushPreferencesProvider.wasServiceUrlSaved());
         AndroidTestCase.assertEquals(shouldTagsHaveBeenSaved, pushPreferencesProvider.wereTagsSaved());
@@ -249,6 +254,7 @@ public class RegistrationEngineTestParameters {
         AndroidTestCase.assertEquals(finalPlatformUuidInPrefs, pushPreferencesProvider.getPlatformUuid());
         AndroidTestCase.assertEquals(finalPlatformSecretInPrefs, pushPreferencesProvider.getPlatformSecret());
         AndroidTestCase.assertEquals(finalDeviceAliasInPrefs, pushPreferencesProvider.getDeviceAlias());
+        AndroidTestCase.assertEquals(finalCustomUserIdInPrefs, pushPreferencesProvider.getCustomUserId());
         AndroidTestCase.assertEquals(finalServiceUrlInPrefs, pushPreferencesProvider.getServiceUrl());
         AndroidTestCase.assertEquals(finalAppVersionInPrefs, pushPreferencesProvider.getAppVersion());
         AndroidTestCase.assertEquals(finalPackageNameInPrefs, pushPreferencesProvider.getPackageName());
@@ -279,6 +285,14 @@ public class RegistrationEngineTestParameters {
         deviceAliasFromUser = fromUser;
         finalDeviceAliasInPrefs = finalValue;
         shouldDeviceAliasHaveBeenSaved = shouldHaveBeenSaved;
+        return this;
+    }
+
+    public RegistrationEngineTestParameters setupCustomUserId(String inPrefs, String fromUser, String finalValue, boolean shouldHaveBeenSaved) {
+        customUserIdInPrefs = inPrefs;
+        customUserIdFromUser = fromUser;
+        finalCustomUserIdInPrefs = finalValue;
+        shouldCustomUserIdHaveBeenSaved = shouldHaveBeenSaved;
         return this;
     }
 

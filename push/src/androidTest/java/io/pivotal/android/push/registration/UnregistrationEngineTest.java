@@ -37,6 +37,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
     private static final String TEST_PLATFORM_UUID = "TEST_PLATFORM_UUID";
     private static final String TEST_PLATFORM_SECRET = "TEST_PLATFORM_SECRET";
     private static final String TEST_DEVICE_ALIAS = "TEST_DEVICE_ALIAS";
+    private static final String TEST_CUSTOM_USER_ID = "TEST_CUSTOM_USER_ID";
     private static final String TEST_SERVICE_URL = "http://test.com";
     private static final Set<String> TEST_TAGS = new HashSet<>();
 
@@ -55,8 +56,8 @@ public class UnregistrationEngineTest extends AndroidTestCase {
         super.setUp();
         System.setProperty("dexmaker.dexcache", mContext.getCacheDir().getPath());
         TEST_TAGS.addAll(Arrays.asList("DONKEYS", "BURROS"));
-        parameters = new PushParameters(TEST_GCM_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, TEST_TAGS, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
-        pushPreferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null, null, 0, false);
+        parameters = new PushParameters(TEST_GCM_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, TEST_CUSTOM_USER_ID, TEST_TAGS, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
+        pushPreferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null, null, null, 0, false);
         gcmProvider = new FakeGcmProvider(TEST_GCM_DEVICE_REGISTRATION_ID_1);
         gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(new FakeGcmUnregistrationApiRequest(gcmProvider));
         pcfPushUnregisterDeviceApiRequestProvider = new PCFPushUnregisterDeviceApiRequestProvider(new FakePCFPushUnregisterDeviceApiRequest());
@@ -141,7 +142,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
     public void testNullServiceUrl() {
         try {
             final UnregistrationEngine engine = new UnregistrationEngine(context,gcmProvider, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, pcfPushUnregisterDeviceApiRequestProvider, geofenceUpdater, geofenceStatusUtil);
-            parameters = new PushParameters(TEST_GCM_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, null, TEST_DEVICE_ALIAS, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
+            parameters = new PushParameters(TEST_GCM_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, null, TEST_DEVICE_ALIAS, TEST_CUSTOM_USER_ID, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
             engine.unregisterDevice(parameters, getListenerForUnregistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
