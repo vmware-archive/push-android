@@ -156,6 +156,38 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
         assertTrue(delayedLoop.isSuccess());
     }
 
+    public void testSuccessfulNewDeviceRegistrationRequestWithNullDeviceAlias() {
+        makeListenersForSuccessfulRequestFromNetwork(true, 200, HTTP_POST, null, null, null);
+        final PCFPushRegistrationApiRequestImpl request = new PCFPushRegistrationApiRequestImpl(getContext(), networkWrapper);
+        request.startNewDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, null, getParametersWithDeviceAlias(null), listener);
+        delayedLoop.startLoop();
+        assertTrue(delayedLoop.isSuccess());
+    }
+
+    public void testSuccessfulUpdateDeviceRegistrationRequestWithNullDeviceAlias() {
+        makeListenersForSuccessfulRequestFromNetwork(true, 200, HTTP_PUT, null, null, null);
+        final PCFPushRegistrationApiRequestImpl request = new PCFPushRegistrationApiRequestImpl(getContext(), networkWrapper);
+        request.startUpdateDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, null, getParametersWithDeviceAlias(null), listener);
+        delayedLoop.startLoop();
+        assertTrue(delayedLoop.isSuccess());
+    }
+
+    public void testSuccessfulNewDeviceRegistrationRequestWithNullCustomUserId() {
+        makeListenersForSuccessfulRequestFromNetwork(true, 200, HTTP_POST, null, null, null);
+        final PCFPushRegistrationApiRequestImpl request = new PCFPushRegistrationApiRequestImpl(getContext(), networkWrapper);
+        request.startNewDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, null, getParametersWithCustomUserId(null), listener);
+        delayedLoop.startLoop();
+        assertTrue(delayedLoop.isSuccess());
+    }
+
+    public void testSuccessfulUpdateDeviceRegistrationRequestWithNullCustomUserId() {
+        makeListenersForSuccessfulRequestFromNetwork(true, 200, HTTP_PUT, null, null, null);
+        final PCFPushRegistrationApiRequestImpl request = new PCFPushRegistrationApiRequestImpl(getContext(), networkWrapper);
+        request.startUpdateDeviceRegistration(TEST_GCM_DEVICE_REGISTRATION_ID, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, null, getParametersWithCustomUserId(null), listener);
+        delayedLoop.startLoop();
+        assertTrue(delayedLoop.isSuccess());
+    }
+
     public void testSuccessfulNewDeviceRegistrationRequestSslTrustAll() {
         makeListenersForSuccessfulRequestFromNetworkSsl(true, 200, HTTP_POST, null, null, null);
         final PCFPushRegistrationApiRequestImpl request = new PCFPushRegistrationApiRequestImpl(getContext(), networkWrapper);
@@ -434,9 +466,15 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
 
                 final byte[] requestData = FakeHttpURLConnection.getRequestData();
                 assertNotNull(requestData);
+                final String requestDataString = new String(requestData);
+
                 if (FakeHttpURLConnection.getReceivedHttpMethod().equals("PUT")) {
+
+                    assertTrue(requestDataString.contains("\"custom_user_id\""));
+                    assertTrue(requestDataString.contains("\"device_alias\""));
+
                     final Gson gson = new Gson();
-                    final PCFPushApiRegistrationPutRequestData model = gson.fromJson(new String(requestData), PCFPushApiRegistrationPutRequestData.class);
+                    final PCFPushApiRegistrationPutRequestData model = gson.fromJson(requestDataString, PCFPushApiRegistrationPutRequestData.class);
                     assertNotNull(model);
 
                     if (expectedSubscribeTags == null) {
@@ -453,8 +491,11 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
 
                 } else if (FakeHttpURLConnection.getReceivedHttpMethod().equals("POST")) {
 
+                    assertTrue(requestDataString.contains("\"custom_user_id\""));
+                    assertTrue(requestDataString.contains("\"device_alias\""));
+
                     final Gson gson = new Gson();
-                    final PCFPushApiRegistrationPostRequestData model = gson.fromJson(new String(requestData), PCFPushApiRegistrationPostRequestData.class);
+                    final PCFPushApiRegistrationPostRequestData model = gson.fromJson(requestDataString, PCFPushApiRegistrationPostRequestData.class);
                     assertNotNull(model);
 
                     if (expectedSubscribeTags == null) {
@@ -481,6 +522,14 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
                 delayedLoop.flagSuccess();
             }
         };
+    }
+
+    private PushParameters getParametersWithDeviceAlias(String deviceAlias) {
+        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, deviceAlias, TEST_CUSTOM_USER_ID, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
+    }
+
+    private PushParameters getParametersWithCustomUserId(String customUserId) {
+        return new PushParameters(TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, customUserId, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
     }
 
     private PushParameters getParameters() {

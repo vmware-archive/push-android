@@ -47,7 +47,7 @@ public class PushParameters {
      *                       See the pivotal.push.serviceUrl" property.
      * @param deviceAlias    A developer-defined "device alias" which can be used to designate this device, or class.
      *                       of devices, in push or notification campaigns. May not be set to `null`. May be set to empty.
-     * @param customUserId     A developer-defined "custom user ID" which can be used to identify the user using this device.
+     * @param customUserId   A developer-defined "custom user ID" which can be used to identify the user using this device.
      *                       Can be used to associate multiple devices with the same user if the share a custom user ID. May be set to null or empty.
      * @param tags           A set of tags to register to.  You should always register all tags that you want to listen to, even if you have
      *                       already subscribed to them.  If you exclude any subscribed tags in a registration request, then those tags
@@ -75,8 +75,16 @@ public class PushParameters {
         this.platformUuid = platformUuid;
         this.platformSecret = platformSecret;
         this.serviceUrl = serviceUrl;
-        this.deviceAlias = deviceAlias;
-        this.customUserId = customUserId;
+        if (deviceAlias != null && deviceAlias.trim().isEmpty()) {
+            this.deviceAlias = null;
+        } else {
+            this.deviceAlias = deviceAlias;
+        }
+        if (customUserId != null && customUserId.trim().isEmpty()) {
+            this.customUserId = null;
+        } else {
+            this.customUserId = customUserId;
+        }
         this.tags = Util.lowercaseTags(tags);
         this.areGeofencesEnabled = areGeofencesEnabled;
         this.sslCertValidationMode = sslCertValidationMode;

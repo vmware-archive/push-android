@@ -248,11 +248,17 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
         } else {
             data.setDeviceAlias(parameters.getDeviceAlias());
         }
+
+        if (parameters.getCustomUserId() == null) {
+            data.setCustomUserId("");
+        } else {
+            data.setCustomUserId(parameters.getCustomUserId());
+        }
+
         data.setDeviceModel(Build.MODEL);
         data.setDeviceManufacturer(Build.MANUFACTURER);
         data.setOsVersion(Build.VERSION.RELEASE);
         data.setRegistrationToken(deviceRegistrationId);
-        data.setCustomUserId(parameters.getCustomUserId());
         return data;
     }
 

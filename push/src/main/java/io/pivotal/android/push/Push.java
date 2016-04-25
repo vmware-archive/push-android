@@ -138,7 +138,6 @@ public class Push {
         startRegistration(deviceAlias, tags, areGeofencesEnabled, null);
     }
 
-
     /**
      * Asynchronously registers the device and application for receiving push notifications.  If the application
      * is already registered then will do nothing.  If some of the registration parameters are different then
