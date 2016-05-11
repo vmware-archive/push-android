@@ -6,6 +6,7 @@ package io.pivotal.android.push.registration;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.support.annotation.NonNull;
 import android.test.AndroidTestCase;
 
 import org.mockito.invocation.InvocationOnMock;
@@ -273,6 +274,31 @@ public class RegistrationEngineTest extends AndroidTestCase {
         final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
         engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, "", null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null), getListenerForRegistration(true));
         semaphore.acquire();
+    }
+
+    public void test254LongCustomUserId() throws InterruptedException {
+        final String longString = getStringWithLength(254);
+        final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+        engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, longString, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null), getListenerForRegistration(true));
+        semaphore.acquire();
+    }
+
+    public void test255LongCustomUserId() throws InterruptedException {
+        final String longString = getStringWithLength(255);
+        final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+        engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, longString, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null), getListenerForRegistration(true));
+        semaphore.acquire();
+    }
+
+    public void test256LongCustomUserId() {
+        try {
+            final String longString = getStringWithLength(256);
+            final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+            engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, longString, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null), getListenerForRegistration(false));
+            fail("should not have succeeded");
+        } catch (IllegalArgumentException e) {
+            // success
+        }
     }
 
     public void testEmptyServiceUrl() throws InterruptedException {
@@ -2608,5 +2634,16 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 semaphore.release();
             }
         };
+    }
+
+    @NonNull
+    private String getStringWithLength(int length) {
+        final StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < length; i++) {
+            sb.append("a");
+        }
+        final String result = sb.toString();
+        assertEquals(length, result.length());
+        return result;
     }
 }

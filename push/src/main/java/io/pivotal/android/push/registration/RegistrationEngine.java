@@ -63,6 +63,7 @@ import io.pivotal.android.push.version.VersionProvider;
  */
 public class RegistrationEngine {
 
+    public static final int MAXIMUM_CUSTOM_USER_ID_LENGTH = 255;
     private Context context;
     private GcmProvider gcmProvider;
     private PushPreferencesProvider pushPreferencesProvider;
@@ -286,6 +287,9 @@ public class RegistrationEngine {
         }
         if (parameters.getServiceUrl() == null) {
             throw new IllegalArgumentException("parameters.serviceUrl may not be null");
+        }
+        if (parameters.getCustomUserId() != null && parameters.getCustomUserId().length() > MAXIMUM_CUSTOM_USER_ID_LENGTH) {
+            throw new IllegalArgumentException("customUserId must be fewer than or equal to "+ MAXIMUM_CUSTOM_USER_ID_LENGTH + " characters");
         }
     }
 
