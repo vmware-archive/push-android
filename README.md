@@ -3,7 +3,7 @@ Android Push Client SDK
 
 The Push SDK requires API level 16 or greater.
 
-The Push Android SDK v1.4.0 is compatible with the Push Notification Service 1.4.0.
+The Push Android SDK v1.6.0 is compatible with the Push Notification Service 1.6.0.
 
 Push SDK Usage
 --------------
