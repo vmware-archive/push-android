@@ -6,7 +6,6 @@ package io.pivotal.android.push.registration;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.test.AndroidTestCase;
-import android.test.MoreAsserts;
 
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -18,9 +17,6 @@ import java.util.Set;
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.api.FakePCFPushUnregisterDeviceApiRequest;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestProvider;
-import io.pivotal.android.push.gcm.FakeGcmProvider;
-import io.pivotal.android.push.gcm.FakeGcmUnregistrationApiRequest;
-import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
 import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
@@ -76,7 +72,7 @@ public class UnregistrationEngineTestParameters {
 
     public void run() throws Exception {
 
-        final FakeGcmProvider gcmProvider = new FakeGcmProvider(null, true, !shouldGcmDeviceUnregistrationBeSuccessful);
+//        final FakeGcmProvider gcmProvider = new FakeGcmProvider(null, true, !shouldGcmDeviceUnregistrationBeSuccessful);
         final FakePushPreferencesProvider pushPreferencesProvider;
         final GeofenceUpdater geofenceUpdater = mock(GeofenceUpdater.class);
         final GeofenceStatusUtil geofenceStatusUtil = mock(GeofenceStatusUtil.class);
@@ -118,12 +114,10 @@ public class UnregistrationEngineTestParameters {
         }).when(geofenceUpdater).clearGeofencesFromStoreOnly(any(GeofenceUpdater.GeofenceUpdaterListener.class));
 
         if (startingPCFPushDeviceRegistrationIdInPrefs == null) {
-            pushPreferencesProvider = new FakePushPreferencesProvider(null, startingPCFPushDeviceRegistrationIdInPrefs, -1, null, null, null, null, null, null, null, null, lastGeofenceUpdateTimeInPrefs, areGeofencesEnabledInPrefs);
+            pushPreferencesProvider = new FakePushPreferencesProvider(null, startingPCFPushDeviceRegistrationIdInPrefs, null, null, null, null, null, null, null, lastGeofenceUpdateTimeInPrefs, areGeofencesEnabledInPrefs);
         } else {
             pushPreferencesProvider = new FakePushPreferencesProvider(GCM_DEVICE_ID_IN_PREFS,
                     startingPCFPushDeviceRegistrationIdInPrefs,
-                    APP_VERSION_IN_PREFS,
-                    GCM_SENDER_ID_IN_PREFS,
                     PLATFORM_UUID_IN_PREFS,
                     PLATFORM_SECRET_IN_PREFS,
                     DEVICE_ALIAS_IN_PREFS,
@@ -135,44 +129,38 @@ public class UnregistrationEngineTestParameters {
                     areGeofencesEnabledInPrefs);
         }
 
-        final FakeGcmUnregistrationApiRequest gcmUnregistrationApiRequest = new FakeGcmUnregistrationApiRequest(gcmProvider);
-        final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(gcmUnregistrationApiRequest);
         final FakePCFPushUnregisterDeviceApiRequest fakePCFPushUnregisterDeviceApiRequest = new FakePCFPushUnregisterDeviceApiRequest(shouldPCFPushDeviceUnregistrationBeSuccessful);
         final PCFPushUnregisterDeviceApiRequestProvider PCFPushUnregisterDeviceApiRequestProvider = new PCFPushUnregisterDeviceApiRequestProvider(fakePCFPushUnregisterDeviceApiRequest);
-        final UnregistrationEngine engine = new UnregistrationEngine(context, gcmProvider, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, PCFPushUnregisterDeviceApiRequestProvider, geofenceUpdater, geofenceStatusUtil);
+//        final UnregistrationEngine engine = new UnregistrationEngine(context, gcmProvider, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, PCFPushUnregisterDeviceApiRequestProvider, geofenceUpdater, geofenceStatusUtil);
 
-        engine.unregisterDevice(parametersFromUser, new UnregistrationListener() {
-
-            @Override
-            public void onUnregistrationComplete() {
-                if (shouldUnregistrationHaveSucceeded) {
-                    delayedLoop.flagSuccess();
-                } else {
-                    delayedLoop.flagFailure();
-                }
-            }
-
-            @Override
-            public void onUnregistrationFailed(String reason) {
-                if (!shouldUnregistrationHaveSucceeded) {
-                    delayedLoop.flagSuccess();
-                } else {
-                    delayedLoop.flagFailure();
-                }
-            }
-        });
+//        engine.unregisterDevice(parametersFromUser, new UnregistrationListener() {
+//
+//            @Override
+//            public void onUnregistrationComplete() {
+//                if (shouldUnregistrationHaveSucceeded) {
+//                    delayedLoop.flagSuccess();
+//                } else {
+//                    delayedLoop.flagFailure();
+//                }
+//            }
+//
+//            @Override
+//            public void onUnregistrationFailed(String reason) {
+//                if (!shouldUnregistrationHaveSucceeded) {
+//                    delayedLoop.flagSuccess();
+//                } else {
+//                    delayedLoop.flagFailure();
+//                }
+//            }
+//        });
         delayedLoop.startLoop();
 
         AndroidTestCase.assertTrue(delayedLoop.isSuccess());
 
         if (shouldGcmDeviceUnregistrationBeSuccessful) {
-            AndroidTestCase.assertNull(pushPreferencesProvider.getGcmDeviceRegistrationId());
-            AndroidTestCase.assertNull(pushPreferencesProvider.getGcmSenderId());
-            AndroidTestCase.assertEquals(-1, pushPreferencesProvider.getAppVersion());
+            AndroidTestCase.assertNull(pushPreferencesProvider.getFcmTokenId());
         } else {
-            AndroidTestCase.assertNotNull(pushPreferencesProvider.getGcmDeviceRegistrationId());
-            AndroidTestCase.assertNotNull(pushPreferencesProvider.getGcmSenderId());
-            MoreAsserts.assertNotEqual(-1, pushPreferencesProvider.getAppVersion());
+            AndroidTestCase.assertNotNull(pushPreferencesProvider.getFcmTokenId());
         }
 
         if (pcfPushDeviceRegistrationIdResultant == null) {
@@ -223,8 +211,8 @@ public class UnregistrationEngineTestParameters {
 
         AndroidTestCase.assertNull(pushPreferencesProvider.getPackageName());
         AndroidTestCase.assertEquals(shouldPCFPushUnregisterHaveBeenCalled, fakePCFPushUnregisterDeviceApiRequest.wasUnregisterCalled());
-        AndroidTestCase.assertFalse(gcmProvider.wasRegisterCalled());
-        AndroidTestCase.assertTrue(gcmProvider.wasUnregisterCalled());
+//        AndroidTestCase.assertFalse(gcmProvider.wasRegisterCalled());
+//        AndroidTestCase.assertTrue(gcmProvider.wasUnregisterCalled());
         verifyNoMoreInteractions(geofenceUpdater);
         verifyNoMoreInteractions(geofenceStatusUtil);
     }

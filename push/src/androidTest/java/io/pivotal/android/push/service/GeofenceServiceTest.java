@@ -178,14 +178,13 @@ public class GeofenceServiceTest extends AndroidTestCase {
     }
 
     private FakePushPreferencesProvider getPreferences(long timestamp, boolean areGeofencesEnabled) {
-        return new FakePushPreferencesProvider("", TEST_DEVICE_UUID, 0, "", "", "", "", "", "", "", null, timestamp, areGeofencesEnabled);
+        return new FakePushPreferencesProvider("", TEST_DEVICE_UUID, "", "", "", "", "", "", null, timestamp, areGeofencesEnabled);
     }
 
     private Properties getProperties() {
         // TODO - are properties still needed for this test?
         final Properties properties = new Properties();
         properties.setProperty(Pivotal.Keys.SERVICE_URL, "http://some.url");
-        properties.setProperty(Pivotal.Keys.GCM_SENDER_ID, "fake_sender_id");
         properties.setProperty(Pivotal.Keys.PLATFORM_UUID, "fake_platform_uuid");
         properties.setProperty(Pivotal.Keys.PLATFORM_SECRET, "fake_platform_secret");
         return properties;

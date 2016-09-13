@@ -52,10 +52,6 @@ public class PivotalTest extends AndroidTestCase {
         assertEquals("test_platform_secret", Pivotal.getPlatformSecret(getContext()));
     }
 
-    public void testGetGcmSenderId() {
-        assertEquals("test_gcm_sender_id", Pivotal.getGcmSenderId(getContext()));
-    }
-
     public void testGetServiceUrl() {
         assertEquals("http://example.com", Pivotal.getServiceUrl(getContext()));
     }

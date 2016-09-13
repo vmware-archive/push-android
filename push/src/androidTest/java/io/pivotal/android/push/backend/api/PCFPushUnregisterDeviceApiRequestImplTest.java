@@ -19,7 +19,6 @@ public class PCFPushUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
 
     private static final long TEN_SECOND_TIMEOUT = 10000L;
     private static final String TEST_PCF_PUSH_DEVICE_REGISTRATION_ID = "TEST_PCF_PUSH_DEVICE_REGISTRATION_ID";
-    private static final String TEST_GCM_SENDER_ID = "TEST_GCM_SENDER_ID";
     private static final String TEST_PLATFORM_UUID = "TEST_PLATFORM_UUID";
     private static final String TEST_PLATFORM_SECRET = "TEST_PLATFORM_SECRET";
     private static final String TEST_DEVICE_ALIAS = "TEST_DEVICE_ALIAS";
@@ -33,7 +32,7 @@ public class PCFPushUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
     @Override
     protected void setUp() throws Exception {
         super.setUp();
-        parameters = new PushParameters(TEST_GCM_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
+        parameters = new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
         networkWrapper = new FakeNetworkWrapper();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
         FakeHttpURLConnection.reset();
@@ -102,7 +101,7 @@ public class PCFPushUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
         requestHeaders.put("FUN HEADER", "FUN VALUE");
         requestHeaders.put("SAD HEADER", "SAD VALUE");
         makeListenersForSuccessfulRequestFromNetwork(true, 200, requestHeaders);
-        parameters = new PushParameters(TEST_GCM_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, requestHeaders);
+        parameters = new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, requestHeaders);
         final PCFPushUnregisterDeviceApiRequestImpl request = new PCFPushUnregisterDeviceApiRequestImpl(getContext(), networkWrapper);
         request.startUnregisterDevice(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, parameters, PCFPushUnregisterDeviceListener);
         delayedLoop.startLoop();
@@ -110,7 +109,7 @@ public class PCFPushUnregisterDeviceApiRequestImplTest extends AndroidTestCase {
     }
 
     public void testSuccessfulRequestSsl() {
-        parameters = new PushParameters(TEST_GCM_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null, null, true, Pivotal.SslCertValidationMode.TRUST_ALL, null, null);
+        parameters = new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, null, null, true, Pivotal.SslCertValidationMode.TRUST_ALL, null, null);
         makeListenersForSuccessfulRequestFromNetworkSsl(true, 200);
         final PCFPushUnregisterDeviceApiRequestImpl request = new PCFPushUnregisterDeviceApiRequestImpl(getContext(), networkWrapper);
         request.startUnregisterDevice(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, parameters, PCFPushUnregisterDeviceListener);

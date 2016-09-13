@@ -17,6 +17,9 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.firebase.iid.FirebaseInstanceId;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -33,14 +36,6 @@ import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequest;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestImpl;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestProvider;
 import io.pivotal.android.push.backend.geofence.PCFPushGetGeofenceUpdatesApiRequest;
-import io.pivotal.android.push.gcm.GcmProvider;
-import io.pivotal.android.push.gcm.GcmRegistrationApiRequest;
-import io.pivotal.android.push.gcm.GcmRegistrationApiRequestImpl;
-import io.pivotal.android.push.gcm.GcmRegistrationApiRequestProvider;
-import io.pivotal.android.push.gcm.GcmUnregistrationApiRequest;
-import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestImpl;
-import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
-import io.pivotal.android.push.gcm.RealGcmProvider;
 import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofencePersistentStore;
 import io.pivotal.android.push.geofence.GeofenceRegistrar;
@@ -54,7 +49,6 @@ import io.pivotal.android.push.receiver.AnalyticsEventsSenderAlarmProviderImpl;
 import io.pivotal.android.push.registration.RegistrationEngine;
 import io.pivotal.android.push.registration.RegistrationListener;
 import io.pivotal.android.push.registration.SubscribeToTagsListener;
-import io.pivotal.android.push.registration.UnregistrationEngine;
 import io.pivotal.android.push.registration.UnregistrationListener;
 import io.pivotal.android.push.service.AnalyticsEventService;
 import io.pivotal.android.push.util.DebugUtil;
@@ -66,8 +60,6 @@ import io.pivotal.android.push.util.ServiceStarter;
 import io.pivotal.android.push.util.ServiceStarterImpl;
 import io.pivotal.android.push.util.TimeProvider;
 import io.pivotal.android.push.version.GeofenceStatus;
-import io.pivotal.android.push.version.VersionProvider;
-import io.pivotal.android.push.version.VersionProviderImpl;
 
 /**
  * Entry-point for the Push Library functionality.  Requires Google Play Services,
@@ -174,16 +166,10 @@ public class Push {
                                   final boolean areGeofencesEnabled,
                                   @Nullable final RegistrationListener listener) {
 
-        final GcmProvider gcmProvider = new RealGcmProvider(context);
         final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
-        final GcmRegistrationApiRequest dummyGcmRegistrationApiRequest = new GcmRegistrationApiRequestImpl(context, gcmProvider);
-        final GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider = new GcmRegistrationApiRequestProvider(dummyGcmRegistrationApiRequest);
-        final GcmUnregistrationApiRequest dummyGcmUnregistrationApiRequest = new GcmUnregistrationApiRequestImpl(context, gcmProvider);
-        final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(dummyGcmUnregistrationApiRequest);
         final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
         final PCFPushRegistrationApiRequest dummyPCFPushRegistrationApiRequest = new PCFPushRegistrationApiRequestImpl(context, networkWrapper);
         final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(dummyPCFPushRegistrationApiRequest);
-        final VersionProvider versionProvider = new VersionProviderImpl(context);
         final PushParameters parameters = getPushParameters(deviceAlias, customUserId, tags, areGeofencesEnabled, pushPreferencesProvider.getRequestHeaders());
         final PCFPushGetGeofenceUpdatesApiRequest geofenceUpdatesApiRequest = new PCFPushGetGeofenceUpdatesApiRequest(context, networkWrapper);
         final GeofenceRegistrar geofenceRegistrar = new GeofenceRegistrar(context);
@@ -198,6 +184,9 @@ public class Push {
 
         verifyRegistrationArguments(parameters);
 
+        // TODO: Check if token is ready
+        // TODO: If ready, run engine, else save parameters and wait for token
+
         final Runnable runnable = new Runnable() {
 
             @Override
@@ -205,12 +194,10 @@ public class Push {
                 try {
                     final RegistrationEngine registrationEngine = new RegistrationEngine(context,
                             context.getPackageName(),
-                            gcmProvider,
+                            FirebaseInstanceId.getInstance(),
+                            GoogleApiAvailability.getInstance(),
                             pushPreferencesProvider,
-                            gcmRegistrationApiRequestProvider,
-                            gcmUnregistrationApiRequestProvider,
                             PCFPushRegistrationApiRequestProvider,
-                            versionProvider,
                             geofenceUpdater,
                             geofenceEngine,
                             geofenceStatusUtil);
@@ -230,21 +217,17 @@ public class Push {
                                              boolean areGeofencesEnabled,
                                              @Nullable Map<String, String> requestHeaders) {
 
-        final String gcmSenderId = Pivotal.getGcmSenderId(context);
         final String platformUuid = Pivotal.getPlatformUuid(context);
         final String platformSecret = Pivotal.getPlatformSecret(context);
         final String serviceUrl = Pivotal.getServiceUrl(context);
         final Pivotal.SslCertValidationMode sslCertValidationMode = Pivotal.getSslCertValidationMode(context);
         final List<String> pinnedCertificateNames = Pivotal.getPinnedSslCertificateNames(context);
-        return new PushParameters(gcmSenderId, platformUuid, platformSecret, serviceUrl, deviceAlias, customUserId, tags, areGeofencesEnabled, sslCertValidationMode, pinnedCertificateNames, requestHeaders);
+        return new PushParameters(platformUuid, platformSecret, serviceUrl, deviceAlias, customUserId, tags, areGeofencesEnabled, sslCertValidationMode, pinnedCertificateNames, requestHeaders);
     }
 
     private void verifyRegistrationArguments(@NonNull PushParameters parameters) {
         if (parameters == null) {
             throw new IllegalArgumentException("parameters may not be null");
-        }
-        if (parameters.getGcmSenderId() == null || parameters.getGcmSenderId().isEmpty()) {
-            throw new IllegalArgumentException("parameters.senderId may not be null or empty");
         }
         if (parameters.getPlatformUuid() == null || parameters.getPlatformUuid().isEmpty()) {
             throw new IllegalArgumentException("parameters.platformUuid may not be null or empty");
@@ -374,9 +357,6 @@ public class Push {
         final PushParameters parameters = getPushParameters(null, null, null, areGeofencesEnabled, pushPreferencesProvider.getRequestHeaders());
         verifyUnregistrationArguments(parameters);
 
-        final GcmProvider gcmProvider = new RealGcmProvider(context);
-        final GcmUnregistrationApiRequest dummyGcmUnregistrationApiRequest = new GcmUnregistrationApiRequestImpl(context, gcmProvider);
-        final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(dummyGcmUnregistrationApiRequest);
         final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
         final PCFPushUnregisterDeviceApiRequest dummyPCFPushUnregisterDeviceApiRequest = new PCFPushUnregisterDeviceApiRequestImpl(context, networkWrapper);
         final PCFPushUnregisterDeviceApiRequestProvider pcfPushUnregisterDeviceApiRequestProvider = new PCFPushUnregisterDeviceApiRequestProvider(dummyPCFPushUnregisterDeviceApiRequest);
@@ -394,15 +374,15 @@ public class Push {
             @Override
             public void run() {
                 try {
-                    final UnregistrationEngine unregistrationEngine = new UnregistrationEngine(
-                            context,
-                            gcmProvider,
-                            pushPreferencesProvider,
-                            gcmUnregistrationApiRequestProvider,
-                            pcfPushUnregisterDeviceApiRequestProvider,
-                            geofenceUpdater,
-                            geofenceStatusUtil);
-                    unregistrationEngine.unregisterDevice(parameters, listener);
+//                    final UnregistrationEngine unregistrationEngine = new UnregistrationEngine(
+//                            context,
+//                            gcmProvider,
+//                            pushPreferencesProvider,
+//                            gcmUnregistrationApiRequestProvider,
+//                            pcfPushUnregisterDeviceApiRequestProvider,
+//                            geofenceUpdater,
+//                            geofenceStatusUtil);
+//                    unregistrationEngine.unregisterDevice(parameters, listener);
                 } catch (Exception e) {
                     Logger.ex("Push SDK unregistration failed", e);
                 }
@@ -571,5 +551,10 @@ public class Push {
         } else {
             Logger.w("Note: notification has no receiptId. No analytics event will be logged for opening this notification.");
         }
+    }
+
+    public synchronized void setFcmInstanceTokenReady() {
+        // isFcmTokenReady = true;
+        // TODO: If we got parameters, initiate engine
     }
 }

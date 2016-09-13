@@ -457,13 +457,12 @@ public class GcmServiceTest extends AndroidTestCase {
         } else {
             set = null;
         }
-        return new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null, null, set, 0, areGeofencesEnabled);
+        return new FakePushPreferencesProvider(null, null, null, null, null, null, null, null, set, 0, areGeofencesEnabled);
     }
 
     private Properties getProperties() {
         final Properties properties = new Properties();
         properties.setProperty(Pivotal.Keys.SERVICE_URL, "http://some.url");
-        properties.setProperty(Pivotal.Keys.GCM_SENDER_ID, "fake_sender_id");
         properties.setProperty(Pivotal.Keys.PLATFORM_UUID, "fake_platform_uuid");
         properties.setProperty(Pivotal.Keys.PLATFORM_SECRET, "fake_platform_secret");
         properties.setProperty(Pivotal.Keys.ARE_ANALYTICS_ENABLED, Boolean.toString(true));
