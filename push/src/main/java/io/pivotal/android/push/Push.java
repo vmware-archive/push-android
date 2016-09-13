@@ -49,6 +49,7 @@ import io.pivotal.android.push.receiver.AnalyticsEventsSenderAlarmProviderImpl;
 import io.pivotal.android.push.registration.RegistrationEngine;
 import io.pivotal.android.push.registration.RegistrationListener;
 import io.pivotal.android.push.registration.SubscribeToTagsListener;
+import io.pivotal.android.push.registration.UnregistrationEngine;
 import io.pivotal.android.push.registration.UnregistrationListener;
 import io.pivotal.android.push.service.AnalyticsEventService;
 import io.pivotal.android.push.util.DebugUtil;
@@ -374,15 +375,13 @@ public class Push {
             @Override
             public void run() {
                 try {
-//                    final UnregistrationEngine unregistrationEngine = new UnregistrationEngine(
-//                            context,
-//                            gcmProvider,
-//                            pushPreferencesProvider,
-//                            gcmUnregistrationApiRequestProvider,
-//                            pcfPushUnregisterDeviceApiRequestProvider,
-//                            geofenceUpdater,
-//                            geofenceStatusUtil);
-//                    unregistrationEngine.unregisterDevice(parameters, listener);
+                    final UnregistrationEngine unregistrationEngine = new UnregistrationEngine(
+                            context,
+                            pushPreferencesProvider,
+                            pcfPushUnregisterDeviceApiRequestProvider,
+                            geofenceUpdater,
+                            geofenceStatusUtil);
+                    unregistrationEngine.unregisterDevice(parameters, listener);
                 } catch (Exception e) {
                     Logger.ex("Push SDK unregistration failed", e);
                 }
