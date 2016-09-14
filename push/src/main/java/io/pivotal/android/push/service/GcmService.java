@@ -135,26 +135,26 @@ public class GcmService extends IntentService {
                 Logger.i("Ignoring message. Geofences are disabled.");
             }
 
-        } else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-            if (extras.containsKey(KEY_HEARTBEAT)) {
-                Logger.i("GcmService has received a heartbeat push message.");
-                enqueueHeartbeatReceivedEvent(intent);
-                onReceiveHeartbeat(extras);
-
-            } else {
-                Logger.i("GcmService has received a push message.");
-                enqueueMessageReceivedEvent(intent);
-                onReceiveMessage(extras);
-            }
-
-        } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
-            Logger.i("GcmService has received a DELETED push message.");
-            onReceiveMessageDeleted(extras);
-
-        } else if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
-            Logger.e("GcmService has received an ERROR push message.");
-            onReceiveMessageSendError(extras);
-        }
+        } // else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
+//            if (extras.containsKey(KEY_HEARTBEAT)) {
+//                Logger.i("GcmService has received a heartbeat push message.");
+//                enqueueHeartbeatReceivedEvent(intent);
+//                onReceiveHeartbeat(extras);
+//
+//            } else {
+//                Logger.i("GcmService has received a push message.");
+//                enqueueMessageReceivedEvent(intent);
+//                onReceiveMessage(extras);
+//            }
+//
+//        } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
+//            Logger.i("GcmService has received a DELETED push message.");
+//            onReceiveMessageDeleted(extras);
+//
+//        } else if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
+//            Logger.e("GcmService has received an ERROR push message.");
+//            onReceiveMessageSendError(extras);
+//        }
     }
 
     private void handleGeofenceUpdate(Intent intent) {
@@ -251,32 +251,32 @@ public class GcmService extends IntentService {
         }
     }
 
-    private void enqueueMessageReceivedEvent(Intent intent) {
-        final String receiptId = intent.getStringExtra(KEY_RECEIPT_ID);
-        if (receiptId != null) {
-            eventLogger.logReceivedNotification(receiptId);
-        } else {
-            Logger.w("Note: notification has no receiptId. No analytics event will be logged for receiving this notification.");
-        }
-    }
+//    private void enqueueMessageReceivedEvent(Intent intent) {
+//        final String receiptId = intent.getStringExtra(KEY_RECEIPT_ID);
+//        if (receiptId != null) {
+//            eventLogger.logReceivedNotification(receiptId);
+//        } else {
+//            Logger.w("Note: notification has no receiptId. No analytics event will be logged for receiving this notification.");
+//        }
+//    }
+//
+//    private void enqueueHeartbeatReceivedEvent(Intent intent) {
+//        final String receiptId = intent.getStringExtra(KEY_RECEIPT_ID);
+//        if (receiptId != null) {
+//            eventLogger.logReceivedHeartbeat(receiptId);
+//        } else {
+//            Logger.w("Note: heartbeat has no receiptId. No analytics event will be logged for receiving this notification.");
+//        }
+//    }
 
-    private void enqueueHeartbeatReceivedEvent(Intent intent) {
-        final String receiptId = intent.getStringExtra(KEY_RECEIPT_ID);
-        if (receiptId != null) {
-            eventLogger.logReceivedHeartbeat(receiptId);
-        } else {
-            Logger.w("Note: heartbeat has no receiptId. No analytics event will be logged for receiving this notification.");
-        }
-    }
-
-    // Intended to be overridden by application
-    public void onReceiveMessage(final Bundle payload) {}
-
-    // Intended to be overridden by application
-    public void onReceiveMessageDeleted(final Bundle payload) {}
-
-    // Intended to be overridden by application
-    public void onReceiveMessageSendError(final Bundle payload) {}
+//    // Intended to be overridden by application
+//    public void onReceiveMessage(final Bundle payload) {}
+//
+//    // Intended to be overridden by application
+//    public void onReceiveMessageDeleted(final Bundle payload) {}
+//
+//    // Intended to be overridden by application
+//    public void onReceiveMessageSendError(final Bundle payload) {}
 
     // Intended to be overridden by application
     public void onGeofenceEnter(final Bundle payload) {}
@@ -284,8 +284,8 @@ public class GcmService extends IntentService {
     // Intended to be overridden by application
     public void onGeofenceExit(final Bundle payload) {}
 
-    // Intended to be overridded by application
-    public void onReceiveHeartbeat(final Bundle payload) {}
+//    // Intended to be overridded by application
+//    public void onReceiveHeartbeat(final Bundle payload) {}
 
     public boolean isGeofencingEvent(Intent intent) {
         return (intent != null && helper.isGeofencingEvent());

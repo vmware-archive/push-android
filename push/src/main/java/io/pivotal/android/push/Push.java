@@ -79,13 +79,17 @@ public class Push {
     // TODO - consider creating an IntentService (instead of a thread pool) in order to process registration and unregistration requests.
     private static final ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
+    private PushParameters parameters = null;
+    private boolean isFcmTokenReady = false;
+    private RegistrationListener registrationListener = null;
+
     /**
      * Retrieves an instance of the Pivotal CF Mobile Services Push SDK singleton object.
      *
      * @param context       A context object.  May not be null.
      * @return  A reference to the singleton Push object.
      */
-    public static Push getInstance(@NonNull Context context) {
+    public synchronized static Push getInstance(@NonNull Context context) {
         if (instance == null) {
             instance = new Push(context);
         }
@@ -161,17 +165,34 @@ public class Push {
      * @param areGeofencesEnabled Should Push use geofences?  If 'yes' then you must ask the user for permission before calling `startRegistration`.
      * @param listener Optional listener for receiving a callback after registration finishes. This callback may
      */
-    public void startRegistration(@Nullable final String deviceAlias,
+    public synchronized void startRegistration(@Nullable final String deviceAlias,
                                   @Nullable final String customUserId,
                                   @Nullable final Set<String> tags,
                                   final boolean areGeofencesEnabled,
                                   @Nullable final RegistrationListener listener) {
 
         final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
+        parameters = getPushParameters(deviceAlias, customUserId, tags, areGeofencesEnabled, pushPreferencesProvider.getRequestHeaders());
+
+        registrationListener = listener;
+
+        checkAnalytics();
+
+        verifyRegistrationArguments(parameters);
+
+        if (!isFcmTokenReady || FirebaseInstanceId.getInstance().getToken() == null) {
+            Logger.i("Firebase token id not ready. Waiting on token before registering");
+            return;
+        }
+
+        initiateRegistration();
+    }
+
+    private void initiateRegistration() {
+        final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
         final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
         final PCFPushRegistrationApiRequest dummyPCFPushRegistrationApiRequest = new PCFPushRegistrationApiRequestImpl(context, networkWrapper);
         final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(dummyPCFPushRegistrationApiRequest);
-        final PushParameters parameters = getPushParameters(deviceAlias, customUserId, tags, areGeofencesEnabled, pushPreferencesProvider.getRequestHeaders());
         final PCFPushGetGeofenceUpdatesApiRequest geofenceUpdatesApiRequest = new PCFPushGetGeofenceUpdatesApiRequest(context, networkWrapper);
         final GeofenceRegistrar geofenceRegistrar = new GeofenceRegistrar(context);
         final FileHelper fileHelper = new FileHelper(context);
@@ -181,12 +202,6 @@ public class Push {
         final GeofenceUpdater geofenceUpdater = new GeofenceUpdater(context, geofenceUpdatesApiRequest, geofenceEngine, pushPreferencesProvider);
         final GeofenceStatusUtil geofenceStatusUtil = new GeofenceStatusUtil(context);
 
-        checkAnalytics();
-
-        verifyRegistrationArguments(parameters);
-
-        // TODO: Check if token is ready
-        // TODO: If ready, run engine, else save parameters and wait for token
 
         final Runnable runnable = new Runnable() {
 
@@ -203,7 +218,7 @@ public class Push {
                             geofenceEngine,
                             geofenceStatusUtil);
 
-                    registrationEngine.registerDevice(parameters, listener);
+                    registrationEngine.registerDevice(parameters, registrationListener);
                 } catch (Exception e) {
                     Logger.ex("Push SDK registration failed", e);
                 }
@@ -552,8 +567,12 @@ public class Push {
         }
     }
 
+    //TODO: Put comments in
     public synchronized void setFcmInstanceTokenReady() {
-        // isFcmTokenReady = true;
-        // TODO: If we got parameters, initiate engine
+         isFcmTokenReady = true;
+
+        if (parameters != null) {
+            initiateRegistration();
+        }
     }
 }
