@@ -11,7 +11,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ServiceInfo;
 import android.os.Bundle;
 
-import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.location.Geofence;
 
 import java.util.Map;
@@ -36,9 +35,6 @@ import io.pivotal.android.push.util.TimeProvider;
 public class GcmService extends IntentService {
 
     public static final String GEOFENCE_TRANSITION_KEY = "com.google.android.location.intent.extra.transition";
-    public static final String KEY_MESSAGE = "message";
-    public static final String KEY_RECEIPT_ID = "receiptId";
-    public static final String KEY_HEARTBEAT = "pcf.push.heartbeat.sentToDeviceAt";
 
     private GeofenceHelper helper;
     private GeofenceEngine engine;
@@ -81,7 +77,7 @@ public class GcmService extends IntentService {
                 onReceive(intent);
             }
         } finally {
-            if (intent != null && !GeofenceService.isGeofenceUpdate(this, intent)) {
+            if (intent != null && !GeofenceService.isGeofenceUpdate(intent)) {
                 GcmBroadcastReceiver.completeWakefulIntent(intent);
             }
         }
@@ -110,58 +106,24 @@ public class GcmService extends IntentService {
     }
 
     private void onReceive(Intent intent) {
-        final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(this);
-        final String messageType = gcm.getMessageType(intent);
         final Bundle extras = intent.getExtras();
 
         if (extras != null && !extras.isEmpty()) {
-            handleMessage(intent, extras, messageType);
+            handleMessage(intent);
         }
     }
 
-    private void handleMessage(Intent intent, Bundle extras, String messageType) {
+    private void handleMessage(Intent intent) {
         final boolean areGeofencesEnabled = preferences.areGeofencesEnabled();
-        if (GeofenceService.isGeofenceUpdate(this, intent)) {
-            if (areGeofencesEnabled) {
-                handleGeofenceUpdate(intent);
-            } else {
-                Logger.i("Ignoring message. Geofences are disabled.");
-            }
-
-        } else if (isGeofencingEvent(intent)) {
+        if (isGeofencingEvent(intent)) {
             if (areGeofencesEnabled) {
                 handleGeofencingEvent(intent);
             } else {
                 Logger.i("Ignoring message. Geofences are disabled.");
             }
 
-        } // else if (GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType)) {
-//            if (extras.containsKey(KEY_HEARTBEAT)) {
-//                Logger.i("GcmService has received a heartbeat push message.");
-//                enqueueHeartbeatReceivedEvent(intent);
-//                onReceiveHeartbeat(extras);
-//
-//            } else {
-//                Logger.i("GcmService has received a push message.");
-//                enqueueMessageReceivedEvent(intent);
-//                onReceiveMessage(extras);
-//            }
-//
-//        } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
-//            Logger.i("GcmService has received a DELETED push message.");
-//            onReceiveMessageDeleted(extras);
-//
-//        } else if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
-//            Logger.e("GcmService has received an ERROR push message.");
-//            onReceiveMessageSendError(extras);
-//        }
-    }
+        }
 
-    private void handleGeofenceUpdate(Intent intent) {
-        final Intent geofenceServiceIntent = new Intent(getBaseContext(), GeofenceService.class);
-        geofenceServiceIntent.setAction(intent.getAction());
-        geofenceServiceIntent.replaceExtras(intent);
-        getBaseContext().startService(geofenceServiceIntent);
     }
 
     private void handleGeofencingEvent(Intent intent) {
@@ -251,41 +213,11 @@ public class GcmService extends IntentService {
         }
     }
 
-//    private void enqueueMessageReceivedEvent(Intent intent) {
-//        final String receiptId = intent.getStringExtra(KEY_RECEIPT_ID);
-//        if (receiptId != null) {
-//            eventLogger.logReceivedNotification(receiptId);
-//        } else {
-//            Logger.w("Note: notification has no receiptId. No analytics event will be logged for receiving this notification.");
-//        }
-//    }
-//
-//    private void enqueueHeartbeatReceivedEvent(Intent intent) {
-//        final String receiptId = intent.getStringExtra(KEY_RECEIPT_ID);
-//        if (receiptId != null) {
-//            eventLogger.logReceivedHeartbeat(receiptId);
-//        } else {
-//            Logger.w("Note: heartbeat has no receiptId. No analytics event will be logged for receiving this notification.");
-//        }
-//    }
-
-//    // Intended to be overridden by application
-//    public void onReceiveMessage(final Bundle payload) {}
-//
-//    // Intended to be overridden by application
-//    public void onReceiveMessageDeleted(final Bundle payload) {}
-//
-//    // Intended to be overridden by application
-//    public void onReceiveMessageSendError(final Bundle payload) {}
-
     // Intended to be overridden by application
     public void onGeofenceEnter(final Bundle payload) {}
 
     // Intended to be overridden by application
     public void onGeofenceExit(final Bundle payload) {}
-
-//    // Intended to be overridded by application
-//    public void onReceiveHeartbeat(final Bundle payload) {}
 
     public boolean isGeofencingEvent(Intent intent) {
         return (intent != null && helper.isGeofencingEvent());

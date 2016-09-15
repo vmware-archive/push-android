@@ -1,11 +1,8 @@
 package io.pivotal.android.push.service;
 
 import android.app.IntentService;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
-
-import com.google.android.gms.gcm.GoogleCloudMessaging;
 
 import io.pivotal.android.push.backend.geofence.PCFPushGetGeofenceUpdatesApiRequest;
 import io.pivotal.android.push.geofence.GeofenceEngine;
@@ -49,15 +46,12 @@ public class GeofenceService extends IntentService {
         this.pushPreferencesProvider = preferences;
     }
 
-    public static boolean isGeofenceUpdate(Context context, Intent intent) {
-        final GoogleCloudMessaging gcm = GoogleCloudMessaging.getInstance(context);
-        final String messageType = gcm.getMessageType(intent);
+    public static boolean isGeofenceUpdate(Intent intent) {
         final Bundle extras = intent.getExtras();
         return extras != null &&
                 extras.containsKey(GeofenceService.GEOFENCE_AVAILABLE) &&
                 extras.getString(GeofenceService.GEOFENCE_AVAILABLE) != null &&
-                extras.getString(GeofenceService.GEOFENCE_AVAILABLE).equals("true") &
-                GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE.equals(messageType);
+                extras.getString(GeofenceService.GEOFENCE_AVAILABLE).equals("true");
     }
 
     @Override
@@ -85,7 +79,7 @@ public class GeofenceService extends IntentService {
 
     private void onReceive(Intent intent) {
 
-        if (isGeofenceUpdate(this, intent)) {
+        if (isGeofenceUpdate(intent)) {
             instantiateDependencies();
             final GeofenceUpdater updater = new GeofenceUpdater(this, apiRequest, geofenceEngine, pushPreferencesProvider);
             final long timestamp = pushPreferencesProvider.getLastGeofenceUpdate();

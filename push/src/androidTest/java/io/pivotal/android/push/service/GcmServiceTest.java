@@ -10,7 +10,6 @@ import android.os.Bundle;
 import android.test.AndroidTestCase;
 import android.test.mock.MockContext;
 
-import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.location.Geofence;
 
 import java.io.IOException;
@@ -42,9 +41,6 @@ import static org.mockito.Mockito.when;
 
 public class GcmServiceTest extends AndroidTestCase {
 
-//    private static final String TEST_MESSAGE = "some fancy message";
-//    private static final String TEST_RECEIPT_ID = "TEST_RECEIPT_ID";
-//    private static final String TEST_TIMESTAMP = "1234567890";
     private static final Geofence GEOFENCE_1 = makeGeofence(-43.5,   61.5, 150.0f, "PCF_5_99",  Geofence.GEOFENCE_TRANSITION_ENTER, Geofence.NEVER_EXPIRE);
     private static final Geofence GEOFENCE_2 = makeGeofence( 53.5,  -91.5, 120.0f, "PCF_11_66", Geofence.GEOFENCE_TRANSITION_EXIT,  Geofence.NEVER_EXPIRE);
     private static final Geofence GEOFENCE_3 = makeGeofence( 53.5,  -91.5, 120.0f, "PCF_44_66", Geofence.GEOFENCE_TRANSITION_EXIT,  Geofence.NEVER_EXPIRE);
@@ -78,10 +74,6 @@ public class GcmServiceTest extends AndroidTestCase {
     public void testHandleNullIntent() throws InterruptedException {
         final FakeGcmService service = startService(FakeGcmService.class);
         service.onHandleIntent(null);
-//        service.assertMessageReceived(false);
-//        service.assertHeartbeatReceived(false);
-//        service.assertMessageSendError(false);
-//        service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
         service.assertTimesGeofenceExited(0);
         service.onDestroy();
@@ -95,124 +87,9 @@ public class GcmServiceTest extends AndroidTestCase {
         final FakeGcmService service = startService(FakeGcmService.class);
         when(helper.isGeofencingEvent()).thenReturn(false);
         service.onHandleIntent(intent);
-//        service.assertMessageReceived(false);
-//        service.assertHeartbeatReceived(false);
-//        service.assertMessageSendError(false);
-//        service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
         service.assertTimesGeofenceExited(0);
         service.onDestroy();
-        verifyZeroInteractions(store);
-        verifyZeroInteractions(eventLogger);
-    }
-
-//    public void testMessageReceivedWithoutReceiptId() throws InterruptedException {
-//        final Intent intent = createMessageReceivedIntent(TEST_MESSAGE, null);
-//        final FakeGcmService service = startService(FakeGcmService.class);
-//        when(helper.isGeofencingEvent()).thenReturn(false);
-//        service.onHandleIntent(intent);
-//        service.assertMessageContent(TEST_MESSAGE);
-//        service.assertHeartbeatReceived(false);
-//        service.assertMessageSendError(false);
-//        service.assertMessageDeleted(false);
-//        service.assertTimesGeofenceEntered(0);
-//        service.assertTimesGeofenceExited(0);
-//        service.onDestroy();
-//        verifyZeroInteractions(store);
-//        verifyZeroInteractions(eventLogger);
-//    }
-//
-//    public void testMessageReceivedWithReceiptId() throws InterruptedException {
-//        final Intent intent = createMessageReceivedIntent(TEST_MESSAGE, TEST_RECEIPT_ID);
-//        final FakeGcmService service = startService(FakeGcmService.class);
-//        when(helper.isGeofencingEvent()).thenReturn(false);
-//        service.onHandleIntent(intent);
-//        service.assertMessageContent(TEST_MESSAGE);
-//        service.assertHeartbeatReceived(false);
-//        service.assertMessageSendError(false);
-//        service.assertMessageDeleted(false);
-//        service.assertTimesGeofenceEntered(0);
-//        service.assertTimesGeofenceExited(0);
-//        service.onDestroy();
-//        verify(eventLogger, times(1)).logReceivedNotification(TEST_RECEIPT_ID);
-//        verifyZeroInteractions(store);
-//        verifyNoMoreInteractions(eventLogger);
-//    }
-//
-//    public void testMessageHeartbeatReceivedWithReceiptId() throws InterruptedException {
-//        final Intent intent = createHeartbeatReceivedIntent(TEST_TIMESTAMP, TEST_RECEIPT_ID);
-//        final FakeGcmService service = startService(FakeGcmService.class);
-//        when(helper.isGeofencingEvent()).thenReturn(false);
-//        service.onHandleIntent(intent);
-//        service.assertMessageReceived(false);
-//        service.assertHeartbeatReceived(true);
-//        service.assertMessageSendError(false);
-//        service.assertMessageDeleted(false);
-//        service.assertTimesGeofenceEntered(0);
-//        service.assertTimesGeofenceExited(0);
-//        service.onDestroy();
-//        verify(eventLogger, times(1)).logReceivedHeartbeat(TEST_RECEIPT_ID);
-//        verifyZeroInteractions(store);
-//        verifyNoMoreInteractions(eventLogger);
-//    }
-//
-//    public void testMessageDeleted() throws InterruptedException {
-//        final Intent intent = createMessageDeletedIntent();
-//        final FakeGcmService service = startService(FakeGcmService.class);
-//        when(helper.isGeofencingEvent()).thenReturn(false);
-//        service.onHandleIntent(intent);
-//        service.assertHeartbeatReceived(false);
-//        service.assertMessageSendError(false);
-//        service.assertMessageDeleted(true);
-//        service.assertTimesGeofenceEntered(0);
-//        service.assertTimesGeofenceExited(0);
-//        service.onDestroy();
-//        verifyZeroInteractions(store);
-//        verifyZeroInteractions(eventLogger);
-//    }
-//
-//    public void testMessageSendError() throws InterruptedException {
-//        final Intent intent = createMessageSendErrorIntent();
-//        final FakeGcmService service = startService(FakeGcmService.class);
-//        when(helper.isGeofencingEvent()).thenReturn(false);
-//        service.onHandleIntent(intent);
-//        service.assertHeartbeatReceived(false);
-//        service.assertMessageSendError(true);
-//        service.assertMessageDeleted(false);
-//        service.assertTimesGeofenceEntered(0);
-//        service.assertTimesGeofenceExited(0);
-//        service.onDestroy();
-//        verifyZeroInteractions(store);
-//        verifyZeroInteractions(eventLogger);
-//    }
-
-    public void testReceivesGeofenceUpdateSilentPush() throws InterruptedException {
-        final FakeContext context = new FakeContext(getContext());
-        final Intent intent = GeofenceServiceTest.createGeofenceUpdateSilentPushIntent(context, FakeGcmService.class);
-        final FakeGcmService service = startService(FakeGcmService.class, context, getPreferences(true, (String)null));
-        when(helper.isGeofencingEvent()).thenReturn(false);
-        service.onHandleIntent(intent);
-        service.assertTimesGeofenceEntered(0);
-        service.assertTimesGeofenceExited(0);
-        service.onDestroy();
-        assertEquals(GeofenceService.class.getCanonicalName(), context.getStartedServiceIntent().getComponent().getClassName());
-        assertEquals(getContext().getPackageName(), context.getStartedServiceIntent().getComponent().getPackageName());
-        assertTrue(context.getStartedServiceIntent().getExtras().getString(GeofenceService.GEOFENCE_AVAILABLE).equals("true"));
-        assertTrue(context.getStartedServiceIntent().getAction().equals(intent.getAction()));
-        verifyZeroInteractions(store);
-        verifyZeroInteractions(eventLogger);
-    }
-
-    public void testReceivesGeofenceUpdateSilentPushWithGeofencesDisabled() throws InterruptedException {
-        final FakeContext context = new FakeContext(getContext());
-        final Intent intent = GeofenceServiceTest.createGeofenceUpdateSilentPushIntent(context, FakeGcmService.class);
-        final FakeGcmService service = startService(FakeGcmService.class, context, getPreferences(false, (String)null));
-        when(helper.isGeofencingEvent()).thenReturn(false);
-        service.onHandleIntent(intent);
-        service.assertTimesGeofenceEntered(0);
-        service.assertTimesGeofenceExited(0);
-        service.onDestroy();
-        assertNull(context.getStartedServiceIntent());
         verifyZeroInteractions(store);
         verifyZeroInteractions(eventLogger);
     }
@@ -372,42 +249,6 @@ public class GcmServiceTest extends AndroidTestCase {
         verifyNoMoreInteractions(store);
     }
 
-//    private Intent createMessageReceivedIntent(final String message, String receiptId) {
-//        final Intent intent = new Intent(getContext(), FakeGcmService.class);
-//        intent.setAction("com.google.android.c2dm.intent.RECEIVE");
-//        intent.putExtra("message_type", GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE);
-//        intent.putExtra(GcmService.KEY_MESSAGE, message);
-//        if (receiptId != null) {
-//            intent.putExtra("receiptId", receiptId);
-//        }
-//        return intent;
-//    }
-//
-//    private Intent createHeartbeatReceivedIntent(final String timestamp, String receiptId) {
-//        final Intent intent = new Intent(getContext(), FakeGcmService.class);
-//        intent.setAction("com.google.android.c2dm.intent.RECEIVE");
-//        intent.putExtra("message_type", GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE);
-//        intent.putExtra(GcmService.KEY_HEARTBEAT, timestamp);
-//        if (receiptId != null) {
-//            intent.putExtra("receiptId", receiptId);
-//        }
-//        return intent;
-//    }
-//
-//    private Intent createMessageDeletedIntent() {
-//        final Intent intent = new Intent(getContext(), FakeGcmService.class);
-//        intent.setAction("com.google.android.c2dm.intent.RECEIVE");
-//        intent.putExtra("message_type", GoogleCloudMessaging.MESSAGE_TYPE_DELETED);
-//        return intent;
-//    }
-//
-//    private Intent createMessageSendErrorIntent() {
-//        final Intent intent = new Intent(getContext(), FakeGcmService.class);
-//        intent.setAction("com.google.android.c2dm.intent.RECEIVE");
-//        intent.putExtra("message_type", GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR);
-//        return intent;
-//    }
-
     private Intent createGeofenceTransitionEventIntent(Context context, int transition) throws IOException {
         final Intent intent = new Intent(context, FakeGcmService.class);
         intent.putExtra("com.google.android.location.intent.extra.transition", transition);
@@ -500,15 +341,10 @@ public class GcmServiceTest extends AndroidTestCase {
 
     private static final class FakeGcmService extends GcmService {
 
-//        private boolean messageDeleted = false;
-//        private boolean messageSendError = false;
-//        private boolean messageReceived = false;
-//        private boolean heartbeatReceived = false;
         private List<String> enteredGeofencesMessages = new ArrayList<>();
         private List<String> exitedGeofencesMessages = new ArrayList<>();
         private int timesEnteredGeofences = 0;
         private int timesExitedGeofences = 0;
-//        private Bundle bundle;
 
         public FakeGcmService() {
             super();
@@ -518,28 +354,6 @@ public class GcmServiceTest extends AndroidTestCase {
         public void attachBaseContext(final Context base) {
             super.attachBaseContext(base);
         }
-
-//        @Override
-//        public void onReceiveMessage(final Bundle payload) {
-//            messageReceived = true;
-//            bundle = payload;
-//        }
-//
-//        @Override
-//        public void onReceiveHeartbeat(Bundle payload) {
-//            heartbeatReceived = true;
-//            bundle = payload;
-//        }
-//
-//        @Override
-//        public void onReceiveMessageSendError(final Bundle payload) {
-//            messageSendError = true;
-//        }
-//
-//        @Override
-//        public void onReceiveMessageDeleted(final Bundle payload) {
-//            messageDeleted = true;
-//        }
 
         @Override
         public void onGeofenceEnter(Bundle payload) {
@@ -556,27 +370,6 @@ public class GcmServiceTest extends AndroidTestCase {
                 exitedGeofencesMessages.add(payload.getString("message"));
             }
         }
-
-//        public void assertMessageContent(final String expected) {
-//            assertTrue(messageReceived);
-//            assertEquals(expected, bundle.getString(GcmService.KEY_MESSAGE));
-//        }
-//
-//        public void assertMessageReceived(final boolean expected) {
-//            assertEquals(expected, messageReceived);
-//        }
-//
-//        public void assertHeartbeatReceived(final boolean expected) {
-//            assertEquals(expected, heartbeatReceived);
-//        }
-//
-//        public void assertMessageDeleted(final boolean expected) {
-//            assertEquals(expected, messageDeleted);
-//        }
-//
-//        public void assertMessageSendError(final boolean expected) {
-//            assertEquals(expected, messageSendError);
-//        }
 
         public void assertTimesGeofenceEntered(final int expected) {
             assertEquals(expected, timesEnteredGeofences);
