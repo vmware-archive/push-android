@@ -80,7 +80,6 @@ public class Push {
     private static final ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
     private PushParameters parameters = null;
-    private boolean isFcmTokenReady = false;
     private RegistrationListener registrationListener = null;
 
     /**
@@ -180,7 +179,7 @@ public class Push {
 
         verifyRegistrationArguments(parameters);
 
-        if (!isFcmTokenReady || FirebaseInstanceId.getInstance().getToken() == null) {
+        if (FirebaseInstanceId.getInstance().getToken() == null) {
             Logger.i("Firebase token id not ready. Waiting on token before registering");
             return;
         }
@@ -569,8 +568,6 @@ public class Push {
 
     //TODO: Put comments in
     public synchronized void setFcmInstanceTokenReady() {
-         isFcmTokenReady = true;
-
         if (parameters != null) {
             initiateRegistration();
         }
