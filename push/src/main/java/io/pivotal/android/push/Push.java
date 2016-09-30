@@ -17,7 +17,6 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 
-import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.firebase.iid.FirebaseInstanceId;
 
 import java.util.List;
@@ -29,9 +28,6 @@ import java.util.concurrent.Executors;
 import io.pivotal.android.push.analytics.AnalyticsEventLogger;
 import io.pivotal.android.push.analytics.jobs.CheckBackEndVersionJob;
 import io.pivotal.android.push.analytics.jobs.PrepareDatabaseJob;
-import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequest;
-import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestImpl;
-import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestProvider;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequest;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestImpl;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestProvider;
@@ -179,51 +175,63 @@ public class Push {
 
         verifyRegistrationArguments(parameters);
 
-        if (FirebaseInstanceId.getInstance().getToken() == null) {
-            Logger.i("Firebase token id not ready. Waiting on token before registering");
-            return;
-        }
-
         initiateRegistration();
     }
 
     private void initiateRegistration() {
-        final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
-        final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
-        final PCFPushRegistrationApiRequest dummyPCFPushRegistrationApiRequest = new PCFPushRegistrationApiRequestImpl(context, networkWrapper);
-        final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(dummyPCFPushRegistrationApiRequest);
-        final PCFPushGetGeofenceUpdatesApiRequest geofenceUpdatesApiRequest = new PCFPushGetGeofenceUpdatesApiRequest(context, networkWrapper);
-        final GeofenceRegistrar geofenceRegistrar = new GeofenceRegistrar(context);
-        final FileHelper fileHelper = new FileHelper(context);
-        final TimeProvider timeProvider = new TimeProvider();
-        final GeofencePersistentStore geofencePersistentStore = new GeofencePersistentStore(context, fileHelper);
-        final GeofenceEngine geofenceEngine = new GeofenceEngine(geofenceRegistrar, geofencePersistentStore, timeProvider, pushPreferencesProvider);
-        final GeofenceUpdater geofenceUpdater = new GeofenceUpdater(context, geofenceUpdatesApiRequest, geofenceEngine, pushPreferencesProvider);
-        final GeofenceStatusUtil geofenceStatusUtil = new GeofenceStatusUtil(context);
+        final String fcmToken = FirebaseInstanceId.getInstance().getToken();
+        if (fcmToken == null || fcmToken.isEmpty()) {
+            Logger.i("Firebase token id not ready. Waiting on token before registering");
+            return;
+        }
 
+        final PushParameters pushParameters = parameters;
 
         final Runnable runnable = new Runnable() {
 
             @Override
             public void run() {
                 try {
-                    final RegistrationEngine registrationEngine = new RegistrationEngine(context,
-                            context.getPackageName(),
-                            FirebaseInstanceId.getInstance(),
-                            GoogleApiAvailability.getInstance(),
-                            pushPreferencesProvider,
-                            PCFPushRegistrationApiRequestProvider,
-                            geofenceUpdater,
-                            geofenceEngine,
-                            geofenceStatusUtil);
+                    final RegistrationEngine registrationEngine = RegistrationEngine.getRegistrationEngine(context);
 
-                    registrationEngine.registerDevice(parameters, registrationListener);
+                    registrationEngine.registerDevice(pushParameters, registrationListener);
                 } catch (Exception e) {
                     Logger.ex("Push SDK registration failed", e);
                 }
             }
         };
         threadPool.execute(runnable);
+        parameters = null;
+    }
+
+    private void updateRegistrationToken() {
+        final PushPreferencesProviderImpl preferences = new PushPreferencesProviderImpl(context);
+        final String storedFcmTokenId = preferences.getFcmTokenId();
+
+        final String currentFcmToken = FirebaseInstanceId.getInstance().getToken();
+        if (storedFcmTokenId == null || storedFcmTokenId.isEmpty()) {
+            Logger.w("Application not registered with backend. Will not update backend.");
+        } else if (currentFcmToken == null || currentFcmToken.isEmpty()) {
+            Logger.i("Firebase token not ready. Will not update backend.");
+        } else if(storedFcmTokenId.equals(currentFcmToken)) {
+            Logger.i("Firebase token id not updated. Will not update backend.");
+        } else {
+
+            final Runnable runnable = new Runnable() {
+
+                @Override
+                public void run() {
+                    try {
+                        final RegistrationEngine registrationEngine = RegistrationEngine.getRegistrationEngine(context);
+
+                        registrationEngine.updateDeviceTokenId();
+                    } catch (Exception e) {
+                        Logger.ex("Push SDK update token id failed", e);
+                    }
+                }
+            };
+            threadPool.execute(runnable);
+        }
     }
 
     private PushParameters getPushParameters(@Nullable String deviceAlias,
@@ -566,10 +574,12 @@ public class Push {
         }
     }
 
-    //TODO: Put comments in
-    public synchronized void setFcmInstanceTokenReady() {
+    //TODO: FCM - Put javadocs comments in
+    public synchronized void onFcmTokenUpdated() {
         if (parameters != null) {
             initiateRegistration();
+        } else {
+            updateRegistrationToken();
         }
     }
 }

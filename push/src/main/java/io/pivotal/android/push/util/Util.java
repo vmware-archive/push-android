@@ -60,7 +60,7 @@ public class Util {
      * Saves the ID string to a plain-text file on the SD card if the application is considered
      * debuggable and if it has WRITE_EXTERNAL_STORAGE permission.  Otherwise does nothing.
      *
-     * Used for debugging, and by the sample application to send push message requests to GCM
+     * Used for debugging, and by the sample application to send push message requests to FCM
      * and to the PCF Push server.
      *
      * @param context A context.

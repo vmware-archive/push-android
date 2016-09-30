@@ -1,6 +1,3 @@
-/*
- * Copyright (C) 2014 Pivotal Software, Inc. All rights reserved.
- */
 package io.pivotal.android.push.service;
 
 import android.content.ComponentName;
@@ -39,8 +36,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-public class GcmServiceTest extends AndroidTestCase {
-
+public class GeofenceServiceTest2 extends AndroidTestCase {
     private static final Geofence GEOFENCE_1 = makeGeofence(-43.5,   61.5, 150.0f, "PCF_5_99",  Geofence.GEOFENCE_TRANSITION_ENTER, Geofence.NEVER_EXPIRE);
     private static final Geofence GEOFENCE_2 = makeGeofence( 53.5,  -91.5, 120.0f, "PCF_11_66", Geofence.GEOFENCE_TRANSITION_EXIT,  Geofence.NEVER_EXPIRE);
     private static final Geofence GEOFENCE_3 = makeGeofence( 53.5,  -91.5, 120.0f, "PCF_44_66", Geofence.GEOFENCE_TRANSITION_EXIT,  Geofence.NEVER_EXPIRE);
@@ -72,7 +68,7 @@ public class GcmServiceTest extends AndroidTestCase {
     }
 
     public void testHandleNullIntent() throws InterruptedException {
-        final FakeGcmService service = startService(FakeGcmService.class);
+        final FakeGeofenceService service = startService(FakeGeofenceService.class);
         service.onHandleIntent(null);
         service.assertTimesGeofenceEntered(0);
         service.assertTimesGeofenceExited(0);
@@ -83,8 +79,8 @@ public class GcmServiceTest extends AndroidTestCase {
     }
 
     public void testHandleEmptyIntent() throws InterruptedException {
-        final Intent intent = new Intent(getContext(), FakeGcmService.class);
-        final FakeGcmService service = startService(FakeGcmService.class);
+        final Intent intent = new Intent(getContext(), FakeGeofenceService.class);
+        final FakeGeofenceService service = startService(FakeGeofenceService.class);
         when(helper.isGeofencingEvent()).thenReturn(false);
         service.onHandleIntent(intent);
         service.assertTimesGeofenceEntered(0);
@@ -96,7 +92,7 @@ public class GcmServiceTest extends AndroidTestCase {
 
     public void testReceivesGeofenceEnterEvent() throws Exception {
         final Intent intent = createGeofenceTransitionEventIntent(getContext(), Geofence.GEOFENCE_TRANSITION_ENTER);
-        final FakeGcmService service = startService(FakeGcmService.class, getContext(), getPreferences(true));
+        final FakeGeofenceService service = startService(FakeGeofenceService.class, getContext(), getPreferences(true));
         final PCFPushGeofenceLocationMap expectedLocationsToClear = new PCFPushGeofenceLocationMap();
         expectedLocationsToClear.putLocation(GEOFENCE_DATA_LIST.get(5L), 0);
         when(helper.isGeofencingEvent()).thenReturn(true);
@@ -119,7 +115,7 @@ public class GcmServiceTest extends AndroidTestCase {
     public void testReceivesGeofenceEnterEventWithGeofencesDisabled() throws Exception {
         final Intent intent = createGeofenceTransitionEventIntent(getContext(), Geofence.GEOFENCE_TRANSITION_ENTER);
         final FakeContext context = new FakeContext(getContext());
-        final FakeGcmService service = startService(FakeGcmService.class, context, getPreferences(false));
+        final FakeGeofenceService service = startService(FakeGeofenceService.class, context, getPreferences(false));
         when(helper.isGeofencingEvent()).thenReturn(true);
         when(helper.getGeofenceTransition()).thenReturn(Geofence.GEOFENCE_TRANSITION_ENTER);
         service.onHandleIntent(intent);
@@ -133,7 +129,7 @@ public class GcmServiceTest extends AndroidTestCase {
 
     public void testReceivesGeofenceEnterEventForMissingGeofenceData() throws Exception {
         final Intent intent = createGeofenceTransitionEventIntent(getContext(), Geofence.GEOFENCE_TRANSITION_ENTER);
-        final FakeGcmService service = startService(FakeGcmService.class, getContext(), getPreferences(true));
+        final FakeGeofenceService service = startService(FakeGeofenceService.class, getContext(), getPreferences(true));
         when(helper.isGeofencingEvent()).thenReturn(true);
         when(helper.getGeofenceTransition()).thenReturn(Geofence.GEOFENCE_TRANSITION_ENTER);
         when(helper.getGeofences()).thenReturn(GEOFENCE_LIST_ENTER);
@@ -150,7 +146,7 @@ public class GcmServiceTest extends AndroidTestCase {
 
     public void testReceivesGeofenceExitEvent() throws Exception {
         final Intent intent = createGeofenceTransitionEventIntent(getContext(), Geofence.GEOFENCE_TRANSITION_EXIT);
-        final FakeGcmService service = startService(FakeGcmService.class, getContext(), getPreferences(true));
+        final FakeGeofenceService service = startService(FakeGeofenceService.class, getContext(), getPreferences(true));
         final PCFPushGeofenceLocationMap expectedLocationsToClear = new PCFPushGeofenceLocationMap();
         expectedLocationsToClear.putLocation(GEOFENCE_DATA_LIST.get(11L), 0);
         when(helper.isGeofencingEvent()).thenReturn(true);
@@ -173,7 +169,7 @@ public class GcmServiceTest extends AndroidTestCase {
     public void testReceivesGeofenceExitEventWithGeofencesDisabled() throws Exception {
         final Intent intent = createGeofenceTransitionEventIntent(getContext(), Geofence.GEOFENCE_TRANSITION_EXIT);
         final FakeContext context = new FakeContext(getContext());
-        final FakeGcmService service = startService(FakeGcmService.class, context, getPreferences(false));
+        final FakeGeofenceService service = startService(FakeGeofenceService.class, context, getPreferences(false));
         when(helper.isGeofencingEvent()).thenReturn(true);
         when(helper.getGeofenceTransition()).thenReturn(Geofence.GEOFENCE_TRANSITION_EXIT);
         when(helper.getGeofences()).thenReturn(GEOFENCE_LIST_EXIT_1);
@@ -188,7 +184,7 @@ public class GcmServiceTest extends AndroidTestCase {
 
     public void testReceivesGeofenceExitEventForMissingGeofenceData() throws Exception {
         final Intent intent = createGeofenceTransitionEventIntent(getContext(), Geofence.GEOFENCE_TRANSITION_EXIT);
-        final FakeGcmService service = startService(FakeGcmService.class, getContext(), getPreferences(true));
+        final FakeGeofenceService service = startService(FakeGeofenceService.class, getContext(), getPreferences(true));
         when(helper.isGeofencingEvent()).thenReturn(true);
         when(helper.getGeofenceTransition()).thenReturn(Geofence.GEOFENCE_TRANSITION_EXIT);
         when(helper.getGeofences()).thenReturn(GEOFENCE_LIST_EXIT_1);
@@ -205,7 +201,7 @@ public class GcmServiceTest extends AndroidTestCase {
 
     public void testReceivesGeofenceExitEventMultipleWithEmptySubscribedTags() throws Exception {
         final Intent intent = createGeofenceTransitionEventIntent(getContext(), Geofence.GEOFENCE_TRANSITION_EXIT);
-        final FakeGcmService service = startService(FakeGcmService.class, getContext(), getPreferences(true));
+        final FakeGeofenceService service = startService(FakeGeofenceService.class, getContext(), getPreferences(true));
         final PCFPushGeofenceLocationMap expectedLocationsToClear = new PCFPushGeofenceLocationMap();
         expectedLocationsToClear.putLocation(GEOFENCE_DATA_LIST.get(11L), 0);
         expectedLocationsToClear.putLocation(GEOFENCE_DATA_LIST.get(44L), 0);
@@ -250,7 +246,7 @@ public class GcmServiceTest extends AndroidTestCase {
     }
 
     private Intent createGeofenceTransitionEventIntent(Context context, int transition) throws IOException {
-        final Intent intent = new Intent(context, FakeGcmService.class);
+        final Intent intent = new Intent(context, FakeGeofenceService.class);
         intent.putExtra("com.google.android.location.intent.extra.transition", transition);
         return intent;
     }
@@ -283,11 +279,11 @@ public class GcmServiceTest extends AndroidTestCase {
         return properties;
     }
 
-    private <T extends FakeGcmService> T startService(final Class<T> klass) {
+    private <T extends FakeGeofenceService> T startService(final Class<T> klass) {
         return startService(klass, getContext(), getPreferences(false));
     }
 
-    private <T extends FakeGcmService> T startService(final Class<T> klass, final Context context, final PushPreferencesProvider preferences) {
+    private <T extends FakeGeofenceService> T startService(final Class<T> klass, final Context context, final PushPreferencesProvider preferences) {
         try {
             final Object object = klass.newInstance();
             final T service = klass.cast(object);
@@ -339,14 +335,14 @@ public class GcmServiceTest extends AndroidTestCase {
         }
     }
 
-    private static final class FakeGcmService extends GcmService {
+    private static final class FakeGeofenceService extends GeofenceService {
 
         private List<String> enteredGeofencesMessages = new ArrayList<>();
         private List<String> exitedGeofencesMessages = new ArrayList<>();
         private int timesEnteredGeofences = 0;
         private int timesExitedGeofences = 0;
 
-        public FakeGcmService() {
+        public FakeGeofenceService() {
             super();
         }
 

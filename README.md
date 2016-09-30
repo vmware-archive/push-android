@@ -3,7 +3,7 @@ Android Push Client SDK
 
 The Push SDK requires API level 16 or greater.
 
-The Push Android SDK v1.6.0 is compatible with the Push Notification Service 1.6.0.
+The Push Android SDK v1.7.0 is compatible with the Push Notification Service 1.7.0.
 
 Push SDK Usage
 --------------
@@ -19,9 +19,9 @@ The library depends on the following libraries:
 
  * Google Android Application Compatibility (com.android.support:appcompat)
  * Google GSON - should be in the Maven Central repository
- * Google Play Services - should be provided in your Android SDK distribution. If you don't have it on your computer,
-                          then run the Android SDK Manager (run `android` from your command line) and install it.  You
-                          should be able to find it in the "Extras" section.
+ * Google Play Services 9.6.0 or greater - should be provided in your Android SDK distribution. If you don't have it on your computer,
+                                           then run the Android SDK Manager (run `android` from your command line) and install it.  You
+                                           should be able to find it in the "Extras" section.
 
 To load this project in Android Studio, you will need to select "Import Project" and select the `build.gradle` file in
 the project's base directory.

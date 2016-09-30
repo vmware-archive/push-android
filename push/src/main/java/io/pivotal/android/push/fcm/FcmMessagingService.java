@@ -25,7 +25,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
     private PushPreferencesProvider preferences = null;
 
     // Intended to be overridden by application
-    public void onMessageNotificationReceived(final RemoteMessage.Notification notification) {
+    public void onMessageNotificationReceived(final RemoteMessage.Notification notification, final Map<String, String> data) {
     }
 
     // Intended to be overridden by application
@@ -40,7 +40,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
     public void onReceiveDeletedMessages(){}
 
     // Intended to be overridden by application
-    public void onReceiveMessageSendError(String messageId, Exception exception) {}
+    public void onReceiveMessageSendError(final String messageId, final Exception exception) {}
 
     /**
      * Called when message is received.
@@ -48,7 +48,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
      * @param remoteMessage Object representing the message received from Firebase Cloud Messaging.
      */
     @Override
-    public final void onMessageReceived(RemoteMessage remoteMessage) {
+    public final void onMessageReceived(final RemoteMessage remoteMessage) {
         super.onMessageReceived(remoteMessage);
 
         initializeDependencies();
@@ -64,7 +64,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
     }
 
     @Override
-    public final void onSendError(String messageId, Exception exception) {
+    public final void onSendError(final String messageId, final Exception exception) {
         super.onSendError(messageId, exception);
         Logger.i("FcmMessagingService has received an ERROR push message.");
         onReceiveMessageSendError(messageId, exception);
@@ -78,14 +78,12 @@ public class FcmMessagingService extends FirebaseMessagingService {
         this.eventLogger = eventLogger;
     }
 
-    void handleReceivedMessage(RemoteMessage.Notification notificationMessage, HashMap<String, String> dataMessage) {
+    void handleReceivedMessage(final RemoteMessage.Notification notificationMessage, final HashMap<String, String> dataMessage) {
         if (notificationMessage != null) {
             Logger.i("FcmMessagingService has received a notification push message.");
-            onMessageNotificationReceived(notificationMessage);
+            onMessageNotificationReceived(notificationMessage, dataMessage);
             enqueueMessageNotificationReceivedEvent(dataMessage);
-        }
-
-        if (remoteMessageHasDataPayload(dataMessage)) {
+        } else if (remoteMessageHasDataPayload(dataMessage)) {
             if (dataMessage.containsKey(GeofenceService.GEOFENCE_AVAILABLE)) {
                 Logger.i("FcmMessagingService has received a geofence push message.");
                 handleGeofenceMessage(dataMessage);
@@ -112,7 +110,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
         return dataMessage.size() != 1 || !dataMessage.containsKey(KEY_RECEIPT_ID);
     }
 
-    private void enqueueMessageNotificationReceivedEvent(Map<String, String> messageData) {
+    private void enqueueMessageNotificationReceivedEvent(final Map<String, String> messageData) {
         final String receiptId = messageData.get(KEY_RECEIPT_ID);
         if (receiptId != null) {
             eventLogger.logReceivedNotification(receiptId);
@@ -121,7 +119,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
         }
     }
 
-    private void enqueueHeartbeatReceivedEvent(Map<String, String> heartbeat) {
+    private void enqueueHeartbeatReceivedEvent(final Map<String, String> heartbeat) {
         final String receiptId = heartbeat.get(KEY_RECEIPT_ID);
         if (receiptId != null) {
             eventLogger.logReceivedHeartbeat(receiptId);
@@ -141,7 +139,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
         }
     }
 
-    private void handleGeofenceMessage(HashMap<String, String> dataMessage) {
+    private void handleGeofenceMessage(final HashMap<String, String> dataMessage) {
         Intent geofenceServiceIntent = new Intent(getBaseContext(), GeofenceService.class);
 
         for (Entry<String, String> dataKeyValue : dataMessage.entrySet()) {

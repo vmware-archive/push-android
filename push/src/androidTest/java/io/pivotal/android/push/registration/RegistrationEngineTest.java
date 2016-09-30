@@ -13,6 +13,7 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.firebase.iid.FirebaseInstanceId;
 
+import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -36,7 +37,10 @@ import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyLong;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class RegistrationEngineTest extends AndroidTestCase {
@@ -1180,6 +1184,45 @@ public class RegistrationEngineTest extends AndroidTestCase {
                 .setShouldHavePermissionForGeofences(false)
                 .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
+    }
+
+    public void testUpdateDeviceTokenId() {
+        final FakePushPreferencesProvider pushPreferencesProvider = new FakePushPreferencesProvider(TEST_FCM_DEVICE_REGISTRATION_ID_1,
+                TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                TEST_PLATFORM_UUID_1,
+                TEST_PLATFORM_SECRET_1,
+                TEST_DEVICE_ALIAS_1,
+                TEST_CUSTOM_USER_ID_1,
+                TEST_PACKAGE_NAME,
+                TEST_SERVICE_URL_1,
+                EMPTY_SET,
+                GeofenceEngine.NEVER_UPDATED_GEOFENCES,
+                false);
+
+        final FakePCFPushRegistrationApiRequest fakePCFPushRegistrationApiRequest = new FakePCFPushRegistrationApiRequest(TEST_FCM_DEVICE_REGISTRATION_ID_2, true);
+        final PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(fakePCFPushRegistrationApiRequest);
+
+        final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, firebaseInstanceId, googleApiAvailability, pushPreferencesProvider,
+                pcfPushRegistrationApiRequestProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+
+        final RegistrationEngine spiedEngined = spy(engine);
+        doNothing().when(spiedEngined).registerDevice(any(PushParameters.class), any(RegistrationListener.class));
+
+        spiedEngined.updateDeviceTokenId();
+
+        ArgumentCaptor<PushParameters> pushParametersArgumentCaptor = ArgumentCaptor.forClass(PushParameters.class);
+        ArgumentCaptor<RegistrationListener> registrationListenerArgumentCaptor = ArgumentCaptor.forClass(RegistrationListener.class);
+
+        verify(spiedEngined).registerDevice(pushParametersArgumentCaptor.capture(), registrationListenerArgumentCaptor.capture());
+
+        assertNotNull(pushParametersArgumentCaptor.getValue());
+        assertEquals(TEST_PLATFORM_UUID_1, pushParametersArgumentCaptor.getValue().getPlatformUuid());
+        assertEquals(TEST_PLATFORM_SECRET_1, pushParametersArgumentCaptor.getValue().getPlatformSecret());
+        assertEquals(TEST_DEVICE_ALIAS_1, pushParametersArgumentCaptor.getValue().getDeviceAlias());
+        assertEquals(TEST_CUSTOM_USER_ID_1, pushParametersArgumentCaptor.getValue().getCustomUserId());
+        assertEquals(TEST_SERVICE_URL_1, pushParametersArgumentCaptor.getValue().getServiceUrl());
+        assertEquals(EMPTY_SET, pushParametersArgumentCaptor.getValue().getTags());
+        assertEquals(false, pushParametersArgumentCaptor.getValue().areGeofencesEnabled());
     }
 
     private RegistrationListener getListenerForRegistration(final boolean isSuccessfulRegistration) {

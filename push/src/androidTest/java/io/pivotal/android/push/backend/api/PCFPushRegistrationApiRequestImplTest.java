@@ -72,7 +72,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
         }
     }
 
-    public void testNewDeviceRegistrationRequiresGcmDeviceRegistrationId() {
+    public void testNewDeviceRegistrationRequiresFcmDeviceRegistrationId() {
         try {
             final PCFPushRegistrationApiRequestImpl request = new PCFPushRegistrationApiRequestImpl(getContext(), new FakeNetworkWrapper());
             makePCFPushRegistrationApiRequestListener(true, HTTP_POST, null, null, null, false, null);
@@ -104,7 +104,7 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
         }
     }
 
-    public void testUpdateDeviceRegistrationRequiresGcmDeviceRegistrationId() {
+    public void testUpdateDeviceRegistrationRequiresFcmDeviceRegistrationId() {
         try {
             final PCFPushRegistrationApiRequestImpl request = new PCFPushRegistrationApiRequestImpl(getContext(), new FakeNetworkWrapper());
             makePCFPushRegistrationApiRequestListener(true, HTTP_POST, null, null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID, false, null);

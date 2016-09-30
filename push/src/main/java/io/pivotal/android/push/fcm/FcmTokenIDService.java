@@ -14,6 +14,6 @@ public class FcmTokenIDService extends FirebaseInstanceIdService {
      */
     @Override
     public void onTokenRefresh() {
-        Push.getInstance(this).setFcmInstanceTokenReady();
+        Push.getInstance(this).onFcmTokenUpdated();
     }
 }

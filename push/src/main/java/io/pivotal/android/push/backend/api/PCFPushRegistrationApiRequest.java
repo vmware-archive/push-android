@@ -9,12 +9,12 @@ import io.pivotal.android.push.PushParameters;
 
 public interface PCFPushRegistrationApiRequest {
 
-    void startNewDeviceRegistration(String gcmDeviceRegistrationId,
+    void startNewDeviceRegistration(String fcmDeviceRegistrationId,
                                     Set<String> savedTags,
                                     PushParameters parameters,
                                     PCFPushRegistrationListener listener);
 
-    void startUpdateDeviceRegistration(String gcmDeviceRegistrationId,
+    void startUpdateDeviceRegistration(String fcmDeviceRegistrationId,
                                        String pcfPushDeviceRegistrationId,
                                        Set<String> savedTags,
                                        PushParameters parameters,

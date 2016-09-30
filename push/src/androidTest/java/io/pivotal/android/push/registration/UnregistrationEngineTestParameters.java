@@ -48,7 +48,6 @@ public class UnregistrationEngineTestParameters {
 
     private final Context context;
     private final DelayedLoop delayedLoop;
-//    private boolean shouldGcmDeviceUnregistrationBeSuccessful;
     private boolean shouldUnregistrationHaveSucceeded;
     private boolean shouldPCFPushDeviceUnregistrationBeSuccessful;
     private String startingPCFPushDeviceRegistrationIdInPrefs;

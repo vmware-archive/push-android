@@ -14,13 +14,23 @@ import java.util.Set;
 
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequest;
+import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestImpl;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestProvider;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationListener;
+import io.pivotal.android.push.backend.geofence.PCFPushGetGeofenceUpdatesApiRequest;
 import io.pivotal.android.push.geofence.GeofenceEngine;
+import io.pivotal.android.push.geofence.GeofencePersistentStore;
+import io.pivotal.android.push.geofence.GeofenceRegistrar;
 import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
+import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
+import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
+import io.pivotal.android.push.util.FileHelper;
 import io.pivotal.android.push.util.Logger;
+import io.pivotal.android.push.util.NetworkWrapper;
+import io.pivotal.android.push.util.NetworkWrapperImpl;
+import io.pivotal.android.push.util.TimeProvider;
 import io.pivotal.android.push.util.Util;
 import io.pivotal.android.push.version.GeofenceStatus;
 
@@ -70,6 +80,31 @@ public class RegistrationEngine {
     private String previousDeviceAlias;
     private String previousCustomUserId;
     private String previousServiceUrl;
+
+    public static RegistrationEngine getRegistrationEngine(Context context) {
+        final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
+        final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
+        final PCFPushRegistrationApiRequest dummyPCFPushRegistrationApiRequest = new PCFPushRegistrationApiRequestImpl(context, networkWrapper);
+        final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(dummyPCFPushRegistrationApiRequest);
+        final PCFPushGetGeofenceUpdatesApiRequest geofenceUpdatesApiRequest = new PCFPushGetGeofenceUpdatesApiRequest(context, networkWrapper);
+        final GeofenceRegistrar geofenceRegistrar = new GeofenceRegistrar(context);
+        final FileHelper fileHelper = new FileHelper(context);
+        final TimeProvider timeProvider = new TimeProvider();
+        final GeofencePersistentStore geofencePersistentStore = new GeofencePersistentStore(context, fileHelper);
+        final GeofenceEngine geofenceEngine = new GeofenceEngine(geofenceRegistrar, geofencePersistentStore, timeProvider, pushPreferencesProvider);
+        final GeofenceUpdater geofenceUpdater = new GeofenceUpdater(context, geofenceUpdatesApiRequest, geofenceEngine, pushPreferencesProvider);
+        final GeofenceStatusUtil geofenceStatusUtil = new GeofenceStatusUtil(context);
+
+        return new RegistrationEngine(context,
+                context.getPackageName(),
+                FirebaseInstanceId.getInstance(),
+                GoogleApiAvailability.getInstance(),
+                pushPreferencesProvider,
+                PCFPushRegistrationApiRequestProvider,
+                geofenceUpdater,
+                geofenceEngine,
+                geofenceStatusUtil);
+    }
 
     /**
      * Instantiate an instance of the RegistrationEngine.
@@ -242,6 +277,7 @@ public class RegistrationEngine {
 
         if (isPCFPushUpdateRegistrationRequired(fcmTokenId, parameters) && !isServiceUrlUpdated && !isPlatformUpdated) {
             registerUpdateDeviceWithPCFPush(fcmTokenId, previousPCFPushDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
+
         } else if (isNewFcmTokenId || isServiceUrlUpdated || isPlatformUpdated) {
                 registerNewDeviceWithPCFPush(fcmTokenId, pushPreferencesProvider.getTags(), parameters, listener);
 
@@ -257,6 +293,22 @@ public class RegistrationEngine {
                 listener.onRegistrationComplete();
             }
         }
+    }
+
+    //TODO: FCM - Create javadoc comments
+    public void updateDeviceTokenId() {
+        PushParameters parameters = new PushParameters(pushPreferencesProvider.getPlatformUuid(),
+                pushPreferencesProvider.getPlatformSecret(),
+                pushPreferencesProvider.getServiceUrl(),
+                pushPreferencesProvider.getDeviceAlias(),
+                pushPreferencesProvider.getCustomUserId(),
+                pushPreferencesProvider.getTags(),
+                pushPreferencesProvider.areGeofencesEnabled(),
+                Pivotal.getSslCertValidationMode(context),
+                Pivotal.getPinnedSslCertificateNames(context),
+                pushPreferencesProvider.getRequestHeaders());
+
+        registerDevice(parameters, null);
     }
 
     private void verifyRegistrationArguments(PushParameters parameters) {
@@ -301,7 +353,7 @@ public class RegistrationEngine {
     }
 
     private boolean isPCFPushUpdateRegistrationRequired(String newFcmTokenId, PushParameters parameters) {
-        final boolean isFcmTokenIdDifferent = isPreviousFcmTokenIdEmpty() || !previousFcmTokenId.equals(newFcmTokenId);
+        final boolean isFcmTokenIdDifferent = !isPreviousFcmTokenIdEmpty() && !previousFcmTokenId.equals(newFcmTokenId); // If previous token is empty, this means a new registration, not an registration update
         final boolean isPreviousPCFPushDeviceRegistrationIdEmpty = previousPCFPushDeviceRegistrationId == null || previousPCFPushDeviceRegistrationId.isEmpty();
         if (isPreviousPCFPushDeviceRegistrationIdEmpty) {
             Logger.v("previousPCFPushDeviceRegistrationId is empty. Device will NOT require an update-registration with PCF Push.");

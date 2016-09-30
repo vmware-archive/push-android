@@ -31,7 +31,6 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
     private final RemoteMessage.Notification NO_NOTIFICATION = null;
     private final HashMap<String, String> RECEIPT_DATA = new HashMap<>();
 
-
     private TestFcmMessagingService fcmMessagingService;
     private AnalyticsEventLogger eventLogger;
     private ArgumentCaptor<Intent> intentCaptor;
@@ -50,7 +49,7 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
         RECEIPT_DATA.put(FcmMessagingService.KEY_RECEIPT_ID, "some receipt id");
 
         // Context setup for Geofences
-        Context context = mock(Context.class);
+        final Context context = mock(Context.class);
         fcmMessagingService.attachBaseContext(context);
 
         intentCaptor = ArgumentCaptor.forClass(Intent.class);
@@ -66,22 +65,21 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
     }
 
     public void testMessageTypeNotification() {
-
-        RemoteMessage.Notification notification = mock(RemoteMessage.Notification.class);
+        final RemoteMessage.Notification notification = mock(RemoteMessage.Notification.class);
 
         fcmMessagingService.handleReceivedMessage(notification, RECEIPT_DATA);
 
         fcmMessagingService.assertDeletedMessagesCalled(false);
         fcmMessagingService.assertErrorMessageReceived(null, null);
         fcmMessagingService.assertMessageDataReceived(NO_DATA);
-        fcmMessagingService.assertMessageNotificationReceived(notification);
+        fcmMessagingService.assertMessageNotificationReceived(notification, RECEIPT_DATA);
 
         verify(eventLogger).logReceivedNotification(anyString());
         verify(eventLogger, never()).logReceivedHeartbeat(anyString());
     }
 
     public void testMessageTypeData() {
-        HashMap<String, String> messageData = new HashMap<>();
+        final HashMap<String, String> messageData = new HashMap<>();
         messageData.put("SomePayloadKey", "SomePayloadValue");
         messageData.put(FcmMessagingService.KEY_RECEIPT_ID, "some receipt id");
 
@@ -90,15 +88,15 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
         fcmMessagingService.assertDeletedMessagesCalled(false);
         fcmMessagingService.assertErrorMessageReceived(null, null);
         fcmMessagingService.assertMessageDataReceived(messageData);
-        fcmMessagingService.assertMessageNotificationReceived(NO_NOTIFICATION);
+        fcmMessagingService.assertMessageNotificationReceived(NO_NOTIFICATION, NO_DATA);
 
         verify(eventLogger).logReceivedNotification(anyString());
         verify(eventLogger, never()).logReceivedHeartbeat(anyString());
     }
 
     public void testMessageTypeNotificationAndData() {
-        RemoteMessage.Notification notification = mock(RemoteMessage.Notification.class);
-        HashMap<String, String> messageData = new HashMap<>();
+        final RemoteMessage.Notification notification = mock(RemoteMessage.Notification.class);
+        final HashMap<String, String> messageData = new HashMap<>();
         messageData.put("SomePayloadKey", "SomePayloadValue");
         messageData.put(FcmMessagingService.KEY_RECEIPT_ID, "some receipt id");
 
@@ -106,15 +104,15 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
 
         fcmMessagingService.assertDeletedMessagesCalled(false);
         fcmMessagingService.assertErrorMessageReceived(null, null);
-        fcmMessagingService.assertMessageDataReceived(messageData);
-        fcmMessagingService.assertMessageNotificationReceived(notification);
+        fcmMessagingService.assertMessageDataReceived(NO_DATA);
+        fcmMessagingService.assertMessageNotificationReceived(notification, messageData);
 
         verify(eventLogger).logReceivedNotification(anyString());
         verify(eventLogger, never()).logReceivedHeartbeat(anyString());
     }
 
     public void testMessageTypeHeartbeat() {
-        HashMap<String, String> messageData = new HashMap<>();
+        final HashMap<String, String> messageData = new HashMap<>();
         messageData.put(FcmMessagingService.KEY_RECEIPT_ID, "some receipt id");
         messageData.put(FcmMessagingService.KEY_HEARTBEAT, "heartbeat key");
 
@@ -123,7 +121,7 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
         fcmMessagingService.assertDeletedMessagesCalled(false);
         fcmMessagingService.assertErrorMessageReceived(null, null);
         fcmMessagingService.assertMessageDataReceived(NO_DATA);
-        fcmMessagingService.assertMessageNotificationReceived(NO_NOTIFICATION);
+        fcmMessagingService.assertMessageNotificationReceived(NO_NOTIFICATION, NO_DATA);
         fcmMessagingService.assertHeartbeatReceived(messageData);
 
         verify(eventLogger, never()).logReceivedNotification(anyString());
@@ -136,7 +134,7 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
         fcmMessagingService.assertDeletedMessagesCalled(true);
         fcmMessagingService.assertErrorMessageReceived(null, null);
         fcmMessagingService.assertMessageDataReceived(NO_DATA);
-        fcmMessagingService.assertMessageNotificationReceived(NO_NOTIFICATION);
+        fcmMessagingService.assertMessageNotificationReceived(NO_NOTIFICATION, NO_DATA);
         fcmMessagingService.assertHeartbeatReceived(NO_DATA);
 
         verify(eventLogger, never()).logReceivedNotification(anyString());
@@ -144,8 +142,8 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
     }
 
     public void testReceiveMessageSendError() {
-        String messageId = "123";
-        Exception messageException = new Exception("Exception");
+        final String messageId = "123";
+        final Exception messageException = new Exception("Exception");
 
         fcmMessagingService.onReceiveMessageSendError(messageId, messageException);
 
@@ -153,7 +151,7 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
 
         fcmMessagingService.assertDeletedMessagesCalled(false);
         fcmMessagingService.assertMessageDataReceived(NO_DATA);
-        fcmMessagingService.assertMessageNotificationReceived(NO_NOTIFICATION);
+        fcmMessagingService.assertMessageNotificationReceived(NO_NOTIFICATION, NO_DATA);
         fcmMessagingService.assertHeartbeatReceived(NO_DATA);
 
         verify(eventLogger, never()).logReceivedNotification(anyString());
@@ -161,12 +159,12 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
     }
 
     public void testGeofenceAvailableKeySetToTrue() {
-        HashMap<String, String> messageData = new HashMap<>();
+        final HashMap<String, String> messageData = new HashMap<>();
         messageData.put(GeofenceService.GEOFENCE_AVAILABLE, "true");
 
         fcmMessagingService.handleReceivedMessage(NO_NOTIFICATION, messageData);
 
-        Intent startServiceIntent = intentCaptor.getValue();
+        final Intent startServiceIntent = intentCaptor.getValue();
 
         assertEquals(startServiceIntent.getComponent().getClassName(), GeofenceService.class.getName());
         assertTrue(startServiceIntent.getExtras().containsKey(GeofenceService.GEOFENCE_AVAILABLE));
@@ -174,18 +172,18 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
 
         fcmMessagingService.assertDeletedMessagesCalled(false);
         fcmMessagingService.assertMessageDataReceived(NO_DATA);
-        fcmMessagingService.assertMessageNotificationReceived(NO_NOTIFICATION);
+        fcmMessagingService.assertMessageNotificationReceived(NO_NOTIFICATION, NO_DATA);
         fcmMessagingService.assertHeartbeatReceived(NO_DATA);
         fcmMessagingService.assertErrorMessageReceived(null, null);
     }
 
     public void testGeofenceAvailableKeySetToFalse() {
-        HashMap<String, String> messageData = new HashMap<>();
+        final HashMap<String, String> messageData = new HashMap<>();
         messageData.put(GeofenceService.GEOFENCE_AVAILABLE, "false");
 
         fcmMessagingService.handleReceivedMessage(NO_NOTIFICATION, messageData);
 
-        Intent startServiceIntent = intentCaptor.getValue();
+        final Intent startServiceIntent = intentCaptor.getValue();
 
         assertEquals(startServiceIntent.getComponent().getClassName(), GeofenceService.class.getName());
         assertTrue(startServiceIntent.getExtras().containsKey(GeofenceService.GEOFENCE_AVAILABLE));
@@ -193,20 +191,20 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
 
         fcmMessagingService.assertDeletedMessagesCalled(false);
         fcmMessagingService.assertMessageDataReceived(NO_DATA);
-        fcmMessagingService.assertMessageNotificationReceived(NO_NOTIFICATION);
+        fcmMessagingService.assertMessageNotificationReceived(NO_NOTIFICATION, NO_DATA);
         fcmMessagingService.assertHeartbeatReceived(NO_DATA);
         fcmMessagingService.assertErrorMessageReceived(null, null);
     }
 
     public void testGeofenceWithExtraData() {
-        HashMap<String, String> messageData = new HashMap<>();
+        final HashMap<String, String> messageData = new HashMap<>();
         messageData.put(GeofenceService.GEOFENCE_AVAILABLE, "false");
         messageData.put(GeofenceService.GEOFENCE_UPDATE_JSON, "{key: value}");
         messageData.put("other data key", "some string");
 
         fcmMessagingService.handleReceivedMessage(NO_NOTIFICATION, messageData);
 
-        Intent startServiceIntent = intentCaptor.getValue();
+        final Intent startServiceIntent = intentCaptor.getValue();
 
         assertEquals(startServiceIntent.getComponent().getClassName(), GeofenceService.class.getName());
         assertTrue(startServiceIntent.getExtras().containsKey(GeofenceService.GEOFENCE_AVAILABLE));
@@ -220,18 +218,18 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
 
         fcmMessagingService.assertDeletedMessagesCalled(false);
         fcmMessagingService.assertMessageDataReceived(NO_DATA);
-        fcmMessagingService.assertMessageNotificationReceived(NO_NOTIFICATION);
+        fcmMessagingService.assertMessageNotificationReceived(NO_NOTIFICATION, NO_DATA);
         fcmMessagingService.assertHeartbeatReceived(NO_DATA);
         fcmMessagingService.assertErrorMessageReceived(null, null);
     }
 
     public void testGeofenceAvailableKeySetToEmpty() {
-        HashMap<String, String> messageData = new HashMap<>();
+        final HashMap<String, String> messageData = new HashMap<>();
         messageData.put(GeofenceService.GEOFENCE_AVAILABLE, "");
 
         fcmMessagingService.handleReceivedMessage(NO_NOTIFICATION, messageData);
 
-        Intent startServiceIntent = intentCaptor.getValue();
+        final Intent startServiceIntent = intentCaptor.getValue();
 
         assertEquals(startServiceIntent.getComponent().getClassName(), GeofenceService.class.getName());
         assertTrue(startServiceIntent.getExtras().containsKey(GeofenceService.GEOFENCE_AVAILABLE));
@@ -239,7 +237,7 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
 
         fcmMessagingService.assertDeletedMessagesCalled(false);
         fcmMessagingService.assertMessageDataReceived(NO_DATA);
-        fcmMessagingService.assertMessageNotificationReceived(NO_NOTIFICATION);
+        fcmMessagingService.assertMessageNotificationReceived(NO_NOTIFICATION, NO_DATA);
         fcmMessagingService.assertHeartbeatReceived(NO_DATA);
         fcmMessagingService.assertErrorMessageReceived(null, null);
     }
@@ -247,6 +245,7 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
     private final class TestFcmMessagingService extends FcmMessagingService {
 
         private Map<String, String> data = NO_DATA;
+        private Map<String, String> notificationData = NO_DATA;
         private RemoteMessage.Notification notification = NO_NOTIFICATION;
         private Map<String, String> heartbeat = NO_DATA;
         private boolean onReceiveDeletedMessagesCalled = false;
@@ -259,12 +258,13 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
         }
 
         @Override
-        public void onMessageNotificationReceived(final RemoteMessage.Notification notification) {
+        public void onMessageNotificationReceived(final RemoteMessage.Notification notification, final Map<String, String> data) {
             this.notification = notification;
+            this.notificationData = data;
         }
 
         @Override
-        public void onReceiveHeartbeat(Map<String, String> heartbeat) {
+        public void onReceiveHeartbeat(final Map<String, String> heartbeat) {
             this.heartbeat = heartbeat;
         }
 
@@ -274,7 +274,7 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
         }
 
         @Override
-        public void onReceiveMessageSendError(String messageId, Exception exception) {
+        public void onReceiveMessageSendError(final String messageId, final Exception exception) {
             this.errorMessageId = messageId;
             this.errorMessageException = exception;
         }
@@ -283,19 +283,20 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
             assertEquals(expected, data);
         }
 
-        public void assertMessageNotificationReceived(final RemoteMessage.Notification expected) {
-            assertEquals(expected, notification);
+        public void assertMessageNotificationReceived(final RemoteMessage.Notification expectedNotification, final Map<String, String> expectedData) {
+            assertEquals(expectedNotification, notification);
+            assertEquals(expectedData, notificationData);
         }
 
-        public void assertHeartbeatReceived(Map<String, String> expected) {
+        public void assertHeartbeatReceived(final Map<String, String> expected) {
             assertEquals(expected, heartbeat);
         }
 
-        public void assertDeletedMessagesCalled(boolean expected) {
+        public void assertDeletedMessagesCalled(final boolean expected) {
             assertEquals(expected, onReceiveDeletedMessagesCalled);
         }
 
-        public void assertErrorMessageReceived(String messageId, Exception exception) {
+        public void assertErrorMessageReceived(final String messageId, final Exception exception) {
             assertEquals(messageId, errorMessageId);
             assertEquals(exception, errorMessageException);
         }
