@@ -295,7 +295,13 @@ public class RegistrationEngine {
         }
     }
 
-    //TODO: FCM - Create javadoc comments
+    /**
+     * Start a FCM token update attempt. It informs the Push backend of the device's new FCM token id.
+     * This method is asynchronous and will return before update is complete.
+     *
+     * This function is not intended to be used directly. It will be called automatically by the Push instance
+     * when it receives a token update notification from FcmTokenIDService.
+     */
     public void updateDeviceTokenId() {
         PushParameters parameters = new PushParameters(pushPreferencesProvider.getPlatformUuid(),
                 pushPreferencesProvider.getPlatformSecret(),

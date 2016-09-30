@@ -574,7 +574,11 @@ public class Push {
         }
     }
 
-    //TODO: FCM - Put javadocs comments in
+    /**
+     * Called by the FcmTokenIDService to inform of a token update.
+     *
+     * This function is not intended to be used directly.
+     */
     public synchronized void onFcmTokenUpdated() {
         if (parameters != null) {
             initiateRegistration();
