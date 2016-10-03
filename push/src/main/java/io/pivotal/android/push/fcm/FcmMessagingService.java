@@ -140,7 +140,7 @@ public class FcmMessagingService extends FirebaseMessagingService {
     }
 
     private void handleGeofenceMessage(final HashMap<String, String> dataMessage) {
-        Intent geofenceServiceIntent = new Intent(getBaseContext(), GeofenceService.class);
+        final Intent geofenceServiceIntent = new Intent(getBaseContext(), GeofenceService.class);
 
         for (Entry<String, String> dataKeyValue : dataMessage.entrySet()) {
             geofenceServiceIntent.putExtra(dataKeyValue.getKey(), dataKeyValue.getValue());

@@ -3,10 +3,15 @@ package io.pivotal.android.push.fcm;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.test.AndroidTestCase;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.LargeTest;
+import android.support.test.runner.AndroidJUnit4;
 
 import com.google.firebase.messaging.RemoteMessage;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
@@ -18,6 +23,8 @@ import io.pivotal.android.push.analytics.AnalyticsEventLogger;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.service.GeofenceService;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
@@ -25,7 +32,9 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-public class FcmMessagingServiceTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+@LargeTest
+public class FcmMessagingServiceTest {
 
     private final HashMap<String, String> NO_DATA = new HashMap<>();
     private final RemoteMessage.Notification NO_NOTIFICATION = null;
@@ -35,10 +44,9 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
     private AnalyticsEventLogger eventLogger;
     private ArgumentCaptor<Intent> intentCaptor;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        System.setProperty("dexmaker.dexcache", mContext.getCacheDir().getPath());
+    @Before
+    public void setUp() throws Exception {
+        System.setProperty("dexmaker.dexcache", InstrumentationRegistry.getContext().getCacheDir().getPath());
         eventLogger = mock(AnalyticsEventLogger.class);
         final PushPreferencesProvider pushPreferencesProvider = mock(PushPreferencesProvider.class);
 
@@ -64,6 +72,7 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
         when(context.getPackageName()).thenReturn("io.pivotal.android.push.fcm");
     }
 
+    @Test
     public void testMessageTypeNotification() {
         final RemoteMessage.Notification notification = mock(RemoteMessage.Notification.class);
 
@@ -78,6 +87,7 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
         verify(eventLogger, never()).logReceivedHeartbeat(anyString());
     }
 
+    @Test
     public void testMessageTypeData() {
         final HashMap<String, String> messageData = new HashMap<>();
         messageData.put("SomePayloadKey", "SomePayloadValue");
@@ -94,6 +104,7 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
         verify(eventLogger, never()).logReceivedHeartbeat(anyString());
     }
 
+    @Test
     public void testMessageTypeNotificationAndData() {
         final RemoteMessage.Notification notification = mock(RemoteMessage.Notification.class);
         final HashMap<String, String> messageData = new HashMap<>();
@@ -111,6 +122,7 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
         verify(eventLogger, never()).logReceivedHeartbeat(anyString());
     }
 
+    @Test
     public void testMessageTypeHeartbeat() {
         final HashMap<String, String> messageData = new HashMap<>();
         messageData.put(FcmMessagingService.KEY_RECEIPT_ID, "some receipt id");
@@ -128,6 +140,7 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
         verify(eventLogger).logReceivedHeartbeat(anyString());
     }
 
+    @Test
     public void testReceiveDeleteMessage() {
         fcmMessagingService.onReceiveDeletedMessages();
 
@@ -141,6 +154,7 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
         verify(eventLogger, never()).logReceivedHeartbeat(anyString());
     }
 
+    @Test
     public void testReceiveMessageSendError() {
         final String messageId = "123";
         final Exception messageException = new Exception("Exception");
@@ -158,6 +172,7 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
         verify(eventLogger, never()).logReceivedHeartbeat(anyString());
     }
 
+    @Test
     public void testGeofenceAvailableKeySetToTrue() {
         final HashMap<String, String> messageData = new HashMap<>();
         messageData.put(GeofenceService.GEOFENCE_AVAILABLE, "true");
@@ -177,6 +192,7 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
         fcmMessagingService.assertErrorMessageReceived(null, null);
     }
 
+    @Test
     public void testGeofenceAvailableKeySetToFalse() {
         final HashMap<String, String> messageData = new HashMap<>();
         messageData.put(GeofenceService.GEOFENCE_AVAILABLE, "false");
@@ -196,6 +212,7 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
         fcmMessagingService.assertErrorMessageReceived(null, null);
     }
 
+    @Test
     public void testGeofenceWithExtraData() {
         final HashMap<String, String> messageData = new HashMap<>();
         messageData.put(GeofenceService.GEOFENCE_AVAILABLE, "false");
@@ -223,6 +240,7 @@ public class FcmMessagingServiceTest extends AndroidTestCase {
         fcmMessagingService.assertErrorMessageReceived(null, null);
     }
 
+    @Test
     public void testGeofenceAvailableKeySetToEmpty() {
         final HashMap<String, String> messageData = new HashMap<>();
         messageData.put(GeofenceService.GEOFENCE_AVAILABLE, "");
