@@ -26,7 +26,7 @@ import io.pivotal.android.push.model.geofence.PCFPushGeofenceData;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceDataList;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocation;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocationMap;
-import io.pivotal.android.push.service.GcmService;
+import io.pivotal.android.push.service.GeofenceService;
 import io.pivotal.android.push.util.DebugUtil;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.Util;
@@ -175,8 +175,8 @@ public class GeofenceRegistrar {
     }
 
     private void handleMonitorGeofences(final List<Geofence> geofences, final List<Map<String, String>> serializableGeofences, final GoogleApiClient googleApiClient) {
-        final Class<?> gcmServiceClass = GcmService.getGcmServiceClass(context);
-        final Intent intent = new Intent(context, gcmServiceClass);
+        final Class<?> geofenceServiceClass = GeofenceService.getGeofenceServiceClass(context);
+        final Intent intent = new Intent(context, geofenceServiceClass);
         final PendingIntent pendingIntent = PendingIntent.getService(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         final Status removeGeofencesStatus = LocationServices.GeofencingApi.removeGeofences(googleApiClient, pendingIntent).await();

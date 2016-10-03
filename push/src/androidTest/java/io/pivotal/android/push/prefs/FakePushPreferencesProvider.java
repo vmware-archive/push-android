@@ -12,9 +12,8 @@ import io.pivotal.android.push.version.Version;
 
 public class FakePushPreferencesProvider implements PushPreferencesProvider {
 
-    private String gcmDeviceRegistrationId;
+    private String fcmTokenId;
     private String pcfPushDeviceRegistrationId;
-    private String gcmSenderId;
     private String platformUuid;
     private String platformSecret;
     private String deviceAlias;
@@ -23,15 +22,12 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     private String serviceUrl;
     private Set<String> tags;
     private Map<String, String> requestHeaders;
-    private int appVersion;
     private long lastGeofenceUpdate = GeofenceEngine.NEVER_UPDATED_GEOFENCES;
     private Version backEndVersion;
     private Date backEndVersionTimePolled;
     private boolean areGeofencesEnabled;
-    private boolean wasGcmDeviceRegistrationIdSaved = false;
+    private boolean wasFcmTokenIdSaved = false;
     private boolean wasPCFPushDeviceRegistrationIdSaved = false;
-    private boolean wasAppVersionSaved = false;
-    private boolean wasGcmSenderIdSaved = false;
     private boolean wasPlatformUuidSaved = false;
     private boolean wasPlatformSecretSaved = false;
     private boolean wasDeviceAliasSaved = false;
@@ -46,10 +42,8 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     public FakePushPreferencesProvider() {
     }
 
-    public FakePushPreferencesProvider(String gcmDeviceRegistrationIdToLoad,
+    public FakePushPreferencesProvider(String fcmTokenIdToLoad,
                                        String pcfPushDeviceRegistrationIdToLoad,
-                                       int appVersionToLoad,
-                                       String gcmSenderIdToLoad,
                                        String platformUuidToLoad,
                                        String platformSecretToLoad,
                                        String deviceAliasToLoad,
@@ -60,10 +54,8 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
                                        long lastGeofenceUpdateToLoad,
                                        boolean areGeofencesEnabled) {
 
-        this.gcmDeviceRegistrationId = gcmDeviceRegistrationIdToLoad;
+        this.fcmTokenId = fcmTokenIdToLoad;
         this.pcfPushDeviceRegistrationId = pcfPushDeviceRegistrationIdToLoad;
-        this.appVersion = appVersionToLoad;
-        this.gcmSenderId = gcmSenderIdToLoad;
         this.platformUuid = platformUuidToLoad;
         this.platformSecret = platformSecretToLoad;
         this.deviceAlias = deviceAliasToLoad;
@@ -75,10 +67,8 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
         this.tags = tagsToLoad;
     }
 
-    public FakePushPreferencesProvider(String gcmDeviceRegistrationIdToLoad,
+    public FakePushPreferencesProvider(String fcmTokenIdToLoad,
                                        String pcfPushDeviceRegistrationIdToLoad,
-                                       int appVersionToLoad,
-                                       String gcmSenderIdToLoad,
                                        String platformUuidToLoad,
                                        String platformSecretToLoad,
                                        String deviceAliasToLoad,
@@ -91,10 +81,8 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
                                        Version backEndVersion,
                                        Date backEndVersionTimePolled) {
 
-        this.gcmDeviceRegistrationId = gcmDeviceRegistrationIdToLoad;
+        this.fcmTokenId = fcmTokenIdToLoad;
         this.pcfPushDeviceRegistrationId = pcfPushDeviceRegistrationIdToLoad;
-        this.appVersion = appVersionToLoad;
-        this.gcmSenderId = gcmSenderIdToLoad;
         this.platformUuid = platformUuidToLoad;
         this.platformSecret = platformSecretToLoad;
         this.deviceAlias = deviceAliasToLoad;
@@ -109,23 +97,13 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     }
 
     @Override
-    public String getGcmDeviceRegistrationId() {
-        return gcmDeviceRegistrationId;
+    public String getFcmTokenId() {
+        return fcmTokenId;
     }
 
     @Override
     public String getPCFPushDeviceRegistrationId() {
         return pcfPushDeviceRegistrationId;
-    }
-
-    @Override
-    public int getAppVersion() {
-        return appVersion;
-    }
-
-    @Override
-    public String getGcmSenderId() {
-        return gcmSenderId;
     }
 
     @Override
@@ -195,21 +173,9 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     }
 
     @Override
-    public void setAppVersion(int appVersion) {
-        this.appVersion = appVersion;
-        wasAppVersionSaved = true;
-    }
-
-    @Override
-    public void setGcmSenderId(String gcmSenderId) {
-        this.gcmSenderId = gcmSenderId;
-        wasGcmSenderIdSaved = true;
-    }
-
-    @Override
-    public void setGcmDeviceRegistrationId(String gcmDeviceRegistrationId) {
-        this.gcmDeviceRegistrationId = gcmDeviceRegistrationId;
-        wasGcmDeviceRegistrationIdSaved = true;
+    public void setFcmTokenId(String fcmTokenId) {
+        this.fcmTokenId = fcmTokenId;
+        wasFcmTokenIdSaved = true;
     }
 
     @Override
@@ -290,20 +256,12 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
         return areAnalyticsEnabled;
     }
 
-    public boolean wasGcmDeviceRegistrationIdSaved() {
-        return wasGcmDeviceRegistrationIdSaved;
+    public boolean wasFcmTokenIdSaved() {
+        return wasFcmTokenIdSaved;
     }
 
     public boolean wasPCFPushDeviceRegistrationIdSaved() {
         return wasPCFPushDeviceRegistrationIdSaved;
-    }
-
-    public boolean wasAppVersionSaved() {
-        return wasAppVersionSaved;
-    }
-
-    public boolean wasGcmSenderIdSaved() {
-        return wasGcmSenderIdSaved;
     }
 
     public boolean wasPlatformUuidSaved() {

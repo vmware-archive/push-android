@@ -19,7 +19,6 @@ import io.pivotal.android.push.util.NetworkWrapper;
 
 public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
 
-    private static final String TEST_SENDER_ID = "TEST_SENDER_ID";
     private static final String TEST_PLATFORM_UUID = "TEST_PLATFORM_UUID";
     private static final String TEST_PLATFORM_SECRET = "TEST_PLATFORM_SECRET";
     private static final String TEST_DEVICE_ALIAS = "TEST_DEVICE_ALIAS";
@@ -40,7 +39,7 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
         eventsStorage = new FakeAnalyticsEventsStorage();
         networkWrapper = new FakeNetworkWrapper();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
-        preferencesProvider = new FakePushPreferencesProvider(null, null, 0, TEST_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_DEVICE_ALIAS, null, null, TEST_SERVICE_URL, null, 0, true);
+        preferencesProvider = new FakePushPreferencesProvider(null, null, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_DEVICE_ALIAS, null, null, TEST_SERVICE_URL, null, 0, true);
         FakeHttpURLConnection.reset();
         emptyList = new LinkedList<>();
         listWithOneItem = new LinkedList<>();
@@ -199,7 +198,6 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
     private Properties getProperties(boolean areAnalyticsEnabled) {
         final Properties properties = new Properties();
         properties.setProperty(Pivotal.Keys.SERVICE_URL, "http://some.url");
-        properties.setProperty(Pivotal.Keys.GCM_SENDER_ID, "fake_sender_id");
         properties.setProperty(Pivotal.Keys.PLATFORM_UUID, "fake_platform_uuid");
         properties.setProperty(Pivotal.Keys.PLATFORM_SECRET, "fake_platform_secret");
         properties.setProperty(Pivotal.Keys.ARE_ANALYTICS_ENABLED, Boolean.toString(areAnalyticsEnabled));

@@ -6,27 +6,33 @@ package io.pivotal.android.push.registration;
 import android.content.Context;
 import android.content.pm.PackageManager;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.GoogleApiAvailability;
+import com.google.firebase.iid.FirebaseInstanceId;
+
 import java.util.Set;
 
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequest;
+import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestImpl;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestProvider;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationListener;
-import io.pivotal.android.push.gcm.GcmProvider;
-import io.pivotal.android.push.gcm.GcmRegistrationApiRequest;
-import io.pivotal.android.push.gcm.GcmRegistrationApiRequestProvider;
-import io.pivotal.android.push.gcm.GcmRegistrationListener;
-import io.pivotal.android.push.gcm.GcmUnregistrationApiRequest;
-import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
-import io.pivotal.android.push.gcm.GcmUnregistrationListener;
+import io.pivotal.android.push.backend.geofence.PCFPushGetGeofenceUpdatesApiRequest;
 import io.pivotal.android.push.geofence.GeofenceEngine;
+import io.pivotal.android.push.geofence.GeofencePersistentStore;
+import io.pivotal.android.push.geofence.GeofenceRegistrar;
 import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
+import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
+import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
+import io.pivotal.android.push.util.FileHelper;
 import io.pivotal.android.push.util.Logger;
+import io.pivotal.android.push.util.NetworkWrapper;
+import io.pivotal.android.push.util.NetworkWrapperImpl;
+import io.pivotal.android.push.util.TimeProvider;
 import io.pivotal.android.push.util.Util;
 import io.pivotal.android.push.version.GeofenceStatus;
-import io.pivotal.android.push.version.VersionProvider;
 
 /**
  * This class is responsible for all the business logic behind device registration.  For a description
@@ -40,17 +46,11 @@ import io.pivotal.android.push.version.VersionProvider;
  *  If the device is already successfully registered and all of the registration parameters are the same as the
  *  previous registration then the Registration Engine won't do anything.
  *
- *  On a fresh install, the Registration Engine will register with Google Cloud Messaging (GCM) and then with the
+ *  On a fresh install, the Registration Engine will register with Google Firebase Cloud Messaging (FCM) and then with the
  *  Pivotal CF Mobile Services server.
  *
- *  If the GCM Sender ID is different then the previous registration, then the Registration Engine will
- *  attempt to unregister the device with GCM (Google Cloud Messaging) first.
- *
- *  If the application version code or the GCM Sender ID is updated since the previous registration, then the
- *  Registration Engine will attempt to re-register with GCM.
- *
  *  If any of the Pivotal CF Mobile Services registration parameters (platform_uuid, platform_secret, device_alias), or
- *  if a GCM registration provides a different device registration ID than a previous install, then the Registration
+ *  if FCM provides a different token ID than a previous install, then the Registration
  *  Engine will attempt to update its registration wih the Pivotal CF Mobile Services Push server (i.e.: HTTP PUT).
  *
  *  If, however, the base_server_url parameter is different than the existing registration, then the Registration
@@ -58,31 +58,53 @@ import io.pivotal.android.push.version.VersionProvider;
  *  server.
  *
  *  The Registration Engine is also designed to successfully complete previous registrations that have failed. For
- *  instance, if the previous registration attempt successfully registered with GCM but failed to complete the
- *  registration with PCF Push then it will simply try to re-register with the server if called again.
+ *  instance, if the previous registration attempt failed to complete the registration with PCF Push then it will
+ *  try to re-register with the server if called again.
  */
 public class RegistrationEngine {
 
     public static final int MAXIMUM_CUSTOM_USER_ID_LENGTH = 255;
     private Context context;
-    private GcmProvider gcmProvider;
+    private FirebaseInstanceId firebaseInstanceId;
+    private GoogleApiAvailability googleApiAvailability;
     private PushPreferencesProvider pushPreferencesProvider;
-    private GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider;
-    private GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider;
     private PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider;
     private GeofenceUpdater geofenceUpdater;
     private GeofenceEngine geofenceEngine;
-    private VersionProvider versionProvider;
     private GeofenceStatusUtil geofenceStatusUtil;
     private String packageName;
-    private String previousGcmDeviceRegistrationId = null;
+    private String previousFcmTokenId = null;
     private String previousPCFPushDeviceRegistrationId = null;
-    private String previousGcmSenderId;
     private String previousPlatformUuid;
     private String previousPlatformSecret;
     private String previousDeviceAlias;
     private String previousCustomUserId;
     private String previousServiceUrl;
+
+    public static RegistrationEngine getRegistrationEngine(Context context) {
+        final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
+        final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
+        final PCFPushRegistrationApiRequest dummyPCFPushRegistrationApiRequest = new PCFPushRegistrationApiRequestImpl(context, networkWrapper);
+        final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(dummyPCFPushRegistrationApiRequest);
+        final PCFPushGetGeofenceUpdatesApiRequest geofenceUpdatesApiRequest = new PCFPushGetGeofenceUpdatesApiRequest(context, networkWrapper);
+        final GeofenceRegistrar geofenceRegistrar = new GeofenceRegistrar(context);
+        final FileHelper fileHelper = new FileHelper(context);
+        final TimeProvider timeProvider = new TimeProvider();
+        final GeofencePersistentStore geofencePersistentStore = new GeofencePersistentStore(context, fileHelper);
+        final GeofenceEngine geofenceEngine = new GeofenceEngine(geofenceRegistrar, geofencePersistentStore, timeProvider, pushPreferencesProvider);
+        final GeofenceUpdater geofenceUpdater = new GeofenceUpdater(context, geofenceUpdatesApiRequest, geofenceEngine, pushPreferencesProvider);
+        final GeofenceStatusUtil geofenceStatusUtil = new GeofenceStatusUtil(context);
+
+        return new RegistrationEngine(context,
+                context.getPackageName(),
+                FirebaseInstanceId.getInstance(),
+                GoogleApiAvailability.getInstance(),
+                pushPreferencesProvider,
+                PCFPushRegistrationApiRequestProvider,
+                geofenceUpdater,
+                geofenceEngine,
+                geofenceStatusUtil);
+    }
 
     /**
      * Instantiate an instance of the RegistrationEngine.
@@ -90,48 +112,40 @@ public class RegistrationEngine {
      * All the parameters are required.  None may be null.
      * @param context  A context
      * @param packageName  The currenly application package name.
-     * @param gcmProvider  Some object that can provide the GCM services.
+     * @param firebaseInstanceId Some object that can provide Firebase Token ID
+     * @param googleApiAvailability Some object that can used to determine if Google Play is available.
      * @param pushPreferencesProvider  Some object that can provide persistent storage for push preferences.
-     * @param gcmRegistrationApiRequestProvider  Some object that can provide GCMRegistrationApiRequest objects.
-     * @param gcmUnregistrationApiRequestProvider  Some object that can provide GCMUnregistrationApiRequest objects.
      * @param pcfPushRegistrationApiRequestProvider  Some object that can provide PCFPushRegistrationApiRequest objects.
-     * @param versionProvider  Some object that can provide the application version.
      * @param geofenceUpdater  Some object that can be used to download geofence updates from the server.
      * @param geofenceEngine  Some object that can be used to register geofences.
      * @param geofenceStatusUtil  Some object that can be used to change the geofence status
      */
     public RegistrationEngine(Context context,
                               String packageName,
-                              GcmProvider gcmProvider,
+                              FirebaseInstanceId firebaseInstanceId,
+                              GoogleApiAvailability googleApiAvailability,
                               PushPreferencesProvider pushPreferencesProvider,
-                              GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
-                              GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                               PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
-                              VersionProvider versionProvider,
                               GeofenceUpdater geofenceUpdater,
                               GeofenceEngine geofenceEngine,
                               GeofenceStatusUtil geofenceStatusUtil) {
 
         verifyArguments(context,
                 packageName,
-                gcmProvider,
+                firebaseInstanceId,
+                googleApiAvailability,
                 pushPreferencesProvider,
-                gcmRegistrationApiRequestProvider,
-                gcmUnregistrationApiRequestProvider,
                 pcfPushRegistrationApiRequestProvider,
-                versionProvider,
                 geofenceUpdater,
                 geofenceEngine,
                 geofenceStatusUtil);
 
         saveArguments(context,
                 packageName,
-                gcmProvider,
+                firebaseInstanceId,
+                googleApiAvailability,
                 pushPreferencesProvider,
-                gcmRegistrationApiRequestProvider,
-                gcmUnregistrationApiRequestProvider,
                 pcfPushRegistrationApiRequestProvider,
-                versionProvider,
                 geofenceUpdater,
                 geofenceEngine,
                 geofenceStatusUtil);
@@ -139,12 +153,10 @@ public class RegistrationEngine {
 
     private void verifyArguments(Context context,
                                  String packageName,
-                                 GcmProvider gcmProvider,
+                                 FirebaseInstanceId firebaseInstanceId,
+                                 GoogleApiAvailability googleApiAvailability,
                                  PushPreferencesProvider pushPreferencesProvider,
-                                 GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
-                                 GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                  PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
-                                 VersionProvider versionProvider,
                                  GeofenceUpdater geofenceUpdater,
                                  GeofenceEngine geofenceEngine,
                                  GeofenceStatusUtil geofenceStatusUtil) {
@@ -155,23 +167,17 @@ public class RegistrationEngine {
         if (packageName == null) {
             throw new IllegalArgumentException("packageName may not be null");
         }
-        if (gcmProvider == null) {
-            throw new IllegalArgumentException("gcmProvider may not be null");
+        if (firebaseInstanceId == null) {
+            throw new IllegalArgumentException("firebaseInstanceId may not be null");
+        }
+        if (googleApiAvailability == null) {
+            throw new IllegalArgumentException("googleApiAvailability may not be null");
         }
         if (pushPreferencesProvider == null) {
             throw new IllegalArgumentException("pushPreferencesProvider may not be null");
         }
-        if (gcmRegistrationApiRequestProvider == null) {
-            throw new IllegalArgumentException("gcmRegistrationApiRequestProvider may not be null");
-        }
-        if (gcmUnregistrationApiRequestProvider == null) {
-            throw new IllegalArgumentException("gcmUnregistrationApiRequestProvider may not be null");
-        }
         if (pcfPushRegistrationApiRequestProvider == null) {
             throw new IllegalArgumentException("pcfPushRegistrationApiRequestProvider may not be null");
-        }
-        if (versionProvider == null) {
-            throw new IllegalArgumentException("versionProvider may not be null");
         }
         if (geofenceUpdater == null) {
             throw new IllegalArgumentException("geofenceUpdater may not be null");
@@ -186,30 +192,25 @@ public class RegistrationEngine {
 
     private void saveArguments(Context context,
                                String packageName,
-                               GcmProvider gcmProvider,
+                               FirebaseInstanceId firebaseInstanceId,
+                               GoogleApiAvailability googleApiAvailability,
                                PushPreferencesProvider pushPreferencesProvider,
-                               GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
-                               GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
-                               VersionProvider versionProvider,
                                GeofenceUpdater geofenceUpdater,
                                GeofenceEngine geofenceEngine,
                                GeofenceStatusUtil geofenceStatusUtil) {
 
         this.context = context;
         this.packageName = packageName;
-        this.gcmProvider = gcmProvider;
+        this.firebaseInstanceId = firebaseInstanceId;
+        this.googleApiAvailability = googleApiAvailability;
         this.pushPreferencesProvider = pushPreferencesProvider;
-        this.gcmRegistrationApiRequestProvider = gcmRegistrationApiRequestProvider;
-        this.gcmUnregistrationApiRequestProvider = gcmUnregistrationApiRequestProvider;
         this.pcfPushRegistrationApiRequestProvider = pcfPushRegistrationApiRequestProvider;
-        this.versionProvider = versionProvider;
         this.geofenceUpdater = geofenceUpdater;
         this.geofenceEngine = geofenceEngine;
         this.geofenceStatusUtil = geofenceStatusUtil;
-        this.previousGcmDeviceRegistrationId = pushPreferencesProvider.getGcmDeviceRegistrationId();
+        this.previousFcmTokenId = pushPreferencesProvider.getFcmTokenId();
         this.previousPCFPushDeviceRegistrationId = pushPreferencesProvider.getPCFPushDeviceRegistrationId();
-        this.previousGcmSenderId = pushPreferencesProvider.getGcmSenderId();
         this.previousPlatformUuid = pushPreferencesProvider.getPlatformUuid();
         this.previousPlatformSecret = pushPreferencesProvider.getPlatformSecret();
         this.previousDeviceAlias = pushPreferencesProvider.getDeviceAlias();
@@ -232,31 +233,53 @@ public class RegistrationEngine {
      */
     public void registerDevice(PushParameters parameters, final RegistrationListener listener) {
 
+        if (!isGooglePlayServicesInstalled(context)) {
+            if (listener != null) {
+                listener.onRegistrationFailed("Google Play Services is not available");
+            }
+        }
+
         verifyRegistrationArguments(parameters);
 
         // Save the given package name so that the message receiver service can see it
         pushPreferencesProvider.setPackageName(packageName);
 
-        if (!isEmptyPreviousGcmSenderId() && isUpdatedGcmSenderId(parameters)) {
-          unregisterDeviceWithGcm(parameters, listener);
-
-        } else if (isGcmRegistrationRequired(parameters)) {
-            if (gcmProvider.isGooglePlayServicesInstalled(context)) {
-                registerDeviceWithGcm(parameters, listener);
-            } else {
-                if (listener != null) {
-                    listener.onRegistrationFailed("Google Play Services is not available");
-                }
+        String fcmTokenId = firebaseInstanceId.getToken();
+        if (fcmTokenId == null) {
+            Logger.e("FCM returned null fcmTokenId");
+            if (listener != null) {
+                listener.onRegistrationFailed("FCM returned null fcmTokenId");
             }
+            return;
+        }
 
-        // TODO: If the Push Platform is changed then consider doing a DELETE at the old platform with the old GCM device ID and then a POST at the new platform.  At this time,
-        // the registration engine simply orphans the registration at the old platform and does a POST at the new platform.
+        final boolean isNewFcmTokenId;
+        if (!isPreviousFcmTokenIdEmpty() && previousFcmTokenId.equals(fcmTokenId)) {
+            Logger.v("New fcmTokenId from FCM is the same as the previous one.");
+            isNewFcmTokenId = false;
+        } else {
+            isNewFcmTokenId = true;
+        }
 
-        } else if (isPCFPushUpdateRegistrationRequired(previousGcmDeviceRegistrationId, parameters)) {
-            registerUpdateDeviceWithPCFPush(previousGcmDeviceRegistrationId, previousPCFPushDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
+        if (isPreviousFcmTokenIdEmpty() || isNewFcmTokenId) {
+            pushPreferencesProvider.setFcmTokenId(fcmTokenId);
+        }
 
-        } else if (isPCFPushNewRegistrationRequired(parameters)) {
-            registerNewDeviceWithPCFPush(previousGcmDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
+        final boolean isServiceUrlUpdated = isServiceUrlUpdated(parameters);
+        if (isServiceUrlUpdated) {
+            Logger.v("The PCF Push serviceUrl has been updated. A new registration with the PCF Push server is required.");
+        }
+
+        final boolean isPlatformUpdated = isPlatformUpdated(parameters);
+        if (isPlatformUpdated) {
+            Logger.v("The PCF Push platform has been updated. A new registration with the PCF Push server is required.");
+        }
+
+        if (isPCFPushUpdateRegistrationRequired(fcmTokenId, parameters) && !isServiceUrlUpdated && !isPlatformUpdated) {
+            registerUpdateDeviceWithPCFPush(fcmTokenId, previousPCFPushDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
+
+        } else if (isNewFcmTokenId || isServiceUrlUpdated || isPlatformUpdated) {
+                registerNewDeviceWithPCFPush(fcmTokenId, pushPreferencesProvider.getTags(), parameters, listener);
 
         } else if (isGeofenceUpdateRequired(parameters)) {
             updateGeofences(listener);
@@ -265,19 +288,38 @@ public class RegistrationEngine {
             clearGeofences(listener);
 
         } else {
-            Logger.v("Already registered with GCM and PCF Push");
+            Logger.v("Already registered");
             if (listener != null) {
                 listener.onRegistrationComplete();
             }
         }
     }
 
+    /**
+     * Start a FCM token update attempt. It informs the Push backend of the device's new FCM token id.
+     * This method is asynchronous and will return before update is complete.
+     *
+     * This function is not intended to be used directly. It will be called automatically by the Push instance
+     * when it receives a token update notification from FcmTokenIDService.
+     */
+    public void updateDeviceTokenId() {
+        PushParameters parameters = new PushParameters(pushPreferencesProvider.getPlatformUuid(),
+                pushPreferencesProvider.getPlatformSecret(),
+                pushPreferencesProvider.getServiceUrl(),
+                pushPreferencesProvider.getDeviceAlias(),
+                pushPreferencesProvider.getCustomUserId(),
+                pushPreferencesProvider.getTags(),
+                pushPreferencesProvider.areGeofencesEnabled(),
+                Pivotal.getSslCertValidationMode(context),
+                Pivotal.getPinnedSslCertificateNames(context),
+                pushPreferencesProvider.getRequestHeaders());
+
+        registerDevice(parameters, null);
+    }
+
     private void verifyRegistrationArguments(PushParameters parameters) {
         if (parameters == null) {
             throw new IllegalArgumentException("parameters may not be null");
-        }
-        if (parameters.getGcmSenderId() == null || parameters.getGcmSenderId().isEmpty()) {
-            throw new IllegalArgumentException("parameters.senderId may not be null or empty");
         }
         if (parameters.getPlatformUuid() == null || parameters.getPlatformUuid().isEmpty()) {
             throw new IllegalArgumentException("parameters.platformUuid may not be null or empty");
@@ -293,37 +335,8 @@ public class RegistrationEngine {
         }
     }
 
-    private boolean isGcmRegistrationRequired(PushParameters parameters) {
-        if (isEmptyPreviousGcmDeviceRegistrationId()) {
-            Logger.v("previousGcmDeviceRegistrationId is empty. Device registration with GCM will be required");
-            return true;
-        }
-        if (isEmptyPreviousGcmSenderId()) {
-            Logger.v("previousGcmSenderId is empty. Device registration with GCM will be required");
-            return true;
-        }
-        if (isUpdatedGcmSenderId(parameters)) {
-            Logger.v("gcmSenderId has been updated. Device unregistration and re-registration with GCM will be required");
-            return true;
-        }
-        if (hasAppBeenUpdated()) {
-            Logger.v("App version changed. Device registration with GCM will be required.");
-            return true;
-        }
-        return false;
-    }
-
-    private boolean isEmptyPreviousGcmDeviceRegistrationId() {
-        return previousGcmDeviceRegistrationId == null || previousGcmDeviceRegistrationId.isEmpty();
-    }
-
-    private boolean isEmptyPreviousGcmSenderId() {
-        final boolean isPreviousGcmSenderIdEmpty = previousGcmSenderId == null || previousGcmSenderId.isEmpty();
-        return isPreviousGcmSenderIdEmpty;
-    }
-
-    private boolean isUpdatedGcmSenderId(PushParameters parameters) {
-        return !parameters.getGcmSenderId().equals(previousGcmSenderId);
+    private boolean isPreviousFcmTokenIdEmpty() {
+        return previousFcmTokenId == null || previousFcmTokenId.isEmpty();
     }
 
     private boolean haveTagsBeenUpdated(PushParameters parameters) {
@@ -345,36 +358,15 @@ public class RegistrationEngine {
         return (s == null || s.isEmpty());
     }
 
-    private boolean hasAppBeenUpdated() {
-        final int currentAppVersion = versionProvider.getAppVersion();
-        final int savedAppVersion = pushPreferencesProvider.getAppVersion();
-        return currentAppVersion != savedAppVersion;
-    }
-
-    private boolean isPCFPushNewRegistrationRequired(PushParameters parameters) {
-        final boolean isPlatformUpdated = isPlatformUpdated(parameters);
-        final boolean isServiceUrlUpdated = isServiceUrlUpdated(parameters);
-        if (isEmptyPreviousGcmDeviceRegistrationId()) {
-            Logger.v("previousGcmDeviceRegistrationId is empty. Device registration with PCF Push will be required.");
-        }
-        if (isPlatformUpdated) {
-            Logger.v("The platform uuid and/or secret is updated. Device registration with PCF Push will be required.");
-        }
-        if (isServiceUrlUpdated) {
-            Logger.v("The serviceUrl has been updated. Device registration with PCF Push will be required.");
-        }
-        return isEmptyPreviousGcmDeviceRegistrationId() || isPlatformUpdated || isServiceUrlUpdated;
-    }
-
-    private boolean isPCFPushUpdateRegistrationRequired(String newGcmDeviceRegistrationId, PushParameters parameters) {
-        final boolean isGcmDeviceRegistrationIdDifferent = isEmptyPreviousGcmDeviceRegistrationId() || !previousGcmDeviceRegistrationId.equals(newGcmDeviceRegistrationId);
+    private boolean isPCFPushUpdateRegistrationRequired(String newFcmTokenId, PushParameters parameters) {
+        final boolean isFcmTokenIdDifferent = !isPreviousFcmTokenIdEmpty() && !previousFcmTokenId.equals(newFcmTokenId); // If previous token is empty, this means a new registration, not an registration update
         final boolean isPreviousPCFPushDeviceRegistrationIdEmpty = previousPCFPushDeviceRegistrationId == null || previousPCFPushDeviceRegistrationId.isEmpty();
         if (isPreviousPCFPushDeviceRegistrationIdEmpty) {
             Logger.v("previousPCFPushDeviceRegistrationId is empty. Device will NOT require an update-registration with PCF Push.");
             return false;
         }
-        if (isGcmDeviceRegistrationIdDifferent) {
-            Logger.v("The gcmDeviceRegistrationId is different. Device will need to update its registration with PCF Push.");
+        if (isFcmTokenIdDifferent) {
+            Logger.v("The fcmTokenId is different. Device will need to update its registration with PCF Push.");
             return true;
         }
         if (areRegistrationParametersUpdated(parameters)) {
@@ -443,98 +435,7 @@ public class RegistrationEngine {
         return (accessGpsPermission == PackageManager.PERMISSION_GRANTED) && (receiveBootPermission == PackageManager.PERMISSION_GRANTED);
     }
 
-    private void unregisterDeviceWithGcm(final PushParameters parameters, final RegistrationListener listener) {
-        Logger.i("GCM Sender ID has been changed. Unregistering sender ID with GCM.");
-        final GcmUnregistrationApiRequest gcmUnregistrationApiRequest = gcmUnregistrationApiRequestProvider.getRequest();
-        gcmUnregistrationApiRequest.startUnregistration(new GcmUnregistrationListener() {
-
-            @Override
-            public void onGcmUnregistrationComplete() {
-                pushPreferencesProvider.setGcmDeviceRegistrationId(null);
-                pushPreferencesProvider.setGcmSenderId(null);
-                pushPreferencesProvider.setAppVersion(PushPreferencesProvider.NO_SAVED_VERSION);
-
-                registerDeviceWithGcm(parameters, listener);
-            }
-
-            @Override
-            public void onGcmUnregistrationFailed(String reason) {
-                // Even if we couldn't unregister from GCM we should try to register with GCM.
-                registerDeviceWithGcm(parameters, listener);
-            }
-        });
-    }
-
-    private void registerDeviceWithGcm(final PushParameters parameters, final RegistrationListener listener) {
-        Logger.i("Initiating device registration with GCM.");
-        final GcmRegistrationApiRequest gcmRegistrationApiRequest = gcmRegistrationApiRequestProvider.getRequest();
-        gcmRegistrationApiRequest.startRegistration(parameters.getGcmSenderId(), new GcmRegistrationListener() {
-
-            @Override
-            public void onGcmRegistrationComplete(String gcmDeviceRegistrationId) {
-
-                if (gcmDeviceRegistrationId == null) {
-                    Logger.e("GCM returned null gcmDeviceRegistrationId");
-                    if (listener != null) {
-                        listener.onRegistrationFailed("GCM returned null gcmDeviceRegistrationId");
-                    }
-                    return;
-                }
-
-                pushPreferencesProvider.setGcmDeviceRegistrationId(gcmDeviceRegistrationId);
-                pushPreferencesProvider.setGcmSenderId(parameters.getGcmSenderId());
-                pushPreferencesProvider.setAppVersion(versionProvider.getAppVersion());
-
-                final boolean isNewGcmDeviceRegistrationId;
-                if (previousGcmDeviceRegistrationId != null && previousGcmDeviceRegistrationId.equals(gcmDeviceRegistrationId)) {
-                    Logger.v("New gcmDeviceRegistrationId from GCM is the same as the previous one.");
-                    isNewGcmDeviceRegistrationId = false;
-                } else {
-                    isNewGcmDeviceRegistrationId = true;
-                }
-
-                final boolean isServiceUrlUpdated = isServiceUrlUpdated(parameters);
-                if (isServiceUrlUpdated) {
-                    Logger.v("The PCF Push serviceUrl has been updated. A new registration with the PCF Push server is required.");
-                }
-
-                final boolean isPlatformUpdated = isPlatformUpdated(parameters);
-                if (isPlatformUpdated) {
-                    Logger.v("The PCF Push platform has been updated. A new registration with the PCF Push server is required.");
-                }
-
-                if (isPCFPushUpdateRegistrationRequired(gcmDeviceRegistrationId, parameters) && !isServiceUrlUpdated && !isPlatformUpdated) {
-                    registerUpdateDeviceWithPCFPush(gcmDeviceRegistrationId, previousPCFPushDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
-
-                } else if (isNewGcmDeviceRegistrationId || isServiceUrlUpdated || isPlatformUpdated) {
-                    registerNewDeviceWithPCFPush(gcmDeviceRegistrationId, pushPreferencesProvider.getTags(), parameters, listener);
-
-                } else if (isGeofenceUpdateRequired(parameters)) {
-                    updateGeofences(listener);
-
-                } else if (isClearGeofencesRequired(parameters)) {
-                    clearGeofences(listener);
-
-                } else if (listener != null) {
-                    listener.onRegistrationComplete();
-                }
-            }
-
-            @Override
-            public void onGcmRegistrationFailed(String reason) {
-
-                if (isClearGeofencesRequired(parameters)) {
-                    clearGeofences(null); // Note - skipping the callback since we want to report the failure below
-                }
-
-                if (listener != null) {
-                    listener.onRegistrationFailed(reason);
-                }
-            }
-        });
-    }
-
-    private void registerUpdateDeviceWithPCFPush(String gcmDeviceRegistrationId,
+    private void registerUpdateDeviceWithPCFPush(String fcmTokenId,
                                                  String pcfPushDeviceRegistrationId,
                                                  Set<String> savedTags,
                                                  PushParameters parameters,
@@ -542,7 +443,7 @@ public class RegistrationEngine {
 
         Logger.i("Initiating update device registration with PCF Push.");
         final PCFPushRegistrationApiRequest PCFPushRegistrationApiRequest = pcfPushRegistrationApiRequestProvider.getRequest();
-        PCFPushRegistrationApiRequest.startUpdateDeviceRegistration(gcmDeviceRegistrationId,
+        PCFPushRegistrationApiRequest.startUpdateDeviceRegistration(fcmTokenId,
                 pcfPushDeviceRegistrationId,
                 savedTags,
                 parameters,
@@ -616,14 +517,14 @@ public class RegistrationEngine {
         };
     }
 
-    private void registerNewDeviceWithPCFPush(final String gcmDeviceRegistrationId,
+    private void registerNewDeviceWithPCFPush(final String fcmTokenId,
                                               Set<String> savedTags,
                                               PushParameters parameters,
                                               RegistrationListener listener) {
 
         Logger.i("Initiating new device registration with PCF Push.");
         final PCFPushRegistrationApiRequest PCFPushRegistrationApiRequest = pcfPushRegistrationApiRequestProvider.getRequest();
-        PCFPushRegistrationApiRequest.startNewDeviceRegistration(gcmDeviceRegistrationId, savedTags, parameters, getPCFPushNewRegistrationListener(parameters, listener));
+        PCFPushRegistrationApiRequest.startNewDeviceRegistration(fcmTokenId, savedTags, parameters, getPCFPushNewRegistrationListener(parameters, listener));
     }
 
     private PCFPushRegistrationListener getPCFPushNewRegistrationListener(final PushParameters parameters, final RegistrationListener listener) {
@@ -777,5 +678,15 @@ public class RegistrationEngine {
         pushPreferencesProvider.setCustomUserId(null);
         pushPreferencesProvider.setServiceUrl(null);
         pushPreferencesProvider.setTags(null);
+    }
+
+    private boolean isGooglePlayServicesInstalled(Context context) {
+        int resultCode = googleApiAvailability.isGooglePlayServicesAvailable(context);
+        if (resultCode != ConnectionResult.SUCCESS) {
+            final String errorString = googleApiAvailability.getErrorString(resultCode);
+            Logger.e("Google Play Services is not available: " + errorString);
+            return false;
+        }
+        return true;
     }
 }

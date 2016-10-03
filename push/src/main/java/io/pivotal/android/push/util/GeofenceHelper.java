@@ -7,12 +7,12 @@ import com.google.android.gms.location.GeofencingEvent;
 
 import java.util.List;
 
-import io.pivotal.android.push.service.GcmService;
-
 public class GeofenceHelper {
 
     private final Intent intent;
     private final GeofencingEvent event;
+    private static final String GEOFENCE_TRANSITION_KEY = "com.google.android.location.intent.extra.transition";
+
 
     public GeofenceHelper(Intent intent) {
         this.intent = intent;
@@ -20,7 +20,7 @@ public class GeofenceHelper {
     }
 
     public boolean isGeofencingEvent() {
-        return (intent != null && intent.hasExtra(GcmService.GEOFENCE_TRANSITION_KEY));
+        return (intent != null && intent.hasExtra(GEOFENCE_TRANSITION_KEY));
     }
 
     public int getGeofenceTransition() {

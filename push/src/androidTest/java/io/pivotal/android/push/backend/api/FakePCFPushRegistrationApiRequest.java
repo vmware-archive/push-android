@@ -35,7 +35,7 @@ public class FakePCFPushRegistrationApiRequest implements PCFPushRegistrationApi
     }
 
     @Override
-    public void startNewDeviceRegistration(String gcmDeviceRegistrationId,
+    public void startNewDeviceRegistration(String fcmDeviceRegistrationId,
                                            Set<String> savedTags,
                                            PushParameters parameters,
                                            PCFPushRegistrationListener listener) {
@@ -56,7 +56,7 @@ public class FakePCFPushRegistrationApiRequest implements PCFPushRegistrationApi
     }
 
     @Override
-    public void startUpdateDeviceRegistration(String gcmDeviceRegistrationId,
+    public void startUpdateDeviceRegistration(String fcmDeviceRegistrationId,
                                               String previousPCFPushDeviceRegistrationId,
                                               Set<String> savedTags,
                                               PushParameters parameters,

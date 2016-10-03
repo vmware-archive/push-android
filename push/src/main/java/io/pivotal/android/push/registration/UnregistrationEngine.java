@@ -10,10 +10,6 @@ import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequest;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestProvider;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceListener;
-import io.pivotal.android.push.gcm.GcmProvider;
-import io.pivotal.android.push.gcm.GcmUnregistrationApiRequest;
-import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
-import io.pivotal.android.push.gcm.GcmUnregistrationListener;
 import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
@@ -24,9 +20,7 @@ import io.pivotal.android.push.version.GeofenceStatus;
 public class UnregistrationEngine {
 
     private Context context;
-    private GcmProvider gcmProvider;
     private PushPreferencesProvider pushPreferencesProvider;
-    private GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider;
     private PCFPushUnregisterDeviceApiRequestProvider PCFPushUnregisterDeviceApiRequestProvider;
     private GeofenceUpdater geofenceUpdater;
     private GeofenceStatusUtil geofenceStatusUtil;
@@ -37,42 +31,32 @@ public class UnregistrationEngine {
      *
      * All the parameters are required.  None may be null.
      * @param context  A context
-     * @param gcmProvider  Some object that can provide the GCM services.
      * @param pushPreferencesProvider  Some object that can provide persistent storage of push preferences.
-     * @param gcmUnregistrationApiRequestProvider  Some object that can provide GCMUnregistrationApiRequest objects.
      * @param pcfPushUnregisterDeviceApiRequestProvider  Some object that can provide PCFPushUnregisterDeviceApiRequest objects.
      * @param geofenceUpdater  Some object that can unregister geofences.
      * @param geofenceStatusUtil  Some object that can update geofence statuses.
      */
     public UnregistrationEngine(Context context,
-                                GcmProvider gcmProvider,
                                 PushPreferencesProvider pushPreferencesProvider,
-                                GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                 PCFPushUnregisterDeviceApiRequestProvider pcfPushUnregisterDeviceApiRequestProvider,
                                 GeofenceUpdater geofenceUpdater,
                                 GeofenceStatusUtil geofenceStatusUtil) {
 
         verifyArguments(context,
-                gcmProvider,
                 pushPreferencesProvider,
-                gcmUnregistrationApiRequestProvider,
                 pcfPushUnregisterDeviceApiRequestProvider,
                 geofenceUpdater,
                 geofenceStatusUtil);
 
         saveArguments(context,
-                gcmProvider,
                 pushPreferencesProvider,
-                gcmUnregistrationApiRequestProvider,
                 pcfPushUnregisterDeviceApiRequestProvider,
                 geofenceUpdater,
                 geofenceStatusUtil);
     }
 
     private void verifyArguments(Context context,
-                                 GcmProvider gcmProvider,
                                  PushPreferencesProvider pushPreferencesProvider,
-                                 GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                  PCFPushUnregisterDeviceApiRequestProvider pcfPushUnregisterDeviceApiRequestProvider,
                                  GeofenceUpdater geofenceUpdater,
                                  GeofenceStatusUtil geofenceStatusUtil) {
@@ -80,14 +64,8 @@ public class UnregistrationEngine {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
-        if (gcmProvider == null) {
-            throw new IllegalArgumentException("gcmProvider may not be null");
-        }
         if (pushPreferencesProvider == null) {
             throw new IllegalArgumentException("pushPreferencesProvider may not be null");
-        }
-        if (gcmUnregistrationApiRequestProvider == null) {
-            throw new IllegalArgumentException("gcmUnregistrationApiRequestProvider may not be null");
         }
         if (pcfPushUnregisterDeviceApiRequestProvider == null) {
             throw new IllegalArgumentException("pcfPushUnregisterDeviceApiRequestProvider may not be null");
@@ -101,17 +79,13 @@ public class UnregistrationEngine {
     }
 
     private void saveArguments(Context context,
-                               GcmProvider gcmProvider,
                                PushPreferencesProvider pushPreferencesProvider,
-                               GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
                                PCFPushUnregisterDeviceApiRequestProvider PCFPushUnregisterDeviceApiRequestProvider,
                                GeofenceUpdater geofenceUpdater,
                                GeofenceStatusUtil geofenceStatusUtil) {
 
         this.context = context;
-        this.gcmProvider = gcmProvider;
         this.pushPreferencesProvider = pushPreferencesProvider;
-        this.gcmUnregistrationApiRequestProvider = gcmUnregistrationApiRequestProvider;
         this.PCFPushUnregisterDeviceApiRequestProvider = PCFPushUnregisterDeviceApiRequestProvider;
         this.previousPCFPushDeviceRegistrationId = pushPreferencesProvider.getPCFPushDeviceRegistrationId();
         this.geofenceUpdater = geofenceUpdater;
@@ -126,13 +100,9 @@ public class UnregistrationEngine {
         // the application any more broadcasts
         pushPreferencesProvider.setPackageName(null);
 
-        if (gcmProvider.isGooglePlayServicesInstalled(context)) {
-            unregisterDeviceWithGcm(parameters, listener);
-        } else {
-            if (listener != null) {
-                listener.onUnregistrationFailed("Google Play Services is not available");
-            }
-        }
+        pushPreferencesProvider.setFcmTokenId(null);
+
+        unregisterDeviceWithPCFPush(previousPCFPushDeviceRegistrationId, parameters, listener);
     }
 
     private void verifyUnregisterDeviceArguments(PushParameters parameters) {
@@ -142,35 +112,6 @@ public class UnregistrationEngine {
         if (parameters.getServiceUrl() == null) {
             throw new IllegalArgumentException("parameters.serviceUrl may not be null");
         }
-    }
-
-    private void unregisterDeviceWithGcm(PushParameters parameters, final UnregistrationListener listener) {
-        Logger.i("Unregistering sender ID with GCM.");
-        final GcmUnregistrationApiRequest gcmUnregistrationApiRequest = gcmUnregistrationApiRequestProvider.getRequest();
-        gcmUnregistrationApiRequest.startUnregistration(getGcmUnregistrationListener(parameters, listener));
-    }
-
-    private GcmUnregistrationListener getGcmUnregistrationListener(final PushParameters parameters, final UnregistrationListener listener) {
-
-        return new GcmUnregistrationListener() {
-            @Override
-            public void onGcmUnregistrationComplete() {
-                clearGcmRegistrationPreferences();
-                unregisterDeviceWithPCFPush(previousPCFPushDeviceRegistrationId, parameters, listener);
-            }
-
-            @Override
-            public void onGcmUnregistrationFailed(String reason) {
-                // Even if we couldn't unregister from GCM we need to continue and unregister the device from PCF Push
-                unregisterDeviceWithPCFPush(previousPCFPushDeviceRegistrationId, parameters, listener);
-            }
-        };
-    }
-
-    private void clearGcmRegistrationPreferences() {
-        pushPreferencesProvider.setGcmDeviceRegistrationId(null);
-        pushPreferencesProvider.setGcmSenderId(null);
-        pushPreferencesProvider.setAppVersion(-1);
     }
 
     private void unregisterDeviceWithPCFPush(final String registrationId, PushParameters parameters, final UnregistrationListener listener) {
