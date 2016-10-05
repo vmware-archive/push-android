@@ -11,13 +11,23 @@ import io.pivotal.android.push.version.Version;
 
 public interface PushPreferencesProvider {
 
-    String getFcmTokenId();
+    public static int NO_SAVED_VERSION = -1;
 
-    void setFcmTokenId(String fcmTokenId);
+    String getGcmDeviceRegistrationId();
+
+    void setGcmDeviceRegistrationId(String gcmDeviceRegistrationId);
 
     String getPCFPushDeviceRegistrationId();
 
     void setPCFPushDeviceRegistrationId(String pcfPushDeviceRegistrationId);
+
+    int getAppVersion();
+
+    void setAppVersion(int appVersion);
+
+    String getGcmSenderId();
+
+    void setGcmSenderId(String gcmSenderId);
 
     String getPlatformUuid();
 

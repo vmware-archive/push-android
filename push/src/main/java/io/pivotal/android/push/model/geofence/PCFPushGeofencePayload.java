@@ -2,7 +2,10 @@ package io.pivotal.android.push.model.geofence;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 public final class PCFPushGeofencePayload {

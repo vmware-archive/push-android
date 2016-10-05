@@ -40,34 +40,34 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
     }
 
     @Override
-    public void startNewDeviceRegistration(String fcmDeviceRegistrationId,
+    public void startNewDeviceRegistration(String gcmDeviceRegistrationId,
                                            Set<String> savedTags,
                                            PushParameters parameters,
                                            PCFPushRegistrationListener listener) {
 
-        verifyNewRegistrationArguments(fcmDeviceRegistrationId, parameters, listener);
+        verifyNewRegistrationArguments(gcmDeviceRegistrationId, parameters, listener);
         final boolean isUpdate = false;
-        handleRequest(fcmDeviceRegistrationId, null, savedTags, parameters, listener, isUpdate);
+        handleRequest(gcmDeviceRegistrationId, null, savedTags, parameters, listener, isUpdate);
     }
 
     @Override
-    public void startUpdateDeviceRegistration(String fcmDeviceRegistrationId,
+    public void startUpdateDeviceRegistration(String gcmDeviceRegistrationId,
                                               String pcfPushDeviceRegistrationId,
                                               Set<String> savedTags,
                                               PushParameters parameters,
                                               PCFPushRegistrationListener listener) {
 
-        verifyUpdateRegistrationArguments(fcmDeviceRegistrationId, pcfPushDeviceRegistrationId, parameters, listener);
+        verifyUpdateRegistrationArguments(gcmDeviceRegistrationId, pcfPushDeviceRegistrationId, parameters, listener);
         final boolean isUpdate = true;
-        handleRequest(fcmDeviceRegistrationId, pcfPushDeviceRegistrationId, savedTags, parameters, listener, isUpdate);
+        handleRequest(gcmDeviceRegistrationId, pcfPushDeviceRegistrationId, savedTags, parameters, listener, isUpdate);
     }
 
-    private void verifyNewRegistrationArguments(String fcmDeviceRegistrationId,
+    private void verifyNewRegistrationArguments(String gcmDeviceRegistrationId,
                                                 PushParameters parameters,
                                                 PCFPushRegistrationListener listener) {
 
-        if (fcmDeviceRegistrationId == null) {
-            throw new IllegalArgumentException("fcmDeviceRegistrationId may not be null");
+        if (gcmDeviceRegistrationId == null) {
+            throw new IllegalArgumentException("gcmDeviceRegistrationId may not be null");
         }
         if (parameters == null) {
             throw new IllegalArgumentException("parameters may not be null");
@@ -77,18 +77,18 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
         }
     }
 
-    private void verifyUpdateRegistrationArguments(String fcmDeviceRegistrationId,
+    private void verifyUpdateRegistrationArguments(String gcmDeviceRegistrationId,
                                                    String pcfPushDeviceRegistrationId,
                                                    PushParameters parameters,
                                                    PCFPushRegistrationListener listener) {
 
-        verifyNewRegistrationArguments(fcmDeviceRegistrationId, parameters, listener);
+        verifyNewRegistrationArguments(gcmDeviceRegistrationId, parameters, listener);
         if (pcfPushDeviceRegistrationId == null) {
             throw new IllegalArgumentException("pcfPushDeviceRegistrationId may not be null");
         }
     }
 
-    private void handleRequest(String fcmDeviceRegistrationId,
+    private void handleRequest(String gcmDeviceRegistrationId,
                                String previousPCFPushDeviceRegistrationId,
                                Set<String> savedTags,
                                PushParameters parameters,
@@ -110,7 +110,7 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
             outputStream = new BufferedOutputStream(urlConnection.getOutputStream());
 
             final String requestBodyData = getRequestBodyData(
-                    fcmDeviceRegistrationId,
+                    gcmDeviceRegistrationId,
                     savedTags,
                     parameters,
                     isUpdate);
@@ -238,7 +238,7 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
             data = putData;
         } else {
             final PCFPushApiRegistrationPostRequestData postData = new PCFPushApiRegistrationPostRequestData();
-            postData.setOs("android-fcm");
+            postData.setOs("android");
             postData.setTags(parameters.getTags());
             data = postData;
         }

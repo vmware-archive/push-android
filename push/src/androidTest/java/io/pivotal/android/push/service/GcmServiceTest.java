@@ -1,3 +1,6 @@
+/*
+ * Copyright (C) 2014 Pivotal Software, Inc. All rights reserved.
+ */
 package io.pivotal.android.push.service;
 
 import android.content.ComponentName;
@@ -7,6 +10,7 @@ import android.os.Bundle;
 import android.test.AndroidTestCase;
 import android.test.mock.MockContext;
 
+import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.google.android.gms.location.Geofence;
 
 import java.io.IOException;
@@ -36,7 +40,11 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 
-public class GeofenceServiceTest2 extends AndroidTestCase {
+public class GcmServiceTest extends AndroidTestCase {
+
+    private static final String TEST_MESSAGE = "some fancy message";
+    private static final String TEST_RECEIPT_ID = "TEST_RECEIPT_ID";
+    private static final String TEST_TIMESTAMP = "1234567890";
     private static final Geofence GEOFENCE_1 = makeGeofence(-43.5,   61.5, 150.0f, "PCF_5_99",  Geofence.GEOFENCE_TRANSITION_ENTER, Geofence.NEVER_EXPIRE);
     private static final Geofence GEOFENCE_2 = makeGeofence( 53.5,  -91.5, 120.0f, "PCF_11_66", Geofence.GEOFENCE_TRANSITION_EXIT,  Geofence.NEVER_EXPIRE);
     private static final Geofence GEOFENCE_3 = makeGeofence( 53.5,  -91.5, 120.0f, "PCF_44_66", Geofence.GEOFENCE_TRANSITION_EXIT,  Geofence.NEVER_EXPIRE);
@@ -68,8 +76,12 @@ public class GeofenceServiceTest2 extends AndroidTestCase {
     }
 
     public void testHandleNullIntent() throws InterruptedException {
-        final FakeGeofenceService service = startService(FakeGeofenceService.class);
+        final FakeGcmService service = startService(FakeGcmService.class);
         service.onHandleIntent(null);
+        service.assertMessageReceived(false);
+        service.assertHeartbeatReceived(false);
+        service.assertMessageSendError(false);
+        service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
         service.assertTimesGeofenceExited(0);
         service.onDestroy();
@@ -79,10 +91,14 @@ public class GeofenceServiceTest2 extends AndroidTestCase {
     }
 
     public void testHandleEmptyIntent() throws InterruptedException {
-        final Intent intent = new Intent(getContext(), FakeGeofenceService.class);
-        final FakeGeofenceService service = startService(FakeGeofenceService.class);
+        final Intent intent = new Intent(getContext(), FakeGcmService.class);
+        final FakeGcmService service = startService(FakeGcmService.class);
         when(helper.isGeofencingEvent()).thenReturn(false);
         service.onHandleIntent(intent);
+        service.assertMessageReceived(false);
+        service.assertHeartbeatReceived(false);
+        service.assertMessageSendError(false);
+        service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
         service.assertTimesGeofenceExited(0);
         service.onDestroy();
@@ -90,9 +106,126 @@ public class GeofenceServiceTest2 extends AndroidTestCase {
         verifyZeroInteractions(eventLogger);
     }
 
+    public void testMessageReceivedWithoutReceiptId() throws InterruptedException {
+        final Intent intent = createMessageReceivedIntent(TEST_MESSAGE, null);
+        final FakeGcmService service = startService(FakeGcmService.class);
+        when(helper.isGeofencingEvent()).thenReturn(false);
+        service.onHandleIntent(intent);
+        service.assertMessageContent(TEST_MESSAGE);
+        service.assertHeartbeatReceived(false);
+        service.assertMessageSendError(false);
+        service.assertMessageDeleted(false);
+        service.assertTimesGeofenceEntered(0);
+        service.assertTimesGeofenceExited(0);
+        service.onDestroy();
+        verifyZeroInteractions(store);
+        verifyZeroInteractions(eventLogger);
+    }
+
+    public void testMessageReceivedWithReceiptId() throws InterruptedException {
+        final Intent intent = createMessageReceivedIntent(TEST_MESSAGE, TEST_RECEIPT_ID);
+        final FakeGcmService service = startService(FakeGcmService.class);
+        when(helper.isGeofencingEvent()).thenReturn(false);
+        service.onHandleIntent(intent);
+        service.assertMessageContent(TEST_MESSAGE);
+        service.assertHeartbeatReceived(false);
+        service.assertMessageSendError(false);
+        service.assertMessageDeleted(false);
+        service.assertTimesGeofenceEntered(0);
+        service.assertTimesGeofenceExited(0);
+        service.onDestroy();
+        verify(eventLogger, times(1)).logReceivedNotification(TEST_RECEIPT_ID);
+        verifyZeroInteractions(store);
+        verifyNoMoreInteractions(eventLogger);
+    }
+
+    public void testMessageHeartbeatReceivedWithReceiptId() throws InterruptedException {
+        final Intent intent = createHeartbeatReceivedIntent(TEST_TIMESTAMP, TEST_RECEIPT_ID);
+        final FakeGcmService service = startService(FakeGcmService.class);
+        when(helper.isGeofencingEvent()).thenReturn(false);
+        service.onHandleIntent(intent);
+        service.assertMessageReceived(false);
+        service.assertHeartbeatReceived(true);
+        service.assertMessageSendError(false);
+        service.assertMessageDeleted(false);
+        service.assertTimesGeofenceEntered(0);
+        service.assertTimesGeofenceExited(0);
+        service.onDestroy();
+        verify(eventLogger, times(1)).logReceivedHeartbeat(TEST_RECEIPT_ID);
+        verifyZeroInteractions(store);
+        verifyNoMoreInteractions(eventLogger);
+    }
+
+    public void testMessageDeleted() throws InterruptedException {
+        final Intent intent = createMessageDeletedIntent();
+        final FakeGcmService service = startService(FakeGcmService.class);
+        when(helper.isGeofencingEvent()).thenReturn(false);
+        service.onHandleIntent(intent);
+        service.assertHeartbeatReceived(false);
+        service.assertMessageSendError(false);
+        service.assertMessageDeleted(true);
+        service.assertTimesGeofenceEntered(0);
+        service.assertTimesGeofenceExited(0);
+        service.onDestroy();
+        verifyZeroInteractions(store);
+        verifyZeroInteractions(eventLogger);
+    }
+
+    public void testMessageSendError() throws InterruptedException {
+        final Intent intent = createMessageSendErrorIntent();
+        final FakeGcmService service = startService(FakeGcmService.class);
+        when(helper.isGeofencingEvent()).thenReturn(false);
+        service.onHandleIntent(intent);
+        service.assertHeartbeatReceived(false);
+        service.assertMessageSendError(true);
+        service.assertMessageDeleted(false);
+        service.assertTimesGeofenceEntered(0);
+        service.assertTimesGeofenceExited(0);
+        service.onDestroy();
+        verifyZeroInteractions(store);
+        verifyZeroInteractions(eventLogger);
+    }
+
+    public void testReceivesGeofenceUpdateSilentPush() throws InterruptedException {
+        final FakeContext context = new FakeContext(getContext());
+        final Intent intent = GeofenceServiceTest.createGeofenceUpdateSilentPushIntent(context, FakeGcmService.class);
+        final FakeGcmService service = startService(FakeGcmService.class, context, getPreferences(true, (String)null));
+        when(helper.isGeofencingEvent()).thenReturn(false);
+        service.onHandleIntent(intent);
+        service.assertHeartbeatReceived(false);
+        service.assertMessageSendError(false);
+        service.assertMessageDeleted(false);
+        service.assertTimesGeofenceEntered(0);
+        service.assertTimesGeofenceExited(0);
+        service.onDestroy();
+        assertEquals(GeofenceService.class.getCanonicalName(), context.getStartedServiceIntent().getComponent().getClassName());
+        assertEquals(getContext().getPackageName(), context.getStartedServiceIntent().getComponent().getPackageName());
+        assertTrue(context.getStartedServiceIntent().getExtras().getString(GeofenceService.GEOFENCE_AVAILABLE).equals("true"));
+        assertTrue(context.getStartedServiceIntent().getAction().equals(intent.getAction()));
+        verifyZeroInteractions(store);
+        verifyZeroInteractions(eventLogger);
+    }
+
+    public void testReceivesGeofenceUpdateSilentPushWithGeofencesDisabled() throws InterruptedException {
+        final FakeContext context = new FakeContext(getContext());
+        final Intent intent = GeofenceServiceTest.createGeofenceUpdateSilentPushIntent(context, FakeGcmService.class);
+        final FakeGcmService service = startService(FakeGcmService.class, context, getPreferences(false, (String)null));
+        when(helper.isGeofencingEvent()).thenReturn(false);
+        service.onHandleIntent(intent);
+        service.assertHeartbeatReceived(false);
+        service.assertMessageSendError(false);
+        service.assertMessageDeleted(false);
+        service.assertTimesGeofenceEntered(0);
+        service.assertTimesGeofenceExited(0);
+        service.onDestroy();
+        assertNull(context.getStartedServiceIntent());
+        verifyZeroInteractions(store);
+        verifyZeroInteractions(eventLogger);
+    }
+
     public void testReceivesGeofenceEnterEvent() throws Exception {
         final Intent intent = createGeofenceTransitionEventIntent(getContext(), Geofence.GEOFENCE_TRANSITION_ENTER);
-        final FakeGeofenceService service = startService(FakeGeofenceService.class, getContext(), getPreferences(true));
+        final FakeGcmService service = startService(FakeGcmService.class, getContext(), getPreferences(true));
         final PCFPushGeofenceLocationMap expectedLocationsToClear = new PCFPushGeofenceLocationMap();
         expectedLocationsToClear.putLocation(GEOFENCE_DATA_LIST.get(5L), 0);
         when(helper.isGeofencingEvent()).thenReturn(true);
@@ -100,6 +233,9 @@ public class GeofenceServiceTest2 extends AndroidTestCase {
         when(helper.getGeofences()).thenReturn(GEOFENCE_LIST_ENTER);
         when(store.getGeofenceData(5L)).thenReturn(GEOFENCE_DATA_LIST.get(5L));
         service.onHandleIntent(intent);
+        service.assertHeartbeatReceived(false);
+        service.assertMessageSendError(false);
+        service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(1);
         service.assertTimesGeofenceExited(0);
         service.assertGeofenceEnteredContainsMessage("tacos");
@@ -115,10 +251,13 @@ public class GeofenceServiceTest2 extends AndroidTestCase {
     public void testReceivesGeofenceEnterEventWithGeofencesDisabled() throws Exception {
         final Intent intent = createGeofenceTransitionEventIntent(getContext(), Geofence.GEOFENCE_TRANSITION_ENTER);
         final FakeContext context = new FakeContext(getContext());
-        final FakeGeofenceService service = startService(FakeGeofenceService.class, context, getPreferences(false));
+        final FakeGcmService service = startService(FakeGcmService.class, context, getPreferences(false));
         when(helper.isGeofencingEvent()).thenReturn(true);
         when(helper.getGeofenceTransition()).thenReturn(Geofence.GEOFENCE_TRANSITION_ENTER);
         service.onHandleIntent(intent);
+        service.assertHeartbeatReceived(false);
+        service.assertMessageSendError(false);
+        service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
         service.assertTimesGeofenceExited(0);
         service.onDestroy();
@@ -129,12 +268,15 @@ public class GeofenceServiceTest2 extends AndroidTestCase {
 
     public void testReceivesGeofenceEnterEventForMissingGeofenceData() throws Exception {
         final Intent intent = createGeofenceTransitionEventIntent(getContext(), Geofence.GEOFENCE_TRANSITION_ENTER);
-        final FakeGeofenceService service = startService(FakeGeofenceService.class, getContext(), getPreferences(true));
+        final FakeGcmService service = startService(FakeGcmService.class, getContext(), getPreferences(true));
         when(helper.isGeofencingEvent()).thenReturn(true);
         when(helper.getGeofenceTransition()).thenReturn(Geofence.GEOFENCE_TRANSITION_ENTER);
         when(helper.getGeofences()).thenReturn(GEOFENCE_LIST_ENTER);
         when(store.getGeofenceData(5L)).thenReturn(null);
         service.onHandleIntent(intent);
+        service.assertHeartbeatReceived(false);
+        service.assertMessageSendError(false);
+        service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
         service.assertTimesGeofenceExited(0);
         service.onDestroy();
@@ -146,7 +288,7 @@ public class GeofenceServiceTest2 extends AndroidTestCase {
 
     public void testReceivesGeofenceExitEvent() throws Exception {
         final Intent intent = createGeofenceTransitionEventIntent(getContext(), Geofence.GEOFENCE_TRANSITION_EXIT);
-        final FakeGeofenceService service = startService(FakeGeofenceService.class, getContext(), getPreferences(true));
+        final FakeGcmService service = startService(FakeGcmService.class, getContext(), getPreferences(true));
         final PCFPushGeofenceLocationMap expectedLocationsToClear = new PCFPushGeofenceLocationMap();
         expectedLocationsToClear.putLocation(GEOFENCE_DATA_LIST.get(11L), 0);
         when(helper.isGeofencingEvent()).thenReturn(true);
@@ -154,6 +296,9 @@ public class GeofenceServiceTest2 extends AndroidTestCase {
         when(helper.getGeofences()).thenReturn(GEOFENCE_LIST_EXIT_1);
         when(store.getGeofenceData(11L)).thenReturn(GEOFENCE_DATA_LIST.get(11L));
         service.onHandleIntent(intent);
+        service.assertHeartbeatReceived(false);
+        service.assertMessageSendError(false);
+        service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
         service.assertTimesGeofenceExited(1);
         service.assertGeofenceExitedContainsMessage("pizzas");
@@ -169,11 +314,14 @@ public class GeofenceServiceTest2 extends AndroidTestCase {
     public void testReceivesGeofenceExitEventWithGeofencesDisabled() throws Exception {
         final Intent intent = createGeofenceTransitionEventIntent(getContext(), Geofence.GEOFENCE_TRANSITION_EXIT);
         final FakeContext context = new FakeContext(getContext());
-        final FakeGeofenceService service = startService(FakeGeofenceService.class, context, getPreferences(false));
+        final FakeGcmService service = startService(FakeGcmService.class, context, getPreferences(false));
         when(helper.isGeofencingEvent()).thenReturn(true);
         when(helper.getGeofenceTransition()).thenReturn(Geofence.GEOFENCE_TRANSITION_EXIT);
         when(helper.getGeofences()).thenReturn(GEOFENCE_LIST_EXIT_1);
         service.onHandleIntent(intent);
+        service.assertHeartbeatReceived(false);
+        service.assertMessageSendError(false);
+        service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
         service.assertTimesGeofenceExited(0);
         service.onDestroy();
@@ -184,12 +332,15 @@ public class GeofenceServiceTest2 extends AndroidTestCase {
 
     public void testReceivesGeofenceExitEventForMissingGeofenceData() throws Exception {
         final Intent intent = createGeofenceTransitionEventIntent(getContext(), Geofence.GEOFENCE_TRANSITION_EXIT);
-        final FakeGeofenceService service = startService(FakeGeofenceService.class, getContext(), getPreferences(true));
+        final FakeGcmService service = startService(FakeGcmService.class, getContext(), getPreferences(true));
         when(helper.isGeofencingEvent()).thenReturn(true);
         when(helper.getGeofenceTransition()).thenReturn(Geofence.GEOFENCE_TRANSITION_EXIT);
         when(helper.getGeofences()).thenReturn(GEOFENCE_LIST_EXIT_1);
         when(store.getGeofenceData(11L)).thenReturn(null);
         service.onHandleIntent(intent);
+        service.assertHeartbeatReceived(false);
+        service.assertMessageSendError(false);
+        service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
         service.assertTimesGeofenceExited(0);
         service.onDestroy();
@@ -201,7 +352,7 @@ public class GeofenceServiceTest2 extends AndroidTestCase {
 
     public void testReceivesGeofenceExitEventMultipleWithEmptySubscribedTags() throws Exception {
         final Intent intent = createGeofenceTransitionEventIntent(getContext(), Geofence.GEOFENCE_TRANSITION_EXIT);
-        final FakeGeofenceService service = startService(FakeGeofenceService.class, getContext(), getPreferences(true));
+        final FakeGcmService service = startService(FakeGcmService.class, getContext(), getPreferences(true));
         final PCFPushGeofenceLocationMap expectedLocationsToClear = new PCFPushGeofenceLocationMap();
         expectedLocationsToClear.putLocation(GEOFENCE_DATA_LIST.get(11L), 0);
         expectedLocationsToClear.putLocation(GEOFENCE_DATA_LIST.get(44L), 0);
@@ -210,6 +361,9 @@ public class GeofenceServiceTest2 extends AndroidTestCase {
         expectedLocationsToClear.putLocation(GEOFENCE_DATA_LIST.get(49L), 1);
         setupMultipleEvents();
         service.onHandleIntent(intent);
+        service.assertHeartbeatReceived(false);
+        service.assertMessageSendError(false);
+        service.assertMessageDeleted(false);
         service.assertTimesGeofenceEntered(0);
         service.assertTimesGeofenceExited(5);
         service.assertGeofenceExitedContainsMessage("pizzas");
@@ -245,8 +399,44 @@ public class GeofenceServiceTest2 extends AndroidTestCase {
         verifyNoMoreInteractions(store);
     }
 
+    private Intent createMessageReceivedIntent(final String message, String receiptId) {
+        final Intent intent = new Intent(getContext(), FakeGcmService.class);
+        intent.setAction("com.google.android.c2dm.intent.RECEIVE");
+        intent.putExtra("message_type", GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE);
+        intent.putExtra(GcmService.KEY_MESSAGE, message);
+        if (receiptId != null) {
+            intent.putExtra("receiptId", receiptId);
+        }
+        return intent;
+    }
+
+    private Intent createHeartbeatReceivedIntent(final String timestamp, String receiptId) {
+        final Intent intent = new Intent(getContext(), FakeGcmService.class);
+        intent.setAction("com.google.android.c2dm.intent.RECEIVE");
+        intent.putExtra("message_type", GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE);
+        intent.putExtra(GcmService.KEY_HEARTBEAT, timestamp);
+        if (receiptId != null) {
+            intent.putExtra("receiptId", receiptId);
+        }
+        return intent;
+    }
+
+    private Intent createMessageDeletedIntent() {
+        final Intent intent = new Intent(getContext(), FakeGcmService.class);
+        intent.setAction("com.google.android.c2dm.intent.RECEIVE");
+        intent.putExtra("message_type", GoogleCloudMessaging.MESSAGE_TYPE_DELETED);
+        return intent;
+    }
+
+    private Intent createMessageSendErrorIntent() {
+        final Intent intent = new Intent(getContext(), FakeGcmService.class);
+        intent.setAction("com.google.android.c2dm.intent.RECEIVE");
+        intent.putExtra("message_type", GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR);
+        return intent;
+    }
+
     private Intent createGeofenceTransitionEventIntent(Context context, int transition) throws IOException {
-        final Intent intent = new Intent(context, FakeGeofenceService.class);
+        final Intent intent = new Intent(context, FakeGcmService.class);
         intent.putExtra("com.google.android.location.intent.extra.transition", transition);
         return intent;
     }
@@ -267,23 +457,24 @@ public class GeofenceServiceTest2 extends AndroidTestCase {
         } else {
             set = null;
         }
-        return new FakePushPreferencesProvider(null, null, null, null, null, null, null, null, set, 0, areGeofencesEnabled);
+        return new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null, null, set, 0, areGeofencesEnabled);
     }
 
     private Properties getProperties() {
         final Properties properties = new Properties();
         properties.setProperty(Pivotal.Keys.SERVICE_URL, "http://some.url");
+        properties.setProperty(Pivotal.Keys.GCM_SENDER_ID, "fake_sender_id");
         properties.setProperty(Pivotal.Keys.PLATFORM_UUID, "fake_platform_uuid");
         properties.setProperty(Pivotal.Keys.PLATFORM_SECRET, "fake_platform_secret");
         properties.setProperty(Pivotal.Keys.ARE_ANALYTICS_ENABLED, Boolean.toString(true));
         return properties;
     }
 
-    private <T extends FakeGeofenceService> T startService(final Class<T> klass) {
+    private <T extends FakeGcmService> T startService(final Class<T> klass) {
         return startService(klass, getContext(), getPreferences(false));
     }
 
-    private <T extends FakeGeofenceService> T startService(final Class<T> klass, final Context context, final PushPreferencesProvider preferences) {
+    private <T extends FakeGcmService> T startService(final Class<T> klass, final Context context, final PushPreferencesProvider preferences) {
         try {
             final Object object = klass.newInstance();
             final T service = klass.cast(object);
@@ -335,20 +526,47 @@ public class GeofenceServiceTest2 extends AndroidTestCase {
         }
     }
 
-    private static final class FakeGeofenceService extends GeofenceService {
+    private static final class FakeGcmService extends GcmService {
 
+        private boolean messageDeleted = false;
+        private boolean messageSendError = false;
+        private boolean messageReceived = false;
+        private boolean heartbeatReceived = false;
         private List<String> enteredGeofencesMessages = new ArrayList<>();
         private List<String> exitedGeofencesMessages = new ArrayList<>();
         private int timesEnteredGeofences = 0;
         private int timesExitedGeofences = 0;
+        private Bundle bundle;
 
-        public FakeGeofenceService() {
+        public FakeGcmService() {
             super();
         }
 
         @Override
         public void attachBaseContext(final Context base) {
             super.attachBaseContext(base);
+        }
+
+        @Override
+        public void onReceiveMessage(final Bundle payload) {
+            messageReceived = true;
+            bundle = payload;
+        }
+
+        @Override
+        public void onReceiveHeartbeat(Bundle payload) {
+            heartbeatReceived = true;
+            bundle = payload;
+        }
+
+        @Override
+        public void onReceiveMessageSendError(final Bundle payload) {
+            messageSendError = true;
+        }
+
+        @Override
+        public void onReceiveMessageDeleted(final Bundle payload) {
+            messageDeleted = true;
         }
 
         @Override
@@ -365,6 +583,27 @@ public class GeofenceServiceTest2 extends AndroidTestCase {
             if (payload != null) {
                 exitedGeofencesMessages.add(payload.getString("message"));
             }
+        }
+
+        public void assertMessageContent(final String expected) {
+            assertTrue(messageReceived);
+            assertEquals(expected, bundle.getString(GcmService.KEY_MESSAGE));
+        }
+
+        public void assertMessageReceived(final boolean expected) {
+            assertEquals(expected, messageReceived);
+        }
+
+        public void assertHeartbeatReceived(final boolean expected) {
+            assertEquals(expected, heartbeatReceived);
+        }
+
+        public void assertMessageDeleted(final boolean expected) {
+            assertEquals(expected, messageDeleted);
+        }
+
+        public void assertMessageSendError(final boolean expected) {
+            assertEquals(expected, messageSendError);
         }
 
         public void assertTimesGeofenceEntered(final int expected) {

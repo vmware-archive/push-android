@@ -22,6 +22,7 @@ import io.pivotal.android.push.util.Util;
  */
 public class PushParameters {
 
+    private final String gcmSenderId;
     private final String platformUuid;
     private final String platformSecret;
     private final String serviceUrl;
@@ -35,6 +36,9 @@ public class PushParameters {
 
     /**
      * Sets up parameters used by the Pivotal CF Mobile Services Push SDK
+     * @param gcmSenderId    The "sender ID" or "project ID", as defined by the Google Cloud Messaging.  May not be null or empty.
+     *                       You can find it on the Google Cloud Console (https://cloud.google.com) for your project.  See
+     *                       the "pivotal.push.gcmSenderId" property.
      * @param platformUuid   The "platform", as defined by Pivotal CF Mobile Services Push Services for your platform.  May not be null or empty.
      *                       See the "pivotal.push.platformUuid" property.
      * @param platformSecret The "platform secret", as defined by Pivotal CF Mobile Services Push Services for your platform.  May not be null or empty.
@@ -55,7 +59,8 @@ public class PushParameters {
      * @param pinnedSslCertificateNames  The list of pinned SSL certificates.  May be null or empty.
      * @param requestHeaders             The list of extra request headers to inject into the request
      */
-    public PushParameters(@NonNull String platformUuid,
+    public PushParameters(@NonNull String gcmSenderId,
+                          @NonNull String platformUuid,
                           @NonNull String platformSecret,
                           @NonNull String serviceUrl,
                           @Nullable String deviceAlias,
@@ -66,6 +71,7 @@ public class PushParameters {
                           @Nullable List<String> pinnedSslCertificateNames,
                           @Nullable Map<String, String> requestHeaders) {
 
+        this.gcmSenderId = gcmSenderId;
         this.platformUuid = platformUuid;
         this.platformSecret = platformSecret;
         this.serviceUrl = serviceUrl;
@@ -94,6 +100,7 @@ public class PushParameters {
                           @Nullable String deviceAlias,
                           @Nullable Set<String> tags) {
 
+        this.gcmSenderId = Pivotal.getGcmSenderId(context);
         this.platformUuid = Pivotal.getPlatformUuid(context);
         this.platformSecret = Pivotal.getPlatformSecret(context);
         this.serviceUrl = Pivotal.getServiceUrl(context);
@@ -104,6 +111,10 @@ public class PushParameters {
         this.tags = Util.lowercaseTags(tags);
         this.deviceAlias = deviceAlias;
         this.customUserId = preferencesProvider.getCustomUserId();
+    }
+
+    public String getGcmSenderId() {
+        return gcmSenderId;
     }
 
     public String getPlatformUuid() {
@@ -154,6 +165,8 @@ public class PushParameters {
         PushParameters that = (PushParameters) o;
 
         if (areGeofencesEnabled != that.areGeofencesEnabled) return false;
+        if (gcmSenderId != null ? !gcmSenderId.equals(that.gcmSenderId) : that.gcmSenderId != null)
+            return false;
         if (platformUuid != null ? !platformUuid.equals(that.platformUuid) : that.platformUuid != null)
             return false;
         if (platformSecret != null ? !platformSecret.equals(that.platformSecret) : that.platformSecret != null)
@@ -174,7 +187,8 @@ public class PushParameters {
 
     @Override
     public int hashCode() {
-        int result = (platformUuid != null ? platformUuid.hashCode() : 0);
+        int result = gcmSenderId != null ? gcmSenderId.hashCode() : 0;
+        result = 31 * result + (platformUuid != null ? platformUuid.hashCode() : 0);
         result = 31 * result + (platformSecret != null ? platformSecret.hashCode() : 0);
         result = 31 * result + (serviceUrl != null ? serviceUrl.hashCode() : 0);
         result = 31 * result + (deviceAlias != null ? deviceAlias.hashCode() : 0);

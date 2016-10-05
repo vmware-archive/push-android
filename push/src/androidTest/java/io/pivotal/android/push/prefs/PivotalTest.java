@@ -3,32 +3,20 @@
  */
 package io.pivotal.android.push.prefs;
 
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import android.test.AndroidTestCase;
 
 import java.util.List;
 import java.util.Properties;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
+public class PivotalTest extends AndroidTestCase {
 
-@RunWith(AndroidJUnit4.class)
-@SmallTest
-public class PivotalTest {
+    @Override
+    protected void tearDown() throws Exception {
+        super.tearDown();
 
-    @After
-    public void tearDown() throws Exception {
         Pivotal.setProperties(null);
     }
 
-    @Test
     public void testGetSucceeds() {
         final String key = "key";
         final String value = "value";
@@ -37,10 +25,9 @@ public class PivotalTest {
         properties.setProperty(key, value);
 
         Pivotal.setProperties(properties);
-        assertEquals(value, Pivotal.getRequiredProperty(InstrumentationRegistry.getContext(), key));
+        assertEquals(value, Pivotal.getRequiredProperty(getContext(), key));
     }
 
-    @Test
     public void testGetFails() {
         final String key = "key";
         final String value = "value";
@@ -50,31 +37,31 @@ public class PivotalTest {
         Pivotal.setProperties(properties);
 
         try {
-            assertEquals(value, Pivotal.getRequiredProperty(InstrumentationRegistry.getContext(), key));
+            assertEquals(value, Pivotal.getRequiredProperty(getContext(), key));
             fail();
         } catch (final IllegalStateException e) {
             assertNotNull(e);
         }
     }
 
-    @Test
     public void testGetPlatformUuid() {
-        assertEquals("test_platform_uuid", Pivotal.getPlatformUuid(InstrumentationRegistry.getContext()));
+        assertEquals("test_platform_uuid", Pivotal.getPlatformUuid(getContext()));
     }
 
-    @Test
     public void testGetPlatformSecret() {
-        assertEquals("test_platform_secret", Pivotal.getPlatformSecret(InstrumentationRegistry.getContext()));
+        assertEquals("test_platform_secret", Pivotal.getPlatformSecret(getContext()));
     }
 
-    @Test
+    public void testGetGcmSenderId() {
+        assertEquals("test_gcm_sender_id", Pivotal.getGcmSenderId(getContext()));
+    }
+
     public void testGetServiceUrl() {
-        assertEquals("http://example.com", Pivotal.getServiceUrl(InstrumentationRegistry.getContext()));
+        assertEquals("http://example.com", Pivotal.getServiceUrl(getContext()));
     }
 
-    @Test
     public void testGetTrustedCertificateNames() {
-        final List<String> names = Pivotal.getPinnedSslCertificateNames(InstrumentationRegistry.getContext());
+        final List<String> names = Pivotal.getPinnedSslCertificateNames(getContext());
         assertNotNull(names);
         assertEquals(3, names.size());
         assertTrue(names.contains("CATS"));
@@ -82,47 +69,40 @@ public class PivotalTest {
         assertTrue(names.contains("certificate.der"));
     }
 
-    @Test
     public void testDefaultSslCertValidationMode1() {
         setSslCertValidationModeInProperties(null);
-        assertEquals(Pivotal.SslCertValidationMode.DEFAULT, Pivotal.getSslCertValidationMode(InstrumentationRegistry.getContext()));
+        assertEquals(Pivotal.SslCertValidationMode.DEFAULT, Pivotal.getSslCertValidationMode(getContext()));
     }
 
-    @Test
     public void testDefaultSslCertValidationMode2() {
         setSslCertValidationModeInProperties("default");
-        assertEquals(Pivotal.SslCertValidationMode.DEFAULT, Pivotal.getSslCertValidationMode(InstrumentationRegistry.getContext()));
+        assertEquals(Pivotal.SslCertValidationMode.DEFAULT, Pivotal.getSslCertValidationMode(getContext()));
     }
 
-    @Test
     public void testTrustAllSslCertValidationMode1() {
         setSslCertValidationModeInProperties("trustall");
-        assertEquals(Pivotal.SslCertValidationMode.TRUST_ALL, Pivotal.getSslCertValidationMode(InstrumentationRegistry.getContext()));
+        assertEquals(Pivotal.SslCertValidationMode.TRUST_ALL, Pivotal.getSslCertValidationMode(getContext()));
     }
 
-    @Test
     public void testTrustAllSslCertValidationMode2() {
         setSslCertValidationModeInProperties("trust_all");
-        assertEquals(Pivotal.SslCertValidationMode.TRUST_ALL, Pivotal.getSslCertValidationMode(InstrumentationRegistry.getContext()));
+        assertEquals(Pivotal.SslCertValidationMode.TRUST_ALL, Pivotal.getSslCertValidationMode(getContext()));
     }
 
-    @Test
     public void testPinnedSslCertValidationMode() {
         setSslCertValidationModeInProperties("pinned");
-        assertEquals(Pivotal.SslCertValidationMode.PINNED, Pivotal.getSslCertValidationMode(InstrumentationRegistry.getContext()));
+        assertEquals(Pivotal.SslCertValidationMode.PINNED, Pivotal.getSslCertValidationMode(getContext()));
     }
 
-    @Test
     public void testCallbackSslCertValidationMode() {
         setSslCertValidationModeInProperties("callback");
-        assertEquals(Pivotal.SslCertValidationMode.CALLBACK, Pivotal.getSslCertValidationMode(InstrumentationRegistry.getContext()));
+        assertEquals(Pivotal.SslCertValidationMode.CALLBACK, Pivotal.getSslCertValidationMode(getContext()));
     }
 
-    @Test
     public void testInvalidSslCertValidationMode() {
         setSslCertValidationModeInProperties("invalid value chimps");
         try {
-            Pivotal.getSslCertValidationMode(InstrumentationRegistry.getContext());
+            Pivotal.getSslCertValidationMode(getContext());
             fail("Should not have succeeded");
         } catch(IllegalArgumentException e) {
             // throw expected
@@ -136,9 +116,8 @@ public class PivotalTest {
         }
         Pivotal.setProperties(p);
     }
-
-    @Test
+    
     public void testAreAnalyticsEnabled() {
-        assertTrue(Pivotal.getAreAnalyticsEnabled(InstrumentationRegistry.getContext()));
+        assertTrue(Pivotal.getAreAnalyticsEnabled(getContext()));
     }
 }
