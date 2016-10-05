@@ -15,6 +15,9 @@ import java.util.concurrent.Semaphore;
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.api.FakePCFPushUnregisterDeviceApiRequest;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestProvider;
+import io.pivotal.android.push.gcm.FakeGcmProvider;
+import io.pivotal.android.push.gcm.FakeGcmUnregistrationApiRequest;
+import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
 import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
@@ -28,7 +31,9 @@ import static org.mockito.Mockito.when;
 
 public class UnregistrationEngineTest extends AndroidTestCase {
 
+    private static final String TEST_GCM_DEVICE_REGISTRATION_ID_1 = "TEST_GCM_DEVICE_REGISTRATION_ID_1";
     private static final String TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1 = "TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1";
+    private static final String TEST_GCM_SENDER_ID = "TEST_GCM_SENDER_ID";
     private static final String TEST_PLATFORM_UUID = "TEST_PLATFORM_UUID";
     private static final String TEST_PLATFORM_SECRET = "TEST_PLATFORM_SECRET";
     private static final String TEST_DEVICE_ALIAS = "TEST_DEVICE_ALIAS";
@@ -36,6 +41,8 @@ public class UnregistrationEngineTest extends AndroidTestCase {
     private static final String TEST_SERVICE_URL = "http://test.com";
     private static final Set<String> TEST_TAGS = new HashSet<>();
 
+    private FakeGcmProvider gcmProvider;
+    private GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider;
     private FakePushPreferencesProvider pushPreferencesProvider;
     private PCFPushUnregisterDeviceApiRequestProvider pcfPushUnregisterDeviceApiRequestProvider;
     private PushParameters parameters;
@@ -49,8 +56,10 @@ public class UnregistrationEngineTest extends AndroidTestCase {
         super.setUp();
         System.setProperty("dexmaker.dexcache", mContext.getCacheDir().getPath());
         TEST_TAGS.addAll(Arrays.asList("DONKEYS", "BURROS"));
-        parameters = new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, TEST_CUSTOM_USER_ID, TEST_TAGS, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
-        pushPreferencesProvider = new FakePushPreferencesProvider(null, null, null, null, null, null, null, null, null, 0, false);
+        parameters = new PushParameters(TEST_GCM_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, TEST_CUSTOM_USER_ID, TEST_TAGS, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
+        pushPreferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null, null, null, 0, false);
+        gcmProvider = new FakeGcmProvider(TEST_GCM_DEVICE_REGISTRATION_ID_1);
+        gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(new FakeGcmUnregistrationApiRequest(gcmProvider));
         pcfPushUnregisterDeviceApiRequestProvider = new PCFPushUnregisterDeviceApiRequestProvider(new FakePCFPushUnregisterDeviceApiRequest());
         geofenceUpdater = mock(GeofenceUpdater.class);
         geofenceStatusUtil = mock(GeofenceStatusUtil.class);
@@ -59,7 +68,16 @@ public class UnregistrationEngineTest extends AndroidTestCase {
 
     public void testNullContext() {
         try {
-            new UnregistrationEngine(null, pushPreferencesProvider, pcfPushUnregisterDeviceApiRequestProvider, geofenceUpdater, geofenceStatusUtil);
+            new UnregistrationEngine(null, gcmProvider, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, pcfPushUnregisterDeviceApiRequestProvider, geofenceUpdater, geofenceStatusUtil);
+            fail("should not have succeeded");
+        } catch (IllegalArgumentException e) {
+            // success
+        }
+    }
+
+    public void testNullGcmProvider() {
+        try {
+            new UnregistrationEngine(context, null, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, pcfPushUnregisterDeviceApiRequestProvider, geofenceUpdater, geofenceStatusUtil);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -68,17 +86,25 @@ public class UnregistrationEngineTest extends AndroidTestCase {
 
     public void testNullPushPreferencesProvider() {
         try {
-            new UnregistrationEngine(context, null, pcfPushUnregisterDeviceApiRequestProvider, geofenceUpdater, geofenceStatusUtil);
+            new UnregistrationEngine(context, gcmProvider, null, gcmUnregistrationApiRequestProvider, pcfPushUnregisterDeviceApiRequestProvider, geofenceUpdater, geofenceStatusUtil);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
         }
     }
 
+    public void testNullGcmUnregistrationApiRequestProvider() {
+        try {
+            new UnregistrationEngine(context, gcmProvider, pushPreferencesProvider, null, pcfPushUnregisterDeviceApiRequestProvider, geofenceUpdater, geofenceStatusUtil);
+            fail("should not have succeeded");
+        } catch (IllegalArgumentException e) {
+            // success
+        }
+    }
 
     public void testNullPCFPushApiUnregisterDeviceRequestProvider() {
         try {
-            new UnregistrationEngine(context, pushPreferencesProvider, null, geofenceUpdater, geofenceStatusUtil);
+            new UnregistrationEngine(context, gcmProvider, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, null, geofenceUpdater, geofenceStatusUtil);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -87,7 +113,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
 
     public void testNullGeofenceUpdaterProvider() {
         try {
-            new UnregistrationEngine(context, pushPreferencesProvider, pcfPushUnregisterDeviceApiRequestProvider, null, geofenceStatusUtil);
+            new UnregistrationEngine(context, gcmProvider, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, pcfPushUnregisterDeviceApiRequestProvider, null, geofenceStatusUtil);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -96,7 +122,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
 
     public void testNullGeofenceStatusUtil() {
         try {
-            new UnregistrationEngine(context, pushPreferencesProvider, pcfPushUnregisterDeviceApiRequestProvider, geofenceUpdater, null);
+            new UnregistrationEngine(context, gcmProvider, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, pcfPushUnregisterDeviceApiRequestProvider, geofenceUpdater, null);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -105,7 +131,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
 
     public void testNullParameters() {
         try {
-            final UnregistrationEngine engine = new UnregistrationEngine(context, pushPreferencesProvider, pcfPushUnregisterDeviceApiRequestProvider, geofenceUpdater, geofenceStatusUtil);
+            final UnregistrationEngine engine = new UnregistrationEngine(context, gcmProvider, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, pcfPushUnregisterDeviceApiRequestProvider, geofenceUpdater, geofenceStatusUtil);
             engine.unregisterDevice(null, getListenerForUnregistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -115,16 +141,25 @@ public class UnregistrationEngineTest extends AndroidTestCase {
 
     public void testNullServiceUrl() {
         try {
-            final UnregistrationEngine engine = new UnregistrationEngine(context, pushPreferencesProvider, pcfPushUnregisterDeviceApiRequestProvider, geofenceUpdater, geofenceStatusUtil);
-            parameters = new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, null, TEST_DEVICE_ALIAS, TEST_CUSTOM_USER_ID, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
+            final UnregistrationEngine engine = new UnregistrationEngine(context,gcmProvider, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, pcfPushUnregisterDeviceApiRequestProvider, geofenceUpdater, geofenceStatusUtil);
+            parameters = new PushParameters(TEST_GCM_SENDER_ID, TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, null, TEST_DEVICE_ALIAS, TEST_CUSTOM_USER_ID, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
             engine.unregisterDevice(parameters, getListenerForUnregistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
         }
     }
+
+    public void testGooglePlayServicesNotAvailable() throws InterruptedException {
+        gcmProvider.setIsGooglePlayServicesInstalled(false);
+        final UnregistrationEngine engine = new UnregistrationEngine(context, gcmProvider, pushPreferencesProvider, gcmUnregistrationApiRequestProvider, pcfPushUnregisterDeviceApiRequestProvider, geofenceUpdater, geofenceStatusUtil);
+        engine.unregisterDevice(parameters, getListenerForUnregistration(false));
+        semaphore.acquire();
+    }
+
     public void testSuccessfulUnregistrationWithGeofencesDisabled() throws Exception {
         UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(true)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, null)
                 .setupGeofences(GeofenceEngine.NEVER_UPDATED_GEOFENCES, false, false, false, true)
                 .setShouldHavePermissionForGeofences(true)
@@ -135,6 +170,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
 
     public void testSuccessfulUnregistrationWithGeofencesEnabled() throws Exception {
         UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(true)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, null)
                 .setupGeofences(1337L, true, true, false, true)
                 .setShouldHavePermissionForGeofences(true)
@@ -145,6 +181,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
 
     public void testSuccessfulUnregistrationWithGeofencesEnabledWithPermissionsForGeofencesRemoved() throws Exception {
         UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(true)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, null)
                 .setupGeofences(1337L, true, false, true, true)
                 .setShouldHavePermissionForGeofences(false)
@@ -155,6 +192,7 @@ public class UnregistrationEngineTest extends AndroidTestCase {
 
     public void testSuccessfulUnregistrationButClearGeofencesFailed() throws Exception {
         UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(true)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, null)
                 .setupGeofences(1337L, true, true, false, false)
                 .setShouldHavePermissionForGeofences(true)
@@ -163,8 +201,119 @@ public class UnregistrationEngineTest extends AndroidTestCase {
         testParams.run();
     }
 
-    public void testUnregistrationWhePCFPushUnregistrationFailsWithGeofencesDisabled() throws Exception {
+    public void testSuccessfulUnregistrationFromGcmOnlyWithGeofencesDisabled() throws Exception {
         UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(true)
+                .setupPCFPushDeviceRegistrationId(null, null)
+                .setupGeofences(GeofenceEngine.NEVER_UPDATED_GEOFENCES, false, false, false, true)
+                .setShouldHavePermissionForGeofences(true)
+                .setupParameters(parameters)
+                .setShouldUnregistrationHaveSucceeded(true);
+        testParams.run();
+    }
+
+    public void testSuccessfulUnregistrationFromGcmOnlyWithGeofencesEnabled() throws Exception {
+        UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(true)
+                .setupPCFPushDeviceRegistrationId(null, null)
+                .setupGeofences(1337L, true, true, false, true)
+                .setShouldHavePermissionForGeofences(true)
+                .setupParameters(parameters)
+                .setShouldUnregistrationHaveSucceeded(true);
+        testParams.run();
+    }
+
+    public void testSuccessfulUnregistrationFromGcmOnlyWithGeofencesEnabledWithPermissionsForGeofencesRemoved() throws Exception {
+        UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(true)
+                .setupPCFPushDeviceRegistrationId(null, null)
+                .setupGeofences(1337L, true, false, true, true)
+                .setShouldHavePermissionForGeofences(false)
+                .setupParameters(parameters)
+                .setShouldUnregistrationHaveSucceeded(true);
+        testParams.run();
+    }
+
+    public void testSuccessfulUnregistrationFromGcmOnlyButClearGeofencesFailed() throws Exception {
+        UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(true)
+                .setupPCFPushDeviceRegistrationId(null, null)
+                .setupGeofences(1337L, true, true, false, false)
+                .setShouldHavePermissionForGeofences(true)
+                .setupParameters(parameters)
+                .setShouldUnregistrationHaveSucceeded(false);
+        testParams.run();
+    }
+
+    public void testSuccessfulUnregistrationFromGcmOnlyButClearGeofencesFailedWithPermissionsForGeofencesRemoved() throws Exception {
+        UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(true)
+                .setupPCFPushDeviceRegistrationId(null, null)
+                .setupGeofences(1337L, true, false, true, false)
+                .setShouldHavePermissionForGeofences(false)
+                .setupParameters(parameters)
+                .setShouldUnregistrationHaveSucceeded(false);
+        testParams.run();
+    }
+
+    public void testUnregistrationWhenGcmUnregistrationFailsWithGeofencesDisabled() throws Exception {
+        UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(false)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, null)
+                .setupGeofences(GeofenceEngine.NEVER_UPDATED_GEOFENCES, false, false, false, true)
+                .setShouldHavePermissionForGeofences(true)
+                .setupParameters(parameters)
+                .setShouldUnregistrationHaveSucceeded(true);
+        testParams.run();
+    }
+
+    public void testUnregistrationWhenGcmUnregistrationFailsWithGeofencesEnabled() throws Exception {
+        UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(false)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, null)
+                .setupGeofences(1337L, true, true, false, true)
+                .setShouldHavePermissionForGeofences(true)
+                .setupParameters(parameters)
+                .setShouldUnregistrationHaveSucceeded(true);
+        testParams.run();
+    }
+
+    public void testUnregistrationWhenGcmUnregistrationFailsWithGeofencesEnabledWithPermissionsForGeofencesRemoved() throws Exception {
+        UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(false)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, null)
+                .setupGeofences(1337L, true, false, true, true)
+                .setShouldHavePermissionForGeofences(false)
+                .setupParameters(parameters)
+                .setShouldUnregistrationHaveSucceeded(true);
+        testParams.run();
+    }
+
+    public void testUnregistrationWhenGcmUnregistrationFailsAndClearGeofencesFails() throws Exception {
+        UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(false)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, null)
+                .setupGeofences(1337L, true, true, false, false)
+                .setShouldHavePermissionForGeofences(true)
+                .setupParameters(parameters)
+                .setShouldUnregistrationHaveSucceeded(false);
+        testParams.run();
+    }
+
+    public void testUnregistrationWhenGcmUnregistrationFailsAndClearGeofencesFailsWithPermissionsForGeofencesRemoved() throws Exception {
+        UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(false)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, null)
+                .setupGeofences(1337L, true, false, true, false)
+                .setShouldHavePermissionForGeofences(false)
+                .setupParameters(parameters)
+                .setShouldUnregistrationHaveSucceeded(false);
+        testParams.run();
+    }
+
+    public void testUnregistrationWhenGcmUnregistrationFailsAndPCFPushUnregistrationFailsWithGeofencesDisabled() throws Exception {
+        UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(false)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGeofences(GeofenceEngine.NEVER_UPDATED_GEOFENCES, false, false, false, true)
                 .setShouldHavePermissionForGeofences(true)
@@ -173,8 +322,9 @@ public class UnregistrationEngineTest extends AndroidTestCase {
         testParams.run();
     }
 
-    public void testUnregistrationWhenPCFPushUnregistrationFailsWithGeofencesEnabled() throws Exception {
+    public void testUnregistrationWhenGcmUnregistrationFailsAndPCFPushUnregistrationFailsWithGeofencesEnabled() throws Exception {
         UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(false)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGeofences(1337L, true, true, false, true)
                 .setShouldHavePermissionForGeofences(true)
@@ -183,8 +333,9 @@ public class UnregistrationEngineTest extends AndroidTestCase {
         testParams.run();
     }
 
-    public void testUnregistrationWhenPCFPushUnregistrationFailsWithGeofencesEnabledAndPermissionsForGeofencesRemoved() throws Exception {
+    public void testUnregistrationWhenGcmUnregistrationFailsAndPCFPushUnregistrationFailsWithGeofencesEnabledWithPermissionsForGeofencesRemoved() throws Exception {
         UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(false)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGeofences(1337L, true, false, true, true)
                 .setShouldHavePermissionForGeofences(false)
@@ -193,8 +344,9 @@ public class UnregistrationEngineTest extends AndroidTestCase {
         testParams.run();
     }
 
-    public void testUnregistrationPCFPushUnregistrationFailsAndClearGeofencesFails() throws Exception {
+    public void testUnregistrationWhenGcmUnregistrationFailsAndPCFPushUnregistrationFailsAndClearGeofencesFails() throws Exception {
         UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(false)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGeofences(1337L, true, true, false, false)
                 .setShouldHavePermissionForGeofences(true)
@@ -203,8 +355,64 @@ public class UnregistrationEngineTest extends AndroidTestCase {
         testParams.run();
     }
 
-    public void testUnregistrationPCFPushUnregistrationFailsAndClearGeofencesFailsWithPermissionsForGeofencesRemoved() throws Exception {
+    public void testUnregistrationWhenGcmUnregistrationFailsAndPCFPushUnregistrationFailsAndClearGeofencesFailsWithPermissionsForGeofencesRemoved() throws Exception {
         UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(false)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupGeofences(1337L, true, false, true, false)
+                .setShouldHavePermissionForGeofences(false)
+                .setupParameters(parameters)
+                .setShouldUnregistrationHaveSucceeded(false);
+        testParams.run();
+    }
+
+    public void testUnregistrationWhenGcmUnregistrationSucceedsAndPCFPushUnregistrationFailsWithGeofencesDisabled() throws Exception {
+        UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(true)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupGeofences(GeofenceEngine.NEVER_UPDATED_GEOFENCES, false, false, false, true)
+                .setShouldHavePermissionForGeofences(true)
+                .setupParameters(parameters)
+                .setShouldUnregistrationHaveSucceeded(false);
+        testParams.run();
+    }
+
+    public void testUnregistrationWhenGcmUnregistrationSucceedsAndPCFPushUnregistrationFailsWithGeofencesEnabled() throws Exception {
+        UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(true)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupGeofences(1337L, true, true, false, true)
+                .setShouldHavePermissionForGeofences(true)
+                .setupParameters(parameters)
+                .setShouldUnregistrationHaveSucceeded(false);
+        testParams.run();
+    }
+
+    public void testUnregistrationWhenGcmUnregistrationSucceedsAndPCFPushUnregistrationFailsWithGeofencesEnabledAndPermissionsForGeofencesRemoved() throws Exception {
+        UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(true)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupGeofences(1337L, true, false, true, true)
+                .setShouldHavePermissionForGeofences(false)
+                .setupParameters(parameters)
+                .setShouldUnregistrationHaveSucceeded(false);
+        testParams.run();
+    }
+
+    public void testUnregistrationWhenGcmUnregistrationSucceedsAndPCFPushUnregistrationFailsAndClearGeofencesFails() throws Exception {
+        UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(true)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupGeofences(1337L, true, true, false, false)
+                .setShouldHavePermissionForGeofences(true)
+                .setupParameters(parameters)
+                .setShouldUnregistrationHaveSucceeded(false);
+        testParams.run();
+    }
+
+    public void testUnregistrationWhenGcmUnregistrationSucceedsAndPCFPushUnregistrationFailsAndClearGeofencesFailsWithPermissionsForGeofencesRemoved() throws Exception {
+        UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
+                .setShouldGcmDeviceUnregistrationBeSuccessful(true)
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
                 .setupGeofences(1337L, true, false, true, false)
                 .setShouldHavePermissionForGeofences(false)

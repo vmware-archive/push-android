@@ -8,10 +8,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.test.AndroidTestCase;
 
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.firebase.iid.FirebaseInstanceId;
-
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -20,12 +16,19 @@ import java.util.Set;
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.api.FakePCFPushRegistrationApiRequest;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestProvider;
+import io.pivotal.android.push.gcm.FakeGcmProvider;
+import io.pivotal.android.push.gcm.FakeGcmRegistrationApiRequest;
+import io.pivotal.android.push.gcm.FakeGcmUnregistrationApiRequest;
+import io.pivotal.android.push.gcm.GcmRegistrationApiRequestProvider;
+import io.pivotal.android.push.gcm.GcmUnregistrationApiRequestProvider;
 import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.prefs.Pivotal;
+import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.util.DelayedLoop;
+import io.pivotal.android.push.version.FakeVersionProvider;
 import io.pivotal.android.push.version.GeofenceStatus;
 
 import static org.mockito.Matchers.any;
@@ -44,10 +47,12 @@ public class RegistrationEngineTestParameters {
     private final Context context;
     private final DelayedLoop delayedLoop;
 
-    private String fcmTokenIdInPrefs = null;
-    private String fcmTokenIdFromServer = null;
+    private String gcmDeviceRegistrationIdInPrefs = null;
+    private String gcmDeviceRegistrationIdFromServer = null;
     private String pcfPushDeviceRegistrationIdInPrefs = null;
     private String pcfPushDeviceRegistrationIdFromServer;
+    private String gcmSenderIdInPrefs = null;
+    private String gcmSenderIdFromUser = null;
     private String platformUuidInPrefs = null;
     private String platformUuidFromUser = null;
     private String platformSecretInPrefs = null;
@@ -60,8 +65,9 @@ public class RegistrationEngineTestParameters {
     private String serviceUrlFromUser = null;
     private String packageNameInPrefs = null;
     private String packageNameFromUser = ".";
-    private String finalFcmTokenIdInPrefs = null;
+    private String finalGcmDeviceRegistrationIdInPrefs = null;
     private String finalPCFPushDeviceRegistrationIdInPrefs = null;
+    private String finalGcmSenderIdInPrefs = null;
     private String finalPlatformUuidInPrefs = null;
     private String finalPlatformSecretInPrefs = null;
     private String finalDeviceAliasInPrefs = null;
@@ -74,8 +80,13 @@ public class RegistrationEngineTestParameters {
     private boolean areGeofencesEnabledInPrefs;
     private boolean areGeofencesEnabledFromUser = true;
     private boolean finalAreGeofencesEnabled = true;
-    private boolean shouldFcmTokenIdHaveBeenSaved = false;
+    private boolean shouldGcmDeviceRegistrationBeSuccessful = false;
+    private boolean shouldGcmDeviceUnregistrationBeSuccessful = false;
+    private boolean shouldGcmDeviceRegistrationIdHaveBeenSaved = false;
+    private boolean shouldGcmProviderRegisterHaveBeenCalled = false;
+    private boolean shouldGcmProviderUnregisterHaveBeenCalled = false;
     private boolean shouldGeofenceUpdateTimestampedHaveBeenCalled = false;
+    private boolean shouldAppVersionHaveBeenSaved = false;
     private boolean shouldPCFPushDeviceRegistrationHaveBeenSaved = false;
     private boolean shouldPlatformUuidHaveBeenSaved = false;
     private boolean shouldPlatformSecretHaveBeenSaved = false;
@@ -85,6 +96,7 @@ public class RegistrationEngineTestParameters {
     private boolean shouldPCFPushDeviceRegistrationBeSuccessful = false;
     private boolean shouldPCFPushNewRegistrationHaveBeenCalled = false;
     private boolean shouldPCFPushUpdateRegistrationHaveBeenCalled = false;
+    private boolean shouldGcmSenderIdHaveBeenSaved = false;
     private boolean shouldPackageNameHaveBeenSaved = false;
     private boolean shouldServiceUrlHaveBeenSaved = false;
     private boolean shouldRegistrationHaveSucceeded = true;
@@ -98,6 +110,10 @@ public class RegistrationEngineTestParameters {
     private boolean wasClearGeofencesFromStoreOnlyCalled = false;
     private boolean wasGeofenceStatusUpdated = false;
     private int numberOfGeofenceReregistrations = 0;
+
+    private int appVersionInPrefs = PushPreferencesProvider.NO_SAVED_VERSION;
+    private int currentAppVersion = PushPreferencesProvider.NO_SAVED_VERSION;
+    private int finalAppVersionInPrefs = PushPreferencesProvider.NO_SAVED_VERSION;
 
     private long geofenceUpdateTimestampInPrefs = 0L;
     private long geofenceUpdateTimestampToServer = 0L;
@@ -117,19 +133,20 @@ public class RegistrationEngineTestParameters {
             when(context.checkCallingOrSelfPermission(anyString())).thenReturn(PackageManager.PERMISSION_DENIED);
         }
 
-        final FakePushPreferencesProvider pushPreferencesProvider = new FakePushPreferencesProvider(fcmTokenIdInPrefs, pcfPushDeviceRegistrationIdInPrefs, platformUuidInPrefs, platformSecretInPrefs, deviceAliasInPrefs, customUserIdInPrefs, packageNameInPrefs, serviceUrlInPrefs, tagsInPrefs, geofenceUpdateTimestampInPrefs, areGeofencesEnabledInPrefs);
+        final FakeGcmProvider gcmProvider = new FakeGcmProvider(gcmDeviceRegistrationIdFromServer, !shouldGcmDeviceRegistrationBeSuccessful, !shouldGcmDeviceUnregistrationBeSuccessful);
+        final FakePushPreferencesProvider pushPreferencesProvider = new FakePushPreferencesProvider(gcmDeviceRegistrationIdInPrefs, pcfPushDeviceRegistrationIdInPrefs, appVersionInPrefs, gcmSenderIdInPrefs, platformUuidInPrefs, platformSecretInPrefs, deviceAliasInPrefs, customUserIdInPrefs, packageNameInPrefs, serviceUrlInPrefs, tagsInPrefs, geofenceUpdateTimestampInPrefs, areGeofencesEnabledInPrefs);
+        final FakeGcmRegistrationApiRequest gcmRegistrationApiRequest = new FakeGcmRegistrationApiRequest(gcmProvider);
+        final GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider = new GcmRegistrationApiRequestProvider(gcmRegistrationApiRequest);
+        final FakeGcmUnregistrationApiRequest gcmUnregistrationApiRequest = new FakeGcmUnregistrationApiRequest(gcmProvider);
+        final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(gcmUnregistrationApiRequest);
+        final FakeVersionProvider versionProvider = new FakeVersionProvider(currentAppVersion);
         final FakePCFPushRegistrationApiRequest fakePCFPushRegistrationApiRequest = new FakePCFPushRegistrationApiRequest(pcfPushDeviceRegistrationIdFromServer, shouldPCFPushDeviceRegistrationBeSuccessful);
         final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(fakePCFPushRegistrationApiRequest);
         final GeofenceUpdater geofenceUpdater = mock(GeofenceUpdater.class);
         final GeofenceEngine geofenceEngine = mock(GeofenceEngine.class);
         final GeofenceStatusUtil geofenceStatusUtil = mock(GeofenceStatusUtil.class);
-        final FirebaseInstanceId firebaseInstanceId = mock(FirebaseInstanceId.class);
-        when(firebaseInstanceId.getToken()).thenReturn(fcmTokenIdFromServer);
-        final GoogleApiAvailability googleApiAvailability = mock(GoogleApiAvailability.class);
-        when(googleApiAvailability.isGooglePlayServicesAvailable(context)).thenReturn(ConnectionResult.SUCCESS);
-
-        final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, firebaseInstanceId, googleApiAvailability, pushPreferencesProvider, PCFPushRegistrationApiRequestProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
-        final PushParameters parameters = new PushParameters(platformUuidFromUser, platformSecretFromUser, serviceUrlFromUser, deviceAliasFromUser, customUserIdFromUser, tagsFromUser, areGeofencesEnabledFromUser, Pivotal.SslCertValidationMode.DEFAULT, null, null);
+        final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, PCFPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+        final PushParameters parameters = new PushParameters(gcmSenderIdFromUser, platformUuidFromUser, platformSecretFromUser, serviceUrlFromUser, deviceAliasFromUser, customUserIdFromUser, tagsFromUser, areGeofencesEnabledFromUser, Pivotal.SslCertValidationMode.DEFAULT, null, null);
 
         doAnswer(new Answer<Void>() {
 
@@ -211,10 +228,14 @@ public class RegistrationEngineTestParameters {
         delayedLoop.startLoop();
 
         AndroidTestCase.assertTrue(delayedLoop.isSuccess());
+        AndroidTestCase.assertEquals(shouldGcmProviderRegisterHaveBeenCalled, gcmProvider.wasRegisterCalled());
+        AndroidTestCase.assertEquals(shouldGcmProviderUnregisterHaveBeenCalled, gcmProvider.wasUnregisterCalled());
         AndroidTestCase.assertEquals(shouldPCFPushUpdateRegistrationHaveBeenCalled, fakePCFPushRegistrationApiRequest.isUpdateRegistration());
         AndroidTestCase.assertEquals(shouldPCFPushNewRegistrationHaveBeenCalled, fakePCFPushRegistrationApiRequest.isNewRegistration());
         AndroidTestCase.assertEquals(shouldPCFPushDeviceRegistrationHaveBeenSaved, pushPreferencesProvider.wasPCFPushDeviceRegistrationIdSaved());
-        AndroidTestCase.assertEquals(shouldFcmTokenIdHaveBeenSaved, pushPreferencesProvider.wasFcmTokenIdSaved());
+        AndroidTestCase.assertEquals(shouldAppVersionHaveBeenSaved, pushPreferencesProvider.wasAppVersionSaved());
+        AndroidTestCase.assertEquals(shouldGcmDeviceRegistrationIdHaveBeenSaved, pushPreferencesProvider.wasGcmDeviceRegistrationIdSaved());
+        AndroidTestCase.assertEquals(shouldGcmSenderIdHaveBeenSaved, pushPreferencesProvider.wasGcmSenderIdSaved());
         AndroidTestCase.assertEquals(shouldPlatformUuidHaveBeenSaved, pushPreferencesProvider.wasPlatformUuidSaved());
         AndroidTestCase.assertEquals(shouldPlatformSecretHaveBeenSaved, pushPreferencesProvider.wasPlatformSecretSaved());
         AndroidTestCase.assertEquals(shouldDeviceAliasHaveBeenSaved, pushPreferencesProvider.wasDeviceAliasSaved());
@@ -227,13 +248,15 @@ public class RegistrationEngineTestParameters {
         AndroidTestCase.assertEquals(shouldClearGeofencesFromMonitorAndStoreHaveBeenCalled, wasClearGeofencesFromMonitorAndStoreCalled);
         AndroidTestCase.assertEquals(shouldClearGeofencesFromStoreOnlyHaveBeenCalled, wasClearGeofencesFromStoreOnlyCalled);
         AndroidTestCase.assertEquals(shouldClearGeofencesFromStoreOnlyHaveBeenCalled, wasGeofenceStatusUpdated);
-        AndroidTestCase.assertEquals(finalFcmTokenIdInPrefs, pushPreferencesProvider.getFcmTokenId());
+        AndroidTestCase.assertEquals(finalGcmDeviceRegistrationIdInPrefs, pushPreferencesProvider.getGcmDeviceRegistrationId());
         AndroidTestCase.assertEquals(finalPCFPushDeviceRegistrationIdInPrefs, pushPreferencesProvider.getPCFPushDeviceRegistrationId());
+        AndroidTestCase.assertEquals(finalGcmSenderIdInPrefs, pushPreferencesProvider.getGcmSenderId());
         AndroidTestCase.assertEquals(finalPlatformUuidInPrefs, pushPreferencesProvider.getPlatformUuid());
         AndroidTestCase.assertEquals(finalPlatformSecretInPrefs, pushPreferencesProvider.getPlatformSecret());
         AndroidTestCase.assertEquals(finalDeviceAliasInPrefs, pushPreferencesProvider.getDeviceAlias());
         AndroidTestCase.assertEquals(finalCustomUserIdInPrefs, pushPreferencesProvider.getCustomUserId());
         AndroidTestCase.assertEquals(finalServiceUrlInPrefs, pushPreferencesProvider.getServiceUrl());
+        AndroidTestCase.assertEquals(finalAppVersionInPrefs, pushPreferencesProvider.getAppVersion());
         AndroidTestCase.assertEquals(finalPackageNameInPrefs, pushPreferencesProvider.getPackageName());
         AndroidTestCase.assertEquals(finalTagsInPrefs, pushPreferencesProvider.getTags());
         AndroidTestCase.assertEquals(finalGeofenceUpdateTimestampInPrefs, pushPreferencesProvider.getLastGeofenceUpdate());
@@ -281,6 +304,14 @@ public class RegistrationEngineTestParameters {
         return this;
     }
 
+    public RegistrationEngineTestParameters setupGcmSenderId(String inPrefs, String fromUser, String finalValue, boolean shouldHaveBeenSaved) {
+        gcmSenderIdInPrefs = inPrefs;
+        gcmSenderIdFromUser = fromUser;
+        finalGcmSenderIdInPrefs = finalValue;
+        shouldGcmSenderIdHaveBeenSaved = shouldHaveBeenSaved;
+        return this;
+    }
+
     public RegistrationEngineTestParameters setupPlatformUuid(String inPrefs, String fromUser, String finalValue, boolean shouldHaveBeenSaved) {
         platformUuidInPrefs = inPrefs;
         platformUuidFromUser = fromUser;
@@ -297,10 +328,11 @@ public class RegistrationEngineTestParameters {
         return this;
     }
 
-    public RegistrationEngineTestParameters setupFcmTokenId(String inPrefs, String fromServer, String finalValue) {
-        fcmTokenIdInPrefs = inPrefs;
-        fcmTokenIdFromServer = fromServer;
-        finalFcmTokenIdInPrefs = finalValue;
+    public RegistrationEngineTestParameters setupGcmDeviceRegistrationId(String inPrefs, String fromServer, String finalValue) {
+        gcmDeviceRegistrationIdInPrefs = inPrefs;
+        gcmDeviceRegistrationIdFromServer = fromServer;
+        finalGcmDeviceRegistrationIdInPrefs = finalValue;
+        shouldGcmDeviceRegistrationBeSuccessful = fromServer != null;
         return this;
     }
 
@@ -348,13 +380,31 @@ public class RegistrationEngineTestParameters {
         return this;
     }
 
+    public RegistrationEngineTestParameters setupGcmUnregisterDevice(boolean shouldHaveBeenCalled, boolean shouldBeSuccessful) {
+        shouldGcmProviderUnregisterHaveBeenCalled = shouldHaveBeenCalled;
+        shouldGcmDeviceUnregistrationBeSuccessful = shouldBeSuccessful;
+        return this;
+    }
+
+    public RegistrationEngineTestParameters setupAppVersion(int versionInPrefs, int currentVersion, int finalValue) {
+        appVersionInPrefs = versionInPrefs;
+        currentAppVersion = currentVersion;
+        finalAppVersionInPrefs = finalValue;
+        return this;
+    }
+
     public RegistrationEngineTestParameters setShouldRegistrationHaveSucceeded(boolean b) {
         shouldRegistrationHaveSucceeded = b;
         return this;
     }
 
-    public RegistrationEngineTestParameters setShouldFcmTokenIdHaveBeenSaved(boolean b) {
-        shouldFcmTokenIdHaveBeenSaved = b;
+    public RegistrationEngineTestParameters setShouldGcmDeviceRegistrationIdHaveBeenSaved(boolean b) {
+        shouldGcmDeviceRegistrationIdHaveBeenSaved = b;
+        return this;
+    }
+
+    public RegistrationEngineTestParameters setShouldGcmProviderRegisterHaveBeenCalled(boolean b) {
+        shouldGcmProviderRegisterHaveBeenCalled = b;
         return this;
     }
 
@@ -365,6 +415,11 @@ public class RegistrationEngineTestParameters {
 
     public RegistrationEngineTestParameters setShouldPCFPushUpdateRegistrationHaveBeenCalled(boolean b) {
         shouldPCFPushUpdateRegistrationHaveBeenCalled = b;
+        return this;
+    }
+
+    public RegistrationEngineTestParameters setShouldAppVersionHaveBeenSaved(boolean b) {
+        shouldAppVersionHaveBeenSaved = b;
         return this;
     }
 

@@ -16,6 +16,7 @@ public class Pivotal {
 
     public static final class Keys {
         public static final String SERVICE_URL = "pivotal.push.serviceUrl";
+        public static final String GCM_SENDER_ID = "pivotal.push.gcmSenderId";
         public static final String PLATFORM_UUID = "pivotal.push.platformUuid";
         public static final String PLATFORM_SECRET = "pivotal.push.platformSecret";
         public static final String SSL_CERT_VALIDATION_MODE = "pivotal.push.sslCertValidationMode";
@@ -111,6 +112,10 @@ public class Pivotal {
 
     public static String getPlatformSecret(Context context) {
         return getRequiredProperty(context, Keys.PLATFORM_SECRET);
+    }
+
+    public static String getGcmSenderId(Context context) {
+        return getRequiredProperty(context, Keys.GCM_SENDER_ID);
     }
 
     public static String getServiceUrl(Context context) {

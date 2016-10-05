@@ -39,7 +39,6 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
 
     // Captures result codes from the service itself
     public class TestResultReceiver extends ResultReceiver {
-        public final Creator<ResultReceiver> CREATOR = null;
 
         public TestResultReceiver(Handler handler) {
             super(handler);
@@ -65,7 +64,7 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
         final FakePCFPushCheckBackEndVersionApiRequest checkBackEndVersionApiRequest = new FakePCFPushCheckBackEndVersionApiRequest();
         final FakeServiceStarter serviceStarter = new FakeServiceStarter();
 
-        pushPreferencesProvider = new FakePushPreferencesProvider(null, null, null, null, null, null, null, null, null, 0, false);
+        pushPreferencesProvider = new FakePushPreferencesProvider(null, null, 0, null, null, null, null, null, null, null, null, 0, false);
         pushPreferencesProvider.setAreAnalyticsEnabled(true);
 
         testResultReceiver = new TestResultReceiver(null);
@@ -212,6 +211,7 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
     private Properties getProperties() {
         final Properties properties = new Properties();
         properties.setProperty(Pivotal.Keys.SERVICE_URL, "http://some.url");
+        properties.setProperty(Pivotal.Keys.GCM_SENDER_ID, "fake_sender_id");
         properties.setProperty(Pivotal.Keys.PLATFORM_UUID, "fake_platform_uuid");
         properties.setProperty(Pivotal.Keys.PLATFORM_SECRET, "fake_platform_secret");
         properties.setProperty(Pivotal.Keys.ARE_ANALYTICS_ENABLED, "true");

@@ -8,6 +8,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.test.AndroidTestCase;
 
+import com.google.android.gms.gcm.GoogleCloudMessaging;
+
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 
@@ -62,6 +64,8 @@ public class GeofenceServiceTest extends AndroidTestCase {
 
     public static Intent createGeofenceUpdateSilentPushIntent(final Context context, final Class<? extends IntentService> serviceClass) {
         final Intent intent = new Intent(context, serviceClass);
+        intent.setAction("com.google.android.c2dm.intent.RECEIVE");
+        intent.putExtra("message_type", GoogleCloudMessaging.MESSAGE_TYPE_MESSAGE);
         intent.putExtra(GeofenceService.GEOFENCE_AVAILABLE, "true");
         return intent;
     }
@@ -174,13 +178,14 @@ public class GeofenceServiceTest extends AndroidTestCase {
     }
 
     private FakePushPreferencesProvider getPreferences(long timestamp, boolean areGeofencesEnabled) {
-        return new FakePushPreferencesProvider("", TEST_DEVICE_UUID, "", "", "", "", "", "", null, timestamp, areGeofencesEnabled);
+        return new FakePushPreferencesProvider("", TEST_DEVICE_UUID, 0, "", "", "", "", "", "", "", null, timestamp, areGeofencesEnabled);
     }
 
     private Properties getProperties() {
         // TODO - are properties still needed for this test?
         final Properties properties = new Properties();
         properties.setProperty(Pivotal.Keys.SERVICE_URL, "http://some.url");
+        properties.setProperty(Pivotal.Keys.GCM_SENDER_ID, "fake_sender_id");
         properties.setProperty(Pivotal.Keys.PLATFORM_UUID, "fake_platform_uuid");
         properties.setProperty(Pivotal.Keys.PLATFORM_SECRET, "fake_platform_secret");
         return properties;
