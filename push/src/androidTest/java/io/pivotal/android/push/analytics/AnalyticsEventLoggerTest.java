@@ -47,7 +47,7 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
         super.setUp();
         serviceStarter = new FakeServiceStarter();
         serviceStarter.setReturnedComponentName(new ComponentName(getContext(), AnalyticsEventService.class));
-        preferencesProvider = new FakePushPreferencesProvider(null, TEST_EVENT_DEVICE_UUID_VALUE, 0, null, TEST_EVENT_PLATFORM_UUID_VALUE, null, null, null, null, null, null, 0, false);
+        preferencesProvider = new FakePushPreferencesProvider(null, TEST_EVENT_DEVICE_UUID_VALUE, TEST_EVENT_PLATFORM_UUID_VALUE, null, null, null, null, null, null, 0, false);
         preferencesProvider.setAreAnalyticsEnabled(true);
     }
 
@@ -200,7 +200,6 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
     private Properties getProperties(boolean areAnalyticsEnabled) {
         final Properties properties = new Properties();
         properties.setProperty(Pivotal.Keys.SERVICE_URL, "http://some.url");
-        properties.setProperty(Pivotal.Keys.GCM_SENDER_ID, "fake_sender_id");
         properties.setProperty(Pivotal.Keys.PLATFORM_UUID, "fake_platform_uuid");
         properties.setProperty(Pivotal.Keys.PLATFORM_SECRET, "fake_platform_secret");
         properties.setProperty(Pivotal.Keys.ARE_ANALYTICS_ENABLED, Boolean.toString(areAnalyticsEnabled));

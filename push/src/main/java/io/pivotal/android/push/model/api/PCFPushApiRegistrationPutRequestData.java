@@ -10,7 +10,7 @@ package io.pivotal.android.push.model.api;
         "device_model": "Nexus 5",
         "os": "android",
         "os_version": "4.4",
-        "registration_token": "provided_by_GCM",
+        "registration_token": "provided_by_FCM",
         "tags": [
             "subscribe": ["tag1", "tag2"],
             "unsubscribe": ["tag3", "tag4"]
