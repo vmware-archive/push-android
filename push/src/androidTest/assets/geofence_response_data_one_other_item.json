@@ -5,7 +5,7 @@
         {
             "id": 7,
             "data": {
-                "android":{"message": "pizza"}
+                "androidFcm":{"message": "pizza"}
             },
             "expiry_time": 1424309210305,
             "trigger_type": "exit",

@@ -5,7 +5,7 @@
         {
             "id": 7,
             "data": {
-                "android":{"message": "pants"}
+                "androidFcm":{"message": "pants"}
             },
             "trigger_type": "exit",
             "expiry_time": 1424309210305,

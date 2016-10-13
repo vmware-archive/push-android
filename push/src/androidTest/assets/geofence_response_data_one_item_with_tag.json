@@ -5,7 +5,7 @@
         {
             "id": 7,
             "data": {
-                "android":{"message": "pants"}
+                "androidFcm":{"message": "pants"}
             },
             "tags": ["ice cream"],
             "trigger_type": "exit",

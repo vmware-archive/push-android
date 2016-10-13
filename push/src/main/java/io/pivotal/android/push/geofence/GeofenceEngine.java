@@ -204,7 +204,7 @@ public class GeofenceEngine {
                     return false;
                 }
                 if (!areLocationsValid(item)) return false;
-                if (item.getPayload() == null || item.getPayload().getAndroid() == null || item.getPayload().getAndroid().size() <= 0) {
+                if (item.getPayload() == null || item.getPayload().getAndroidFcm() == null || item.getPayload().getAndroidFcm().size() <= 0) {
                     Logger.w(String.format("Filtering out item %d with no payload", item.getId()));
                     return false;
                 }

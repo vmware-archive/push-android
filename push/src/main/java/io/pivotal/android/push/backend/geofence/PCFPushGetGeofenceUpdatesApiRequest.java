@@ -164,6 +164,6 @@ public class PCFPushGetGeofenceUpdatesApiRequest extends ApiRequestImpl {
         builder.append('&');
         builder.append(Const.PCF_PUSH_GEOFENCE_UPDATE_REQUEST_PLATFORM);
         builder.append('=');
-        builder.append(Const.PCF_PUSH_GEOFENCE_UPDATE_REQUEST_ANDROID);
+        builder.append(Const.PCF_PUSH_GEOFENCE_UPDATE_REQUEST_ANDROID_FCM);
     }
 }

@@ -2,7 +2,7 @@
     {
         "id": 7,
         "data": {
-            "android":{"message": "tacos"}
+            "androidFcm":{"message": "tacos"}
         },
         "trigger_type": "enter",
         "expiry_time": 1424309210305,
@@ -19,7 +19,7 @@
     {
         "id": 9,
         "data": {
-            "android":{"message": "pizzas"}
+            "androidFcm":{"message": "pizzas"}
         },
         "trigger_type": "exit",
         "expiry_time": 1142744274,
@@ -36,7 +36,7 @@
     {
         "id": 44,
         "data": {
-            "android":{"message": "eat all this great stuff"}
+            "androidFcm":{"message": "eat all this great stuff"}
         },
         "trigger_type": "exit",
         "expiry_time": 1924309210305,

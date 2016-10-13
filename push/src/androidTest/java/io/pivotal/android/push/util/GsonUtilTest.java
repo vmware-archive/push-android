@@ -49,7 +49,7 @@ public class GsonUtilTest extends AndroidTestCase {
         assertEquals(1, array.size());
         assertEquals(7L, data.getId());
         assertEquals(new Date(1142744274L), data.getExpiryTime());
-        assertEquals("tacos", data.getPayload().getAndroid().get("message"));
+        assertEquals("tacos", data.getPayload().getAndroidFcm().get("message"));
         assertEquals(1, locations.size());
         assertEquals(66L, location.getId());
         assertEquals("robs_wizard_tacos", location.getName());

@@ -7,15 +7,15 @@ import java.util.Map;
 
 public final class PCFPushGeofencePayload {
 
-    @SerializedName("android")
-    private Map<String, String> android = new HashMap<>();
+    @SerializedName("androidFcm")
+    private Map<String, String> androidFcm = new HashMap<>();
 
-    public Map<String, String> getAndroid() {
-        return android;
+    public Map<String, String> getAndroidFcm() {
+        return androidFcm;
     }
 
     public PCFPushGeofencePayload(PCFPushGeofencePayload payload) {
-        this.android = new HashMap<>(payload.android);
+        this.androidFcm = new HashMap<>(payload.androidFcm);
     }
 
     @Override
@@ -25,11 +25,11 @@ public final class PCFPushGeofencePayload {
 
         PCFPushGeofencePayload that = (PCFPushGeofencePayload) o;
 
-        return !(android != null ? !android.equals(that.android) : that.android != null);
+        return !(androidFcm != null ? !androidFcm.equals(that.androidFcm) : that.androidFcm != null);
     }
 
     @Override
     public int hashCode() {
-        return android != null ? android.hashCode() : 0;
+        return androidFcm != null ? androidFcm.hashCode() : 0;
     }
 }

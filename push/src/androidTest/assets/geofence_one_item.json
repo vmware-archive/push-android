@@ -2,7 +2,7 @@
     {
         "id": 7,
         "data": {
-            "android":{"message": "tacos"}
+            "androidFcm":{"message": "tacos"}
         },
         "expiry_time": 1142744274,
         "trigger_type": "exit",

@@ -7,7 +7,7 @@ import java.util.Set;
 public class PCFPushGeofenceLocationMap extends HashMap<String, PCFPushGeofenceLocation> {
 
     public interface Filter {
-        public boolean filterItem(PCFPushGeofenceData item, PCFPushGeofenceLocation location);
+        boolean filterItem(PCFPushGeofenceData item, PCFPushGeofenceLocation location);
     }
 
     public static class LocationEntry {

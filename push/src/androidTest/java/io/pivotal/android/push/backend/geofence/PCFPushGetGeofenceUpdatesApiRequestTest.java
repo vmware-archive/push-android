@@ -218,10 +218,10 @@ public class PCFPushGetGeofenceUpdatesApiRequestTest extends AndroidTestCase {
         makePCFPushGeofenceUpdateApiRequestListener(false, expectedTimestamp, expectedDeviceUuid, null);
     }
 
-    public void makePCFPushGeofenceUpdateApiRequestListener(final boolean isSuccessfulRequest,
-                                                            final long expectedTimestamp,
-                                                            final String expectedDeviceUuid,
-                                                            final Map<String, String> expectedRequestHeaders) {
+    private void makePCFPushGeofenceUpdateApiRequestListener(final boolean isSuccessfulRequest,
+                                                             final long expectedTimestamp,
+                                                             final String expectedDeviceUuid,
+                                                             final Map<String, String> expectedRequestHeaders) {
 
         listener = new PCFPushGetGeofenceUpdatesListener() {
             @Override
@@ -230,7 +230,7 @@ public class PCFPushGetGeofenceUpdatesApiRequestTest extends AndroidTestCase {
                 assertEquals("GET", FakeHttpURLConnection.getReceivedHttpMethod());
                 assertTrue(FakeHttpURLConnection.getReceivedURL().toString().contains("timestamp=" + expectedTimestamp));
                 assertTrue(FakeHttpURLConnection.getReceivedURL().toString().contains("device_uuid=" + expectedDeviceUuid));
-                assertTrue(FakeHttpURLConnection.getReceivedURL().toString().contains("platform=android"));
+                assertTrue(FakeHttpURLConnection.getReceivedURL().toString().contains("platform=android-fcm"));
 
                 if (expectedRequestHeaders != null) {
                     final Map<String, String> actualRequestHeaders = FakeHttpURLConnection.getRequestPropertiesMap();
@@ -248,7 +248,7 @@ public class PCFPushGetGeofenceUpdatesApiRequestTest extends AndroidTestCase {
                 assertEquals("GET", FakeHttpURLConnection.getReceivedHttpMethod());
                 assertTrue(FakeHttpURLConnection.getReceivedURL().toString().contains("timestamp=" + expectedTimestamp));
                 assertTrue(FakeHttpURLConnection.getReceivedURL().toString().contains("device_uuid=" + expectedDeviceUuid));
-                assertTrue(FakeHttpURLConnection.getReceivedURL().toString().contains("platform=android"));
+                assertTrue(FakeHttpURLConnection.getReceivedURL().toString().contains("platform=android-fcm"));
                 delayedLoop.flagSuccess();
             }
         };

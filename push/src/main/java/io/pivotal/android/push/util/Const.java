@@ -11,5 +11,5 @@ public class Const {
     public static final String PCF_PUSH_GEOFENCE_UPDATE_REQUEST_TIMESTAMP = "timestamp";
     public static final String PCF_PUSH_GEOFENCE_UPDATE_REQUEST_DEVICE_UUID = "device_uuid";
     public static final String PCF_PUSH_GEOFENCE_UPDATE_REQUEST_PLATFORM = "platform";
-    public static final String PCF_PUSH_GEOFENCE_UPDATE_REQUEST_ANDROID = "android";
+    public static final String PCF_PUSH_GEOFENCE_UPDATE_REQUEST_ANDROID_FCM = "android-fcm";
 }

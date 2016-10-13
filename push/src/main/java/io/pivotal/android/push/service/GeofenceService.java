@@ -238,7 +238,7 @@ public class GeofenceService extends IntentService {
             return null;
         }
 
-        final Map<String, String> data = geofenceData.getPayload().getAndroid();
+        final Map<String, String> data = geofenceData.getPayload().getAndroidFcm();
         if (data == null) {
             Logger.e("Triggered geofence with ID " + geofenceId + " has no Android message payload.");
             return null;
