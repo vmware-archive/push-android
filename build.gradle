@@ -73,15 +73,7 @@ subprojects {
             }
 
             // Publishes to local repository
-             repository url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
-
-            // Publishes to remote repository
-//            repository(url: 'https://maven.xtremelabs.com/artifactory/libs-release-local') {
-//                authentication(userName: MAVEN_USER, password: MAVEN_PASS)
-//            }
-//            snapshotRepository(url: 'https://maven.xtremelabs.com/artifactory/libs-snapshot-local') {
-//                authentication(userName: MAVEN_USER, password: MAVEN_PASS)
-//            }
+            repository url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
         }
     }
 
