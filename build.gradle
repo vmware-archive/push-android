@@ -25,6 +25,7 @@ ext {
 subprojects {
 
     apply plugin: 'maven'
+    apply plugin: 'signing'
 
     group = "io.pivotal.android"
 
@@ -71,11 +72,48 @@ subprojects {
                         distribution 'repo'
                     }
                 }
+
+                scm {
+                    url 'https://github.com/cfmobile/push-android'
+                    connection 'scm:git:git@github.com/cfmobile/push-android.git'
+                    developerConnection 'scm:git:ssh://github.com:cfmobile/push-android.git'
+                }
+
+                developers {
+                    developer {
+                        id 'cf-push-notifications'
+                        name 'PCF Push Nofitications'
+                        email 'cf-push-notifications@poivotal.io'
+                    }
+                }
+
+                name 'Push client SDK for Android'
+                description 'A comprehensive SDK for receiving and sending Push Notification through Pivotal Cloud Foundry\'s Push API'
+                url 'https://github.com/cfmobile/push-android'
+            }
+
+            beforeDeployment {
+                MavenDeployment deployment -> signing.signPom(deployment)
             }
 
             // Publishes to local repository
             repository url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
        }
+    }
+
+    //Creating sources with comments
+    task androidSourcesJar(type: Jar) {
+        classifier = 'sources'
+        from android.sourceSets.main.java.srcDirs
+    }
+
+    //Put the androidSources to the artifacts
+    artifacts {
+        archives androidSourcesJar
+    }
+
+    signing {
+        sign configurations.archives
     }
 
     task(printVersion) << {
