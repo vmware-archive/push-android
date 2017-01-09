@@ -24,7 +24,6 @@ ext {
 subprojects {
 
     apply plugin: 'maven'
-    apply plugin: 'signing'
 
     group = "io.pivotal.android"
 
@@ -63,6 +62,12 @@ subprojects {
         repositories.mavenDeployer {
 
             pom.project {
+
+                name 'Push client SDK for Android'
+                packaging 'aar'
+                description 'A comprehensive SDK for receiving and sending Push Notification through Pivotal Cloud Foundry\'s Push API'
+                url 'https://github.com/cfmobile/push-android'
+
                 licenses {
                     license {
                         // TODO - provide a more correct license file and URL
@@ -85,14 +90,6 @@ subprojects {
                         email 'cf-push-notifications@poivotal.io'
                     }
                 }
-
-                name 'Push client SDK for Android'
-                description 'A comprehensive SDK for receiving and sending Push Notification through Pivotal Cloud Foundry\'s Push API'
-                url 'https://github.com/cfmobile/push-android'
-            }
-
-            beforeDeployment {
-                MavenDeployment deployment -> signing.signPom(deployment)
             }
 
             // Publishes to local repository
@@ -109,10 +106,6 @@ subprojects {
     //Put the androidSources to the artifacts
     artifacts {
         archives androidSourcesJar
-    }
-
-    signing {
-        sign configurations.archives
     }
 
     task(printVersion) << {
