@@ -18,7 +18,7 @@ public interface AnalyticsEventsStorage {
     /**
      * Gets the list of Event URIs from the backing store.
      *
-     * @return           the list of {@link Uri} objects for all Events currently in the backing store of the given {@link EventType}.
+     * @return           the list of {@link Uri} objects for all Events currently in the backing store of the given eventType.
      */
     public List<Uri> getEventUris();
 
@@ -27,7 +27,7 @@ public interface AnalyticsEventsStorage {
      * satisfy the given status
      *
      * @param status     a {@link AnalyticsEvent.Status} value to query
-     * @return  the list of {@link AnalyticsEvent} {@link Uri} objects currently in the backing store with the given {@link AnalyticsEvent.Status} of the given {@link EventType}.
+     * @return  the list of {@link AnalyticsEvent} {@link Uri} objects currently in the backing store with the given {@link AnalyticsEvent.Status} of the given eventType.
      */
     public List<Uri> getEventUrisWithStatus(int status);
 
@@ -54,7 +54,8 @@ public interface AnalyticsEventsStorage {
     public void deleteEvents(List<Uri> eventUris);
 
     /**
-     * Returns the number of {@link AnalyticsEvent} currently in the backing store.
+     * Gets the number of {@link AnalyticsEvent} currently in the backing store.
+     * @return the number of {@link AnalyticsEvent} currently in the backing store.
      */
     public int getNumberOfEvents();
 
@@ -65,8 +66,8 @@ public interface AnalyticsEventsStorage {
 
     /**
      * Sets the status of the {@link AnalyticsEvent} with the given {@link Uri}.
-     * @param eventUri
-     * @param status
+     * @param eventUri the {@link android.net.Uri} of the {@link AnalyticsEvent} to set the status
+     * @param status the {@link AnalyticsEvent.Status} value to set
      */
     public void setEventStatus(Uri eventUri, int status);
 }

@@ -88,6 +88,13 @@ public class PushParameters {
 
     /**
      * Returns a PushParameters object by reading some of its field from the Pivotal.properties file and some from the PushPreferences
+     * @param context               The {@link Context} to use to load the properties with
+     * @param preferencesProvider   The {@link PushPreferencesProvider} to use to load the properties with
+     * @param deviceAlias           A developer-defined "device alias" which can be used to designate this device, or class.
+     *                              of devices, in push or notification campaigns. May not be set to `null`. May be set to empty.
+     * @param tags                  A set of tags to register to.  You should always register all tags that you want to listen to, even if you have
+     *                              already subscribed to them.  If you exclude any subscribed tags in a registration request, then those tags
+     *                              will be unsubscribed.
      */
     public PushParameters(@NonNull Context context,
                           @NonNull PushPreferencesProvider preferencesProvider,

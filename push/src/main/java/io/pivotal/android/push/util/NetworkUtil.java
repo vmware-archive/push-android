@@ -29,6 +29,7 @@ public class NetworkUtil {
 
     /**
      * Checks if the device thinks it is connected to an active network.
+     * @return Returns true if the device is connected to an active network, else returns false.
      */
     public boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager = (ConnectivityManager) applicationContext.getSystemService(Context.CONNECTIVITY_SERVICE);

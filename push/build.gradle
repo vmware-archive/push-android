@@ -1,3 +1,36 @@
+repositories {
+    mavenCentral()
+}
+
+apply plugin: 'com.android.library'
+apply plugin: 'maven'
+
+group = "io.pivotal.android"
+version = System.getenv("PUSH_SDK_VERSION") ?: "1.8.0"
+
+android {
+    compileSdkVersion 24
+    buildToolsVersion "24.0.2"
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_7
+        targetCompatibility JavaVersion.VERSION_1_7
+    }
+    defaultConfig {
+        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+        versionCode 8
+        versionName project.version
+        minSdkVersion 16
+        targetSdkVersion 24
+    }
+}
+
+configurations {
+    archives {
+        extendsFrom configurations.default
+    }
+}
+
 dependencies {
     compile 'com.google.code.gson:gson:2.4'
     compile 'com.google.android.gms:play-services-location:9.4.0'
@@ -14,12 +47,77 @@ dependencies {
     androidTestCompile 'com.android.support.test:rules:0.5'
 }
 
-android {
-    compileOptions {
-        sourceCompatibility JavaVersion.VERSION_1_7
-        targetCompatibility JavaVersion.VERSION_1_7
+uploadArchives {
+    configuration = configurations.archives
+    repositories.mavenDeployer {
+
+        pom.project {
+
+            name 'Push client SDK for Android'
+            packaging 'aar'
+            description 'A comprehensive SDK for receiving and sending Push Notification through Pivotal Cloud Foundry\'s Push API'
+            url 'https://github.com/cfmobile/push-android'
+
+            licenses {
+                license {
+                    // TODO - provide a more correct license file and URL
+                    name 'Pivotal Software License'
+                    url 'https://github.com/cfmobile/push-android/blob/master/LICENSE'
+                    distribution 'repo'
+                }
+            }
+
+            scm {
+                url 'https://github.com/cfmobile/push-android'
+                connection 'scm:git:git@github.com/cfmobile/push-android.git'
+                developerConnection 'scm:git:ssh://github.com:cfmobile/push-android.git'
+            }
+
+            developers {
+                developer {
+                    id 'cf-push-notifications'
+                    name 'PCF Push Nofitications'
+                    email 'cf-push-notifications@poivotal.io'
+                }
+            }
+        }
+
+        // Publishes to local repository
+        repository url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
     }
-    defaultConfig {
-        testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
+}
+
+task javadoc(type: Javadoc) {
+    failOnError false
+    source = android.sourceSets.main.java.sourceFiles
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    classpath += configurations.compile
+    classpath += fileTree(dir: "$buildDir/intermediates/exploded-aar/", include:"**/classes.jar")
+    options {
+        links "http://docs.oracle.com/javase/8/docs/api/"
+        linksOffline "http://d.android.com/reference","${android.sdkDirectory}/docs/reference"
     }
+    exclude '**/BuildConfig.java'
+    exclude '**/R.java'
+}
+
+//Creating sources with comments
+task androidSourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+}
+
+//Put the androidSources and javadocs to the artifacts
+artifacts {
+    archives androidSourcesJar
+    archives javadocJar
+}
+
+task(printVersion) << {
+    println "My version is: " + project.version
 }

@@ -19,7 +19,8 @@ public class GeofenceStatus {
     }
 
     /**
-     * Set if some kind of error happens while PCF Push tries to update or monitor geofences.
+     * Indicates if an error happened while PCF Push tried to update or monitor geofences.
+     * @return Returns true if an error occurred, else returns false.
      */
     public boolean isError() {
         return isError;
@@ -27,6 +28,7 @@ public class GeofenceStatus {
 
     /**
      * The error reason (if there is one).
+     * @return The reason for the error
      */
     public String getErrorReason() {
         return errorReason;
@@ -34,6 +36,7 @@ public class GeofenceStatus {
 
     /**
      * The number of geofences currently being monitored.
+     * @return number of geofences currently being monitored.
      */
     public int getNumberCurrentlyMonitoringGeofences() {
         return numberCurrentlyMonitoringGeofences;

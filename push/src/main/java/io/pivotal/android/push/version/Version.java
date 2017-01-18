@@ -23,29 +23,29 @@ public class Version implements Comparable<Version> {
 
     /**
      * Compares two version objects.
-     * <p/>
+     * <p>
      * NOTES:
-     * <p/>
+     * <p>
      * Consecutive delimiters are collapsed are treated the same as each other.
-     * <p/>
+     * <p>
      * Negative signs are ignored since they are used as delimiter.
-     * <p/>
+     * <p>
      * String comparisons are case insensitive.
-     * <p/>
+     * <p>
      * String comparisons are used to compare mixed items, so 'a' will be greater than '1' since 'a' has a higher ASCII
      * code (i.e.: lexigraphical comparison).
-     * <p/>
+     * <p>
      * EXAMPLES:
-     * <p/>
-     * "1" < "1.0" < "1.0.0"
-     * <p/>
-     * "1.0" < "1.0a" < "1.0ab"
-     * <p/>
-     * " " < "1" < "a" < "ab"
-     * <p/>
+     * <p>
+     * "1" &lt; "1.0" &lt; "1.0.0"
+     * <p>
+     * "1.0" &lt; "1.0a" &lt; "1.0ab"
+     * <p>
+     * " " &lt; "1" &lt; "a" &lt; "ab"
+     * <p>
      * "a" == "A"
      *
-     * @returns -1 if this version is less than the other version. 0 if they are equal. 1 if this version is greater
+     * @return -1 if this version is less than the other version. 0 if they are equal. 1 if this version is greater
      * than the other version.
      */
     public int compareTo(Version other) {

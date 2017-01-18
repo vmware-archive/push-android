@@ -40,6 +40,8 @@ public class DebugUtil {
 
 	/**
 	 * Checks if the debuggable flag is set in the application's manifest file.
+	 *
+	 * @return Returns true if the application's manifest file has the debuggable flag set, else returns false.
 	 */
 	public boolean isDebuggable() {
 		return isDebuggable;
