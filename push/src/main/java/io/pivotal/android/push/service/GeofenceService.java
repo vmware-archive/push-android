@@ -23,6 +23,7 @@ import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocation;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocationMap;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
+import io.pivotal.android.push.prefs.PushRequestHeaders;
 import io.pivotal.android.push.receiver.GeofenceBroadcastReceiver;
 import io.pivotal.android.push.util.FileHelper;
 import io.pivotal.android.push.util.GeofenceHelper;
@@ -41,6 +42,7 @@ public class GeofenceService extends IntentService {
     private PCFPushGetGeofenceUpdatesApiRequest apiRequest;
     private GeofenceEngine geofenceEngine;
     private PushPreferencesProvider pushPreferencesProvider;
+    private PushRequestHeaders pushRequestHeaders;
     private GeofenceHelper helper;
     private GeofencePersistentStore store;
     private AnalyticsEventLogger eventLogger;
@@ -77,6 +79,9 @@ public class GeofenceService extends IntentService {
         try {
             if (pushPreferencesProvider == null) {
                 pushPreferencesProvider = new PushPreferencesProviderImpl(this);
+            }
+            if (pushRequestHeaders == null) {
+                pushRequestHeaders = PushRequestHeaders.getInstance(this);
             }
             if (intent != null && pushPreferencesProvider.areGeofencesEnabled())  {
                 if (intent.getAction() != null) {
@@ -131,7 +136,7 @@ public class GeofenceService extends IntentService {
             if (isGeofencingEvent(intent)) {
                 handleGeofenceMessage(intent);
             } else if (isPushGeofenceUpdate(intent)) {
-                final GeofenceUpdater updater = new GeofenceUpdater(this, apiRequest, geofenceEngine, pushPreferencesProvider);
+                final GeofenceUpdater updater = new GeofenceUpdater(this, apiRequest, geofenceEngine, pushPreferencesProvider, pushRequestHeaders);
                 final long timestamp = pushPreferencesProvider.getLastGeofenceUpdate();
                 updater.startGeofenceUpdate(intent, timestamp, null);
             }

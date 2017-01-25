@@ -4,7 +4,6 @@
 package io.pivotal.android.push.prefs;
 
 import java.util.Date;
-import java.util.Map;
 import java.util.Set;
 
 import io.pivotal.android.push.version.Version;
@@ -50,10 +49,6 @@ public interface PushPreferencesProvider {
     boolean areGeofencesEnabled();
 
     void setAreGeofencesEnabled(boolean areGeofencesEnabled);
-
-    Map<String, String> getRequestHeaders();
-
-    void setRequestHeaders(Map<String, String> requestHeaders);
 
     Version getBackEndVersion();
 
