@@ -25,6 +25,7 @@ import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
+import io.pivotal.android.push.prefs.FakePushRequestHeaders;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.util.DelayedLoop;
@@ -140,12 +141,13 @@ public class RegistrationEngineTestParameters {
         final FakeGcmUnregistrationApiRequest gcmUnregistrationApiRequest = new FakeGcmUnregistrationApiRequest(gcmProvider);
         final GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(gcmUnregistrationApiRequest);
         final FakeVersionProvider versionProvider = new FakeVersionProvider(currentAppVersion);
+        final FakePushRequestHeaders pushRequestHeaders = new FakePushRequestHeaders();
         final FakePCFPushRegistrationApiRequest fakePCFPushRegistrationApiRequest = new FakePCFPushRegistrationApiRequest(pcfPushDeviceRegistrationIdFromServer, shouldPCFPushDeviceRegistrationBeSuccessful);
         final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(fakePCFPushRegistrationApiRequest);
         final GeofenceUpdater geofenceUpdater = mock(GeofenceUpdater.class);
         final GeofenceEngine geofenceEngine = mock(GeofenceEngine.class);
         final GeofenceStatusUtil geofenceStatusUtil = mock(GeofenceStatusUtil.class);
-        final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, PCFPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+        final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pushRequestHeaders, PCFPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
         final PushParameters parameters = new PushParameters(gcmSenderIdFromUser, platformUuidFromUser, platformSecretFromUser, serviceUrlFromUser, deviceAliasFromUser, customUserIdFromUser, tagsFromUser, areGeofencesEnabledFromUser, Pivotal.SslCertValidationMode.DEFAULT, null, null);
 
         doAnswer(new Answer<Void>() {

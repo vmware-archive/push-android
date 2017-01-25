@@ -19,6 +19,7 @@ import io.pivotal.android.push.database.AnalyticsEventsStorage;
 import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 import io.pivotal.android.push.model.analytics.AnalyticsEventList;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
+import io.pivotal.android.push.prefs.PushRequestHeaders;
 import io.pivotal.android.push.util.ApiRequestImpl;
 import io.pivotal.android.push.util.Const;
 import io.pivotal.android.push.util.Logger;
@@ -29,14 +30,15 @@ public class PCFPushSendAnalyticsApiRequestImpl extends ApiRequestImpl implement
     private Context context;
     private AnalyticsEventsStorage eventsStorage;
     private PushPreferencesProvider preferencesProvider;
+    private PushRequestHeaders pushRequestHeaders;
 
-    public PCFPushSendAnalyticsApiRequestImpl(Context context, AnalyticsEventsStorage eventsStorage, PushPreferencesProvider preferencesProvider, NetworkWrapper networkWrapper) {
+    public PCFPushSendAnalyticsApiRequestImpl(Context context, AnalyticsEventsStorage eventsStorage, PushPreferencesProvider preferencesProvider, PushRequestHeaders pushRequestHeaders, NetworkWrapper networkWrapper) {
         super(context, networkWrapper);
-        verifyArguments(context, eventsStorage, preferencesProvider);
-        saveArguments(context, eventsStorage, preferencesProvider);
+        verifyArguments(context, eventsStorage, preferencesProvider, pushRequestHeaders);
+        saveArguments(context, eventsStorage, preferencesProvider, pushRequestHeaders);
     }
 
-    private void verifyArguments(Context context, AnalyticsEventsStorage eventsStorage, PushPreferencesProvider preferencesProvider) {
+    private void verifyArguments(Context context, AnalyticsEventsStorage eventsStorage, PushPreferencesProvider preferencesProvider, PushRequestHeaders pushRequestHeaders) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
@@ -46,12 +48,17 @@ public class PCFPushSendAnalyticsApiRequestImpl extends ApiRequestImpl implement
         if (preferencesProvider == null) {
             throw new IllegalArgumentException("preferencesProvider may not be null");
         }
+        if (pushRequestHeaders == null) {
+            throw new IllegalArgumentException("pushRequestHeaders may not be null");
+        }
+
     }
 
-    private void saveArguments(Context context, AnalyticsEventsStorage eventsStorage, PushPreferencesProvider preferencesProvider) {
+    private void saveArguments(Context context, AnalyticsEventsStorage eventsStorage, PushPreferencesProvider preferencesProvider, PushRequestHeaders pushRequestHeaders) {
         this.context = context;
         this.eventsStorage = eventsStorage;
         this.preferencesProvider = preferencesProvider;
+        this.pushRequestHeaders = pushRequestHeaders;
     }
 
     @Override
@@ -71,7 +78,7 @@ public class PCFPushSendAnalyticsApiRequestImpl extends ApiRequestImpl implement
 
     private void processRequest(List<Uri> uris, PCFPushSendAnalyticsListener listener) {
 
-        final PushParameters parameters = new PushParameters(context, preferencesProvider, null, null);
+        final PushParameters parameters = new PushParameters(context, preferencesProvider, pushRequestHeaders, null, null);
 
         OutputStream outputStream = null;
 
@@ -151,6 +158,6 @@ public class PCFPushSendAnalyticsApiRequestImpl extends ApiRequestImpl implement
 
     @Override
     public PCFPushSendAnalyticsApiRequest copy() {
-        return new PCFPushSendAnalyticsApiRequestImpl(context, eventsStorage, preferencesProvider, networkWrapper);
+        return new PCFPushSendAnalyticsApiRequestImpl(context, eventsStorage, preferencesProvider, pushRequestHeaders, networkWrapper);
     }
 }

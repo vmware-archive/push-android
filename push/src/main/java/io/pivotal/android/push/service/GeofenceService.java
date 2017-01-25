@@ -14,6 +14,7 @@ import io.pivotal.android.push.geofence.GeofenceRegistrar;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
+import io.pivotal.android.push.prefs.PushRequestHeaders;
 import io.pivotal.android.push.receiver.GcmBroadcastReceiver;
 import io.pivotal.android.push.util.FileHelper;
 import io.pivotal.android.push.util.Logger;
@@ -29,6 +30,7 @@ public class GeofenceService extends IntentService {
     private PCFPushGetGeofenceUpdatesApiRequest apiRequest;
     private GeofenceEngine geofenceEngine;
     private PushPreferencesProvider pushPreferencesProvider;
+    private PushRequestHeaders pushRequestHeaders;
 
     public GeofenceService() {
         super("GeofenceService");
@@ -68,6 +70,9 @@ public class GeofenceService extends IntentService {
             if (pushPreferencesProvider == null) {
                 pushPreferencesProvider = new PushPreferencesProviderImpl(this);
             }
+            if (pushRequestHeaders == null) {
+                pushRequestHeaders = PushRequestHeaders.getInstance(this);
+            }
             if (intent != null && pushPreferencesProvider.areGeofencesEnabled())  {
                 if (intent.getAction() != null) {
                     Logger.d("GeofenceService has received an intent: " + intent.getAction());
@@ -87,7 +92,7 @@ public class GeofenceService extends IntentService {
 
         if (isGeofenceUpdate(this, intent)) {
             instantiateDependencies();
-            final GeofenceUpdater updater = new GeofenceUpdater(this, apiRequest, geofenceEngine, pushPreferencesProvider);
+            final GeofenceUpdater updater = new GeofenceUpdater(this, apiRequest, geofenceEngine, pushPreferencesProvider, pushRequestHeaders);
             final long timestamp = pushPreferencesProvider.getLastGeofenceUpdate();
             updater.startGeofenceUpdate(intent, timestamp, null);
         }

@@ -109,6 +109,31 @@ public class PivotalTest extends AndroidTestCase {
         }
     }
 
+    public void testPersistRequestHeadersNotInPropertiesFile() {
+        Pivotal.setProperties(null);
+        assertTrue(Pivotal.getPersistRequestHeaders(getContext()));
+    }
+
+    public void testPersistRequestHeadersSetToTrue() {
+        setPersistRequestHeaders(true);
+        assertTrue(Pivotal.getPersistRequestHeaders(getContext()));
+    }
+
+    public void testPersistRequestHeadersSetToFalse() {
+        setPersistRequestHeaders(false);
+        assertFalse(Pivotal.getPersistRequestHeaders(getContext()));
+    }
+
+    public void testAreAnalyticsEnabled() {
+        assertTrue(Pivotal.getAreAnalyticsEnabled(getContext()));
+    }
+
+    private void setPersistRequestHeaders(boolean persistRequestHeader) {
+        final Properties p = new Properties();
+        p.put("pivotal.push.persistRequestHeaders", Boolean.toString(persistRequestHeader));
+        Pivotal.setProperties(p);
+    }
+
     private void setSslCertValidationModeInProperties(String sslCertValidationMode) {
         final Properties p = new Properties();
         if (sslCertValidationMode != null) {
@@ -116,8 +141,5 @@ public class PivotalTest extends AndroidTestCase {
         }
         Pivotal.setProperties(p);
     }
-    
-    public void testAreAnalyticsEnabled() {
-        assertTrue(Pivotal.getAreAnalyticsEnabled(getContext()));
-    }
+
 }

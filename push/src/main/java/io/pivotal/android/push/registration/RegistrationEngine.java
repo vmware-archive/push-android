@@ -23,6 +23,7 @@ import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
+import io.pivotal.android.push.prefs.PushRequestHeaders;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.Util;
 import io.pivotal.android.push.version.GeofenceStatus;
@@ -69,6 +70,7 @@ public class RegistrationEngine {
     private PushPreferencesProvider pushPreferencesProvider;
     private GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider;
     private GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider;
+    private PushRequestHeaders pushRequestHeaders;
     private PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider;
     private GeofenceUpdater geofenceUpdater;
     private GeofenceEngine geofenceEngine;
@@ -94,6 +96,7 @@ public class RegistrationEngine {
      * @param pushPreferencesProvider  Some object that can provide persistent storage for push preferences.
      * @param gcmRegistrationApiRequestProvider  Some object that can provide GCMRegistrationApiRequest objects.
      * @param gcmUnregistrationApiRequestProvider  Some object that can provide GCMUnregistrationApiRequest objects.
+     * @param pushRequestHeaders Some object that can provide storage for push request headers
      * @param pcfPushRegistrationApiRequestProvider  Some object that can provide PCFPushRegistrationApiRequest objects.
      * @param versionProvider  Some object that can provide the application version.
      * @param geofenceUpdater  Some object that can be used to download geofence updates from the server.
@@ -106,6 +109,7 @@ public class RegistrationEngine {
                               PushPreferencesProvider pushPreferencesProvider,
                               GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
                               GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
+                              PushRequestHeaders pushRequestHeaders,
                               PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
                               VersionProvider versionProvider,
                               GeofenceUpdater geofenceUpdater,
@@ -118,6 +122,7 @@ public class RegistrationEngine {
                 pushPreferencesProvider,
                 gcmRegistrationApiRequestProvider,
                 gcmUnregistrationApiRequestProvider,
+                pushRequestHeaders,
                 pcfPushRegistrationApiRequestProvider,
                 versionProvider,
                 geofenceUpdater,
@@ -130,6 +135,7 @@ public class RegistrationEngine {
                 pushPreferencesProvider,
                 gcmRegistrationApiRequestProvider,
                 gcmUnregistrationApiRequestProvider,
+                pushRequestHeaders,
                 pcfPushRegistrationApiRequestProvider,
                 versionProvider,
                 geofenceUpdater,
@@ -143,6 +149,7 @@ public class RegistrationEngine {
                                  PushPreferencesProvider pushPreferencesProvider,
                                  GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
                                  GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
+                                 PushRequestHeaders pushRequestHeaders,
                                  PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
                                  VersionProvider versionProvider,
                                  GeofenceUpdater geofenceUpdater,
@@ -167,6 +174,9 @@ public class RegistrationEngine {
         if (gcmUnregistrationApiRequestProvider == null) {
             throw new IllegalArgumentException("gcmUnregistrationApiRequestProvider may not be null");
         }
+        if (pushRequestHeaders == null) {
+            throw new IllegalArgumentException("pushRequestHeaders may not be null");
+        }
         if (pcfPushRegistrationApiRequestProvider == null) {
             throw new IllegalArgumentException("pcfPushRegistrationApiRequestProvider may not be null");
         }
@@ -190,6 +200,7 @@ public class RegistrationEngine {
                                PushPreferencesProvider pushPreferencesProvider,
                                GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider,
                                GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider,
+                               PushRequestHeaders pushRequestHeaders,
                                PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
                                VersionProvider versionProvider,
                                GeofenceUpdater geofenceUpdater,
@@ -202,6 +213,7 @@ public class RegistrationEngine {
         this.pushPreferencesProvider = pushPreferencesProvider;
         this.gcmRegistrationApiRequestProvider = gcmRegistrationApiRequestProvider;
         this.gcmUnregistrationApiRequestProvider = gcmUnregistrationApiRequestProvider;
+        this.pushRequestHeaders = pushRequestHeaders;
         this.pcfPushRegistrationApiRequestProvider = pcfPushRegistrationApiRequestProvider;
         this.versionProvider = versionProvider;
         this.geofenceUpdater = geofenceUpdater;

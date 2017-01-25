@@ -30,6 +30,7 @@ import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
+import io.pivotal.android.push.prefs.FakePushRequestHeaders;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.util.Logger;
@@ -72,6 +73,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     private FakePushPreferencesProvider pushPreferencesProvider;
     private GcmRegistrationApiRequestProvider gcmRegistrationApiRequestProvider;
     private GcmUnregistrationApiRequestProvider gcmUnregistrationApiRequestProvider;
+    private FakePushRequestHeaders pushRequestHeaders;
     private PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider;
     private GeofenceStatusUtil geofenceStatusUtil;
     private VersionProvider versionProvider;
@@ -94,6 +96,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
         gcmUnregistrationApiRequestProvider = new GcmUnregistrationApiRequestProvider(new FakeGcmUnregistrationApiRequest(gcmProvider));
         pushPreferencesProvider = new FakePushPreferencesProvider();
         versionProvider = new FakeVersionProvider(10);
+        pushRequestHeaders = new FakePushRequestHeaders();
         pcfPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(new FakePCFPushRegistrationApiRequest(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1));
         geofenceUpdater = mock(GeofenceUpdater.class);
         geofenceEngine = mock(GeofenceEngine.class);
@@ -115,7 +118,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullContext() {
         try {
-            new RegistrationEngine(null, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+            new RegistrationEngine(null, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pushRequestHeaders, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -124,7 +127,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullPackageName() {
         try {
-            new RegistrationEngine(context, null, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+            new RegistrationEngine(context, null, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider,  pushRequestHeaders,pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -133,7 +136,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullGcmProvider() {
         try {
-            new RegistrationEngine(context, TEST_PACKAGE_NAME, null, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+            new RegistrationEngine(context, TEST_PACKAGE_NAME, null, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider,  pushRequestHeaders,pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -142,7 +145,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullPushPreferencesProvider() {
         try {
-            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, null, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, null, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider,  pushRequestHeaders,pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -151,7 +154,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullGcmRegistrationApiRequestProvider() {
         try {
-            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, null, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, null, gcmUnregistrationApiRequestProvider, pushRequestHeaders, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -160,7 +163,16 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullGcmUnregistrationApiRequestProvider() {
         try {
-            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, null, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, null, pushRequestHeaders, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+            fail("should not have succeeded");
+        } catch (IllegalArgumentException e) {
+            // success
+        }
+    }
+
+    public void testNullPushRequestHeaders() {
+        try {
+            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, null, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -169,7 +181,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullPCFPushRegisterDeviceApiRequestProvider() {
         try {
-            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, null, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pushRequestHeaders, null, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -178,7 +190,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullVersionProvider() {
         try {
-            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, null, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pushRequestHeaders, pcfPushRegistrationApiRequestProvider, null, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -187,7 +199,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullGeofenceUpdater() {
         try {
-            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, null, geofenceEngine, geofenceStatusUtil);
+            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pushRequestHeaders, pcfPushRegistrationApiRequestProvider, versionProvider, null, geofenceEngine, geofenceStatusUtil);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -196,7 +208,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullGeofenceEngine() {
         try {
-            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, null, geofenceStatusUtil);
+            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pushRequestHeaders, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, null, geofenceStatusUtil);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -205,7 +217,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullGeofenceStatusUtil() {
         try {
-            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, null);
+            new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pushRequestHeaders, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, null);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -214,7 +226,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullParameters() {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+            final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pushRequestHeaders, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
             engine.registerDevice(null, getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -224,7 +236,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullSenderId() {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+            final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider,  gcmUnregistrationApiRequestProvider, pushRequestHeaders,pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
             engine.registerDevice(new PushParameters(null, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, TEST_CUSTOM_USER_ID_1, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -234,7 +246,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullPlatformUuid() {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+            final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider,  gcmUnregistrationApiRequestProvider, pushRequestHeaders,pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
             engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, null, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, TEST_CUSTOM_USER_ID_1, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -244,7 +256,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testNullPlatformSecret() {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+            final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider,  gcmUnregistrationApiRequestProvider, pushRequestHeaders,pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
             engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, null, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, TEST_CUSTOM_USER_ID_1, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -253,39 +265,39 @@ public class RegistrationEngineTest extends AndroidTestCase {
     }
 
     public void testNullDeviceAlias() throws InterruptedException {
-        final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+        final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider,  gcmUnregistrationApiRequestProvider, pushRequestHeaders,pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
         engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_CUSTOM_USER_ID_1, null, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null), getListenerForRegistration(true));
         semaphore.acquire();
     }
 
     public void testEmptyDeviceAlias() throws InterruptedException {
-        final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+        final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider,  gcmUnregistrationApiRequestProvider, pushRequestHeaders,pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
         engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, "", TEST_CUSTOM_USER_ID_1, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null), getListenerForRegistration(true));
         semaphore.acquire();
     }
 
     public void testNullCustomUserId() throws InterruptedException {
-        final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+        final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider,  gcmUnregistrationApiRequestProvider, pushRequestHeaders,pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
         engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, null, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null), getListenerForRegistration(true));
         semaphore.acquire();
     }
 
     public void testEmptyCustomUserId() throws InterruptedException {
-        final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+        final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider,  gcmUnregistrationApiRequestProvider, pushRequestHeaders,pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
         engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, "", null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null), getListenerForRegistration(true));
         semaphore.acquire();
     }
 
     public void test254LongCustomUserId() throws InterruptedException {
         final String longString = getStringWithLength(254);
-        final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+        final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider,  gcmUnregistrationApiRequestProvider, pushRequestHeaders,pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
         engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, longString, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null), getListenerForRegistration(true));
         semaphore.acquire();
     }
 
     public void test255LongCustomUserId() throws InterruptedException {
         final String longString = getStringWithLength(255);
-        final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+        final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider,  gcmUnregistrationApiRequestProvider, pushRequestHeaders,pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
         engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, longString, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null), getListenerForRegistration(true));
         semaphore.acquire();
     }
@@ -293,7 +305,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
     public void test256LongCustomUserId() {
         try {
             final String longString = getStringWithLength(256);
-            final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+            final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider,  gcmUnregistrationApiRequestProvider, pushRequestHeaders,pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
             engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, longString, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null), getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -303,7 +315,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testEmptyServiceUrl() throws InterruptedException {
         try {
-            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+            final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider,  gcmUnregistrationApiRequestProvider, pushRequestHeaders,pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
             engine.registerDevice(new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, null, TEST_DEVICE_ALIAS_1, TEST_CUSTOM_USER_ID_1, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null), getListenerForRegistration(true));
             semaphore.acquire();
             fail("should not have succeeded");
@@ -314,7 +326,7 @@ public class RegistrationEngineTest extends AndroidTestCase {
 
     public void testGooglePlayServicesNotAvailable() throws InterruptedException {
         gcmProvider.setIsGooglePlayServicesInstalled(false);
-        final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider, gcmUnregistrationApiRequestProvider, pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
+        final RegistrationEngine engine = new RegistrationEngine(getContext(), TEST_PACKAGE_NAME, gcmProvider, pushPreferencesProvider, gcmRegistrationApiRequestProvider,  gcmUnregistrationApiRequestProvider, pushRequestHeaders,pcfPushRegistrationApiRequestProvider, versionProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
         final PushParameters parameters = new PushParameters(TEST_GCM_SENDER_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, TEST_CUSTOM_USER_ID_1, null, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
         engine.registerDevice(parameters, getListenerForRegistration(false));
         semaphore.acquire();

@@ -7,9 +7,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import java.util.Date;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
 
 import io.pivotal.android.push.geofence.GeofenceEngine;
@@ -21,7 +19,6 @@ import io.pivotal.android.push.version.Version;
 public class PushPreferencesProviderImpl implements PushPreferencesProvider {
 
     public static final String TAG_NAME = "PivotalCFMSPush";
-    public static final String REQUEST_HEADERS_TAG_NAME = "PivotalCFMSPushRequestHeaders";
 
     // If you add or change any of these strings, then please also update their copies in the
     // sample app's MainActivity::clearRegistration method.
@@ -54,7 +51,6 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
 
     public void clear() {
         getSharedPreferences().edit().clear().commit();
-        getSharedPreferencesForRequestHeaders().edit().clear().commit();
     }
 
     @Override
@@ -214,35 +210,6 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
     }
 
     @Override
-    public Map<String, String> getRequestHeaders()
-    {
-        final Map<String, ?> prefsAll = getSharedPreferencesForRequestHeaders().getAll();
-        final HashMap<String, String> result = new HashMap<>(prefsAll.size());
-        for (Map.Entry<String, ?> entry : prefsAll.entrySet()) {
-            if (entry.getKey() != null && entry.getValue() != null && entry.getValue() instanceof String) {
-                result.put(entry.getKey(), (String) entry.getValue());
-            }
-        }
-        return result;
-    }
-
-    @Override
-    public void setRequestHeaders(Map<String, String> requestHeaders)
-    {
-        final SharedPreferences prefs = getSharedPreferencesForRequestHeaders();
-        final SharedPreferences.Editor editor = prefs.edit();
-        editor.clear();
-        if (requestHeaders != null && !requestHeaders.isEmpty()) {
-            for (Map.Entry<String, String> entry : requestHeaders.entrySet()) {
-                if (entry.getKey() != null && entry.getValue() != null) {
-                    editor.putString(entry.getKey(), entry.getValue());
-                }
-            }
-        }
-        editor.commit();
-    }
-
-    @Override
     public Version getBackEndVersion() {
         final String s = getSharedPreferences().getString(PROPERTY_BACK_END_VERSION, null);
         if (s != null) {
@@ -309,9 +276,4 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
     private SharedPreferences getSharedPreferences() {
         return context.getSharedPreferences(TAG_NAME, Context.MODE_PRIVATE);
     }
-
-    private SharedPreferences getSharedPreferencesForRequestHeaders() {
-        return context.getSharedPreferences(REQUEST_HEADERS_TAG_NAME, Context.MODE_PRIVATE);
-    }
-
 }
