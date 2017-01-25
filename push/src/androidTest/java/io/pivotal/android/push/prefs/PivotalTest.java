@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Properties;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -129,16 +130,40 @@ public class PivotalTest {
         }
     }
 
+    @Test
+    public void testPersistRequestHeadersNotInPropertiesFile() {
+        Pivotal.setProperties(null);
+        assertTrue(Pivotal.getPersistRequestHeaders(InstrumentationRegistry.getContext()));
+    }
+
+    @Test
+    public void testPersistRequestHeadersSetToTrue() {
+        setPersistRequestHeaders(true);
+        assertTrue(Pivotal.getPersistRequestHeaders(InstrumentationRegistry.getContext()));
+    }
+
+    @Test
+    public void testPersistRequestHeadersSetToFalse() {
+        setPersistRequestHeaders(false);
+        assertFalse(Pivotal.getPersistRequestHeaders(InstrumentationRegistry.getContext()));
+    }
+
+    @Test
+    public void testAreAnalyticsEnabled() {
+        assertTrue(Pivotal.getAreAnalyticsEnabled(InstrumentationRegistry.getContext()));
+    }
+
+    private void setPersistRequestHeaders(boolean persistRequestHeader) {
+        final Properties p = new Properties();
+        p.put("pivotal.push.persistRequestHeaders", Boolean.toString(persistRequestHeader));
+        Pivotal.setProperties(p);
+    }
+
     private void setSslCertValidationModeInProperties(String sslCertValidationMode) {
         final Properties p = new Properties();
         if (sslCertValidationMode != null) {
             p.put("pivotal.push.sslCertValidationMode", sslCertValidationMode);
         }
         Pivotal.setProperties(p);
-    }
-
-    @Test
-    public void testAreAnalyticsEnabled() {
-        assertTrue(Pivotal.getAreAnalyticsEnabled(InstrumentationRegistry.getContext()));
     }
 }

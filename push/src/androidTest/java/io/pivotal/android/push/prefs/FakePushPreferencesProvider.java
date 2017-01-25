@@ -4,7 +4,6 @@
 package io.pivotal.android.push.prefs;
 
 import java.util.Date;
-import java.util.Map;
 import java.util.Set;
 
 import io.pivotal.android.push.geofence.GeofenceEngine;
@@ -21,7 +20,6 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     private String packageName;
     private String serviceUrl;
     private Set<String> tags;
-    private Map<String, String> requestHeaders;
     private long lastGeofenceUpdate = GeofenceEngine.NEVER_UPDATED_GEOFENCES;
     private Version backEndVersion;
     private Date backEndVersionTimePolled;
@@ -151,12 +149,6 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     }
 
     @Override
-    public Map<String, String> getRequestHeaders()
-    {
-        return requestHeaders;
-    }
-
-    @Override
     public Version getBackEndVersion() {
         return backEndVersion;
     }
@@ -233,12 +225,6 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
 
     public void setAreAnalyticsEnabled(boolean areAnalyticsEnabled) {
         this.areAnalyticsEnabled = areAnalyticsEnabled;
-    }
-
-    @Override
-    public void setRequestHeaders(Map<String, String> requestHeaders)
-    {
-        this.requestHeaders = requestHeaders;
     }
 
     @Override

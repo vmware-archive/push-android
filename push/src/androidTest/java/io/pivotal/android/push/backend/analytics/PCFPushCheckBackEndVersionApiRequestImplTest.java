@@ -5,6 +5,7 @@ import android.test.AndroidTestCase;
 import java.io.IOException;
 
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
+import io.pivotal.android.push.prefs.FakePushRequestHeaders;
 import io.pivotal.android.push.util.DelayedLoop;
 import io.pivotal.android.push.util.FakeHttpURLConnection;
 import io.pivotal.android.push.util.FakeNetworkWrapper;
@@ -25,6 +26,7 @@ public class PCFPushCheckBackEndVersionApiRequestImplTest extends AndroidTestCas
     private PCFPushCheckBackEndVersionListener listener;
     private DelayedLoop delayedLoop;
     private FakePushPreferencesProvider preferencesProvider;
+    private FakePushRequestHeaders pushRequestHeaders;
     private static final long TEN_SECOND_TIMEOUT = 10000L;
 
     @Override
@@ -33,12 +35,13 @@ public class PCFPushCheckBackEndVersionApiRequestImplTest extends AndroidTestCas
         networkWrapper = new FakeNetworkWrapper();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
         preferencesProvider = new FakePushPreferencesProvider(null, null, null, null, null, null, null, TEST_SERVICE_URL, null, 0, true);
+        pushRequestHeaders = new FakePushRequestHeaders();
         FakeHttpURLConnection.reset();
     }
 
     public void testRequiresContext() {
         try {
-            new PCFPushCheckBackEndVersionApiRequestImpl(null, preferencesProvider, networkWrapper);
+            new PCFPushCheckBackEndVersionApiRequestImpl(null, preferencesProvider, pushRequestHeaders, networkWrapper);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
             // Success
@@ -47,7 +50,7 @@ public class PCFPushCheckBackEndVersionApiRequestImplTest extends AndroidTestCas
 
     public void testRequiresNetworkWrapper() {
         try {
-            new PCFPushCheckBackEndVersionApiRequestImpl(getContext(), preferencesProvider, null);
+            new PCFPushCheckBackEndVersionApiRequestImpl(getContext(), preferencesProvider, pushRequestHeaders, null);
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
             // Success
@@ -56,7 +59,7 @@ public class PCFPushCheckBackEndVersionApiRequestImplTest extends AndroidTestCas
 
     public void testRequiresListener() {
         try {
-            final PCFPushCheckBackEndVersionApiRequestImpl request = new PCFPushCheckBackEndVersionApiRequestImpl(getContext(), preferencesProvider, networkWrapper);
+            final PCFPushCheckBackEndVersionApiRequestImpl request = new PCFPushCheckBackEndVersionApiRequestImpl(getContext(), preferencesProvider, pushRequestHeaders, networkWrapper);
             request.startCheckBackEndVersion(null);
             fail("Should not have succeeded");
         } catch (Exception e) {
@@ -66,7 +69,7 @@ public class PCFPushCheckBackEndVersionApiRequestImplTest extends AndroidTestCas
 
     public void testSuccessfulRequest() {
         makeListenersForSuccessfulRequestFromNetwork(RequestResult.SUCCESS, 200, "1.3.3.7");
-        final PCFPushCheckBackEndVersionApiRequestImpl request = new PCFPushCheckBackEndVersionApiRequestImpl(getContext(), preferencesProvider, networkWrapper);
+        final PCFPushCheckBackEndVersionApiRequestImpl request = new PCFPushCheckBackEndVersionApiRequestImpl(getContext(), preferencesProvider, pushRequestHeaders, networkWrapper);
         request.startCheckBackEndVersion(listener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
@@ -74,7 +77,7 @@ public class PCFPushCheckBackEndVersionApiRequestImplTest extends AndroidTestCas
 
     public void testNullResponse() {
         makeListenersForSuccessfulRequestFromNetwork(RequestResult.RETRYABLE_FAILURE, 204, null);
-        final PCFPushCheckBackEndVersionApiRequestImpl request = new PCFPushCheckBackEndVersionApiRequestImpl(getContext(), preferencesProvider, networkWrapper);
+        final PCFPushCheckBackEndVersionApiRequestImpl request = new PCFPushCheckBackEndVersionApiRequestImpl(getContext(), preferencesProvider, pushRequestHeaders, networkWrapper);
         request.startCheckBackEndVersion(listener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
@@ -82,7 +85,7 @@ public class PCFPushCheckBackEndVersionApiRequestImplTest extends AndroidTestCas
 
     public void testCouldNotConnect() {
         makeListenersFromFailedRequestFromNetwork("Your server is busted", 0);
-        final PCFPushCheckBackEndVersionApiRequestImpl request = new PCFPushCheckBackEndVersionApiRequestImpl(getContext(), preferencesProvider, networkWrapper);
+        final PCFPushCheckBackEndVersionApiRequestImpl request = new PCFPushCheckBackEndVersionApiRequestImpl(getContext(), preferencesProvider, pushRequestHeaders, networkWrapper);
         request.startCheckBackEndVersion(listener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
@@ -90,7 +93,7 @@ public class PCFPushCheckBackEndVersionApiRequestImplTest extends AndroidTestCas
 
     public void testSuccessful400() {
         makeListenersForSuccessfulRequestFromNetwork(RequestResult.FATAL_FAILURE, 400, null);
-        final PCFPushCheckBackEndVersionApiRequestImpl request = new PCFPushCheckBackEndVersionApiRequestImpl(getContext(), preferencesProvider, networkWrapper);
+        final PCFPushCheckBackEndVersionApiRequestImpl request = new PCFPushCheckBackEndVersionApiRequestImpl(getContext(), preferencesProvider, pushRequestHeaders, networkWrapper);
         request.startCheckBackEndVersion(listener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
@@ -98,7 +101,7 @@ public class PCFPushCheckBackEndVersionApiRequestImplTest extends AndroidTestCas
 
     public void testSuccessful500() {
         makeListenersForSuccessfulRequestFromNetwork(RequestResult.RETRYABLE_FAILURE, 500, null);
-        final PCFPushCheckBackEndVersionApiRequestImpl request = new PCFPushCheckBackEndVersionApiRequestImpl(getContext(), preferencesProvider, networkWrapper);
+        final PCFPushCheckBackEndVersionApiRequestImpl request = new PCFPushCheckBackEndVersionApiRequestImpl(getContext(), preferencesProvider, pushRequestHeaders, networkWrapper);
         request.startCheckBackEndVersion(listener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
@@ -106,7 +109,7 @@ public class PCFPushCheckBackEndVersionApiRequestImplTest extends AndroidTestCas
 
     public void testSuccessfulOldVersion() {
         makeListenersForSuccessfulRequestFromNetwork(RequestResult.OLD, 404, null);
-        final PCFPushCheckBackEndVersionApiRequestImpl request = new PCFPushCheckBackEndVersionApiRequestImpl(getContext(), preferencesProvider, networkWrapper);
+        final PCFPushCheckBackEndVersionApiRequestImpl request = new PCFPushCheckBackEndVersionApiRequestImpl(getContext(), preferencesProvider, pushRequestHeaders, networkWrapper);
         request.startCheckBackEndVersion(listener);
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());

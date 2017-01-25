@@ -13,6 +13,7 @@ import java.net.URL;
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.model.version.VersionResult;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
+import io.pivotal.android.push.prefs.PushRequestHeaders;
 import io.pivotal.android.push.util.ApiRequestImpl;
 import io.pivotal.android.push.util.Const;
 import io.pivotal.android.push.util.Logger;
@@ -22,15 +23,18 @@ import io.pivotal.android.push.version.Version;
 public class PCFPushCheckBackEndVersionApiRequestImpl extends ApiRequestImpl implements PCFPushCheckBackEndVersionApiRequest {
 
     private final PushPreferencesProvider preferencesProvider;
+    private final PushRequestHeaders pushRequestHeaders;
 
     public PCFPushCheckBackEndVersionApiRequestImpl(Context context,
                                                     PushPreferencesProvider preferencesProvider,
+                                                    PushRequestHeaders pushRequestHeaders,
                                                     NetworkWrapper networkWrapper) {
         super(context, networkWrapper);
         if (preferencesProvider == null) {
             throw new IllegalArgumentException("preferencesProvider may not be null");
         }
         this.preferencesProvider = preferencesProvider;
+        this.pushRequestHeaders = pushRequestHeaders;
     }
 
     @Override
@@ -51,7 +55,7 @@ public class PCFPushCheckBackEndVersionApiRequestImpl extends ApiRequestImpl imp
 
         try {
 
-            final PushParameters parameters = new PushParameters(context, preferencesProvider, null, null);
+            final PushParameters parameters = new PushParameters(context, preferencesProvider, pushRequestHeaders, null, null);
             final URL url = getUrl(parameters);
             final HttpURLConnection urlConnection = getHttpURLConnection(url, parameters);
 
@@ -141,6 +145,6 @@ public class PCFPushCheckBackEndVersionApiRequestImpl extends ApiRequestImpl imp
 
     @Override
     public PCFPushCheckBackEndVersionApiRequest copy() {
-        return new PCFPushCheckBackEndVersionApiRequestImpl(context, preferencesProvider, networkWrapper);
+        return new PCFPushCheckBackEndVersionApiRequestImpl(context, preferencesProvider, pushRequestHeaders, networkWrapper);
     }
 }

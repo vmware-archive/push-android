@@ -10,6 +10,7 @@ import io.pivotal.android.push.backend.geofence.PCFPushGetGeofenceUpdatesApiRequ
 import io.pivotal.android.push.backend.geofence.PCFPushGetGeofenceUpdatesListener;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceResponseData;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
+import io.pivotal.android.push.prefs.PushRequestHeaders;
 import io.pivotal.android.push.service.GeofenceService;
 import io.pivotal.android.push.util.DebugUtil;
 import io.pivotal.android.push.util.GsonUtil;
@@ -22,17 +23,19 @@ public class GeofenceUpdater {
     private final PCFPushGetGeofenceUpdatesApiRequest apiRequest;
     private final GeofenceEngine geofenceEngine;
     private final PushPreferencesProvider pushPreferencesProvider;
+    private final PushRequestHeaders pushRequestHeaders;
 
     public interface GeofenceUpdaterListener {
         void onSuccess();
         void onFailure(String reason);
     }
 
-    public GeofenceUpdater(Context context, PCFPushGetGeofenceUpdatesApiRequest apiRequest, GeofenceEngine geofenceEngine, PushPreferencesProvider pushPreferencesProvider) {
+    public GeofenceUpdater(Context context, PCFPushGetGeofenceUpdatesApiRequest apiRequest, GeofenceEngine geofenceEngine, PushPreferencesProvider pushPreferencesProvider, PushRequestHeaders pushRequestHeaders) {
         this.context = context;
         this.apiRequest = apiRequest;
         this.geofenceEngine = geofenceEngine;
         this.pushPreferencesProvider = pushPreferencesProvider;
+        this.pushRequestHeaders = pushRequestHeaders;
     }
 
     public void startGeofenceUpdate(final Intent intent, final long timestamp, final GeofenceUpdaterListener listener) {
@@ -62,7 +65,7 @@ public class GeofenceUpdater {
         } else {
 
             // TODO - consider scheduling this request a short random time in the future in order to stagger the demand on the server.
-            final PushParameters parameters = new PushParameters(context, pushPreferencesProvider, null, null);
+            final PushParameters parameters = new PushParameters(context, pushPreferencesProvider, pushRequestHeaders, null, null);
             final String deviceUuid = pushPreferencesProvider.getPCFPushDeviceRegistrationId();
             apiRequest.getGeofenceUpdates(timestamp, deviceUuid, parameters, new PCFPushGetGeofenceUpdatesListener() {
 

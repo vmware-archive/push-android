@@ -40,6 +40,7 @@ import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
+import io.pivotal.android.push.prefs.PushRequestHeaders;
 import io.pivotal.android.push.receiver.AnalyticsEventsSenderAlarmProvider;
 import io.pivotal.android.push.receiver.AnalyticsEventsSenderAlarmProviderImpl;
 import io.pivotal.android.push.registration.RegistrationEngine;
@@ -166,8 +167,8 @@ public class Push {
                                   final boolean areGeofencesEnabled,
                                   @Nullable final RegistrationListener listener) {
 
-        final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
-        parameters = getPushParameters(deviceAlias, customUserId, tags, areGeofencesEnabled, pushPreferencesProvider.getRequestHeaders());
+        final PushRequestHeaders pushRequestHeaders = PushRequestHeaders.getInstance(context);
+        parameters = getPushParameters(deviceAlias, customUserId, tags, areGeofencesEnabled, pushRequestHeaders.getRequestHeaders());
 
         registrationListener = listener;
 
@@ -375,9 +376,10 @@ public class Push {
      */
     public void startUnregistration(@Nullable final UnregistrationListener listener) {
         final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
+        final PushRequestHeaders pushRequestHeaders =  PushRequestHeaders.getInstance(context);
         final boolean areGeofencesEnabled = pushPreferencesProvider.areGeofencesEnabled();
 
-        final PushParameters parameters = getPushParameters(null, null, null, areGeofencesEnabled, pushPreferencesProvider.getRequestHeaders());
+        final PushParameters parameters = getPushParameters(null, null, null, areGeofencesEnabled, pushRequestHeaders.getRequestHeaders());
         verifyUnregistrationArguments(parameters);
 
         final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
@@ -389,7 +391,7 @@ public class Push {
         final TimeProvider timeProvider = new TimeProvider();
         final GeofencePersistentStore geofencePersistentStore = new GeofencePersistentStore(context, fileHelper);
         final GeofenceEngine geofenceEngine = new GeofenceEngine(geofenceRegistrar, geofencePersistentStore, timeProvider, pushPreferencesProvider);
-        final GeofenceUpdater geofenceUpdater = new GeofenceUpdater(context, geofenceUpdatesApiRequest, geofenceEngine, pushPreferencesProvider);
+        final GeofenceUpdater geofenceUpdater = new GeofenceUpdater(context, geofenceUpdatesApiRequest, geofenceEngine, pushPreferencesProvider, pushRequestHeaders);
         final GeofenceStatusUtil geofenceStatusUtil = new GeofenceStatusUtil(context);
 
         final Runnable runnable = new Runnable() {
@@ -550,8 +552,8 @@ public class Push {
      *                        any network requests made by the Push SDK.
      */
     public void setRequestHeaders(@Nullable Map<String, String> requestHeaders) {
-        final PushPreferencesProviderImpl preferences = new PushPreferencesProviderImpl(context);
-        preferences.setRequestHeaders(requestHeaders);
+        final PushRequestHeaders pushRequestHeaders = PushRequestHeaders.getInstance(context);
+        pushRequestHeaders.setRequestHeaders(requestHeaders);
     }
 
     /**

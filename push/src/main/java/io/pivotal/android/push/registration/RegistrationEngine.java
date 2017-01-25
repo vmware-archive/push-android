@@ -26,6 +26,7 @@ import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
+import io.pivotal.android.push.prefs.PushRequestHeaders;
 import io.pivotal.android.push.util.FileHelper;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.NetworkWrapper;
@@ -68,6 +69,7 @@ public class RegistrationEngine {
     private FirebaseInstanceId firebaseInstanceId;
     private GoogleApiAvailability googleApiAvailability;
     private PushPreferencesProvider pushPreferencesProvider;
+    private PushRequestHeaders pushRequestHeaders;
     private PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider;
     private GeofenceUpdater geofenceUpdater;
     private GeofenceEngine geofenceEngine;
@@ -83,6 +85,7 @@ public class RegistrationEngine {
 
     public static RegistrationEngine getRegistrationEngine(Context context) {
         final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
+        final PushRequestHeaders pushRequestHeaders = PushRequestHeaders.getInstance(context);
         final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
         final PCFPushRegistrationApiRequest dummyPCFPushRegistrationApiRequest = new PCFPushRegistrationApiRequestImpl(context, networkWrapper);
         final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(dummyPCFPushRegistrationApiRequest);
@@ -92,7 +95,7 @@ public class RegistrationEngine {
         final TimeProvider timeProvider = new TimeProvider();
         final GeofencePersistentStore geofencePersistentStore = new GeofencePersistentStore(context, fileHelper);
         final GeofenceEngine geofenceEngine = new GeofenceEngine(geofenceRegistrar, geofencePersistentStore, timeProvider, pushPreferencesProvider);
-        final GeofenceUpdater geofenceUpdater = new GeofenceUpdater(context, geofenceUpdatesApiRequest, geofenceEngine, pushPreferencesProvider);
+        final GeofenceUpdater geofenceUpdater = new GeofenceUpdater(context, geofenceUpdatesApiRequest, geofenceEngine, pushPreferencesProvider, pushRequestHeaders);
         final GeofenceStatusUtil geofenceStatusUtil = new GeofenceStatusUtil(context);
 
         return new RegistrationEngine(context,
@@ -100,10 +103,10 @@ public class RegistrationEngine {
                 FirebaseInstanceId.getInstance(),
                 GoogleApiAvailability.getInstance(),
                 pushPreferencesProvider,
+                pushRequestHeaders,
                 PCFPushRegistrationApiRequestProvider,
                 geofenceUpdater,
-                geofenceEngine,
-                geofenceStatusUtil);
+                geofenceEngine, geofenceStatusUtil);
     }
 
     /**
@@ -115,6 +118,7 @@ public class RegistrationEngine {
      * @param firebaseInstanceId Some object that can provide Firebase Token ID
      * @param googleApiAvailability Some object that can used to determine if Google Play is available.
      * @param pushPreferencesProvider  Some object that can provide persistent storage for push preferences.
+     * @param pushRequestHeaders Some object that can provide storage for push request headers
      * @param pcfPushRegistrationApiRequestProvider  Some object that can provide PCFPushRegistrationApiRequest objects.
      * @param geofenceUpdater  Some object that can be used to download geofence updates from the server.
      * @param geofenceEngine  Some object that can be used to register geofences.
@@ -125,6 +129,7 @@ public class RegistrationEngine {
                               FirebaseInstanceId firebaseInstanceId,
                               GoogleApiAvailability googleApiAvailability,
                               PushPreferencesProvider pushPreferencesProvider,
+                              PushRequestHeaders pushRequestHeaders,
                               PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
                               GeofenceUpdater geofenceUpdater,
                               GeofenceEngine geofenceEngine,
@@ -135,20 +140,20 @@ public class RegistrationEngine {
                 firebaseInstanceId,
                 googleApiAvailability,
                 pushPreferencesProvider,
+                pushRequestHeaders,
                 pcfPushRegistrationApiRequestProvider,
                 geofenceUpdater,
-                geofenceEngine,
-                geofenceStatusUtil);
+                geofenceEngine, geofenceStatusUtil);
 
         saveArguments(context,
                 packageName,
                 firebaseInstanceId,
                 googleApiAvailability,
                 pushPreferencesProvider,
+                pushRequestHeaders,
                 pcfPushRegistrationApiRequestProvider,
                 geofenceUpdater,
-                geofenceEngine,
-                geofenceStatusUtil);
+                geofenceEngine, geofenceStatusUtil);
     }
 
     private void verifyArguments(Context context,
@@ -156,6 +161,7 @@ public class RegistrationEngine {
                                  FirebaseInstanceId firebaseInstanceId,
                                  GoogleApiAvailability googleApiAvailability,
                                  PushPreferencesProvider pushPreferencesProvider,
+                                 PushRequestHeaders pushRequestHeaders,
                                  PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
                                  GeofenceUpdater geofenceUpdater,
                                  GeofenceEngine geofenceEngine,
@@ -176,6 +182,9 @@ public class RegistrationEngine {
         if (pushPreferencesProvider == null) {
             throw new IllegalArgumentException("pushPreferencesProvider may not be null");
         }
+        if (pushRequestHeaders == null) {
+            throw new IllegalArgumentException("pushRequestHeaders may not be null");
+        }
         if (pcfPushRegistrationApiRequestProvider == null) {
             throw new IllegalArgumentException("pcfPushRegistrationApiRequestProvider may not be null");
         }
@@ -195,6 +204,7 @@ public class RegistrationEngine {
                                FirebaseInstanceId firebaseInstanceId,
                                GoogleApiAvailability googleApiAvailability,
                                PushPreferencesProvider pushPreferencesProvider,
+                               PushRequestHeaders pushRequestHeaders,
                                PCFPushRegistrationApiRequestProvider pcfPushRegistrationApiRequestProvider,
                                GeofenceUpdater geofenceUpdater,
                                GeofenceEngine geofenceEngine,
@@ -205,6 +215,7 @@ public class RegistrationEngine {
         this.firebaseInstanceId = firebaseInstanceId;
         this.googleApiAvailability = googleApiAvailability;
         this.pushPreferencesProvider = pushPreferencesProvider;
+        this.pushRequestHeaders = pushRequestHeaders;
         this.pcfPushRegistrationApiRequestProvider = pcfPushRegistrationApiRequestProvider;
         this.geofenceUpdater = geofenceUpdater;
         this.geofenceEngine = geofenceEngine;
@@ -312,7 +323,8 @@ public class RegistrationEngine {
                 pushPreferencesProvider.areGeofencesEnabled(),
                 Pivotal.getSslCertValidationMode(context),
                 Pivotal.getPinnedSslCertificateNames(context),
-                pushPreferencesProvider.getRequestHeaders());
+                pushRequestHeaders.getRequestHeaders()
+        );
 
         registerDevice(parameters, null);
     }

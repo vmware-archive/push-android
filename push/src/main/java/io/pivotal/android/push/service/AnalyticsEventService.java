@@ -25,6 +25,7 @@ import io.pivotal.android.push.database.DatabaseWrapper;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
+import io.pivotal.android.push.prefs.PushRequestHeaders;
 import io.pivotal.android.push.receiver.AnalyticsEventsSenderAlarmProvider;
 import io.pivotal.android.push.receiver.AnalyticsEventsSenderAlarmProviderImpl;
 import io.pivotal.android.push.receiver.AnalyticsEventsSenderAlarmReceiver;
@@ -55,6 +56,7 @@ public class AnalyticsEventService extends IntentService {
     /* package */ static PCFPushCheckBackEndVersionApiRequestProvider checkBackEndVersionRequestProvider = null;
     /* package */ static List<String> listOfCompletedJobs = null;
     /* package */ static PushPreferencesProvider pushPreferencesProvider;
+    /* package */ static PushRequestHeaders pushRequestHeaders;
 
 
     // Used by unit tests
@@ -90,6 +92,9 @@ public class AnalyticsEventService extends IntentService {
                     if (AnalyticsEventService.pushPreferencesProvider == null) {
                         AnalyticsEventService.pushPreferencesProvider = new PushPreferencesProviderImpl(this);
                     }
+                    if (AnalyticsEventService.pushRequestHeaders == null) {
+                        AnalyticsEventService.pushRequestHeaders = PushRequestHeaders.getInstance(this);
+                    }
                     if ((job instanceof CheckBackEndVersionJob && Pivotal.getAreAnalyticsEnabled(this)) || pushPreferencesProvider.areAnalyticsEnabled()) {
                         setupStatics(intent);
                         runJob(job, resultReceiver);
@@ -124,11 +129,11 @@ public class AnalyticsEventService extends IntentService {
             AnalyticsEventService.serviceStarter = new ServiceStarterImpl();
         }
         if (AnalyticsEventService.sendAnalyticsRequestProvider == null) {
-            final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(this, AnalyticsEventService.eventsStorage, AnalyticsEventService.pushPreferencesProvider, AnalyticsEventService.networkWrapper);
+            final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(this, AnalyticsEventService.eventsStorage, AnalyticsEventService.pushPreferencesProvider, AnalyticsEventService.pushRequestHeaders, AnalyticsEventService.networkWrapper);
             AnalyticsEventService.sendAnalyticsRequestProvider = new PCFPushSendAnalyticsApiRequestProvider(request);
         }
         if (AnalyticsEventService.checkBackEndVersionRequestProvider == null) {
-            final PCFPushCheckBackEndVersionApiRequestImpl request = new PCFPushCheckBackEndVersionApiRequestImpl(this, AnalyticsEventService.pushPreferencesProvider, AnalyticsEventService.networkWrapper);
+            final PCFPushCheckBackEndVersionApiRequestImpl request = new PCFPushCheckBackEndVersionApiRequestImpl(this, AnalyticsEventService.pushPreferencesProvider, AnalyticsEventService.pushRequestHeaders, AnalyticsEventService.networkWrapper);
             AnalyticsEventService.checkBackEndVersionRequestProvider = new PCFPushCheckBackEndVersionApiRequestProvider(request);
         }
 
