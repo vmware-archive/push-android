@@ -1,6 +1,6 @@
 package io.pivotal.android.push.prefs;
 
-import android.support.test.InstrumentationRegistry;
+
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -19,13 +19,13 @@ import static org.junit.Assert.assertTrue;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
-public class PersistedPushRequestHeadersTest {
+public class InMemoryPushRequestHeadersTest {
 
-    private PersistedPushRequestHeaders pushRequestHeaders;
+    private InMemoryPushRequestHeaders pushRequestHeaders;
 
     @Before
     public void setup() {
-        pushRequestHeaders = new PersistedPushRequestHeaders(InstrumentationRegistry.getContext());
+        pushRequestHeaders = new InMemoryPushRequestHeaders();
     }
 
     @After
