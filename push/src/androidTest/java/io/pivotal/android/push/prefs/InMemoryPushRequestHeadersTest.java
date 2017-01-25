@@ -1,18 +1,19 @@
 package io.pivotal.android.push.prefs;
 
+
 import android.test.AndroidTestCase;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class PersistedPushRequestHeadersTest extends AndroidTestCase {
+public class InMemoryPushRequestHeadersTest extends AndroidTestCase {
 
-    private PersistedPushRequestHeaders pushRequestHeaders;
+    private InMemoryPushRequestHeaders pushRequestHeaders;
 
     @Override
-    protected void setUp() throws Exception{
-        pushRequestHeaders = new PersistedPushRequestHeaders(getContext());
+    protected void setUp() {
+        pushRequestHeaders = new InMemoryPushRequestHeaders();
     }
 
     @Override

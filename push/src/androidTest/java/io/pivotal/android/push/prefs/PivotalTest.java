@@ -125,6 +125,7 @@ public class PivotalTest extends AndroidTestCase {
     }
 
     public void testAreAnalyticsEnabled() {
+        Pivotal.setProperties(null);
         assertTrue(Pivotal.getAreAnalyticsEnabled(getContext()));
     }
 

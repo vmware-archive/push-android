@@ -7,9 +7,15 @@ import java.util.Map;
 
 public abstract class PushRequestHeaders {
 
-
     public static PushRequestHeaders getInstance(Context context) {
-        return new PersistedPushRequestHeaders(context);
+        PushRequestHeaders requestHeaders;
+        if (Pivotal.getPersistRequestHeaders(context)) {
+            requestHeaders = new PersistedPushRequestHeaders(context);
+        } else {
+            requestHeaders = new InMemoryPushRequestHeaders();
+        }
+
+        return requestHeaders;
     }
 
     @NonNull
