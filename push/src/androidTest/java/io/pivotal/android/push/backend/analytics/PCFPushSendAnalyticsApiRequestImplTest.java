@@ -200,9 +200,6 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
 
     private Properties getProperties(boolean areAnalyticsEnabled) {
         final Properties properties = new Properties();
-        properties.setProperty(Pivotal.Keys.SERVICE_URL, "http://some.url");
-        properties.setProperty(Pivotal.Keys.PLATFORM_UUID, "fake_platform_uuid");
-        properties.setProperty(Pivotal.Keys.PLATFORM_SECRET, "fake_platform_secret");
         properties.setProperty(Pivotal.Keys.ARE_ANALYTICS_ENABLED, Boolean.toString(areAnalyticsEnabled));
         return properties;
     }

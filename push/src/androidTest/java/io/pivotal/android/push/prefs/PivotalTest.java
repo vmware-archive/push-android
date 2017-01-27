@@ -59,21 +59,6 @@ public class PivotalTest {
     }
 
     @Test
-    public void testGetPlatformUuid() {
-        assertEquals("test_platform_uuid", Pivotal.getPlatformUuid(InstrumentationRegistry.getContext()));
-    }
-
-    @Test
-    public void testGetPlatformSecret() {
-        assertEquals("test_platform_secret", Pivotal.getPlatformSecret(InstrumentationRegistry.getContext()));
-    }
-
-    @Test
-    public void testGetServiceUrl() {
-        assertEquals("http://example.com", Pivotal.getServiceUrl(InstrumentationRegistry.getContext()));
-    }
-
-    @Test
     public void testGetTrustedCertificateNames() {
         final List<String> names = Pivotal.getPinnedSslCertificateNames(InstrumentationRegistry.getContext());
         assertNotNull(names);

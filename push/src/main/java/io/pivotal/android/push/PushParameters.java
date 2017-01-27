@@ -104,9 +104,9 @@ public class PushParameters {
                           @Nullable String deviceAlias,
                           @Nullable Set<String> tags) {
 
-        this.platformUuid = Pivotal.getPlatformUuid(context);
-        this.platformSecret = Pivotal.getPlatformSecret(context);
-        this.serviceUrl = Pivotal.getServiceUrl(context);
+        this.platformUuid = preferencesProvider.getPlatformUuid();
+        this.platformSecret = preferencesProvider.getPlatformSecret();
+        this.serviceUrl = preferencesProvider.getServiceUrl();
         this.areGeofencesEnabled = preferencesProvider.areGeofencesEnabled();
         this.sslCertValidationMode = Pivotal.getSslCertValidationMode(context);
         this.pinnedSslCertificateNames = Pivotal.getPinnedSslCertificateNames(context);

@@ -180,9 +180,6 @@ public class GeofenceServiceTest extends AndroidTestCase {
     private Properties getProperties() {
         // TODO - are properties still needed for this test?
         final Properties properties = new Properties();
-        properties.setProperty(Pivotal.Keys.SERVICE_URL, "http://some.url");
-        properties.setProperty(Pivotal.Keys.PLATFORM_UUID, "fake_platform_uuid");
-        properties.setProperty(Pivotal.Keys.PLATFORM_SECRET, "fake_platform_secret");
         return properties;
     }
 

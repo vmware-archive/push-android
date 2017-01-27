@@ -94,6 +94,7 @@ public class Push {
 
     private Context context;
     private boolean wasDatabaseCleanupJobRun = false;
+    private PushPlatformInfo pushPlatformInfo = null;
 
     private Push(@NonNull Context context) {
         verifyArguments(context);
@@ -242,12 +243,57 @@ public class Push {
                                              boolean areGeofencesEnabled,
                                              @Nullable Map<String, String> requestHeaders) {
 
-        final String platformUuid = Pivotal.getPlatformUuid(context);
-        final String platformSecret = Pivotal.getPlatformSecret(context);
-        final String serviceUrl = Pivotal.getServiceUrl(context);
+        final String platformUuid = getPlatformUuid();
+        final String platformSecret = getPlatformSecret();
+        final String serviceUrl = getBaseServerUrl();
         final Pivotal.SslCertValidationMode sslCertValidationMode = Pivotal.getSslCertValidationMode(context);
         final List<String> pinnedCertificateNames = Pivotal.getPinnedSslCertificateNames(context);
         return new PushParameters(platformUuid, platformSecret, serviceUrl, deviceAlias, customUserId, tags, areGeofencesEnabled, sslCertValidationMode, pinnedCertificateNames, requestHeaders);
+    }
+
+    @Nullable
+    private String getBaseServerUrl() {
+        String baseServerUrl = null;
+        if (pushPlatformInfo != null) {
+            baseServerUrl = pushPlatformInfo.getBaseServerUrl();
+        }
+
+        if (baseServerUrl == null) {
+            final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
+            baseServerUrl = pushPreferencesProvider.getServiceUrl();
+        }
+
+        return baseServerUrl;
+    }
+
+    @Nullable
+    private String getPlatformUuid() {
+        String platformUuid = null;
+        if (pushPlatformInfo != null) {
+            platformUuid = pushPlatformInfo.getPlatformUuid();
+        }
+
+        if (platformUuid == null) {
+            final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
+            platformUuid = pushPreferencesProvider.getPlatformUuid();
+        }
+
+        return platformUuid;
+    }
+
+    @Nullable
+    private String getPlatformSecret() {
+        String platformSecret = null;
+        if (pushPlatformInfo != null) {
+            platformSecret = pushPlatformInfo.getPlatformSecret();
+        }
+
+        if (platformSecret == null) {
+            final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
+            platformSecret = pushPreferencesProvider.getPlatformSecret();
+        }
+
+        return platformSecret;
     }
 
     private void verifyRegistrationArguments(@NonNull PushParameters parameters) {
@@ -570,6 +616,19 @@ public class Push {
     public void setRequestHeaders(@Nullable Map<String, String> requestHeaders) {
         final PushRequestHeaders pushRequestHeaders = PushRequestHeaders.getInstance(context);
         pushRequestHeaders.setRequestHeaders(requestHeaders);
+    }
+
+    /**
+     * Call this method to set or change the target Push platform information for network request. The SDK stores this information
+     * so that future executions do not need to call this method if the platform information has not changed.
+     *
+     * This method must be called *before* {@link #startRegistration}, {@link #subscribeToTags}, or any other methods that
+     * will make a network request.
+     *
+     * @param pushPlatformInfo A {@link PushPlatformInfo} object containing the new/updated Push platform information.
+     */
+    public void setPlatformInfo(@Nullable final PushPlatformInfo pushPlatformInfo) {
+        this.pushPlatformInfo = pushPlatformInfo;
     }
 
     /**

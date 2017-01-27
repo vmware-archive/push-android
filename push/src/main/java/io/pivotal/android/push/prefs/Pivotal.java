@@ -15,9 +15,6 @@ import java.util.Properties;
 public class Pivotal {
 
     public static final class Keys {
-        public static final String SERVICE_URL = "pivotal.push.serviceUrl";
-        public static final String PLATFORM_UUID = "pivotal.push.platformUuid";
-        public static final String PLATFORM_SECRET = "pivotal.push.platformSecret";
         public static final String SSL_CERT_VALIDATION_MODE = "pivotal.push.sslCertValidationMode";
         public static final String PINNED_SSL_CERTIFICATE_NAMES = "pivotal.push.pinnedSslCertificateNames";
         public static final String ARE_ANALYTICS_ENABLED = "pivotal.push.areAnalyticsEnabled";
@@ -104,18 +101,6 @@ public class Pivotal {
         }
 
         return result;
-    }
-
-    public static String getPlatformUuid(Context context) {
-        return getRequiredProperty(context, Keys.PLATFORM_UUID);
-    }
-
-    public static String getPlatformSecret(Context context) {
-        return getRequiredProperty(context, Keys.PLATFORM_SECRET);
-    }
-
-    public static String getServiceUrl(Context context) {
-        return getRequiredProperty(context, Keys.SERVICE_URL);
     }
 
     public static SslCertValidationMode getSslCertValidationMode(Context context) throws IllegalArgumentException {
