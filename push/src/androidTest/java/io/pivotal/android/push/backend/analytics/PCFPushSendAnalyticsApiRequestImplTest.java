@@ -1,8 +1,19 @@
 package io.pivotal.android.push.backend.analytics;
 
-import android.net.Uri;
-import android.test.AndroidTestCase;
+import static android.support.test.InstrumentationRegistry.getContext;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
+import android.content.Context;
+import android.net.Uri;
+import android.support.test.InstrumentationRegistry;
+import android.support.test.runner.AndroidJUnit4;
+
+import io.pivotal.android.push.prefs.PushPreferences;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
@@ -11,15 +22,18 @@ import java.util.Properties;
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.database.FakeAnalyticsEventsStorage;
 import io.pivotal.android.push.model.analytics.AnalyticsEventTest;
-import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.prefs.FakePushRequestHeaders;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.util.DelayedLoop;
 import io.pivotal.android.push.util.FakeHttpURLConnection;
 import io.pivotal.android.push.util.FakeNetworkWrapper;
 import io.pivotal.android.push.util.NetworkWrapper;
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
-public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class PCFPushSendAnalyticsApiRequestImplTest {
 
     private static final String TEST_PLATFORM_UUID = "TEST_PLATFORM_UUID";
     private static final String TEST_PLATFORM_SECRET = "TEST_PLATFORM_SECRET";
@@ -36,9 +50,8 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
     private List<Uri> emptyList;
     private List<Uri> listWithOneItem;
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
+    @Before
+    public void setUp() throws Exception {
         eventsStorage = new FakeAnalyticsEventsStorage();
         networkWrapper = new FakeNetworkWrapper();
         delayedLoop = new DelayedLoop(TEN_SECOND_TIMEOUT);
@@ -64,15 +77,17 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
         listWithOneItem.add(uri);
     }
 
+    @Test
     public void testRequiresContext() {
         try {
             new PCFPushSendAnalyticsApiRequestImpl(null, parameters, eventsStorage, pushRequestHeaders, networkWrapper);
+
             fail("Should not have succeeded");
         } catch (IllegalArgumentException ex) {
             // Success
         }
     }
-
+    @Test
     public void testRequiresEventsStorage() {
         try {
             new PCFPushSendAnalyticsApiRequestImpl(getContext(), parameters, null, pushRequestHeaders, networkWrapper);
@@ -90,7 +105,7 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
             // Success
         }
     }
-
+    @Test
     public void testRequiresNetworkWrapper() {
         try {
             new PCFPushSendAnalyticsApiRequestImpl(getContext(), parameters, eventsStorage, pushRequestHeaders, null);
@@ -99,7 +114,7 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
             // Success
         }
     }
-
+    @Test
     public void testRequiresMessageReceipts() {
         try {
             final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(getContext(), parameters, eventsStorage, pushRequestHeaders, networkWrapper);
@@ -110,7 +125,7 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
             // Success
         }
     }
-
+    @Test
     public void testMessageReceiptsMayNotBeEmpty() {
         try {
             final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(getContext(), parameters, eventsStorage, pushRequestHeaders, networkWrapper);
@@ -121,7 +136,7 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
             // Success
         }
     }
-
+    @Test
     public void testRequiresListener() {
         try {
             final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(getContext(), parameters, eventsStorage, pushRequestHeaders, networkWrapper);
@@ -131,7 +146,7 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
             // Success
         }
     }
-
+    @Test
     public void testSuccessfulRequest() {
         makeListenersForSuccessfulRequestFromNetwork(true, 200);
         final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(getContext(), parameters, eventsStorage, pushRequestHeaders, networkWrapper);
@@ -139,7 +154,7 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
-
+    @Test
     public void testAreAnalyticsDisabled() {
         parameters = new PushParameters(
                 TEST_PLATFORM_UUID,
@@ -162,7 +177,7 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
             // Success
         }
     }
-
+    @Test
     public void testCouldNotConnect() {
         makeListenersFromFailedRequestFromNetwork("Your server is busted", 0);
         final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(getContext(), parameters, eventsStorage, pushRequestHeaders, networkWrapper);
@@ -170,7 +185,7 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
         delayedLoop.startLoop();
         assertTrue(delayedLoop.isSuccess());
     }
-
+    @Test
     public void testSuccessful400() {
         makeListenersForSuccessfulRequestFromNetwork(false, 400);
         final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(getContext(), parameters, eventsStorage, pushRequestHeaders, networkWrapper);
@@ -179,7 +194,8 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
         assertTrue(delayedLoop.isSuccess());
     }
 
-    private void makeListenersFromFailedRequestFromNetwork(String exceptionText, int expectedHttpStatusCode) {
+    private void makeListenersFromFailedRequestFromNetwork(String exceptionText,
+        int expectedHttpStatusCode) {
         IOException exception = null;
         if (exceptionText != null) {
             exception = new IOException(exceptionText);
@@ -190,7 +206,8 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
         makeBackEndMessageReceiptListener(false);
     }
 
-    private void makeListenersForSuccessfulRequestFromNetwork(boolean isSuccessful, int expectedHttpStatusCode) {
+    private void makeListenersForSuccessfulRequestFromNetwork(boolean isSuccessful,
+        int expectedHttpStatusCode) {
         FakeHttpURLConnection.setResponseCode(expectedHttpStatusCode);
         makeBackEndMessageReceiptListener(isSuccessful);
     }
@@ -201,8 +218,10 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
             @Override
             public void onBackEndSendEventsSuccess() {
                 assertTrue(isSuccessfulRequest);
-                assertTrue(FakeHttpURLConnection.getRequestPropertiesMap().containsKey("Authorization"));
-                assertEquals("application/json", FakeHttpURLConnection.getRequestPropertiesMap().get("Content-Type"));
+                assertTrue(
+                    FakeHttpURLConnection.getRequestPropertiesMap().containsKey("Authorization"));
+                assertEquals("application/json",
+                    FakeHttpURLConnection.getRequestPropertiesMap().get("Content-Type"));
                 if (isSuccessfulRequest) {
                     delayedLoop.flagSuccess();
                 } else {
@@ -213,8 +232,10 @@ public class PCFPushSendAnalyticsApiRequestImplTest extends AndroidTestCase {
             @Override
             public void onBackEndSendEventsFailed(String reason) {
                 assertFalse(isSuccessfulRequest);
-                assertTrue(FakeHttpURLConnection.getRequestPropertiesMap().containsKey("Authorization"));
-                assertEquals("application/json", FakeHttpURLConnection.getRequestPropertiesMap().get("Content-Type"));
+                assertTrue(
+                    FakeHttpURLConnection.getRequestPropertiesMap().containsKey("Authorization"));
+                assertEquals("application/json",
+                    FakeHttpURLConnection.getRequestPropertiesMap().get("Content-Type"));
                 if (isSuccessfulRequest) {
                     delayedLoop.flagFailure();
                 } else {

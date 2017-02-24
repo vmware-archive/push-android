@@ -1,11 +1,16 @@
 package io.pivotal.android.push.service;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.when;
+
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.ResultReceiver;
 import android.test.ServiceTestCase;
 
+import io.pivotal.android.push.prefs.PushPreferences;
 import junit.framework.Assert;
 
 import java.util.ArrayList;
@@ -19,7 +24,6 @@ import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsApiRequestP
 import io.pivotal.android.push.database.DatabaseWrapper;
 import io.pivotal.android.push.database.FakeAnalyticsEventsStorage;
 import io.pivotal.android.push.model.analytics.AnalyticsEventTest;
-import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.receiver.FakeAnalyticsEventsSenderAlarmProvider;
 import io.pivotal.android.push.util.FakeNetworkWrapper;
 import io.pivotal.android.push.util.FakeServiceStarter;
@@ -31,7 +35,7 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
     private List<String> listOfCompletedJobs;
     private int testResultCode = AnalyticsEventService.NO_RESULT;
     private TestResultReceiver testResultReceiver;
-    private FakePushPreferencesProvider pushPreferencesProvider;
+    private PushPreferences pushPreferences;
 
     // Captures result codes from the service itself
     public class TestResultReceiver extends ResultReceiver {
@@ -60,8 +64,8 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
         final FakePCFPushSendAnalyticsApiRequest apiRequest = new FakePCFPushSendAnalyticsApiRequest();
         final FakeServiceStarter serviceStarter = new FakeServiceStarter();
 
-        pushPreferencesProvider = new FakePushPreferencesProvider(null, null, null, null, null, null, null, null, null, 0, false);
-        pushPreferencesProvider.setAreAnalyticsEnabled(true);
+        pushPreferences = mock(PushPreferences.class);
+        when(pushPreferences.areAnalyticsEnabled()).thenReturn(true);
 
         testResultReceiver = new TestResultReceiver(null);
         listOfCompletedJobs = new ArrayList<>();
@@ -73,7 +77,7 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
         AnalyticsEventService.networkWrapper = networkWrapper;
         AnalyticsEventService.serviceStarter = serviceStarter;
         AnalyticsEventService.eventsStorage = eventsStorage;
-        AnalyticsEventService.pushPreferencesProvider = pushPreferencesProvider;
+        AnalyticsEventService.pushPreferences = pushPreferences;
         AnalyticsEventService.sendAnalyticsRequestProvider = new PCFPushSendAnalyticsApiRequestProvider(apiRequest);
         AnalyticsEventService.alarmProvider = alarmProvider;
         AnalyticsEventService.listOfCompletedJobs = listOfCompletedJobs;
@@ -85,9 +89,11 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
         AnalyticsEventService.networkWrapper = null;
         AnalyticsEventService.serviceStarter = null;
         AnalyticsEventService.eventsStorage = null;
-        AnalyticsEventService.pushPreferencesProvider = null;
+        AnalyticsEventService.pushPreferences = null;
         AnalyticsEventService.alarmProvider = null;
         AnalyticsEventService.sendAnalyticsRequestProvider = null;
+
+        reset(pushPreferences);
         super.tearDown();
     }
 
@@ -137,7 +143,8 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
     }
 
     public void testAnalyticsDisabled() throws InterruptedException {
-        pushPreferencesProvider.setAreAnalyticsEnabled(false);
+        when(pushPreferences.areAnalyticsEnabled()).thenReturn(false);
+
         final DummyJob inputJob = new DummyJob();
         inputJob.setResultCode(DUMMY_RESULT_CODE);
         final Intent intent = AnalyticsEventService.getIntentToRunJob(getContext(), inputJob);
@@ -185,7 +192,8 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
     }
 
     public void testDoesNotRunPrepareDatabaseJobIfReceivingAFreshDatabaseInstanceAndAnalyticsAreDisabled() throws InterruptedException {
-        pushPreferencesProvider.setAreAnalyticsEnabled(false);
+        when(pushPreferences.areAnalyticsEnabled()).thenReturn(false);
+
         AnalyticsEventService.eventsStorage = null;
         DatabaseWrapper.removeDatabaseInstance();
         final DummyJob inputJob = new DummyJob();

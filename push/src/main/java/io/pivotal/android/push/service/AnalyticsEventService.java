@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.ResultReceiver;
 
+import io.pivotal.android.push.prefs.PushPreferences;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
@@ -20,8 +21,7 @@ import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsApiRequestP
 import io.pivotal.android.push.database.AnalyticsEventsStorage;
 import io.pivotal.android.push.database.DatabaseAnalyticsEventsStorage;
 import io.pivotal.android.push.database.DatabaseWrapper;
-import io.pivotal.android.push.prefs.PushPreferencesProvider;
-import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
+import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushRequestHeaders;
 import io.pivotal.android.push.receiver.AnalyticsEventsSenderAlarmProvider;
 import io.pivotal.android.push.receiver.AnalyticsEventsSenderAlarmProviderImpl;
@@ -51,14 +51,14 @@ public class AnalyticsEventService extends IntentService {
     /* package */ static AnalyticsEventsSenderAlarmProvider alarmProvider = null;
     /* package */ static PCFPushSendAnalyticsApiRequestProvider sendAnalyticsRequestProvider = null;
     /* package */ static List<String> listOfCompletedJobs = null;
-    /* package */ static PushPreferencesProvider pushPreferencesProvider;
+    /* package */ static PushPreferences pushPreferences;
     /* package */ static PushRequestHeaders pushRequestHeaders;
 
     static PushParameters parameters;
 
     // Used by unit tests
-    /* package */ static void setPushPreferencesProvider(PushPreferencesProvider preferences) {
-        AnalyticsEventService.pushPreferencesProvider = preferences;
+    /* package */ static void setPushPreferences(PushPreferences preferences) {
+        AnalyticsEventService.pushPreferences = preferences;
     }
 
     public static void setPushParameters(PushParameters parameters) {
@@ -90,13 +90,13 @@ public class AnalyticsEventService extends IntentService {
 
                 if (hasJob(intent)) {
                     final BaseJob job = getJobFromIntent(intent);
-                    if (AnalyticsEventService.pushPreferencesProvider == null) {
-                        AnalyticsEventService.pushPreferencesProvider = new PushPreferencesProviderImpl(this);
+                    if (AnalyticsEventService.pushPreferences == null) {
+                        AnalyticsEventService.pushPreferences = new PushPreferences(this);
                     }
                     if (AnalyticsEventService.pushRequestHeaders == null) {
                         AnalyticsEventService.pushRequestHeaders = PushRequestHeaders.getInstance(this);
                     }
-                    if (pushPreferencesProvider.areAnalyticsEnabled()) {
+                    if (pushPreferences.areAnalyticsEnabled()) {
                             setupStatics(intent);
                             runJob(job, resultReceiver);
                     } else {
@@ -228,7 +228,7 @@ public class AnalyticsEventService extends IntentService {
                 AnalyticsEventService.networkWrapper,
                 AnalyticsEventService.serviceStarter,
                 AnalyticsEventService.eventsStorage,
-                AnalyticsEventService.pushPreferencesProvider,
+                AnalyticsEventService.pushPreferences,
                 AnalyticsEventService.alarmProvider,
                 AnalyticsEventService.sendAnalyticsRequestProvider);
     }
@@ -274,7 +274,7 @@ public class AnalyticsEventService extends IntentService {
         AnalyticsEventService.alarmProvider = null;
         AnalyticsEventService.networkWrapper = null;
         AnalyticsEventService.serviceStarter = null;
-        AnalyticsEventService.pushPreferencesProvider = null;
+        AnalyticsEventService.pushPreferences = null;
         AnalyticsEventService.sendAnalyticsRequestProvider = null;
         AnalyticsEventService.listOfCompletedJobs = null;
     }

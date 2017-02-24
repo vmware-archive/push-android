@@ -1,13 +1,22 @@
 package io.pivotal.android.push.analytics.jobs;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import android.content.Intent;
 import android.net.Uri;
-
+import android.support.test.runner.AndroidJUnit4;
 import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 import io.pivotal.android.push.service.AnalyticsEventService;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@RunWith(AndroidJUnit4.class)
 public class PrepareDatabaseJobTest extends JobTest {
 
+    @Test
     public void testHandlesEmptyDatabase() throws InterruptedException {
 
         assertDatabaseEventCount(0);
@@ -17,6 +26,7 @@ public class PrepareDatabaseJobTest extends JobTest {
         assertDatabaseEventCount(0);
     }
 
+    @Test
     public void testSendEventsForNotPostedEvent() throws InterruptedException {
 
         final Uri uri = saveEventWithStatus(AnalyticsEvent.Status.NOT_POSTED);
@@ -30,6 +40,7 @@ public class PrepareDatabaseJobTest extends JobTest {
         assertTrue(getJob(0) instanceof SendAnalyticsEventsJob);
     }
 
+    @Test
     public void testDoesNotSendEventsForNotPostedEvent() throws InterruptedException {
 
         final Uri uri = saveEventWithStatus(AnalyticsEvent.Status.NOT_POSTED);
@@ -42,6 +53,7 @@ public class PrepareDatabaseJobTest extends JobTest {
         assertNumberOfStartedJobs(0);
     }
 
+    @Test
     public void testSendEventsForPostingErrorEvent() throws InterruptedException {
 
         final Uri uri = saveEventWithStatus(AnalyticsEvent.Status.POSTING_ERROR);
@@ -55,6 +67,7 @@ public class PrepareDatabaseJobTest extends JobTest {
         assertTrue(getJob(0) instanceof SendAnalyticsEventsJob);
     }
 
+    @Test
     public void testDoesNotSendEventsForPostingErrorEvent() throws InterruptedException {
 
         final Uri uri = saveEventWithStatus(AnalyticsEvent.Status.POSTING_ERROR);
@@ -67,6 +80,7 @@ public class PrepareDatabaseJobTest extends JobTest {
         assertNumberOfStartedJobs(0);
     }
 
+    @Test
     public void testResetsStatusAndSendsEventsForPostingEvent() throws InterruptedException {
 
         final Uri uri = saveEventWithStatus(AnalyticsEvent.Status.POSTING);
@@ -80,6 +94,7 @@ public class PrepareDatabaseJobTest extends JobTest {
         assertTrue(getJob(0) instanceof SendAnalyticsEventsJob);
     }
 
+    @Test
     public void testResetsStatusAndDoesNotSendsEventsForPostingEvent() throws InterruptedException {
 
         final Uri uri = saveEventWithStatus(AnalyticsEvent.Status.POSTING);
@@ -92,6 +107,7 @@ public class PrepareDatabaseJobTest extends JobTest {
         assertNumberOfStartedJobs(0);
     }
 
+    @Test
     public void testDeletesPostedEvent() throws InterruptedException {
 
         final Uri uri = saveEventWithStatus(AnalyticsEvent.Status.POSTED);
@@ -104,6 +120,7 @@ public class PrepareDatabaseJobTest extends JobTest {
         assertNumberOfStartedJobs(0);
     }
 
+    @Test
     public void testHandlesDatabaseWithManyEvents() throws InterruptedException {
 
         final Uri uri1 = saveEventWithStatus(AnalyticsEvent.Status.NOT_POSTED);
@@ -125,6 +142,7 @@ public class PrepareDatabaseJobTest extends JobTest {
         assertTrue(getJob(0) instanceof SendAnalyticsEventsJob);
     }
 
+    @Test
     public void testEquals() {
         final PrepareDatabaseJob job1 = new PrepareDatabaseJob(true);
         final PrepareDatabaseJob job2 = new PrepareDatabaseJob(true);
@@ -132,6 +150,7 @@ public class PrepareDatabaseJobTest extends JobTest {
         assertEquals(job1, job2);
     }
 
+    @Test
     public void testDoesNotEqual() {
         final PrepareDatabaseJob job1 = new PrepareDatabaseJob(true);
         final PrepareDatabaseJob job2 = new PrepareDatabaseJob(false);
@@ -139,6 +158,7 @@ public class PrepareDatabaseJobTest extends JobTest {
         assertFalse(job1.equals(job2));
     }
 
+    @Test
     public void testParcelsData() {
         final PrepareDatabaseJob inputJob = new PrepareDatabaseJob(true);
         final PrepareDatabaseJob outputJob = getJobViaParcel(inputJob);

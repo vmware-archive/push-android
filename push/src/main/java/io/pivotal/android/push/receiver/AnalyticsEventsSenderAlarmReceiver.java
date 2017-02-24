@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.support.v4.content.WakefulBroadcastReceiver;
 
 import io.pivotal.android.push.analytics.jobs.SendAnalyticsEventsJob;
+import io.pivotal.android.push.prefs.PushPreferences;
 import io.pivotal.android.push.service.AnalyticsEventService;
 import io.pivotal.android.push.util.Logger;
 
@@ -24,9 +25,8 @@ public class AnalyticsEventsSenderAlarmReceiver extends WakefulBroadcastReceiver
     }
 
     private boolean areAnalyticsEnabled(Context context) {
-        return false;
-//        final PushPreferencesProviderImpl preferences = new PushPreferencesProviderImpl(context);
-//        return preferences.areAnalyticsEnabled();
+        final PushPreferences preferences = new PushPreferences(context);
+        return preferences.areAnalyticsEnabled();
     }
 
     public static PendingIntent getPendingIntent(Context context, int pendingIntentFlags) {

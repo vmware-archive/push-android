@@ -1,5 +1,6 @@
 package io.pivotal.android.push.geofence;
 
+import io.pivotal.android.push.prefs.PushPreferences;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -9,7 +10,6 @@ import io.pivotal.android.push.model.geofence.PCFPushGeofenceDataList;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocation;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocationMap;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceResponseData;
-import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.TimeProvider;
 
@@ -20,14 +20,14 @@ public class GeofenceEngine {
     private GeofenceRegistrar registrar;
     private GeofencePersistentStore store;
     private TimeProvider timeProvider;
-    private PushPreferencesProvider pushPreferencesProvider;
+    private PushPreferences pushPreferences;
 
-    public GeofenceEngine(GeofenceRegistrar registrar, GeofencePersistentStore store, TimeProvider timeProvider, PushPreferencesProvider pushPreferencesProvider) {
-        verifyArguments(registrar, store, timeProvider, pushPreferencesProvider);
-        saveArguments(registrar, store, timeProvider, pushPreferencesProvider);
+    public GeofenceEngine(GeofenceRegistrar registrar, GeofencePersistentStore store, TimeProvider timeProvider, PushPreferences pushPreferences) {
+        verifyArguments(registrar, store, timeProvider, pushPreferences);
+        saveArguments(registrar, store, timeProvider, pushPreferences);
     }
 
-    private void verifyArguments(GeofenceRegistrar geofenceRegistrar, GeofencePersistentStore store, TimeProvider timeProvider, PushPreferencesProvider pushPreferencesProvider) {
+    private void verifyArguments(GeofenceRegistrar geofenceRegistrar, GeofencePersistentStore store, TimeProvider timeProvider, PushPreferences pushPreferences) {
         if (geofenceRegistrar == null) {
             throw new IllegalArgumentException("registrar may not be null");
         }
@@ -37,16 +37,16 @@ public class GeofenceEngine {
         if (timeProvider == null) {
             throw new IllegalArgumentException("timeProvider may not be null");
         }
-        if (pushPreferencesProvider == null) {
-            throw new IllegalArgumentException("pushPreferencesProvider may not be null");
+        if (pushPreferences == null) {
+            throw new IllegalArgumentException("pushPreferences may not be null");
         }
     }
 
-    private void saveArguments(GeofenceRegistrar registrar, GeofencePersistentStore store, TimeProvider timeProvider, PushPreferencesProvider pushPreferencesProvider) {
+    private void saveArguments(GeofenceRegistrar registrar, GeofencePersistentStore store, TimeProvider timeProvider, PushPreferences pushPreferences) {
         this.registrar = registrar;
         this.store = store;
         this.timeProvider = timeProvider;
-        this.pushPreferencesProvider = pushPreferencesProvider;
+        this.pushPreferences = pushPreferences;
     }
 
     public void processResponseData(final long lastUpdatedTimestamp, final PCFPushGeofenceResponseData responseData, Set<String> subscribedTags) {
@@ -226,7 +226,7 @@ public class GeofenceEngine {
                                         final PCFPushGeofenceDataList geofencesToStore,
                                         final PCFPushGeofenceLocationMap geofencesToRegister) {
 
-        final Set<String> subscribedTags = pushPreferencesProvider.getTags();
+        final Set<String> subscribedTags = pushPreferences.getTags();
         geofencesToRegister.addFiltered(storedGeofences, new PCFPushGeofenceLocationMap.Filter() {
 
             @Override

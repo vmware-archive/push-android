@@ -3,6 +3,7 @@ package io.pivotal.android.push.analytics;
 import android.content.Context;
 import android.content.Intent;
 
+import io.pivotal.android.push.prefs.PushPreferences;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -11,7 +12,6 @@ import io.pivotal.android.push.BuildConfig;
 import io.pivotal.android.push.analytics.jobs.EnqueueAnalyticsEventJob;
 import io.pivotal.android.push.analytics.jobs.SendAnalyticsEventsJob;
 import io.pivotal.android.push.model.analytics.AnalyticsEvent;
-import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.service.AnalyticsEventService;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.ServiceStarter;
@@ -25,14 +25,14 @@ public class AnalyticsEventLogger {
 
     private Context context;
     private ServiceStarter serviceStarter;
-    private PushPreferencesProvider preferencesProvider;
+    private PushPreferences preferencesProvider;
 
-    public AnalyticsEventLogger(ServiceStarter serviceStarter, PushPreferencesProvider preferencesProvider, Context context) {
+    public AnalyticsEventLogger(ServiceStarter serviceStarter, PushPreferences preferencesProvider, Context context) {
         verifyArguments(serviceStarter, preferencesProvider, context);
         saveArguments(serviceStarter, preferencesProvider, context);
     }
 
-    private void verifyArguments(ServiceStarter serviceStarter, PushPreferencesProvider preferencesProvider, Context context) {
+    private void verifyArguments(ServiceStarter serviceStarter, PushPreferences preferencesProvider, Context context) {
         if (serviceStarter == null) {
             throw new IllegalArgumentException("serviceStarter may not be null");
         }
@@ -44,7 +44,7 @@ public class AnalyticsEventLogger {
         }
     }
 
-    private void saveArguments(ServiceStarter serviceStarter, PushPreferencesProvider preferencesProvider, Context context) {
+    private void saveArguments(ServiceStarter serviceStarter, PushPreferences preferencesProvider, Context context) {
         this.serviceStarter = serviceStarter;
         this.preferencesProvider = preferencesProvider;
         this.context = context;

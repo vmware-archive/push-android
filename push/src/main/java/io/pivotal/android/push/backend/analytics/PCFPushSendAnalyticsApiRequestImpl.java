@@ -5,6 +5,7 @@ import android.net.Uri;
 
 import com.google.gson.Gson;
 
+import io.pivotal.android.push.prefs.PushPreferences;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;

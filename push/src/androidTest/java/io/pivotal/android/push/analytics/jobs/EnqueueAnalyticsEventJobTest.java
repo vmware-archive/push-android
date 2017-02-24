@@ -1,14 +1,20 @@
 package io.pivotal.android.push.analytics.jobs;
 
-import android.net.Uri;
-import android.test.MoreAsserts;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 
-import junit.framework.Assert;
+import android.net.Uri;
+import android.support.test.runner.AndroidJUnit4;
+import android.test.MoreAsserts;
 
 import java.util.List;
 
 import io.pivotal.android.push.model.analytics.AnalyticsEvent;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
+@RunWith(AndroidJUnit4.class)
 public class EnqueueAnalyticsEventJobTest extends JobTest {
 
     public void testRequiresEvent() {
@@ -20,10 +26,11 @@ public class EnqueueAnalyticsEventJobTest extends JobTest {
         }
     }
 
+    @Test
     public void testEnqueuesObject() throws InterruptedException {
 
         // Setup environment
-        Assert.assertEquals(0, eventsStorage.getNumberOfEvents());
+        assertEquals(0, eventsStorage.getNumberOfEvents());
 
         // Run job
         final EnqueueAnalyticsEventJob job = new EnqueueAnalyticsEventJob(event1);
@@ -39,17 +46,18 @@ public class EnqueueAnalyticsEventJobTest extends JobTest {
         semaphore.acquire();
 
         // Ensure event made it into the database
-        Assert.assertEquals(1, eventsStorage.getNumberOfEvents());
+        assertEquals(1, eventsStorage.getNumberOfEvents());
         final List<Uri> uris = eventsStorage.getEventUris();
         assertEquals(1, uris.size());
         final AnalyticsEvent savedEvent = eventsStorage.readEvent(uris.get(0));
         assertEquals(event1, savedEvent);
     }
 
+    @Test
     public void testEnqueuesHeartbeat() throws InterruptedException {
 
         // Setup environment
-        Assert.assertEquals(0, eventsStorage.getNumberOfEvents());
+        assertEquals(0, eventsStorage.getNumberOfEvents());
 
         // Run job
         final EnqueueAnalyticsEventJob job = new EnqueueAnalyticsEventJob(heartbeatEvent);
@@ -65,18 +73,19 @@ public class EnqueueAnalyticsEventJobTest extends JobTest {
         semaphore.acquire();
 
         // Ensure event made it into the database
-        Assert.assertEquals(1, eventsStorage.getNumberOfEvents());
+        assertEquals(1, eventsStorage.getNumberOfEvents());
         final List<Uri> uris = eventsStorage.getEventUris();
         assertEquals(1, uris.size());
         final AnalyticsEvent savedEvent = eventsStorage.readEvent(uris.get(0));
         assertEquals(heartbeatEvent, savedEvent);
     }
 
+    @Test
     public void testSaveFails() throws InterruptedException {
 
         // Setup environment
         eventsStorage.setWillSaveFail(true);
-        Assert.assertEquals(0, eventsStorage.getNumberOfEvents());
+        assertEquals(0, eventsStorage.getNumberOfEvents());
 
         // Run job
         final EnqueueAnalyticsEventJob job = new EnqueueAnalyticsEventJob(event1);
@@ -92,9 +101,10 @@ public class EnqueueAnalyticsEventJobTest extends JobTest {
         semaphore.acquire();
 
         // Ensure event did not made it into the database
-        Assert.assertEquals(0, eventsStorage.getNumberOfEvents());
+        assertEquals(0, eventsStorage.getNumberOfEvents());
     }
 
+    @Test
     public void testEquals() {
         final EnqueueAnalyticsEventJob job1 = new EnqueueAnalyticsEventJob(event1);
         final EnqueueAnalyticsEventJob job2 = new EnqueueAnalyticsEventJob(event1);
@@ -102,6 +112,7 @@ public class EnqueueAnalyticsEventJobTest extends JobTest {
         assertEquals(job1, job2);
     }
 
+    @Test
     public void testNotEquals() {
         final EnqueueAnalyticsEventJob job1 = new EnqueueAnalyticsEventJob(event1);
         final EnqueueAnalyticsEventJob job2 = new EnqueueAnalyticsEventJob(event2);
@@ -109,6 +120,7 @@ public class EnqueueAnalyticsEventJobTest extends JobTest {
         MoreAsserts.assertNotEqual(job1, job2);
     }
 
+    @Test
     public void testParcelsData() {
         final EnqueueAnalyticsEventJob inputJob = new EnqueueAnalyticsEventJob(event1);
         final EnqueueAnalyticsEventJob outputJob = getJobViaParcel(inputJob);

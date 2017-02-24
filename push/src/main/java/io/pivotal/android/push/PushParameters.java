@@ -6,6 +6,7 @@ package io.pivotal.android.push;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
+import io.pivotal.android.push.prefs.PushPreferences;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -86,6 +87,7 @@ public class PushParameters {
         this.pinnedSslCertificateNames = pinnedSslCertificateNames;
         this.requestHeaders = requestHeaders;
     }
+
 
     public String getPlatformUuid() {
         return platformUuid;

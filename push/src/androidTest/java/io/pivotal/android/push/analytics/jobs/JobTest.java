@@ -3,9 +3,9 @@ package io.pivotal.android.push.analytics.jobs;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.test.AndroidTestCase;
+import android.support.test.InstrumentationRegistry;
 
-import junit.framework.Assert;
+import io.pivotal.android.push.prefs.PushPreferences;
 
 import java.lang.reflect.Field;
 import java.util.concurrent.Semaphore;
@@ -15,15 +15,19 @@ import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsApiRequestP
 import io.pivotal.android.push.database.FakeAnalyticsEventsStorage;
 import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 import io.pivotal.android.push.model.analytics.AnalyticsEventTest;
-import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
 import io.pivotal.android.push.receiver.FakeAnalyticsEventsSenderAlarmProvider;
 import io.pivotal.android.push.util.FakeNetworkWrapper;
 import io.pivotal.android.push.util.FakeServiceStarter;
 import io.pivotal.android.push.util.TimeProvider;
+import org.junit.Before;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
-public abstract class JobTest extends AndroidTestCase {
+public abstract class JobTest {
 
     private static final String TEST_SERVICE_URL = "http://test.service.url";
 
@@ -34,16 +38,15 @@ public abstract class JobTest extends AndroidTestCase {
     protected TimeProvider timeProvider;
     protected FakeNetworkWrapper networkWrapper;
     protected FakeServiceStarter serviceStarter;
-    protected FakePushPreferencesProvider preferencesProvider;
+    protected PushPreferences pushPreferences;
     protected FakeAnalyticsEventsSenderAlarmProvider alarmProvider;
     protected FakePCFPushSendAnalyticsApiRequest sendAnalyticsApiRequest;
     protected PCFPushSendAnalyticsApiRequestProvider sendAnalyticsApiRequestProvider;
     protected Semaphore semaphore = new Semaphore(0);
 
-    @Override
-    protected void setUp() throws Exception {
-        super.setUp();
-        System.setProperty("dexmaker.dexcache", mContext.getCacheDir().getPath());
+    @Before
+    public void setUp() throws Exception {
+        System.setProperty("dexmaker.dexcache", InstrumentationRegistry.getContext().getCacheDir().getPath());
         event1 = AnalyticsEventTest.getEvent1();
         event2 = AnalyticsEventTest.getEvent2();
         heartbeatEvent = AnalyticsEventTest.getHeartbeatEvent();
@@ -52,13 +55,16 @@ public abstract class JobTest extends AndroidTestCase {
         networkWrapper = new FakeNetworkWrapper();
         serviceStarter = new FakeServiceStarter();
         alarmProvider = new FakeAnalyticsEventsSenderAlarmProvider();
-        preferencesProvider = new FakePushPreferencesProvider(null, null, null, null, null, null, null, TEST_SERVICE_URL, null, 0, false);
         sendAnalyticsApiRequest = new FakePCFPushSendAnalyticsApiRequest();
         sendAnalyticsApiRequestProvider = new PCFPushSendAnalyticsApiRequestProvider(sendAnalyticsApiRequest);
+
+        pushPreferences = mock(PushPreferences.class);
+        when(pushPreferences.getServiceUrl()).thenReturn(TEST_SERVICE_URL);
     }
 
     protected JobParams getJobParams(JobResultListener listener) {
-        return new JobParams(getContext(), listener, timeProvider, networkWrapper, serviceStarter, eventsStorage, preferencesProvider, alarmProvider, sendAnalyticsApiRequestProvider);
+        return new JobParams(InstrumentationRegistry.getContext(), listener, timeProvider, networkWrapper, serviceStarter, eventsStorage,
+            pushPreferences, alarmProvider, sendAnalyticsApiRequestProvider);
     }
 
     protected Uri saveEventWithStatus(int status) {
@@ -67,7 +73,7 @@ public abstract class JobTest extends AndroidTestCase {
     }
 
     protected void assertDatabaseEventCount(int expectedEventCount) {
-        Assert.assertEquals(expectedEventCount, eventsStorage.getNumberOfEvents());
+        assertEquals(expectedEventCount, eventsStorage.getNumberOfEvents());
     }
 
     protected void assertEventHasStatus(Uri uri, int expectedStatus) {

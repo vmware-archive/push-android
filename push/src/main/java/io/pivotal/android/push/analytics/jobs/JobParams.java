@@ -4,7 +4,7 @@ import android.content.Context;
 
 import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsApiRequestProvider;
 import io.pivotal.android.push.database.AnalyticsEventsStorage;
-import io.pivotal.android.push.prefs.PushPreferencesProvider;
+import io.pivotal.android.push.prefs.PushPreferences;
 import io.pivotal.android.push.receiver.AnalyticsEventsSenderAlarmProvider;
 import io.pivotal.android.push.util.NetworkWrapper;
 import io.pivotal.android.push.util.ServiceStarter;
@@ -17,7 +17,7 @@ public class JobParams {
     public final TimeProvider timeProvider;
     public final NetworkWrapper networkWrapper;
     public final ServiceStarter serviceStarter;
-    public final PushPreferencesProvider pushPreferencesProvider;
+    public final PushPreferences pushPreferences;
     public final AnalyticsEventsStorage eventsStorage;
     public final AnalyticsEventsSenderAlarmProvider alarmProvider;
     public final PCFPushSendAnalyticsApiRequestProvider sendAnalyticsRequestProvider;
@@ -28,11 +28,11 @@ public class JobParams {
                      NetworkWrapper networkWrapper,
                      ServiceStarter serviceStarter,
                      AnalyticsEventsStorage eventsStorage,
-                     PushPreferencesProvider pushPreferencesProvider,
+                     PushPreferences pushPreferences,
                      AnalyticsEventsSenderAlarmProvider alarmProvider,
                      PCFPushSendAnalyticsApiRequestProvider sendAnalyticsRequestProvider) {
 
-        verifyArguments(context, listener, timeProvider, networkWrapper, serviceStarter, eventsStorage, pushPreferencesProvider, alarmProvider, sendAnalyticsRequestProvider);
+        verifyArguments(context, listener, timeProvider, networkWrapper, serviceStarter, eventsStorage, pushPreferences, alarmProvider, sendAnalyticsRequestProvider);
 
         this.context = context;
         this.listener = listener;
@@ -40,7 +40,7 @@ public class JobParams {
         this.networkWrapper = networkWrapper;
         this.serviceStarter = serviceStarter;
         this.eventsStorage = eventsStorage;
-        this.pushPreferencesProvider = pushPreferencesProvider;
+        this.pushPreferences = pushPreferences;
         this.alarmProvider = alarmProvider;
         this.sendAnalyticsRequestProvider = sendAnalyticsRequestProvider;
     }
@@ -53,7 +53,7 @@ public class JobParams {
                 otherJobParams.networkWrapper,
                 otherJobParams.serviceStarter,
                 otherJobParams.eventsStorage,
-                otherJobParams.pushPreferencesProvider,
+                otherJobParams.pushPreferences,
                 otherJobParams.alarmProvider,
                 otherJobParams.sendAnalyticsRequestProvider);
 
@@ -63,7 +63,7 @@ public class JobParams {
         this.networkWrapper = otherJobParams.networkWrapper;
         this.serviceStarter = otherJobParams.serviceStarter;
         this.eventsStorage = otherJobParams.eventsStorage;
-        this.pushPreferencesProvider = otherJobParams.pushPreferencesProvider;
+        this.pushPreferences = otherJobParams.pushPreferences;
         this.alarmProvider = otherJobParams.alarmProvider;
         this.sendAnalyticsRequestProvider = otherJobParams.sendAnalyticsRequestProvider;
     }
@@ -74,7 +74,7 @@ public class JobParams {
                                  NetworkWrapper networkWrapper,
                                  ServiceStarter serviceStarter,
                                  AnalyticsEventsStorage eventsStorage,
-                                 PushPreferencesProvider pushPreferencesProvider,
+                                 PushPreferences pushPreferences,
                                  AnalyticsEventsSenderAlarmProvider alarmProvider,
                                  PCFPushSendAnalyticsApiRequestProvider sendAnalyticsRequestProvider) {
         if (context == null) {
@@ -95,8 +95,8 @@ public class JobParams {
         if (eventsStorage == null) {
             throw new IllegalArgumentException("eventsStorage may not be null");
         }
-        if (pushPreferencesProvider == null) {
-            throw new IllegalArgumentException("pushPreferencesProvider may not be null");
+        if (pushPreferences == null) {
+            throw new IllegalArgumentException("pushPreferences may not be null");
         }
         if (alarmProvider == null) {
             throw new IllegalArgumentException("alarmProvider may not be null");

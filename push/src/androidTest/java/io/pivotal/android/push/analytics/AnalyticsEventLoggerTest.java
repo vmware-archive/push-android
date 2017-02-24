@@ -1,19 +1,20 @@
 package io.pivotal.android.push.analytics;
 
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import android.content.ComponentName;
 import android.content.Intent;
 import android.test.AndroidTestCase;
 
+import io.pivotal.android.push.prefs.PushPreferences;
 import java.util.HashMap;
-import java.util.Properties;
 
 import io.pivotal.android.push.BuildConfig;
 import io.pivotal.android.push.analytics.jobs.BaseJob;
 import io.pivotal.android.push.analytics.jobs.EnqueueAnalyticsEventJob;
 import io.pivotal.android.push.analytics.jobs.SendAnalyticsEventsJob;
 import io.pivotal.android.push.model.analytics.AnalyticsEvent;
-import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
-import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.service.AnalyticsEventService;
 import io.pivotal.android.push.util.FakeServiceStarter;
 
@@ -32,7 +33,7 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
     private static HashMap<String, String> TEST_EVENT_FIELDS;
 
     private FakeServiceStarter serviceStarter;
-    private FakePushPreferencesProvider preferencesProvider;
+    private PushPreferences pushPreferences;
 
     static {
         TEST_EVENT_FIELDS = new HashMap<>();
@@ -47,13 +48,17 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
         super.setUp();
         serviceStarter = new FakeServiceStarter();
         serviceStarter.setReturnedComponentName(new ComponentName(getContext(), AnalyticsEventService.class));
-        preferencesProvider = new FakePushPreferencesProvider(null, TEST_EVENT_DEVICE_UUID_VALUE, TEST_EVENT_PLATFORM_UUID_VALUE, null, null, null, null, null, null, 0, false);
-        preferencesProvider.setAreAnalyticsEnabled(true);
+
+        pushPreferences = mock(PushPreferences.class);
+        when(pushPreferences.getPCFPushDeviceRegistrationId())
+            .thenReturn(TEST_EVENT_DEVICE_UUID_VALUE);
+        when(pushPreferences.getPlatformUuid()).thenReturn(TEST_EVENT_PLATFORM_UUID_VALUE);
+        when(pushPreferences.areAnalyticsEnabled()).thenReturn(true);
     }
 
     public void testRequiresServiceStarter() {
         try {
-            new AnalyticsEventLogger(null, preferencesProvider, getContext());
+            new AnalyticsEventLogger(null, pushPreferences, getContext());
             fail("should have failed");
         } catch (IllegalArgumentException e) {
             // should have thrown
@@ -71,7 +76,7 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
 
     public void testRequiresContext() {
         try {
-            new AnalyticsEventLogger(serviceStarter, preferencesProvider, null);
+            new AnalyticsEventLogger(serviceStarter, pushPreferences, null);
             fail("should have failed");
         } catch (IllegalArgumentException e) {
             // should have thrown
@@ -174,13 +179,13 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
     }
 
     private AnalyticsEventLogger getEventLoggerWithAnalyticsDisabled() {
-        preferencesProvider.setAreAnalyticsEnabled(false);
-        return new AnalyticsEventLogger(serviceStarter, preferencesProvider, getContext());
+        when(pushPreferences.areAnalyticsEnabled()).thenReturn(false);
+        return new AnalyticsEventLogger(serviceStarter, pushPreferences, getContext());
     }
 
     private AnalyticsEventLogger getEventLoggerWithAnalyticsEnabled() {
-        preferencesProvider.setAreAnalyticsEnabled(true);
-        return new AnalyticsEventLogger(serviceStarter, preferencesProvider, getContext());
+        when(pushPreferences.areAnalyticsEnabled()).thenReturn(true);
+        return new AnalyticsEventLogger(serviceStarter, pushPreferences, getContext());
     }
 
     private AnalyticsEvent getLoggedEvent(int intentNumber) {
