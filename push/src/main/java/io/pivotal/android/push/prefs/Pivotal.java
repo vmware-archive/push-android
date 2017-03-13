@@ -5,7 +5,6 @@ package io.pivotal.android.push.prefs;
 
 import android.content.Context;
 import android.text.TextUtils;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -18,7 +17,6 @@ public class Pivotal {
         public static final String SSL_CERT_VALIDATION_MODE = "pivotal.push.sslCertValidationMode";
         public static final String PINNED_SSL_CERTIFICATE_NAMES = "pivotal.push.pinnedSslCertificateNames";
         public static final String ARE_ANALYTICS_ENABLED = "pivotal.push.areAnalyticsEnabled";
-        static final String PERSIST_REQUEST_HEADERS = "pivotal.push.persistRequestHeaders";
     }
 
     public enum SslCertValidationMode {
@@ -128,9 +126,5 @@ public class Pivotal {
 
     public static boolean getAreAnalyticsEnabled(Context context) {
         return Boolean.parseBoolean(getOptionalProperty(context, Keys.ARE_ANALYTICS_ENABLED, "true"));
-    }
-
-    public static boolean getPersistRequestHeaders(Context context) {
-        return Boolean.parseBoolean(getOptionalProperty(context, Keys.PERSIST_REQUEST_HEADERS, "true"));
     }
 }

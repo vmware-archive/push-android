@@ -3,22 +3,19 @@
  */
 package io.pivotal.android.push.prefs;
 
-import android.support.test.InstrumentationRegistry;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
-
-import org.junit.After;
-import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import java.util.List;
-import java.util.Properties;
-
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
+
+import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.SmallTest;
+import android.support.test.runner.AndroidJUnit4;
+import java.util.List;
+import java.util.Properties;
+import org.junit.After;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -116,32 +113,8 @@ public class PivotalTest {
     }
 
     @Test
-    public void testPersistRequestHeadersNotInPropertiesFile() {
-        Pivotal.setProperties(null);
-        assertTrue(Pivotal.getPersistRequestHeaders(InstrumentationRegistry.getContext()));
-    }
-
-    @Test
-    public void testPersistRequestHeadersSetToTrue() {
-        setPersistRequestHeaders(true);
-        assertTrue(Pivotal.getPersistRequestHeaders(InstrumentationRegistry.getContext()));
-    }
-
-    @Test
-    public void testPersistRequestHeadersSetToFalse() {
-        setPersistRequestHeaders(false);
-        assertFalse(Pivotal.getPersistRequestHeaders(InstrumentationRegistry.getContext()));
-    }
-
-    @Test
     public void testAreAnalyticsEnabled() {
         assertTrue(Pivotal.getAreAnalyticsEnabled(InstrumentationRegistry.getContext()));
-    }
-
-    private void setPersistRequestHeaders(boolean persistRequestHeader) {
-        final Properties p = new Properties();
-        p.put("pivotal.push.persistRequestHeaders", Boolean.toString(persistRequestHeader));
-        Pivotal.setProperties(p);
     }
 
     private void setSslCertValidationModeInProperties(String sslCertValidationMode) {
