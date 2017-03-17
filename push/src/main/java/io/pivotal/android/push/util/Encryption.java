@@ -1,10 +1,5 @@
 package io.pivotal.android.push.util;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
-import com.google.common.base.Strings;
-import com.google.common.collect.ImmutableMap;
-import com.google.common.primitives.Bytes;
 import com.nimbusds.jose.JOSEException;
 import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
@@ -12,7 +7,9 @@ import com.nimbusds.jose.JWSObject;
 import com.nimbusds.jose.Payload;
 import com.nimbusds.jose.crypto.MACSigner;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import net.minidev.json.JSONObject;
 
 public class Encryption {
@@ -26,11 +23,19 @@ public class Encryption {
       final String customUserId,
       final String secret) throws IllegalArgumentException {
 
-    checkArgument(!Strings.isNullOrEmpty(customUserId));
-    checkArgument(!Strings.isNullOrEmpty(secret));
+    if (customUserId == null || customUserId.isEmpty()) {
+      throw new IllegalArgumentException();
+    }
+
+    if (secret == null || secret.isEmpty()) {
+      throw new IllegalArgumentException();
+    }
+
+    final Map<String, String> payload = new HashMap<>();
+    payload.put("custom_user_id", customUserId);
 
     final JWSObject jwsObject = new JWSObject(new JWSHeader(JWSAlgorithm.HS256), new Payload(
-        new JSONObject(ImmutableMap.of("custom_user_id", customUserId))
+        new JSONObject(payload)
     ));
 
     try {
@@ -51,8 +56,11 @@ public class Encryption {
   }
 
   private static byte[] parseHexBinary(final String hexBinaryAsString) {
-    checkArgument(!Strings.isNullOrEmpty(hexBinaryAsString));
-    checkArgument(hexBinaryAsString.length() % 2 == 0);
+    if (hexBinaryAsString == null ||
+        hexBinaryAsString.isEmpty() ||
+        hexBinaryAsString.length() % 2 != 0) {
+      throw new IllegalArgumentException();
+    }
 
     final List<Byte> bytes = new ArrayList<>();
     String hexStringToParse = hexBinaryAsString;
@@ -61,6 +69,13 @@ public class Encryption {
       hexStringToParse = hexStringToParse.substring(2);
     }
 
-    return Bytes.toArray(bytes);
+    final byte[] result = new byte[bytes.size()];
+    int index = 0;
+    for (Byte data : bytes) {
+      result[index] = data;
+      index++;
+    }
+
+    return result;
   }
 }

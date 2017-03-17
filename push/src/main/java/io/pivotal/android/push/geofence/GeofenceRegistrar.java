@@ -7,21 +7,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
-
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;
 import com.google.android.gms.location.Geofence;
 import com.google.android.gms.location.LocationServices;
-
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
-
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceData;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceDataList;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocation;
@@ -31,6 +23,12 @@ import io.pivotal.android.push.util.DebugUtil;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.Util;
 import io.pivotal.android.push.version.GeofenceStatus;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class GeofenceRegistrar {
 
@@ -135,28 +133,29 @@ public class GeofenceRegistrar {
         Logger.i("Connecting to GoogleApiClient.");
 
         final GoogleApiClient googleApiClient = new GoogleApiClient.Builder(context)
-            .addApi(LocationServices.API)
-            .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
+                .addApi(LocationServices.API)
+                .addConnectionCallbacks(new GoogleApiClient.ConnectionCallbacks() {
 
-                @Override
-                public void onConnected(Bundle bundle) {
-                    Logger.i("GoogleApiClient connected.");
-                }
+                    @Override
+                    public void onConnected(Bundle bundle) {
+                        Logger.i("GoogleApiClient connected.");
+                    }
 
-                @Override
-                public void onConnectionSuspended(int cause) {
-                    Logger.w("GoogleApiClient Connection Suspended: cause:" + cause);
+                    @Override
+                    public void onConnectionSuspended(int cause) {
+                        Logger.w("GoogleApiClient Connection Suspended: cause:" + cause);
 
-                    // TODO - what to do if the connection is suspended? - Google seems to suggest that the connection will be automatically reestablished so we might not need to do anything special at all.
-                }
-            })
-            .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
-                @Override
-                public void onConnectionFailed(ConnectionResult connectionResult) {
-                    Logger.e("GoogleApiClient Connection Failed: errorCode:" + connectionResult.getErrorCode());
-                }
-            })
-            .build();
+                        // TODO - what to do if the connection is suspended? - Google seems to suggest that the connection will be automatically reestablished so we might not need to do anything special at all.
+                    }
+                })
+                .addOnConnectionFailedListener(new GoogleApiClient.OnConnectionFailedListener() {
+                    @Override
+                    public void onConnectionFailed(ConnectionResult connectionResult) {
+                        Logger.e("GoogleApiClient Connection Failed: errorCode:" + connectionResult
+                                .getErrorCode());
+                    }
+                })
+                .build();
 
         synchronized (lock) {
             final ConnectionResult connectionResult = googleApiClient.blockingConnect();
@@ -181,7 +180,8 @@ public class GeofenceRegistrar {
 
         final Status removeGeofencesStatus = LocationServices.GeofencingApi.removeGeofences(googleApiClient, pendingIntent).await();
 
-        GeofenceStatus resultantStatus;
+        GeofenceStatus resultantStatus = new GeofenceStatus(true,
+                "Access to precise location not granted", 0);
 
         if (removeGeofencesStatus.isSuccess()) {
             Logger.i("Success: removed currently monitored geofences.");
@@ -190,15 +190,24 @@ public class GeofenceRegistrar {
         }
 
         if (!geofences.isEmpty()) {
-            final Status addGeofencesStatus = LocationServices.GeofencingApi.addGeofences(googleApiClient, geofences, pendingIntent).await();
+            if (ActivityCompat
+                    .checkSelfPermission(context, Manifest.permission.ACCESS_FINE_LOCATION)
+                    == PackageManager.PERMISSION_GRANTED) {
+                final Status addGeofencesStatus = LocationServices.GeofencingApi
+                        .addGeofences(googleApiClient, geofences, pendingIntent).await();
 
-            if (addGeofencesStatus.isSuccess()) {
-                Logger.i("Success: Now monitoring for " + geofences.size() + " geofences.");
-                resultantStatus = new GeofenceStatus(false, null, geofences.size());
-            } else {
-                Logger.e("Error trying to monitor geofences. Status: " + addGeofencesStatus.getStatusCode());
-                resultantStatus = new GeofenceStatus(true, "LocationServices.GeofencingApi returned status " + addGeofencesStatus.getStatusCode(), 0);
+                if (addGeofencesStatus.isSuccess()) {
+                    Logger.i("Success: Now monitoring for " + geofences.size() + " geofences.");
+                    resultantStatus = new GeofenceStatus(false, null, geofences.size());
+                } else {
+                    Logger.e("Error trying to monitor geofences. Status: " + addGeofencesStatus
+                            .getStatusCode());
+                    resultantStatus = new GeofenceStatus(true,
+                            "LocationServices.GeofencingApi returned status " + addGeofencesStatus
+                                    .getStatusCode(), 0);
+                }
             }
+
 
         } else {
             Logger.i("Geofences to monitor is empty. Exiting.");

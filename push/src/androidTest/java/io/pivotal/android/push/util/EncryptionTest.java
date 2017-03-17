@@ -5,13 +5,11 @@ import static io.pivotal.android.push.util.Encryption.UserIdEncryptionMode.STAND
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
 @RunWith(AndroidJUnit4.class)
-@LargeTest
 public class EncryptionTest {
 
   private final String CUSTOMUSERID = "bond007";
