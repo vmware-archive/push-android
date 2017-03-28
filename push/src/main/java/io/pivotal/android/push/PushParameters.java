@@ -3,7 +3,6 @@
  */
 package io.pivotal.android.push;
 
-import android.content.Context;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 
@@ -14,8 +13,6 @@ import java.util.Map;
 import java.util.Set;
 
 import io.pivotal.android.push.prefs.Pivotal;
-import io.pivotal.android.push.prefs.PushPreferencesProvider;
-import io.pivotal.android.push.prefs.PushRequestHeaders;
 import io.pivotal.android.push.util.Util;
 
 /**

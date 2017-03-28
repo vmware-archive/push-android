@@ -3,10 +3,7 @@
  */
 package io.pivotal.android.push.prefs;
 
-import java.util.Date;
 import java.util.Set;
-
-import io.pivotal.android.push.version.Version;
 
 public interface PushPreferencesProvider {
 
@@ -49,14 +46,6 @@ public interface PushPreferencesProvider {
     boolean areGeofencesEnabled();
 
     void setAreGeofencesEnabled(boolean areGeofencesEnabled);
-
-    Version getBackEndVersion();
-
-    void setBackEndVersion(Version version);
-
-    Date getBackEndVersionTimePolled();
-
-    void setBackEndVersionTimePolled(Date timestamp);
 
     String getCustomUserId();
 

@@ -19,8 +19,6 @@ import android.support.v4.content.ContextCompat;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 
-import static com.google.gson.internal.$Gson$Preconditions.checkArgument;
-
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -58,6 +56,8 @@ import io.pivotal.android.push.util.ServiceStarter;
 import io.pivotal.android.push.util.ServiceStarterImpl;
 import io.pivotal.android.push.util.TimeProvider;
 import io.pivotal.android.push.version.GeofenceStatus;
+
+import static com.google.gson.internal.$Gson$Preconditions.checkArgument;
 
 /**
  * Entry-point for the Push Library functionality.  Requires Google Play Services,

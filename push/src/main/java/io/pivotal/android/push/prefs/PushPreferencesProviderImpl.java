@@ -6,12 +6,10 @@ package io.pivotal.android.push.prefs;
 import android.content.Context;
 import android.content.SharedPreferences;
 
-import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
 import io.pivotal.android.push.geofence.GeofenceEngine;
-import io.pivotal.android.push.version.Version;
 
 /**
  * Saves preferences to the SharedPreferences on the filesystem.
@@ -160,45 +158,6 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
         final SharedPreferences prefs = getSharedPreferences();
         final SharedPreferences.Editor editor = prefs.edit();
         editor.putBoolean(PROPERTY_ARE_GEOFENCES_ENABLED, areGeofencesEnabled);
-        editor.commit();
-    }
-
-    @Override
-    public Version getBackEndVersion() {
-        final String s = getSharedPreferences().getString(PROPERTY_BACK_END_VERSION, null);
-        if (s != null) {
-            return new Version(s);
-        } else {
-            return null;
-        }
-    }
-
-    @Override
-    public void setBackEndVersion(Version version) {
-        final SharedPreferences prefs = getSharedPreferences();
-        final SharedPreferences.Editor editor = prefs.edit();
-        if (version != null) {
-            editor.putString(PROPERTY_BACK_END_VERSION, version.toString());
-        } else {
-            editor.remove(PROPERTY_BACK_END_VERSION);
-        }
-        editor.commit();
-    }
-
-    @Override
-    public Date getBackEndVersionTimePolled() {
-        return new Date(getSharedPreferences().getLong(PROPERTY_BACK_END_VERSION_TIME_POLLED, 0));
-    }
-
-    @Override
-    public void setBackEndVersionTimePolled(Date timestamp) {
-        final SharedPreferences prefs = getSharedPreferences();
-        final SharedPreferences.Editor editor = prefs.edit();
-        if (timestamp != null) {
-            editor.putLong(PROPERTY_BACK_END_VERSION_TIME_POLLED, timestamp.getTime());
-        } else {
-            editor.remove(PROPERTY_BACK_END_VERSION_TIME_POLLED);
-        }
         editor.commit();
     }
 

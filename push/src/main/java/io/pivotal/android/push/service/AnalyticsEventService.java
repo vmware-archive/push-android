@@ -15,7 +15,6 @@ import io.pivotal.android.push.analytics.jobs.JobParams;
 import io.pivotal.android.push.analytics.jobs.JobResultListener;
 import io.pivotal.android.push.analytics.jobs.PrepareDatabaseJob;
 import io.pivotal.android.push.analytics.jobs.SendAnalyticsEventsJob;
-import io.pivotal.android.push.backend.analytics.PCFPushCheckBackEndVersionApiRequestProvider;
 import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsApiRequestImpl;
 import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsApiRequestProvider;
 import io.pivotal.android.push.database.AnalyticsEventsStorage;
@@ -51,7 +50,6 @@ public class AnalyticsEventService extends IntentService {
     /* package */ static ServiceStarter serviceStarter = null;
     /* package */ static AnalyticsEventsSenderAlarmProvider alarmProvider = null;
     /* package */ static PCFPushSendAnalyticsApiRequestProvider sendAnalyticsRequestProvider = null;
-    /* package */ static PCFPushCheckBackEndVersionApiRequestProvider checkBackEndVersionRequestProvider = null;
     /* package */ static List<String> listOfCompletedJobs = null;
     /* package */ static PushPreferencesProvider pushPreferencesProvider;
     /* package */ static PushRequestHeaders pushRequestHeaders;
@@ -232,8 +230,7 @@ public class AnalyticsEventService extends IntentService {
                 AnalyticsEventService.eventsStorage,
                 AnalyticsEventService.pushPreferencesProvider,
                 AnalyticsEventService.alarmProvider,
-                AnalyticsEventService.sendAnalyticsRequestProvider,
-                AnalyticsEventService.checkBackEndVersionRequestProvider);
+                AnalyticsEventService.sendAnalyticsRequestProvider);
     }
 
     // Used by unit tests
@@ -279,7 +276,6 @@ public class AnalyticsEventService extends IntentService {
         AnalyticsEventService.serviceStarter = null;
         AnalyticsEventService.pushPreferencesProvider = null;
         AnalyticsEventService.sendAnalyticsRequestProvider = null;
-        AnalyticsEventService.checkBackEndVersionRequestProvider = null;
         AnalyticsEventService.listOfCompletedJobs = null;
     }
 }

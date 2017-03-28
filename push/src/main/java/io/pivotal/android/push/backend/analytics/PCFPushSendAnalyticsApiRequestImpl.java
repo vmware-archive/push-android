@@ -18,7 +18,6 @@ import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.database.AnalyticsEventsStorage;
 import io.pivotal.android.push.model.analytics.AnalyticsEvent;
 import io.pivotal.android.push.model.analytics.AnalyticsEventList;
-import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushRequestHeaders;
 import io.pivotal.android.push.util.ApiRequestImpl;
 import io.pivotal.android.push.util.Const;

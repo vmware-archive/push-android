@@ -10,20 +10,16 @@ import junit.framework.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Properties;
 import java.util.concurrent.Semaphore;
 
 import io.pivotal.android.push.analytics.jobs.DummyJob;
 import io.pivotal.android.push.analytics.jobs.PrepareDatabaseJob;
-import io.pivotal.android.push.backend.analytics.FakePCFPushCheckBackEndVersionApiRequest;
 import io.pivotal.android.push.backend.analytics.FakePCFPushSendAnalyticsApiRequest;
-import io.pivotal.android.push.backend.analytics.PCFPushCheckBackEndVersionApiRequestProvider;
 import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsApiRequestProvider;
 import io.pivotal.android.push.database.DatabaseWrapper;
 import io.pivotal.android.push.database.FakeAnalyticsEventsStorage;
 import io.pivotal.android.push.model.analytics.AnalyticsEventTest;
 import io.pivotal.android.push.prefs.FakePushPreferencesProvider;
-import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.receiver.FakeAnalyticsEventsSenderAlarmProvider;
 import io.pivotal.android.push.util.FakeNetworkWrapper;
 import io.pivotal.android.push.util.FakeServiceStarter;
@@ -62,7 +58,6 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
         final FakeNetworkWrapper networkWrapper = new FakeNetworkWrapper();
         final FakeAnalyticsEventsStorage eventsStorage = new FakeAnalyticsEventsStorage();
         final FakePCFPushSendAnalyticsApiRequest apiRequest = new FakePCFPushSendAnalyticsApiRequest();
-        final FakePCFPushCheckBackEndVersionApiRequest checkBackEndVersionApiRequest = new FakePCFPushCheckBackEndVersionApiRequest();
         final FakeServiceStarter serviceStarter = new FakeServiceStarter();
 
         pushPreferencesProvider = new FakePushPreferencesProvider(null, null, null, null, null, null, null, null, null, 0, false);
@@ -82,7 +77,6 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
         AnalyticsEventService.sendAnalyticsRequestProvider = new PCFPushSendAnalyticsApiRequestProvider(apiRequest);
         AnalyticsEventService.alarmProvider = alarmProvider;
         AnalyticsEventService.listOfCompletedJobs = listOfCompletedJobs;
-        AnalyticsEventService.checkBackEndVersionRequestProvider = new PCFPushCheckBackEndVersionApiRequestProvider(checkBackEndVersionApiRequest);
     }
 
     @Override
@@ -94,7 +88,6 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
         AnalyticsEventService.pushPreferencesProvider = null;
         AnalyticsEventService.alarmProvider = null;
         AnalyticsEventService.sendAnalyticsRequestProvider = null;
-        AnalyticsEventService.checkBackEndVersionRequestProvider = null;
         super.tearDown();
     }
 

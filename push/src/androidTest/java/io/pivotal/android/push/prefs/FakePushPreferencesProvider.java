@@ -21,8 +21,6 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     private String serviceUrl;
     private Set<String> tags;
     private long lastGeofenceUpdate = GeofenceEngine.NEVER_UPDATED_GEOFENCES;
-    private Version backEndVersion;
-    private Date backEndVersionTimePolled;
     private boolean areGeofencesEnabled;
     private boolean wasFcmTokenIdSaved = false;
     private boolean wasPCFPushDeviceRegistrationIdSaved = false;
@@ -63,35 +61,6 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
         this.lastGeofenceUpdate = lastGeofenceUpdateToLoad;
         this.areGeofencesEnabled = areGeofencesEnabled;
         this.tags = tagsToLoad;
-    }
-
-    public FakePushPreferencesProvider(String fcmTokenIdToLoad,
-                                       String pcfPushDeviceRegistrationIdToLoad,
-                                       String platformUuidToLoad,
-                                       String platformSecretToLoad,
-                                       String deviceAliasToLoad,
-                                       String customUserIdToLoad,
-                                       String packageNameToLoad,
-                                       String serviceUrlToLoad,
-                                       Set<String> tagsToLoad,
-                                       long lastGeofenceUpdateToLoad,
-                                       boolean areGeofencesEnabled,
-                                       Version backEndVersion,
-                                       Date backEndVersionTimePolled) {
-
-        this.fcmTokenId = fcmTokenIdToLoad;
-        this.pcfPushDeviceRegistrationId = pcfPushDeviceRegistrationIdToLoad;
-        this.platformUuid = platformUuidToLoad;
-        this.platformSecret = platformSecretToLoad;
-        this.deviceAlias = deviceAliasToLoad;
-        this.customUserId = customUserIdToLoad;
-        this.packageName = packageNameToLoad;
-        this.serviceUrl = serviceUrlToLoad;
-        this.lastGeofenceUpdate = lastGeofenceUpdateToLoad;
-        this.areGeofencesEnabled = areGeofencesEnabled;
-        this.tags = tagsToLoad;
-        this.backEndVersion = backEndVersion;
-        this.backEndVersionTimePolled = backEndVersionTimePolled;
     }
 
     @Override
@@ -146,16 +115,6 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     @Override
     public boolean areGeofencesEnabled() {
         return areGeofencesEnabled;
-    }
-
-    @Override
-    public Version getBackEndVersion() {
-        return backEndVersion;
-    }
-
-    @Override
-    public Date getBackEndVersionTimePolled() {
-        return backEndVersionTimePolled;
     }
 
     @Override
@@ -225,16 +184,6 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
 
     public void setAreAnalyticsEnabled(boolean areAnalyticsEnabled) {
         this.areAnalyticsEnabled = areAnalyticsEnabled;
-    }
-
-    @Override
-    public void setBackEndVersion(Version version) {
-        this.backEndVersion = version;
-    }
-
-    @Override
-    public void setBackEndVersionTimePolled(Date timestamp) {
-        this.backEndVersionTimePolled = timestamp;
     }
 
     @Override

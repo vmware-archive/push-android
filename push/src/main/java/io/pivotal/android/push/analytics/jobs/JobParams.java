@@ -2,7 +2,6 @@ package io.pivotal.android.push.analytics.jobs;
 
 import android.content.Context;
 
-import io.pivotal.android.push.backend.analytics.PCFPushCheckBackEndVersionApiRequestProvider;
 import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsApiRequestProvider;
 import io.pivotal.android.push.database.AnalyticsEventsStorage;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
@@ -22,7 +21,6 @@ public class JobParams {
     public final AnalyticsEventsStorage eventsStorage;
     public final AnalyticsEventsSenderAlarmProvider alarmProvider;
     public final PCFPushSendAnalyticsApiRequestProvider sendAnalyticsRequestProvider;
-    public final PCFPushCheckBackEndVersionApiRequestProvider checkBackEndVersionRequestProvider;
 
     public JobParams(Context context,
                      JobResultListener listener,
@@ -32,10 +30,9 @@ public class JobParams {
                      AnalyticsEventsStorage eventsStorage,
                      PushPreferencesProvider pushPreferencesProvider,
                      AnalyticsEventsSenderAlarmProvider alarmProvider,
-                     PCFPushSendAnalyticsApiRequestProvider sendAnalyticsRequestProvider,
-                     PCFPushCheckBackEndVersionApiRequestProvider checkBackEndVersionRequestProvider) {
+                     PCFPushSendAnalyticsApiRequestProvider sendAnalyticsRequestProvider) {
 
-        verifyArguments(context, listener, timeProvider, networkWrapper, serviceStarter, eventsStorage, pushPreferencesProvider, alarmProvider, sendAnalyticsRequestProvider, checkBackEndVersionRequestProvider);
+        verifyArguments(context, listener, timeProvider, networkWrapper, serviceStarter, eventsStorage, pushPreferencesProvider, alarmProvider, sendAnalyticsRequestProvider);
 
         this.context = context;
         this.listener = listener;
@@ -46,7 +43,6 @@ public class JobParams {
         this.pushPreferencesProvider = pushPreferencesProvider;
         this.alarmProvider = alarmProvider;
         this.sendAnalyticsRequestProvider = sendAnalyticsRequestProvider;
-        this.checkBackEndVersionRequestProvider = checkBackEndVersionRequestProvider;
     }
 
     public JobParams(JobParams otherJobParams, JobResultListener listener) {
@@ -59,8 +55,7 @@ public class JobParams {
                 otherJobParams.eventsStorage,
                 otherJobParams.pushPreferencesProvider,
                 otherJobParams.alarmProvider,
-                otherJobParams.sendAnalyticsRequestProvider,
-                otherJobParams.checkBackEndVersionRequestProvider);
+                otherJobParams.sendAnalyticsRequestProvider);
 
         this.context = otherJobParams.context;
         this.listener = listener;
@@ -71,7 +66,6 @@ public class JobParams {
         this.pushPreferencesProvider = otherJobParams.pushPreferencesProvider;
         this.alarmProvider = otherJobParams.alarmProvider;
         this.sendAnalyticsRequestProvider = otherJobParams.sendAnalyticsRequestProvider;
-        this.checkBackEndVersionRequestProvider = otherJobParams.checkBackEndVersionRequestProvider;
     }
 
     private void verifyArguments(Context context,
@@ -82,8 +76,7 @@ public class JobParams {
                                  AnalyticsEventsStorage eventsStorage,
                                  PushPreferencesProvider pushPreferencesProvider,
                                  AnalyticsEventsSenderAlarmProvider alarmProvider,
-                                 PCFPushSendAnalyticsApiRequestProvider sendAnalyticsRequestProvider,
-                                 PCFPushCheckBackEndVersionApiRequestProvider checkBackEndVersionRequestProvider) {
+                                 PCFPushSendAnalyticsApiRequestProvider sendAnalyticsRequestProvider) {
         if (context == null) {
             throw new IllegalArgumentException("context may not be null");
         }
@@ -110,9 +103,6 @@ public class JobParams {
         }
         if (sendAnalyticsRequestProvider == null) {
             throw new IllegalArgumentException("sendAnalyticsRequestProvider may not be null");
-        }
-        if (checkBackEndVersionRequestProvider == null) {
-            throw new IllegalArgumentException("checkBackEndVersionRequestProvider may not be null");
         }
     }
 }

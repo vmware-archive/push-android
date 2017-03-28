@@ -2,6 +2,7 @@ package io.pivotal.android.push.prefs;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
+
 import java.util.Map;
 
 public abstract class PushRequestHeaders {

@@ -10,9 +10,7 @@ import junit.framework.Assert;
 import java.lang.reflect.Field;
 import java.util.concurrent.Semaphore;
 
-import io.pivotal.android.push.backend.analytics.FakePCFPushCheckBackEndVersionApiRequest;
 import io.pivotal.android.push.backend.analytics.FakePCFPushSendAnalyticsApiRequest;
-import io.pivotal.android.push.backend.analytics.PCFPushCheckBackEndVersionApiRequestProvider;
 import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsApiRequestProvider;
 import io.pivotal.android.push.database.FakeAnalyticsEventsStorage;
 import io.pivotal.android.push.model.analytics.AnalyticsEvent;
@@ -39,9 +37,7 @@ public abstract class JobTest extends AndroidTestCase {
     protected FakePushPreferencesProvider preferencesProvider;
     protected FakeAnalyticsEventsSenderAlarmProvider alarmProvider;
     protected FakePCFPushSendAnalyticsApiRequest sendAnalyticsApiRequest;
-    protected FakePCFPushCheckBackEndVersionApiRequest checkBackEndVersionApiRequest;
     protected PCFPushSendAnalyticsApiRequestProvider sendAnalyticsApiRequestProvider;
-    protected PCFPushCheckBackEndVersionApiRequestProvider checkBackEndVersionRequestProvider;
     protected Semaphore semaphore = new Semaphore(0);
 
     @Override
@@ -58,13 +54,11 @@ public abstract class JobTest extends AndroidTestCase {
         alarmProvider = new FakeAnalyticsEventsSenderAlarmProvider();
         preferencesProvider = new FakePushPreferencesProvider(null, null, null, null, null, null, null, TEST_SERVICE_URL, null, 0, false);
         sendAnalyticsApiRequest = new FakePCFPushSendAnalyticsApiRequest();
-        checkBackEndVersionApiRequest = new FakePCFPushCheckBackEndVersionApiRequest();
         sendAnalyticsApiRequestProvider = new PCFPushSendAnalyticsApiRequestProvider(sendAnalyticsApiRequest);
-        checkBackEndVersionRequestProvider = new PCFPushCheckBackEndVersionApiRequestProvider(checkBackEndVersionApiRequest);
     }
 
     protected JobParams getJobParams(JobResultListener listener) {
-        return new JobParams(getContext(), listener, timeProvider, networkWrapper, serviceStarter, eventsStorage, preferencesProvider, alarmProvider, sendAnalyticsApiRequestProvider, checkBackEndVersionRequestProvider);
+        return new JobParams(getContext(), listener, timeProvider, networkWrapper, serviceStarter, eventsStorage, preferencesProvider, alarmProvider, sendAnalyticsApiRequestProvider);
     }
 
     protected Uri saveEventWithStatus(int status) {
