@@ -194,8 +194,8 @@ public class Push {
             return;
         }
 
+        final PushParameters parameters = this.parameters;
         final Runnable runnable = new Runnable() {
-
             @Override
             public void run() {
                 try {
@@ -208,7 +208,6 @@ public class Push {
             }
         };
         threadPool.execute(runnable);
-        parameters = null;
     }
 
     private void updateRegistrationToken() {
