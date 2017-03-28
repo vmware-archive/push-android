@@ -30,6 +30,7 @@ public class PushParameters {
     private final String customUserId;
     private final Set<String> tags;
     private final boolean areGeofencesEnabled;
+    private final boolean areAnalyticsEnabled;
     private final Pivotal.SslCertValidationMode sslCertValidationMode;
     private final List<String> pinnedSslCertificateNames;
     private final Map<String, String> requestHeaders;
@@ -63,6 +64,7 @@ public class PushParameters {
                           @Nullable String customUserId,
                           @Nullable Set<String> tags,
                           boolean areGeofencesEnabled,
+                          boolean areAnalyticsEnabled,
                           Pivotal.SslCertValidationMode sslCertValidationMode,
                           @Nullable List<String> pinnedSslCertificateNames,
                           @Nullable Map<String, String> requestHeaders) {
@@ -82,38 +84,10 @@ public class PushParameters {
         }
         this.tags = Util.lowercaseTags(tags);
         this.areGeofencesEnabled = areGeofencesEnabled;
+        this.areAnalyticsEnabled = areAnalyticsEnabled;
         this.sslCertValidationMode = sslCertValidationMode;
         this.pinnedSslCertificateNames = pinnedSslCertificateNames;
         this.requestHeaders = requestHeaders;
-    }
-
-    /**
-     * Returns a PushParameters object by reading some of its field from the Pivotal.properties file and some from the PushPreferences
-     * @param context               The {@link Context} to use to load the properties with
-     * @param preferencesProvider   The {@link PushPreferencesProvider} to use to load the properties with
-     * @param pushRequestHeaders    The {@link PushRequestHeaders} to use to load the request headers with
-     * @param deviceAlias           A developer-defined "device alias" which can be used to designate this device, or class.
-     *                              of devices, in push or notification campaigns. May not be set to `null`. May be set to empty.
-     * @param tags                  A set of tags to register to.  You should always register all tags that you want to listen to, even if you have
-     *                              already subscribed to them.  If you exclude any subscribed tags in a registration request, then those tags
-     *                              will be unsubscribed.
-     */
-    public PushParameters(@NonNull Context context,
-                          @NonNull PushPreferencesProvider preferencesProvider,
-                          @NonNull PushRequestHeaders pushRequestHeaders,
-                          @Nullable String deviceAlias,
-                          @Nullable Set<String> tags) {
-
-        this.platformUuid = preferencesProvider.getPlatformUuid();
-        this.platformSecret = preferencesProvider.getPlatformSecret();
-        this.serviceUrl = preferencesProvider.getServiceUrl();
-        this.areGeofencesEnabled = preferencesProvider.areGeofencesEnabled();
-        this.sslCertValidationMode = Pivotal.getSslCertValidationMode(context);
-        this.pinnedSslCertificateNames = Pivotal.getPinnedSslCertificateNames(context);
-        this.requestHeaders = pushRequestHeaders.getRequestHeaders();
-        this.tags = Util.lowercaseTags(tags);
-        this.deviceAlias = deviceAlias;
-        this.customUserId = preferencesProvider.getCustomUserId();
     }
 
     public String getPlatformUuid() {
@@ -143,6 +117,7 @@ public class PushParameters {
     public boolean areGeofencesEnabled() {
         return areGeofencesEnabled;
     }
+    public boolean areAnalyticsEnabled() { return areAnalyticsEnabled; }
 
     public List<String> getPinnedSslCertificateNames() {
         return pinnedSslCertificateNames != null ? Collections.unmodifiableList(pinnedSslCertificateNames) : null;

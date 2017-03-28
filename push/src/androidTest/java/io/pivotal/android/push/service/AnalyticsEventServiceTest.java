@@ -83,8 +83,6 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
         AnalyticsEventService.alarmProvider = alarmProvider;
         AnalyticsEventService.listOfCompletedJobs = listOfCompletedJobs;
         AnalyticsEventService.checkBackEndVersionRequestProvider = new PCFPushCheckBackEndVersionApiRequestProvider(checkBackEndVersionApiRequest);
-
-        Pivotal.setProperties(getProperties());
     }
 
     @Override
@@ -207,11 +205,5 @@ public class AnalyticsEventServiceTest extends ServiceTestCase<AnalyticsEventSer
 
     private void addResultReceiverToIntent(Intent intent) {
         intent.putExtra(AnalyticsEventService.KEY_RESULT_RECEIVER, testResultReceiver);
-    }
-
-    private Properties getProperties() {
-        final Properties properties = new Properties();
-        properties.setProperty(Pivotal.Keys.ARE_ANALYTICS_ENABLED, "true");
-        return properties;
     }
 }

@@ -131,7 +131,7 @@ public class RegistrationEngineTestParameters {
         when(googleApiAvailability.isGooglePlayServicesAvailable(context)).thenReturn(ConnectionResult.SUCCESS);
 
         final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, firebaseInstanceId, googleApiAvailability, pushPreferencesProvider, pushRequestHeaders, PCFPushRegistrationApiRequestProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
-        final PushParameters parameters = new PushParameters(platformUuidFromUser, platformSecretFromUser, serviceUrlFromUser, deviceAliasFromUser, customUserIdFromUser, tagsFromUser, areGeofencesEnabledFromUser, Pivotal.SslCertValidationMode.DEFAULT, null, null);
+        final PushParameters parameters = new PushParameters(platformUuidFromUser, platformSecretFromUser, serviceUrlFromUser, deviceAliasFromUser, customUserIdFromUser, tagsFromUser, areGeofencesEnabledFromUser, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
 
         doAnswer(new Answer<Void>() {
 

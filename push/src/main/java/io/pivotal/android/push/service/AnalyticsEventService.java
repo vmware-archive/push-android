@@ -8,21 +8,19 @@ import android.os.ResultReceiver;
 import java.util.List;
 import java.util.concurrent.Semaphore;
 
+import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.analytics.jobs.BaseJob;
-import io.pivotal.android.push.analytics.jobs.CheckBackEndVersionJob;
 import io.pivotal.android.push.analytics.jobs.EnqueueAnalyticsEventJob;
 import io.pivotal.android.push.analytics.jobs.JobParams;
 import io.pivotal.android.push.analytics.jobs.JobResultListener;
 import io.pivotal.android.push.analytics.jobs.PrepareDatabaseJob;
 import io.pivotal.android.push.analytics.jobs.SendAnalyticsEventsJob;
-import io.pivotal.android.push.backend.analytics.PCFPushCheckBackEndVersionApiRequestImpl;
 import io.pivotal.android.push.backend.analytics.PCFPushCheckBackEndVersionApiRequestProvider;
 import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsApiRequestImpl;
 import io.pivotal.android.push.backend.analytics.PCFPushSendAnalyticsApiRequestProvider;
 import io.pivotal.android.push.database.AnalyticsEventsStorage;
 import io.pivotal.android.push.database.DatabaseAnalyticsEventsStorage;
 import io.pivotal.android.push.database.DatabaseWrapper;
-import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushPreferencesProviderImpl;
 import io.pivotal.android.push.prefs.PushRequestHeaders;
@@ -58,10 +56,15 @@ public class AnalyticsEventService extends IntentService {
     /* package */ static PushPreferencesProvider pushPreferencesProvider;
     /* package */ static PushRequestHeaders pushRequestHeaders;
 
+    static PushParameters parameters;
 
     // Used by unit tests
     /* package */ static void setPushPreferencesProvider(PushPreferencesProvider preferences) {
         AnalyticsEventService.pushPreferencesProvider = preferences;
+    }
+
+    public static void setPushParameters(PushParameters parameters) {
+        AnalyticsEventService.parameters = parameters;
     }
 
     public static Intent getIntentToRunJob(Context context, BaseJob job) {
@@ -95,15 +98,14 @@ public class AnalyticsEventService extends IntentService {
                     if (AnalyticsEventService.pushRequestHeaders == null) {
                         AnalyticsEventService.pushRequestHeaders = PushRequestHeaders.getInstance(this);
                     }
-                    if ((job instanceof CheckBackEndVersionJob && Pivotal.getAreAnalyticsEnabled(this)) || pushPreferencesProvider.areAnalyticsEnabled()) {
-                        setupStatics(intent);
-                        runJob(job, resultReceiver);
+                    if (pushPreferencesProvider.areAnalyticsEnabled()) {
+                            setupStatics(intent);
+                            runJob(job, resultReceiver);
                     } else {
                         sendResult(ANALYTICS_DISABLED, resultReceiver);
                     }
                 }
             }
-
         } finally {
             postProcessAfterService(intent);
         }
@@ -129,12 +131,8 @@ public class AnalyticsEventService extends IntentService {
             AnalyticsEventService.serviceStarter = new ServiceStarterImpl();
         }
         if (AnalyticsEventService.sendAnalyticsRequestProvider == null) {
-            final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(this, AnalyticsEventService.eventsStorage, AnalyticsEventService.pushPreferencesProvider, AnalyticsEventService.pushRequestHeaders, AnalyticsEventService.networkWrapper);
+            final PCFPushSendAnalyticsApiRequestImpl request = new PCFPushSendAnalyticsApiRequestImpl(this, parameters, AnalyticsEventService.eventsStorage, AnalyticsEventService.pushRequestHeaders, AnalyticsEventService.networkWrapper);
             AnalyticsEventService.sendAnalyticsRequestProvider = new PCFPushSendAnalyticsApiRequestProvider(request);
-        }
-        if (AnalyticsEventService.checkBackEndVersionRequestProvider == null) {
-            final PCFPushCheckBackEndVersionApiRequestImpl request = new PCFPushCheckBackEndVersionApiRequestImpl(this, AnalyticsEventService.pushPreferencesProvider, AnalyticsEventService.pushRequestHeaders, AnalyticsEventService.networkWrapper);
-            AnalyticsEventService.checkBackEndVersionRequestProvider = new PCFPushCheckBackEndVersionApiRequestProvider(request);
         }
 
         if (!isIntentForSetup(intent) && needToCleanDatabase) {
@@ -184,7 +182,7 @@ public class AnalyticsEventService extends IntentService {
             return false;
         }
 
-        return (job instanceof PrepareDatabaseJob) || (job instanceof CheckBackEndVersionJob);
+        return (job instanceof PrepareDatabaseJob);
     }
 
     private boolean hasJob(Intent intent) {

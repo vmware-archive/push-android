@@ -321,8 +321,9 @@ public class RegistrationEngine {
                 pushPreferencesProvider.getCustomUserId(),
                 pushPreferencesProvider.getTags(),
                 pushPreferencesProvider.areGeofencesEnabled(),
-                Pivotal.getSslCertValidationMode(context),
-                Pivotal.getPinnedSslCertificateNames(context),
+                pushPreferencesProvider.areAnalyticsEnabled(),
+                null,
+                null,
                 pushRequestHeaders.getRequestHeaders()
         );
 

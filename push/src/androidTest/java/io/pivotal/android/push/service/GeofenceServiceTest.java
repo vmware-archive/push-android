@@ -51,7 +51,6 @@ public class GeofenceServiceTest extends AndroidTestCase {
         service = startService();
         service.setGeofenceEngine(geofenceEngine);
         service.setGetGeofenceUpdatesApiRequest(apiRequest);
-        Pivotal.setProperties(getProperties());
     }
 
     @Override
@@ -175,12 +174,6 @@ public class GeofenceServiceTest extends AndroidTestCase {
 
     private FakePushPreferencesProvider getPreferences(long timestamp, boolean areGeofencesEnabled) {
         return new FakePushPreferencesProvider("", TEST_DEVICE_UUID, "", "", "", "", "", "", null, timestamp, areGeofencesEnabled);
-    }
-
-    private Properties getProperties() {
-        // TODO - are properties still needed for this test?
-        final Properties properties = new Properties();
-        return properties;
     }
 
     private FakeGeofenceService startService() {

@@ -3,12 +3,14 @@ package io.pivotal.android.push.geofence;
 import android.content.Context;
 import android.content.Intent;
 
+import java.util.ArrayList;
 import java.util.Set;
 
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.geofence.PCFPushGetGeofenceUpdatesApiRequest;
 import io.pivotal.android.push.backend.geofence.PCFPushGetGeofenceUpdatesListener;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceResponseData;
+import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesProvider;
 import io.pivotal.android.push.prefs.PushRequestHeaders;
 import io.pivotal.android.push.service.GeofenceService;
@@ -65,7 +67,19 @@ public class GeofenceUpdater {
         } else {
 
             // TODO - consider scheduling this request a short random time in the future in order to stagger the demand on the server.
-            final PushParameters parameters = new PushParameters(context, pushPreferencesProvider, pushRequestHeaders, null, null);
+            final PushParameters parameters = new PushParameters(
+                    pushPreferencesProvider.getPlatformUuid(),
+                    pushPreferencesProvider.getPlatformSecret(),
+                    pushPreferencesProvider.getServiceUrl(),
+                    pushPreferencesProvider.getDeviceAlias(),
+                    pushPreferencesProvider.getCustomUserId(),
+                    pushPreferencesProvider.getTags(),
+                    pushPreferencesProvider.areGeofencesEnabled(),
+                    pushPreferencesProvider.areAnalyticsEnabled(),
+                    Pivotal.SslCertValidationMode.DEFAULT,
+                    new ArrayList<String>(),
+                    pushRequestHeaders.getRequestHeaders());
+
             final String deviceUuid = pushPreferencesProvider.getPCFPushDeviceRegistrationId();
             apiRequest.getGeofenceUpdates(timestamp, deviceUuid, parameters, new PCFPushGetGeofenceUpdatesListener() {
 

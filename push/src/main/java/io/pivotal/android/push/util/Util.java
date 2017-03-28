@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.os.Build;
+import android.util.Base64;
 
 import com.google.gson.Gson;
 
@@ -14,6 +15,8 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -132,5 +135,19 @@ public class Util {
 
         final int res = context.checkCallingOrSelfPermission("android.permission.WRITE_EXTERNAL_STORAGE");
         return res == PackageManager.PERMISSION_GRANTED;
+    }
+
+    public static String sha256(String in) {
+        if (in == null) {
+            return null;
+        }
+
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            return Base64.encodeToString(digest.digest(in.getBytes()), Base64.DEFAULT);
+        } catch (NoSuchAlgorithmException e) {
+            return null;
+        }
+
     }
 }

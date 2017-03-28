@@ -179,7 +179,7 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
     }
 
     private AnalyticsEventLogger getEventLoggerWithAnalyticsEnabled() {
-        Pivotal.setProperties(getProperties(true));
+        preferencesProvider.setAreAnalyticsEnabled(true);
         return new AnalyticsEventLogger(serviceStarter, preferencesProvider, getContext());
     }
 
@@ -195,11 +195,5 @@ public class AnalyticsEventLoggerTest extends AndroidTestCase {
 
     private Intent getServiceIntent(int intentNumber) {
         return serviceStarter.getStartedIntents().get(intentNumber);
-    }
-
-    private Properties getProperties(boolean areAnalyticsEnabled) {
-        final Properties properties = new Properties();
-        properties.setProperty(Pivotal.Keys.ARE_ANALYTICS_ENABLED, Boolean.toString(areAnalyticsEnabled));
-        return properties;
     }
 }

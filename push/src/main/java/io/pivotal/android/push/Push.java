@@ -19,6 +19,8 @@ import android.support.v4.content.ContextCompat;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 
+import static com.google.gson.internal.$Gson$Preconditions.checkArgument;
+
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -26,7 +28,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import io.pivotal.android.push.analytics.AnalyticsEventLogger;
-import io.pivotal.android.push.analytics.jobs.CheckBackEndVersionJob;
 import io.pivotal.android.push.analytics.jobs.PrepareDatabaseJob;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequest;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestImpl;
@@ -49,7 +50,6 @@ import io.pivotal.android.push.registration.SubscribeToTagsListener;
 import io.pivotal.android.push.registration.UnregistrationEngine;
 import io.pivotal.android.push.registration.UnregistrationListener;
 import io.pivotal.android.push.service.AnalyticsEventService;
-import io.pivotal.android.push.util.DebugUtil;
 import io.pivotal.android.push.util.FileHelper;
 import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.NetworkWrapper;
@@ -71,13 +71,18 @@ public class Push {
 
     public static final String GEOFENCE_UPDATE_BROADCAST = "io.pivotal.android.push.geofence.UPDATE";
 
-    private static Push instance;
-
-    // TODO - consider creating an IntentService (instead of a thread pool) in order to process registration and unregistration requests.
     private static final ExecutorService threadPool = Executors.newFixedThreadPool(1);
 
+    private static Push instance;
+
     private PushParameters parameters = null;
+
     private RegistrationListener registrationListener = null;
+
+    private Context context;
+    private boolean wasDatabaseCleanupJobRun = false;
+
+    private PushServiceInfo pushServiceInfo = null;
 
     /**
      * Retrieves an instance of the Pivotal CF Mobile Services Push SDK singleton object.
@@ -91,10 +96,6 @@ public class Push {
         }
         return instance;
     }
-
-    private Context context;
-    private boolean wasDatabaseCleanupJobRun = false;
-    private PushPlatformInfo pushPlatformInfo = null;
 
     private Push(@NonNull Context context) {
         verifyArguments(context);
@@ -169,8 +170,13 @@ public class Push {
                                   final boolean areGeofencesEnabled,
                                   @Nullable final RegistrationListener listener) {
 
+        checkArgument(pushServiceInfo != null);
+
+        // TODO Fix header storage implementation
         final PushRequestHeaders pushRequestHeaders = PushRequestHeaders.getInstance(context);
-        parameters = getPushParameters(deviceAlias, customUserId, tags, areGeofencesEnabled, pushRequestHeaders.getRequestHeaders());
+
+        parameters = getPushParameters(deviceAlias, customUserId, tags, areGeofencesEnabled, pushServiceInfo.areAnalyticsEnabled(),
+                pushRequestHeaders.getRequestHeaders());
 
         registrationListener = listener;
 
@@ -188,8 +194,6 @@ public class Push {
             return;
         }
 
-        final PushParameters pushParameters = parameters;
-
         final Runnable runnable = new Runnable() {
 
             @Override
@@ -197,7 +201,7 @@ public class Push {
                 try {
                     final RegistrationEngine registrationEngine = RegistrationEngine.getRegistrationEngine(context);
 
-                    registrationEngine.registerDevice(pushParameters, registrationListener);
+                    registrationEngine.registerDevice(parameters, registrationListener);
                 } catch (Exception e) {
                     Logger.ex("Push SDK registration failed", e);
                 }
@@ -208,7 +212,7 @@ public class Push {
     }
 
     private void updateRegistrationToken() {
-        final PushPreferencesProviderImpl preferences = new PushPreferencesProviderImpl(context);
+        final PushPreferencesProvider preferences = new PushPreferencesProviderImpl(context);
         final String storedFcmTokenId = preferences.getFcmTokenId();
 
         final String currentFcmToken = FirebaseInstanceId.getInstance().getToken();
@@ -241,59 +245,26 @@ public class Push {
                                              @Nullable String customUserId,
                                              @Nullable Set<String> tags,
                                              boolean areGeofencesEnabled,
+                                             boolean areAnalyticsEnabled,
                                              @Nullable Map<String, String> requestHeaders) {
 
-        final String platformUuid = getPlatformUuid();
-        final String platformSecret = getPlatformSecret();
-        final String serviceUrl = getBaseServerUrl();
-        final Pivotal.SslCertValidationMode sslCertValidationMode = Pivotal.getSslCertValidationMode(context);
-        final List<String> pinnedCertificateNames = Pivotal.getPinnedSslCertificateNames(context);
-        return new PushParameters(platformUuid, platformSecret, serviceUrl, deviceAlias, customUserId, tags, areGeofencesEnabled, sslCertValidationMode, pinnedCertificateNames, requestHeaders);
-    }
-
-    @Nullable
-    private String getBaseServerUrl() {
-        String baseServerUrl = null;
-        if (pushPlatformInfo != null) {
-            baseServerUrl = pushPlatformInfo.getBaseServerUrl();
-        }
-
-        if (baseServerUrl == null) {
-            final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
-            baseServerUrl = pushPreferencesProvider.getServiceUrl();
-        }
-
-        return baseServerUrl;
-    }
-
-    @Nullable
-    private String getPlatformUuid() {
-        String platformUuid = null;
-        if (pushPlatformInfo != null) {
-            platformUuid = pushPlatformInfo.getPlatformUuid();
-        }
-
-        if (platformUuid == null) {
-            final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
-            platformUuid = pushPreferencesProvider.getPlatformUuid();
-        }
-
-        return platformUuid;
-    }
-
-    @Nullable
-    private String getPlatformSecret() {
-        String platformSecret = null;
-        if (pushPlatformInfo != null) {
-            platformSecret = pushPlatformInfo.getPlatformSecret();
-        }
-
-        if (platformSecret == null) {
-            final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
-            platformSecret = pushPreferencesProvider.getPlatformSecret();
-        }
-
-        return platformSecret;
+        final String platformUuid = pushServiceInfo.getPlatformUuid();
+        final String platformSecret = pushServiceInfo.getPlatformSecret();
+        final String serviceUrl = pushServiceInfo.getServiceUrl();
+        final Pivotal.SslCertValidationMode sslCertValidationMode = pushServiceInfo.getSslCertValidationMode();
+        final List<String> pinnedCertificateNames = pushServiceInfo.getPinnedSslCertificateNames();
+        return new PushParameters(
+                platformUuid,
+                platformSecret,
+                serviceUrl,
+                deviceAlias,
+                customUserId,
+                tags,
+                areGeofencesEnabled,
+                areAnalyticsEnabled,
+                sslCertValidationMode,
+                pinnedCertificateNames,
+                requestHeaders);
     }
 
     private void verifyRegistrationArguments(@NonNull PushParameters parameters) {
@@ -312,20 +283,15 @@ public class Push {
     }
 
     private void checkAnalytics() {
-        if (Pivotal.getAreAnalyticsEnabled(context)) {
+        if (pushServiceInfo.areAnalyticsEnabled()) {
 
-            final PushPreferencesProviderImpl preferencesProvider = new PushPreferencesProviderImpl(context);
-            final TimeProvider timeProvider = new TimeProvider();
-            final boolean isDebug = DebugUtil.getInstance(context).isDebuggable();
+            AnalyticsEventService.setPushParameters(parameters);
+            final Intent intent = AnalyticsEventService.getIntentToRunJob(context, null);
+            context.startService(intent);
 
-            if (CheckBackEndVersionJob.isPollingTime(isDebug, timeProvider, preferencesProvider)) {
-                final CheckBackEndVersionJob job = new CheckBackEndVersionJob();
-                final Intent intent = AnalyticsEventService.getIntentToRunJob(context, job);
-                context.startService(intent);
-            }
+
 
             cleanupDatabase();
-
         } else {
             Logger.i("Pivotal PushSDK analytics is disabled.");
             final AnalyticsEventsSenderAlarmProvider alarmProvider = new AnalyticsEventsSenderAlarmProviderImpl(context);
@@ -424,10 +390,8 @@ public class Push {
     public void startUnregistration(@Nullable final UnregistrationListener listener) {
         final PushPreferencesProvider pushPreferencesProvider = new PushPreferencesProviderImpl(context);
         final PushRequestHeaders pushRequestHeaders =  PushRequestHeaders.getInstance(context);
-        final boolean areGeofencesEnabled = pushPreferencesProvider.areGeofencesEnabled();
 
-        final PushParameters parameters = getPushParameters(null, null, null, areGeofencesEnabled, pushRequestHeaders.getRequestHeaders());
-        verifyUnregistrationArguments(parameters);
+        verifyUnregistrationArguments(this.parameters);
 
         final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
         final PCFPushUnregisterDeviceApiRequest dummyPCFPushUnregisterDeviceApiRequest = new PCFPushUnregisterDeviceApiRequestImpl(context, networkWrapper);
@@ -619,16 +583,15 @@ public class Push {
     }
 
     /**
-     * Call this method to set or change the target Push platform information for network request. The SDK stores this information
-     * so that future executions do not need to call this method if the platform information has not changed.
+     * Call this method to set or change the target Push platform information for network request.
      *
      * This method must be called *before* {@link #startRegistration}, {@link #subscribeToTags}, or any other methods that
      * will make a network request.
      *
-     * @param pushPlatformInfo A {@link PushPlatformInfo} object containing the new/updated Push platform information.
+     * @param pushServiceInfo A {@link PushServiceInfo} object containing the new/updated Push platform information.
      */
-    public void setPlatformInfo(@Nullable final PushPlatformInfo pushPlatformInfo) {
-        this.pushPlatformInfo = pushPlatformInfo;
+    public void setPushServiceInfo(@Nullable final PushServiceInfo pushServiceInfo) {
+        this.pushServiceInfo = pushServiceInfo;
     }
 
     /**
@@ -659,8 +622,6 @@ public class Push {
     public synchronized void onFcmTokenUpdated() {
         if (parameters != null) {
             initiateRegistration();
-        } else {
-            updateRegistrationToken();
         }
     }
 }

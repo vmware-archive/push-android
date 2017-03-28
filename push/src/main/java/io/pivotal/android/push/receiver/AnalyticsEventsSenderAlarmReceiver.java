@@ -25,8 +25,9 @@ public class AnalyticsEventsSenderAlarmReceiver extends WakefulBroadcastReceiver
     }
 
     private boolean areAnalyticsEnabled(Context context) {
-        final PushPreferencesProviderImpl preferences = new PushPreferencesProviderImpl(context);
-        return preferences.areAnalyticsEnabled();
+        return false;
+//        final PushPreferencesProviderImpl preferences = new PushPreferencesProviderImpl(context);
+//        return preferences.areAnalyticsEnabled();
     }
 
     public static PendingIntent getPendingIntent(Context context, int pendingIntentFlags) {

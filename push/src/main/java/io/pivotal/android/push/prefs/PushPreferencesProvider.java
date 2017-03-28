@@ -63,4 +63,6 @@ public interface PushPreferencesProvider {
     void setCustomUserId(String customUserId);
 
     boolean areAnalyticsEnabled();
+
+    void setAreAnalyticsEnabled(boolean areAnalyticsEnabled);
 }

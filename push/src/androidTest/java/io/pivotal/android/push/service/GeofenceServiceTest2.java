@@ -64,7 +64,6 @@ public class GeofenceServiceTest2 extends AndroidTestCase {
         engine = mock(GeofenceEngine.class);
         eventLogger = mock(AnalyticsEventLogger.class);
         GEOFENCE_DATA_LIST = ModelUtil.getPCFPushGeofenceDataList(getContext(), "geofence_five_items.json");
-        Pivotal.setProperties(getProperties());
     }
 
     public void testHandleNullIntent() throws InterruptedException {
@@ -268,12 +267,6 @@ public class GeofenceServiceTest2 extends AndroidTestCase {
             set = null;
         }
         return new FakePushPreferencesProvider(null, null, null, null, null, null, null, null, set, 0, areGeofencesEnabled);
-    }
-
-    private Properties getProperties() {
-        final Properties properties = new Properties();
-        properties.setProperty(Pivotal.Keys.ARE_ANALYTICS_ENABLED, Boolean.toString(true));
-        return properties;
     }
 
     private <T extends FakeGeofenceService> T startService(final Class<T> klass) {

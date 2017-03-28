@@ -20,51 +20,10 @@ public class PushPreferencesProviderImplTest extends AndroidTestCase {
     protected void tearDown() throws Exception {
         super.tearDown();
         preferences.clear();
-        Pivotal.setProperties(null);
     }
 
     public void testAreAnalyticsEnabled1() {
-        final Properties properties = new Properties();
-        properties.put("areAnalyticsEnabled", "false");
-        Pivotal.setProperties(properties);
-
+        preferences.setAreAnalyticsEnabled(false);
         assertFalse(preferences.areAnalyticsEnabled());
     }
-
-    public void testAreAnalyticsEnabled2() {
-        final Properties properties = new Properties();
-        properties.put("areAnalyticsEnabled", "true");
-        Pivotal.setProperties(properties);
-
-        preferences.setBackEndVersion(null);
-        assertFalse(preferences.areAnalyticsEnabled());
-    }
-
-    public void testAreAnalyticsEnabled3() {
-        final Properties properties = new Properties();
-        properties.put("areAnalyticsEnabled", "true");
-        Pivotal.setProperties(properties);
-
-        preferences.setBackEndVersion(new Version("1.3.0"));
-        assertFalse(preferences.areAnalyticsEnabled());
-    }
-
-    public void testAreAnalyticsEnabled4() {
-        final Properties properties = new Properties();
-        properties.put("areAnalyticsEnabled", "true");
-        Pivotal.setProperties(properties);
-
-        preferences.setBackEndVersion(new Version("1.3.2"));
-        assertTrue(preferences.areAnalyticsEnabled());
-    }
-
-    public void testAreAnalyticsEnabled5() {
-        final Properties properties = new Properties();
-        properties.put("areAnalyticsEnabled", "true");
-        Pivotal.setProperties(properties);
-
-        preferences.setBackEndVersion(new Version("1.3.3"));
-        assertTrue(preferences.areAnalyticsEnabled());
-    }
-
 }

@@ -35,8 +35,7 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
     private static final String PROPERTY_BACK_END_VERSION = "back_end_version";
     private static final String PROPERTY_BACK_END_VERSION_TIME_POLLED = "back_end_version_time_polled";
     private static final String PROPERTY_CUSTOM_USER_ID = "custom_user_id";
-
-    private static final Version BACKEND_VERSION_WITH_ANALYTICS = new Version("1.3.2");
+    private static final String PROPERTY_ARE_ANALYTICS_ENABLED = "are_analytics_enabled";
 
     private final Context context;
 
@@ -58,10 +57,7 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
 
     @Override
     public void setFcmTokenId(String fcmTokenId) {
-        final SharedPreferences prefs = getSharedPreferences();
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(PROPERTY_FCM_TOKEN_ID, fcmTokenId);
-        editor.commit();
+        saveSharedPreferenceString(PROPERTY_FCM_TOKEN_ID, fcmTokenId);
     }
 
     @Override
@@ -71,10 +67,7 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
 
     @Override
     public void setPCFPushDeviceRegistrationId(String pcfPushDeviceRegistrationId) {
-        final SharedPreferences prefs = getSharedPreferences();
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(PROPERTY_PCF_PUSH_DEVICE_REGISTRATION_ID, pcfPushDeviceRegistrationId);
-        editor.commit();
+        saveSharedPreferenceString(PROPERTY_PCF_PUSH_DEVICE_REGISTRATION_ID, pcfPushDeviceRegistrationId);
     }
 
     @Override
@@ -84,10 +77,7 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
 
     @Override
     public void setPlatformUuid(String platformUuid) {
-        final SharedPreferences prefs = getSharedPreferences();
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(PROPERTY_PLATFORM_UUID, platformUuid);
-        editor.commit();
+        saveSharedPreferenceString(PROPERTY_PLATFORM_UUID, platformUuid);
     }
 
     @Override
@@ -97,10 +87,8 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
 
     @Override
     public void setPlatformSecret(String platformSecret) {
-        final SharedPreferences prefs = getSharedPreferences();
-        SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(PROPERTY_PLATFORM_SECRET, platformSecret);
-        editor.commit();
+        saveSharedPreferenceString(PROPERTY_PLATFORM_SECRET, platformSecret);
+
     }
 
     @Override
@@ -110,10 +98,7 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
 
     @Override
     public void setDeviceAlias(String deviceAlias) {
-        final SharedPreferences prefs = getSharedPreferences();
-        final SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(PROPERTY_DEVICE_ALIAS, deviceAlias);
-        editor.commit();
+        saveSharedPreferenceString(PROPERTY_DEVICE_ALIAS, deviceAlias);
     }
 
     @Override
@@ -123,10 +108,7 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
 
     @Override
     public void setPackageName(String packageName) {
-        final SharedPreferences prefs = getSharedPreferences();
-        final SharedPreferences.Editor editor = prefs.edit();
-        editor.putString(PROPERTY_PACKAGE_NAME, packageName);
-        editor.commit();
+        saveSharedPreferenceString(PROPERTY_PACKAGE_NAME, packageName);
     }
 
     @Override
@@ -232,20 +214,26 @@ public class PushPreferencesProviderImpl implements PushPreferencesProvider {
     }
 
     @Override
+    public void setAreAnalyticsEnabled(boolean areAnalyticsEnabled) {
+        final SharedPreferences prefs = getSharedPreferences();
+        final SharedPreferences.Editor editor = prefs.edit();
+        editor.putBoolean(PROPERTY_ARE_ANALYTICS_ENABLED, areAnalyticsEnabled);
+        editor.commit();
+    }
+
+    @Override
     public boolean areAnalyticsEnabled() {
-        if (!Pivotal.getAreAnalyticsEnabled(context)) {
-            return false;
-        } else {
-            final Version backendVersion = getBackEndVersion();
-            if (backendVersion == null) {
-                return false;
-            } else {
-                return backendVersion.compareTo(BACKEND_VERSION_WITH_ANALYTICS) >= 0;
-            }
-        }
+        return getSharedPreferences().getBoolean(PROPERTY_ARE_ANALYTICS_ENABLED, true);
     }
 
     private SharedPreferences getSharedPreferences() {
         return context.getSharedPreferences(TAG_NAME, Context.MODE_PRIVATE);
+    }
+
+    private void saveSharedPreferenceString(final String key, final String value) {
+        final SharedPreferences prefs = getSharedPreferences();
+        final SharedPreferences.Editor editor = prefs.edit();
+        editor.putString(key, value);
+        editor.commit();
     }
 }
