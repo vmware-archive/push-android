@@ -1,39 +1,26 @@
 /*
  * Copyright (C) 2014 Pivotal Software, Inc. All rights reserved.
  */
-package io.pivotal.android.push.registration;
+package io.pivotal.android.push.baidu;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.PackageManager;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
-import com.google.firebase.iid.FirebaseInstanceId;
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.api.FakePCFPushRegistrationApiRequest;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestProvider;
 import io.pivotal.android.push.geofence.GeofenceEngine;
-import io.pivotal.android.push.geofence.GeofenceStatusUtil;
-import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.FakePushRequestHeaders;
 import io.pivotal.android.push.prefs.Pivotal;
-import io.pivotal.android.push.prefs.PushPreferencesFCM;
+import io.pivotal.android.push.prefs.PushPreferencesBaidu;
+import io.pivotal.android.push.registration.RegistrationListener;
 import io.pivotal.android.push.util.DelayedLoop;
-import io.pivotal.android.push.version.GeofenceStatus;
 import java.util.Set;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 
 public class RegistrationEngineTestParameters {
 
@@ -42,8 +29,8 @@ public class RegistrationEngineTestParameters {
     private final Context context;
     private final DelayedLoop delayedLoop;
 
-    private String fcmTokenIdInPrefs = null;
-    private String fcmTokenIdFromServer = null;
+    private String baiduChannelIdInPrefs = null;
+    private String baiduChanneldPassedIn = null;
     private String pcfPushDeviceRegistrationIdInPrefs = null;
     private String pcfPushDeviceRegistrationIdFromServer;
     private String platformUuidInPrefs = null;
@@ -58,7 +45,7 @@ public class RegistrationEngineTestParameters {
     private String serviceUrlFromUser = null;
     private String packageNameInPrefs = null;
     private String packageNameFromUser = ".";
-    private String finalFcmTokenIdInPrefs = null;
+    private String finalBaiduChannelIdInPrefs = null;
     private String finalPCFPushDeviceRegistrationIdInPrefs = null;
     private String finalPlatformUuidInPrefs = null;
     private String finalPlatformSecretInPrefs = null;
@@ -69,11 +56,7 @@ public class RegistrationEngineTestParameters {
     private Set<String> tagsFromUser = null;
     private Set<String> tagsInPrefs = null;
     private Set<String> finalTagsInPrefs = null;
-    private boolean areGeofencesEnabledInPrefs;
-    private boolean areGeofencesEnabledFromUser = true;
-    private boolean finalAreGeofencesEnabled = true;
-    private boolean shouldFcmTokenIdHaveBeenSaved = false;
-    private boolean shouldGeofenceUpdateTimestampedHaveBeenCalled = false;
+    private boolean shouldBaiduChannelIdHaveBeenSaved = false;
     private boolean shouldPCFPushDeviceRegistrationHaveBeenSaved = false;
     private boolean shouldPlatformUuidHaveBeenSaved = false;
     private boolean shouldPlatformSecretHaveBeenSaved = false;
@@ -86,21 +69,6 @@ public class RegistrationEngineTestParameters {
     private boolean shouldPackageNameHaveBeenSaved = false;
     private boolean shouldServiceUrlHaveBeenSaved = false;
     private boolean shouldRegistrationHaveSucceeded = true;
-    private boolean shouldGeofenceUpdateBeSuccessful = true;
-    private boolean shouldAreGeofencesEnabledHaveBeenSaved = false;
-    private boolean shouldClearGeofencesFromMonitorAndStoreHaveBeenCalled = false;
-    private boolean shouldClearGeofencesFromStoreOnlyHaveBeenCalled = false;
-    private boolean shouldHavePermissionForGeofences = true;
-    private boolean wasGeofenceUpdateTimestampCalled = false;
-    private boolean wasClearGeofencesFromMonitorAndStoreCalled = false;
-    private boolean wasClearGeofencesFromStoreOnlyCalled = false;
-    private boolean wasGeofenceStatusUpdated = false;
-    private int numberOfGeofenceReregistrations = 0;
-
-    private long geofenceUpdateTimestampInPrefs = 0L;
-    private long geofenceUpdateTimestampToServer = 0L;
-    private long geofenceUpdateTimestampFromServer = 0L;
-    private long finalGeofenceUpdateTimestampInPrefs = 0L;
 
     public RegistrationEngineTestParameters() {
         this.context = mock(Context.class);
@@ -108,87 +76,18 @@ public class RegistrationEngineTestParameters {
     }
 
     public void run() {
-
-        if (shouldHavePermissionForGeofences) {
-            when(context.checkCallingOrSelfPermission(anyString())).thenReturn(PackageManager.PERMISSION_GRANTED);
-        } else {
-            when(context.checkCallingOrSelfPermission(anyString())).thenReturn(PackageManager.PERMISSION_DENIED);
-        }
-
-        final PushPreferencesFCM pushPreferences = getMockPushPreferences(fcmTokenIdInPrefs, pcfPushDeviceRegistrationIdInPrefs, platformUuidInPrefs, platformSecretInPrefs, deviceAliasInPrefs, customUserIdInPrefs, packageNameInPrefs, serviceUrlInPrefs, tagsInPrefs, geofenceUpdateTimestampInPrefs, areGeofencesEnabledInPrefs);
+        final PushPreferencesBaidu pushPreferences = getMockPushPreferences(baiduChannelIdInPrefs, pcfPushDeviceRegistrationIdInPrefs, platformUuidInPrefs, platformSecretInPrefs, deviceAliasInPrefs, customUserIdInPrefs, packageNameInPrefs, serviceUrlInPrefs, tagsInPrefs,
+            GeofenceEngine.NEVER_UPDATED_GEOFENCES, false);
 
         final FakePushRequestHeaders pushRequestHeaders = new FakePushRequestHeaders();
         final FakePCFPushRegistrationApiRequest fakePCFPushRegistrationApiRequest = new FakePCFPushRegistrationApiRequest(pcfPushDeviceRegistrationIdFromServer, shouldPCFPushDeviceRegistrationBeSuccessful);
         final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(fakePCFPushRegistrationApiRequest);
-        final GeofenceUpdater geofenceUpdater = mock(GeofenceUpdater.class);
-        final GeofenceEngine geofenceEngine = mock(GeofenceEngine.class);
-        final GeofenceStatusUtil geofenceStatusUtil = mock(GeofenceStatusUtil.class);
-        final FirebaseInstanceId firebaseInstanceId = mock(FirebaseInstanceId.class);
-        when(firebaseInstanceId.getToken()).thenReturn(fcmTokenIdFromServer);
-        final GoogleApiAvailability googleApiAvailability = mock(GoogleApiAvailability.class);
-        when(googleApiAvailability.isGooglePlayServicesAvailable(context)).thenReturn(ConnectionResult.SUCCESS);
 
-        final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, firebaseInstanceId, googleApiAvailability, pushPreferences, pushRequestHeaders, PCFPushRegistrationApiRequestProvider, geofenceUpdater, geofenceEngine, geofenceStatusUtil);
-        final PushParameters parameters = new PushParameters(platformUuidFromUser, platformSecretFromUser, serviceUrlFromUser, "some-platform-type", deviceAliasFromUser, customUserIdFromUser, tagsFromUser, areGeofencesEnabledFromUser, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
+        final RegistrationEngine engine = new RegistrationEngine(context, packageNameFromUser, pushPreferences, pushRequestHeaders, PCFPushRegistrationApiRequestProvider);
+        final PushParameters parameters = new PushParameters(platformUuidFromUser, platformSecretFromUser, serviceUrlFromUser, "some-platform-type", deviceAliasFromUser, customUserIdFromUser, tagsFromUser,
+            false, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
 
-        doAnswer(new Answer<Void>() {
-
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                final GeofenceUpdater.GeofenceUpdaterListener listener = (GeofenceUpdater.GeofenceUpdaterListener) invocation.getArguments()[2];
-                if (shouldGeofenceUpdateBeSuccessful) {
-                    wasGeofenceUpdateTimestampCalled = true;
-                    pushPreferences.setLastGeofenceUpdate(geofenceUpdateTimestampFromServer);
-                    listener.onSuccess();
-                } else {
-                    listener.onFailure("Fake request failed fakely");
-                }
-                return null;
-            }
-
-        }).when(geofenceUpdater).startGeofenceUpdate(any(Intent.class), eq(geofenceUpdateTimestampToServer), any(GeofenceUpdater.GeofenceUpdaterListener.class));
-
-        doAnswer(new Answer<Void>() {
-
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                wasClearGeofencesFromMonitorAndStoreCalled = true;
-                final GeofenceUpdater.GeofenceUpdaterListener listener = (GeofenceUpdater.GeofenceUpdaterListener) invocation.getArguments()[0];
-                if (shouldGeofenceUpdateBeSuccessful) {
-                    listener.onSuccess();
-                } else {
-                    listener.onFailure("Fake clear failed fakely"); // TODO - note that clear geofences doesn't fail
-                }
-                return null;
-            }
-
-        }).when(geofenceUpdater).clearGeofencesFromMonitorAndStore(any(GeofenceUpdater.GeofenceUpdaterListener.class));
-
-        doAnswer(new Answer<Void>() {
-
-            @Override
-            public Void answer(InvocationOnMock invocation) throws Throwable {
-                wasClearGeofencesFromStoreOnlyCalled = true;
-                final GeofenceUpdater.GeofenceUpdaterListener listener = (GeofenceUpdater.GeofenceUpdaterListener) invocation.getArguments()[0];
-                if (shouldGeofenceUpdateBeSuccessful) {
-                    listener.onSuccess();
-                } else {
-                    listener.onFailure("Fake clear failed fakely"); // TODO - note that clear geofences doesn't fail
-                }
-                return null;
-            }
-
-        }).when(geofenceUpdater).clearGeofencesFromStoreOnly(any(GeofenceUpdater.GeofenceUpdaterListener.class));
-
-        doAnswer(new Answer<Void>() {
-            @Override
-            public Void answer(InvocationOnMock invocationOnMock) throws Throwable {
-                wasGeofenceStatusUpdated = true;
-                return null;
-            }
-        }).when(geofenceStatusUtil).saveGeofenceStatusAndSendBroadcast(any(GeofenceStatus.class));
-
-        engine.registerDevice(parameters, new RegistrationListener() {
+        engine.registerDevice(parameters, baiduChanneldPassedIn, new RegistrationListener() {
 
             @Override
             public void onRegistrationComplete() {
@@ -215,9 +114,8 @@ public class RegistrationEngineTestParameters {
         assertEquals(shouldPCFPushUpdateRegistrationHaveBeenCalled, fakePCFPushRegistrationApiRequest.isUpdateRegistration());
         assertEquals(shouldPCFPushNewRegistrationHaveBeenCalled, fakePCFPushRegistrationApiRequest.isNewRegistration());
 
-        verify(pushPreferences, times(shouldFcmTokenIdHaveBeenSaved ? 1 : 0)).setFcmTokenId(finalFcmTokenIdInPrefs);
+        verify(pushPreferences, times(shouldBaiduChannelIdHaveBeenSaved ? 1 : 0)).setBaiduChannelId(finalBaiduChannelIdInPrefs);
         verify(pushPreferences, times(shouldPCFPushDeviceRegistrationHaveBeenSaved ? 1 : 0)).setPCFPushDeviceRegistrationId(finalPCFPushDeviceRegistrationIdInPrefs);
-        verify(pushPreferences, times(shouldAreGeofencesEnabledHaveBeenSaved ? 1 : 0)).setAreGeofencesEnabled(finalAreGeofencesEnabled);
         verify(pushPreferences, times(shouldPlatformUuidHaveBeenSaved ? 1 : 0)).setPlatformUuid(finalPlatformUuidInPrefs);
         verify(pushPreferences, times(shouldPlatformSecretHaveBeenSaved ? 1 : 0)).setPlatformSecret(finalPlatformSecretInPrefs);
         verify(pushPreferences, times(shouldDeviceAliasHaveBeenSaved ? 1 : 0)).setDeviceAlias(finalDeviceAliasInPrefs);
@@ -225,27 +123,16 @@ public class RegistrationEngineTestParameters {
         verify(pushPreferences, times(shouldPackageNameHaveBeenSaved ? 1 : 0)).setPackageName(finalPackageNameInPrefs);
         verify(pushPreferences, times(shouldServiceUrlHaveBeenSaved ? 1 : 0)).setServiceUrl(finalServiceUrlInPrefs);
         verify(pushPreferences, times(shouldTagsHaveBeenSaved ? 1 : 0)).setTags(finalTagsInPrefs);
-
-        if (shouldGeofenceUpdateTimestampedHaveBeenCalled) {
-            verify(pushPreferences).setLastGeofenceUpdate(finalGeofenceUpdateTimestampInPrefs);
-        }
-
-        assertEquals(shouldGeofenceUpdateTimestampedHaveBeenCalled, wasGeofenceUpdateTimestampCalled);
-        assertEquals(shouldClearGeofencesFromMonitorAndStoreHaveBeenCalled, wasClearGeofencesFromMonitorAndStoreCalled);
-        assertEquals(shouldClearGeofencesFromStoreOnlyHaveBeenCalled, wasClearGeofencesFromStoreOnlyCalled);
-        assertEquals(shouldClearGeofencesFromStoreOnlyHaveBeenCalled, wasGeofenceStatusUpdated);
-
-        verify(geofenceEngine, times(numberOfGeofenceReregistrations)).reregisterCurrentLocations(any(Set.class));
     }
 
-    private PushPreferencesFCM getMockPushPreferences(String fcmTokenIdInPrefs,
+    private PushPreferencesBaidu getMockPushPreferences(String baiduChannelIdInPrefs,
         String pcfPushDeviceRegistrationIdInPrefs, String platformUuidInPrefs,
         String platformSecretInPrefs, String deviceAliasInPrefs, String customUserIdInPrefs,
         String packageNameInPrefs, String serviceUrlInPrefs, Set<String> tagsInPrefs,
         long geofenceUpdateTimestampInPrefs, boolean areGeofencesEnabledInPrefs) {
 
-        PushPreferencesFCM pushPreferences = mock(PushPreferencesFCM.class);
-        when(pushPreferences.getFcmTokenId()).thenReturn(fcmTokenIdInPrefs);
+        PushPreferencesBaidu pushPreferences = mock(PushPreferencesBaidu.class);
+        when(pushPreferences.getBaiduChannelId()).thenReturn(baiduChannelIdInPrefs);
         when(pushPreferences.getPlatformUuid()).thenReturn(platformUuidInPrefs);
         when(pushPreferences.getPlatformSecret()).thenReturn(platformSecretInPrefs);
         when(pushPreferences.getPCFPushDeviceRegistrationId()).thenReturn(pcfPushDeviceRegistrationIdInPrefs);
@@ -316,10 +203,10 @@ public class RegistrationEngineTestParameters {
         return this;
     }
 
-    public RegistrationEngineTestParameters setupFcmTokenId(String inPrefs, String fromServer, String finalValue) {
-        fcmTokenIdInPrefs = inPrefs;
-        fcmTokenIdFromServer = fromServer;
-        finalFcmTokenIdInPrefs = finalValue;
+    public RegistrationEngineTestParameters setupBaiduChannelId(String inPrefs, String passedIn, String finalValue) {
+        baiduChannelIdInPrefs = inPrefs;
+        baiduChanneldPassedIn = passedIn;
+        finalBaiduChannelIdInPrefs = finalValue;
         return this;
     }
 
@@ -340,30 +227,8 @@ public class RegistrationEngineTestParameters {
         return this;
     }
 
-    public RegistrationEngineTestParameters setupGeofenceUpdateTimestamp(long inPrefs,
-                                                                         long toServer,
-                                                                         long fromServer,
-                                                                         long finalValue,
-                                                                         boolean shouldBeSuccessful,
-                                                                         boolean wasGeofenceUpdateCalled,
-                                                                         boolean wasClearGeofencesFromMonitorAndStoreCalled,
-                                                                         boolean wasClearGeofencesFromStoreOnlyCalled) {
-        geofenceUpdateTimestampInPrefs = inPrefs;
-        geofenceUpdateTimestampToServer = toServer;
-        geofenceUpdateTimestampFromServer = fromServer;
-        shouldGeofenceUpdateBeSuccessful = shouldBeSuccessful;
-        finalGeofenceUpdateTimestampInPrefs = finalValue;
-        shouldGeofenceUpdateTimestampedHaveBeenCalled = wasGeofenceUpdateCalled;
-        shouldClearGeofencesFromMonitorAndStoreHaveBeenCalled = wasClearGeofencesFromMonitorAndStoreCalled;
-        shouldClearGeofencesFromStoreOnlyHaveBeenCalled = wasClearGeofencesFromStoreOnlyCalled;
-        return this;
-    }
-
-    public RegistrationEngineTestParameters setupAreGeofencesEnabled(boolean inPrefs, boolean fromUser, boolean finalValue, boolean shouldHaveBeenSaved) {
-        areGeofencesEnabledInPrefs = inPrefs;
-        areGeofencesEnabledFromUser = fromUser;
-        finalAreGeofencesEnabled = finalValue;
-        shouldAreGeofencesEnabledHaveBeenSaved = shouldHaveBeenSaved;
+    public RegistrationEngineTestParameters setShouldPCFPushDeviceRegistrationBeSuccessful(boolean b) {
+        shouldPCFPushDeviceRegistrationBeSuccessful = b;
         return this;
     }
 
@@ -372,8 +237,8 @@ public class RegistrationEngineTestParameters {
         return this;
     }
 
-    public RegistrationEngineTestParameters setShouldFcmTokenIdHaveBeenSaved(boolean b) {
-        shouldFcmTokenIdHaveBeenSaved = b;
+    public RegistrationEngineTestParameters setShouldBaiduChannelIdHaveBeenSaved(boolean b) {
+        shouldBaiduChannelIdHaveBeenSaved = b;
         return this;
     }
 
@@ -389,16 +254,6 @@ public class RegistrationEngineTestParameters {
 
     public RegistrationEngineTestParameters setShouldPCFPushDeviceRegistrationHaveBeenSaved(boolean b) {
         shouldPCFPushDeviceRegistrationHaveBeenSaved = b;
-        return this;
-    }
-
-    public RegistrationEngineTestParameters setShouldGeofencesHaveBeenReregistered(boolean b) {
-        numberOfGeofenceReregistrations = b ? 1 : 0;
-        return this;
-    }
-
-    public RegistrationEngineTestParameters setShouldHavePermissionForGeofences(boolean b) {
-        shouldHavePermissionForGeofences = b;
         return this;
     }
 }

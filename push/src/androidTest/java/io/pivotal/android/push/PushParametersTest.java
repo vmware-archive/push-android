@@ -53,7 +53,7 @@ public class PushParametersTest {
                 platformUuid,
                 platformSecret,
                 serviceUrl,
-                deviceAlias,
+            "android-baidu", deviceAlias,
                 customUserId,
                 tags,
                 areGeofencesEnabled,

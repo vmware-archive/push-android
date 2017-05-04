@@ -34,13 +34,14 @@ import org.junit.runner.RunWith;
 @RunWith(AndroidJUnit4.class)
 public class UnregistrationEngineTest {
 
-    private static final String TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1 = "TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1";
-    private static final String TEST_PLATFORM_UUID = "TEST_PLATFORM_UUID";
-    private static final String TEST_PLATFORM_SECRET = "TEST_PLATFORM_SECRET";
-    private static final String TEST_DEVICE_ALIAS = "TEST_DEVICE_ALIAS";
-    private static final String TEST_CUSTOM_USER_ID = "TEST_CUSTOM_USER_ID";
-    private static final String TEST_SERVICE_URL = "http://test.com";
-    private static final Set<String> TEST_TAGS = new HashSet<>();
+    private final String TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1 = "TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1";
+    private final String TEST_PLATFORM_UUID = "TEST_PLATFORM_UUID";
+    private final String TEST_PLATFORM_SECRET = "TEST_PLATFORM_SECRET";
+    private final String TEST_DEVICE_ALIAS = "TEST_DEVICE_ALIAS";
+    private final String TEST_CUSTOM_USER_ID = "TEST_CUSTOM_USER_ID";
+    private final String TEST_SERVICE_URL = "http://test.com";
+    private final Set<String> TEST_TAGS = new HashSet<>();
+    private final String TEST_PLATFORM_TYPE = "some-platform-type";
 
     private PushPreferencesFCM pushPreferences;
     private PCFPushUnregisterDeviceApiRequestProvider pcfPushUnregisterDeviceApiRequestProvider;
@@ -55,7 +56,7 @@ public class UnregistrationEngineTest {
         System.setProperty("dexmaker.dexcache", InstrumentationRegistry.getContext().getCacheDir().getPath());
 
         TEST_TAGS.addAll(Arrays.asList("DONKEYS", "BURROS"));
-        parameters = new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, TEST_CUSTOM_USER_ID, TEST_TAGS, true, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
+        parameters = new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_PLATFORM_TYPE, TEST_DEVICE_ALIAS, TEST_CUSTOM_USER_ID, TEST_TAGS, true, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
 
         pushPreferences = mock(PushPreferencesFCM.class);
 
@@ -133,7 +134,7 @@ public class UnregistrationEngineTest {
     @Test
     public void testNullServiceUrl() {
         try {
-            parameters = new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, null, TEST_DEVICE_ALIAS, TEST_CUSTOM_USER_ID, null, true, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
+            parameters = new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, null, TEST_PLATFORM_TYPE, TEST_DEVICE_ALIAS, TEST_CUSTOM_USER_ID, null, true, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
             final UnregistrationEngine engine = new UnregistrationEngine(context, pushPreferences,
                 pcfPushUnregisterDeviceApiRequestProvider, geofenceUpdater, geofenceStatusUtil);
             engine.unregisterDevice(parameters, getListenerForUnregistration(false));

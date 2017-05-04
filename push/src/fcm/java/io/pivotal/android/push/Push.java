@@ -253,7 +253,7 @@ public class Push {
         final Pivotal.SslCertValidationMode sslCertValidationMode = pushServiceInfo.getSslCertValidationMode();
         final List<String> pinnedCertificateNames = pushServiceInfo.getPinnedSslCertificateNames();
 
-        return new PushParameters(platformUuid, platformSecret, serviceUrl, deviceAlias, customUserId, tags, areGeofencesEnabled, areAnalyticsEnabled, sslCertValidationMode, pinnedCertificateNames, requestHeaders);
+        return new PushParameters(platformUuid, platformSecret, serviceUrl, "android-fcm", deviceAlias, customUserId, tags, areGeofencesEnabled, areAnalyticsEnabled, sslCertValidationMode, pinnedCertificateNames, requestHeaders);
     }
 
     private void verifyRegistrationArguments(@NonNull PushParameters parameters) {

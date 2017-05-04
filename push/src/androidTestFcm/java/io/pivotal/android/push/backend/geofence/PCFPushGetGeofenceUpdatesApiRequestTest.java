@@ -258,10 +258,10 @@ public class PCFPushGetGeofenceUpdatesApiRequestTest extends AndroidTestCase {
     }
 
     private PushParameters getParameters() {
-        return new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, null, null, null, true, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
+        return new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, "android-fcm", null, null, null, true, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
     }
 
     private PushParameters getParameters(Map<String, String> requestHeaders) {
-        return new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, null, null, null, true, true, Pivotal.SslCertValidationMode.DEFAULT, null, requestHeaders);
+        return new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, "android-fcm", null, null, null, true, true, Pivotal.SslCertValidationMode.DEFAULT, null, requestHeaders);
     }
 }

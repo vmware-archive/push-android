@@ -238,7 +238,7 @@ public class PCFPushRegistrationApiRequestImpl extends ApiRequestImpl implements
             data = putData;
         } else {
             final PCFPushApiRegistrationPostRequestData postData = new PCFPushApiRegistrationPostRequestData();
-            postData.setOs("android-fcm");
+            postData.setOs(parameters.getPlatformType());
             postData.setTags(parameters.getTags());
             data = postData;
         }

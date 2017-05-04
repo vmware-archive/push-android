@@ -70,6 +70,7 @@ public class GeofenceUpdater {
                     pushPreferences.getPlatformUuid(),
                     pushPreferences.getPlatformSecret(),
                     pushPreferences.getServiceUrl(),
+                    "android-fcm",
                     pushPreferences.getDeviceAlias(),
                     pushPreferences.getCustomUserId(),
                     pushPreferences.getTags(),

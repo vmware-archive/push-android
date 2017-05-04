@@ -17,7 +17,6 @@ import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestProvider
 import io.pivotal.android.push.backend.api.PCFPushRegistrationListener;
 import io.pivotal.android.push.geofence.GeofenceEngine;
 
-import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushRequestHeaders;
 import io.pivotal.android.push.registration.RegistrationListener;
 import io.pivotal.android.push.util.Logger;
@@ -68,13 +67,14 @@ public class RegistrationEngine {
     private String previousDeviceAlias;
     private String previousCustomUserId;
     private String previousServiceUrl;
+    private String baiduChannelId;
 
     public static RegistrationEngine getRegistrationEngine(Context context) {
         final PushPreferencesBaidu pushPreferences = new PushPreferencesBaidu(context);
         final PushRequestHeaders pushRequestHeaders = PushRequestHeaders.getInstance(context);
         final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
-        final PCFPushRegistrationApiRequest dummyPCFPushRegistrationApiRequest = new PCFPushRegistrationApiRequestImpl(context, networkWrapper);
-        final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(dummyPCFPushRegistrationApiRequest);
+        final PCFPushRegistrationApiRequest pushRegistrationApiRequest = new PCFPushRegistrationApiRequestImpl(context, networkWrapper);
+        final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(pushRegistrationApiRequest);
 
 
         return new RegistrationEngine(context,
@@ -166,11 +166,11 @@ public class RegistrationEngine {
      * register again (though I don't know why you would want to register more than ONCE during the lifetime
      * of a process - unless registration fails and you want to retry).
      *
-     *
-     * @param parameters  The registration parameters.  May not be null.
+     *  @param parameters  The registration parameters.  May not be null.
+     * @param channelId
      * @param listener  An optional listener if you care to know when registration completes or fails.
      */
-    public void registerDevice(PushParameters parameters, final RegistrationListener listener) {
+    public void registerDevice(PushParameters parameters, String channelId, final RegistrationListener listener) {
         verifyRegistrationArguments(parameters);
 
         // Save the given package name so that the message receiver service can see it
@@ -178,14 +178,16 @@ public class RegistrationEngine {
         pushPreferences.setSslCertValidationMode(parameters.getSslCertValidationMode());
         pushPreferences.setPinnedCertificateNames(parameters.getPinnedSslCertificateNames());
 
-        String channelId = pushPreferences.getBaiduChannelId();
         if (channelId == null) {
-            Logger.e("Baidu channelId is not available. Registration failed.");
+            Logger.e("Baidu baiduChannelId is not available. Registration failed.");
             if (listener != null) {
-                listener.onRegistrationFailed("Baidu channelId not available.");
+                listener.onRegistrationFailed("Baidu baiduChannelId not available.");
             }
             return;
         }
+
+        this.baiduChannelId = channelId;
+        final boolean isBaiduChannelIdUpdated = isBaiduChannelIdUpdated(channelId);
 
         final boolean isServiceUrlUpdated = isServiceUrlUpdated(parameters);
         if (isServiceUrlUpdated) {
@@ -200,7 +202,7 @@ public class RegistrationEngine {
         if (isPCFPushUpdateRegistrationRequired(channelId, parameters) && !isServiceUrlUpdated && !isPlatformUpdated) {
             registerUpdateDeviceWithPCFPush(channelId, previousPCFPushDeviceRegistrationId, pushPreferences.getTags(), parameters, listener);
 
-        } else if (isServiceUrlUpdated || isPlatformUpdated) {
+        } else if (isBaiduChannelIdUpdated || isServiceUrlUpdated || isPlatformUpdated) {
             registerNewDeviceWithPCFPush(channelId, pushPreferences.getTags(), parameters, listener);
 
         } else {
@@ -209,32 +211,6 @@ public class RegistrationEngine {
                 listener.onRegistrationComplete();
             }
         }
-    }
-
-
-    // TODO this may be what we call when the onBind with the BaiduPushReceiver is called -- since onBind is when we obtain a new channel id from baidu
-    /**
-     * Start a Baidu Channel ID update attempt. It informs the Push backend of the device's new Baidu Channel ID.
-     * This method is asynchronous and will return before update is complete.
-     *
-     * This function is not intended to be used directly. It will be called automatically by the Push instance
-     * when it receives a token update notification from BaiduPushReceiver.
-     */
-    public void updateDeviceTokenId() {
-        PushParameters parameters = new PushParameters(pushPreferences.getPlatformUuid(),
-                pushPreferences.getPlatformSecret(),
-                pushPreferences.getServiceUrl(),
-                pushPreferences.getDeviceAlias(),
-                pushPreferences.getCustomUserId(),
-                pushPreferences.getTags(),
-                pushPreferences.areGeofencesEnabled(),
-                pushPreferences.areAnalyticsEnabled(),
-                pushPreferences.getSslCertValidationMode(),
-                pushPreferences.getPinnedCertificateNames(),
-                pushRequestHeaders.getRequestHeaders()
-        );
-
-        registerDevice(parameters, null);
     }
 
     private void verifyRegistrationArguments(PushParameters parameters) {
@@ -286,7 +262,7 @@ public class RegistrationEngine {
             return false;
         }
         if (isBaiduChannelIdDifferent) {
-            Logger.v("The Baidu channelId is different. Device will need to update its registration with PCF Push.");
+            Logger.v("The Baidu baiduChannelId is different. Device will need to update its registration with PCF Push.");
             return true;
         }
         if (areRegistrationParametersUpdated(parameters)) {
@@ -325,6 +301,10 @@ public class RegistrationEngine {
         return isServiceUrlUpdated;
     }
 
+    private boolean isBaiduChannelIdUpdated(String channelId) {
+        return !channelId.equals(pushPreferences.getBaiduChannelId());
+    }
+
     private void registerUpdateDeviceWithPCFPush(String baiduChannelId,
                                                  String pcfPushDeviceRegistrationId,
                                                  Set<String> savedTags,
@@ -358,6 +338,7 @@ public class RegistrationEngine {
                     }
                     return;
                 }
+                pushPreferences.setBaiduChannelId(baiduChannelId);
 
                 Logger.i("Saving PCF Push device registration ID: " + pcfPushDeviceRegistrationId);
                 pushPreferences.setPCFPushDeviceRegistrationId(pcfPushDeviceRegistrationId);
@@ -369,6 +350,7 @@ public class RegistrationEngine {
                 pushPreferences.setCustomUserId(parameters.getCustomUserId());
                 pushPreferences.setServiceUrl(parameters.getServiceUrl());
                 pushPreferences.setTags(parameters.getTags());
+
                 Logger.v("Saving tags: " + parameters.getTags());
 
                 if (listener != null) {
@@ -416,6 +398,7 @@ public class RegistrationEngine {
                     }
                     return;
                 }
+                pushPreferences.setBaiduChannelId(baiduChannelId);
 
                 Logger.i("Saving PCF Push device registration ID: " + pcfPushDeviceRegistrationId);
                 pushPreferences.setPCFPushDeviceRegistrationId(pcfPushDeviceRegistrationId);
@@ -428,8 +411,6 @@ public class RegistrationEngine {
                 pushPreferences.setServiceUrl(parameters.getServiceUrl());
                 pushPreferences.setTags(parameters.getTags());
                 Logger.v("Saving tags: " + parameters.getTags());
-                pushPreferences.setAreGeofencesEnabled(false);
-                pushPreferences.setLastGeofenceUpdate(GeofenceEngine.NEVER_UPDATED_GEOFENCES);
 
                 if (listener != null) {
                     listener.onRegistrationComplete();

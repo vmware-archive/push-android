@@ -524,19 +524,23 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
     }
 
     private PushParameters getParametersWithDeviceAlias(String deviceAlias) {
-        return new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, deviceAlias, TEST_CUSTOM_USER_ID, null, true, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
+        return new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, "android-baidu",
+            deviceAlias, TEST_CUSTOM_USER_ID, null, true, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
     }
 
     private PushParameters getParametersWithCustomUserId(String customUserId) {
-        return new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, customUserId, null, true, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
+        return new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, "android-baidu",
+            TEST_DEVICE_ALIAS, customUserId, null, true, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
     }
 
     private PushParameters getParameters() {
-        return new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, TEST_CUSTOM_USER_ID, null, true, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
+        return new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, "android-baidu",
+            TEST_DEVICE_ALIAS, TEST_CUSTOM_USER_ID, null, true, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
     }
 
     private PushParameters getParameters(Set<String> tags) {
-        return new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, TEST_CUSTOM_USER_ID, tags, true, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
+        return new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, "android-baidu",
+            TEST_DEVICE_ALIAS, TEST_CUSTOM_USER_ID, tags, true, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
     }
 
     private PushParameters getParameters(Pivotal.SslCertValidationMode sslCertValidationMode) {
@@ -545,11 +549,13 @@ public class PCFPushRegistrationApiRequestImplTest extends AndroidTestCase {
             pinnedSslCertificateNames = new LinkedList<>();
             pinnedSslCertificateNames.add("DUMMY CERT");
         }
-        return new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, TEST_CUSTOM_USER_ID, null, true, true, sslCertValidationMode, pinnedSslCertificateNames, null);
+        return new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, "android-baidu",
+            TEST_DEVICE_ALIAS, TEST_CUSTOM_USER_ID, null, true, true, sslCertValidationMode, pinnedSslCertificateNames, null);
     }
 
     private PushParameters getParameters(Map<String, String> requestHeaders) {
-        return new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, TEST_DEVICE_ALIAS, TEST_CUSTOM_USER_ID, null, true, true, Pivotal.SslCertValidationMode.DEFAULT, null, requestHeaders);
+        return new PushParameters(TEST_PLATFORM_UUID, TEST_PLATFORM_SECRET, TEST_SERVICE_URL, "android-baidu",
+            TEST_DEVICE_ALIAS, TEST_CUSTOM_USER_ID, null, true, true, Pivotal.SslCertValidationMode.DEFAULT, null, requestHeaders);
     }
 
     private Set<String> makeSet(String... strings) {

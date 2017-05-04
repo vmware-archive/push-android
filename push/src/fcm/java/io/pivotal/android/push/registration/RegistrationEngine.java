@@ -25,7 +25,6 @@ import io.pivotal.android.push.geofence.GeofencePersistentStore;
 import io.pivotal.android.push.geofence.GeofenceRegistrar;
 import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
-import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushRequestHeaders;
 import io.pivotal.android.push.util.FileHelper;
 import io.pivotal.android.push.util.Logger;
@@ -321,6 +320,7 @@ public class RegistrationEngine {
         PushParameters parameters = new PushParameters(pushPreferences.getPlatformUuid(),
                 pushPreferences.getPlatformSecret(),
                 pushPreferences.getServiceUrl(),
+                "android-fcm",
                 pushPreferences.getDeviceAlias(),
                 pushPreferences.getCustomUserId(),
                 pushPreferences.getTags(),

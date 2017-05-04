@@ -4,8 +4,6 @@ import static com.google.gson.internal.$Gson$Preconditions.checkArgument;
 
 import android.app.Application;
 import android.content.Context;
-import android.content.SharedPreferences;
-import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -13,8 +11,19 @@ import android.support.annotation.Nullable;
 import com.baidu.android.pushservice.PushConstants;
 import com.baidu.android.pushservice.PushManager;
 
+import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequest;
+import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestImpl;
+import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestProvider;
+import io.pivotal.android.push.backend.geofence.PCFPushGetGeofenceUpdatesApiRequest;
+import io.pivotal.android.push.geofence.GeofenceEngine;
+import io.pivotal.android.push.geofence.GeofencePersistentStore;
+import io.pivotal.android.push.geofence.GeofenceRegistrar;
 import io.pivotal.android.push.prefs.PushPreferencesBaidu;
-import io.pivotal.android.push.prefs.PushPreferencesBaidu.OnBaiduChannelIdChangedListener;
+import io.pivotal.android.push.registration.UnregistrationListener;
+import io.pivotal.android.push.util.FileHelper;
+import io.pivotal.android.push.util.NetworkWrapper;
+import io.pivotal.android.push.util.NetworkWrapperImpl;
+import io.pivotal.android.push.util.TimeProvider;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,7 +40,6 @@ import io.pivotal.android.push.util.ServiceStarter;
 import io.pivotal.android.push.util.ServiceStarterImpl;
 
 public class BaiduPush {
-
     private static BaiduPush instance;
     private static final ExecutorService threadPool = Executors.newFixedThreadPool(1);
     private String baiduAPIKey;
@@ -125,8 +133,6 @@ public class BaiduPush {
 
         registrationListener = listener;
 
-//        checkAnalytics();
-
         verifyRegistrationArguments(parameters);
 
         initiateRegistration();
@@ -145,7 +151,7 @@ public class BaiduPush {
         final Pivotal.SslCertValidationMode sslCertValidationMode = pushServiceInfo.getSslCertValidationMode();
         final List<String> pinnedCertificateNames = pushServiceInfo.getPinnedSslCertificateNames();
 
-        return new PushParameters(platformUuid, platformSecret, serviceUrl, deviceAlias, customUserId, tags, areGeofencesEnabled, areAnalyticsEnabled, sslCertValidationMode, pinnedCertificateNames, requestHeaders);
+        return new PushParameters(platformUuid, platformSecret, serviceUrl, "android-baidu", deviceAlias, customUserId, tags, areGeofencesEnabled, areAnalyticsEnabled, sslCertValidationMode, pinnedCertificateNames, requestHeaders);
     }
 
     /**
@@ -170,31 +176,17 @@ public class BaiduPush {
         if (parameters.getPlatformSecret() == null || parameters.getPlatformSecret().isEmpty()) {
             throw new IllegalArgumentException("parameters.platformSecret may not be null or empty");
         }
+        // TODO also check if it's empty
         if (parameters.getServiceUrl() == null) {
             throw new IllegalArgumentException("parameters.serviceUrl may not be null");
         }
     }
 
     private void initiateRegistration() {
-        // Detect change in channel id
-        // null -> string == new registration
-        // string -> string' == change in channel id, reregister
-        // string -> string == no change, don't reregister unless something else changed
-        PushPreferencesBaidu pushPreferences = new PushPreferencesBaidu(context);
-        pushPreferences.registerOnBaiduChannelIdChangedListener(new OnBaiduChannelIdChangedListener() {
-            @Override
-            public void onChannelIdChanged() {
-                executeRegistration();
-            }
-        });
-
-        // Registers with Baidu directly
-        // Invokes `onBind` in BaiduPushReceiver via broadcast
-        // Changes channel ID preference in PushPreferencesBaidu/SharedPreferences
         PushManager.startWork(context, PushConstants.LOGIN_TYPE_API_KEY, baiduAPIKey);
     }
 
-    private void executeRegistration() {
+    private void executeRegistration(final String channelId) {
         final PushParameters pushParameters = parameters;
         final Runnable runnable = new Runnable() {
 
@@ -203,30 +195,22 @@ public class BaiduPush {
                 try {
                     final RegistrationEngine registrationEngine = RegistrationEngine.getRegistrationEngine(context);
 
-                    registrationEngine.registerDevice(pushParameters, registrationListener);
+                    registrationEngine.registerDevice(pushParameters, channelId, registrationListener);
                 } catch (Exception e) {
                     Logger.ex("Push SDK registration failed", e);
                 }
             }
         };
         threadPool.execute(runnable);
-        parameters = null;
     }
 
-    public synchronized void startRegistration(String apiKey, RegistrationListener listener) {
-        this.registrationListener = listener;
-        PushManager.startWork(this.context, PushConstants.LOGIN_TYPE_API_KEY, apiKey);
-
-    }
-
-    public synchronized void onBaiduServiceBound(int errorCode) {
-        switch (errorCode) {
-            case PushConstants.ERROR_SUCCESS:
-                if (registrationListener != null) registrationListener.onRegistrationComplete();
-                break;
-            default:
-                if (registrationListener != null) registrationListener.onRegistrationFailed(String.format("Registration failed due to error: %s", errorCode));
-                break;
+    public synchronized void onBaiduServiceBound(int errorCode, String channelId) {
+        if (errorCode == PushConstants.ERROR_SUCCESS) {
+            executeRegistration(channelId);
+        } else {
+            if (registrationListener != null) {
+                registrationListener.onRegistrationFailed(String.format("Registration failed due to baidu error: %s", errorCode));
+            }
         }
     }
 

@@ -6,18 +6,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
-import android.content.Context;
 import android.net.Uri;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
-import io.pivotal.android.push.prefs.PushPreferences;
 import java.io.IOException;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Properties;
 
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.database.FakeAnalyticsEventsStorage;
@@ -60,7 +55,7 @@ public class PCFPushSendAnalyticsApiRequestImplTest {
                 TEST_PLATFORM_UUID,
                 TEST_PLATFORM_SECRET,
                 TEST_SERVICE_URL,
-                TEST_DEVICE_ALIAS,
+            "android-baidu", TEST_DEVICE_ALIAS,
                 null,
                 null,
                 true,
@@ -160,7 +155,7 @@ public class PCFPushSendAnalyticsApiRequestImplTest {
                 TEST_PLATFORM_UUID,
                 TEST_PLATFORM_SECRET,
                 TEST_SERVICE_URL,
-                TEST_DEVICE_ALIAS,
+            "android-baidu", TEST_DEVICE_ALIAS,
                 null,
                 null,
                 false,

@@ -52,27 +52,28 @@ import org.mockito.stubbing.Answer;
 @RunWith(AndroidJUnit4.class)
 public class RegistrationEngineTest {
 
-    private static final String TEST_FCM_DEVICE_REGISTRATION_ID_1 = "TEST_FCM_DEVICE_REGISTRATION_ID_1";
-    private static final String TEST_FCM_DEVICE_REGISTRATION_ID_2 = "TEST_FCM_DEVICE_REGISTRATION_ID_2";
-    private static final String TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1 = "TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1";
-    private static final String TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2 = "TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2";
-    private static final String TEST_DEVICE_ALIAS_1 = "TEST_DEVICE_ALIAS_1";
-    private static final String TEST_DEVICE_ALIAS_2 = "TEST_DEVICE_ALIAS_2";
-    private static final String TEST_CUSTOM_USER_ID_1 = "TEST_CUSTOM_USER_ID_1";
-    private static final String TEST_CUSTOM_USER_ID_2 = "TEST_CUSTOM_USER_ID_2";
-    private static final String TEST_PLATFORM_UUID_1 = "TEST_PLATFORM_UUID_1";
-    private static final String TEST_PLATFORM_UUID_2 = "TEST_PLATFORM_UUID_2";
-    private static final String TEST_PLATFORM_SECRET_1 = "TEST_PLATFORM_SECRET_1";
-    private static final String TEST_PLATFORM_SECRET_2 = "TEST_PLATFORM_SECRET_2";
-    private static String TEST_SERVICE_URL_1 = "http://test1.com";
-    private static String TEST_SERVICE_URL_2 = "http://test2.com";
-    private static final Set<String> TEST_TAGS1 = new HashSet<>();
-    private static final Set<String> TEST_TAGS1_LOWER = new HashSet<>();
-    private static final Set<String> TEST_TAGS2 = new HashSet<>();
-    private static final Set<String> TEST_TAGS2_LOWER = new HashSet<>();
-    private static final String TEST_PACKAGE_NAME = "TEST.PACKAGE.NAME";
-    private static final Set<String> EMPTY_SET = Collections.emptySet();
-    private static final long NOT_USED = -1L; // Placeholder used to make some tests more readable.
+    private final String TEST_FCM_DEVICE_REGISTRATION_ID_1 = "TEST_FCM_DEVICE_REGISTRATION_ID_1";
+    private final String TEST_FCM_DEVICE_REGISTRATION_ID_2 = "TEST_FCM_DEVICE_REGISTRATION_ID_2";
+    private final String TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1 = "TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1";
+    private final String TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2 = "TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2";
+    private final String TEST_DEVICE_ALIAS_1 = "TEST_DEVICE_ALIAS_1";
+    private final String TEST_DEVICE_ALIAS_2 = "TEST_DEVICE_ALIAS_2";
+    private final String TEST_CUSTOM_USER_ID_1 = "TEST_CUSTOM_USER_ID_1";
+    private final String TEST_CUSTOM_USER_ID_2 = "TEST_CUSTOM_USER_ID_2";
+    private final String TEST_PLATFORM_UUID_1 = "TEST_PLATFORM_UUID_1";
+    private final String TEST_PLATFORM_UUID_2 = "TEST_PLATFORM_UUID_2";
+    private final String TEST_PLATFORM_SECRET_1 = "TEST_PLATFORM_SECRET_1";
+    private final String TEST_PLATFORM_SECRET_2 = "TEST_PLATFORM_SECRET_2";
+    private final String TEST_SERVICE_URL_1 = "http://test1.com";
+    private final String TEST_SERVICE_URL_2 = "http://test2.com";
+    private final Set<String> TEST_TAGS1 = new HashSet<>();
+    private final Set<String> TEST_TAGS1_LOWER = new HashSet<>();
+    private final Set<String> TEST_TAGS2 = new HashSet<>();
+    private final Set<String> TEST_TAGS2_LOWER = new HashSet<>();
+    private final String TEST_PACKAGE_NAME = "TEST.PACKAGE.NAME";
+    private final Set<String> EMPTY_SET = Collections.emptySet();
+    private final long NOT_USED = -1L; // Placeholder used to make some tests more readable.
+    private final String TEST_PLATFORM_TYPE = "some-platform";
 
     private PushPreferencesFCM pushPreferences;
     private FakePushRequestHeaders pushRequestHeaders;
@@ -273,7 +274,7 @@ public class RegistrationEngineTest {
                 pcfPushRegistrationApiRequestProvider, geofenceUpdater, geofenceEngine,
                 geofenceStatusUtil);
             engine.registerDevice(
-                new PushParameters(null, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1,
+                new PushParameters(null, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,
                     TEST_DEVICE_ALIAS_1, TEST_CUSTOM_USER_ID_1, null, true, true,
                     Pivotal.SslCertValidationMode.DEFAULT, null, null),
                 getListenerForRegistration(false));
@@ -290,7 +291,7 @@ public class RegistrationEngineTest {
                 firebaseInstanceId, googleApiAvailability, pushPreferences, pushRequestHeaders,
                 pcfPushRegistrationApiRequestProvider, geofenceUpdater, geofenceEngine,
                 geofenceStatusUtil);
-            engine.registerDevice(new PushParameters(TEST_PLATFORM_UUID_1, null, TEST_SERVICE_URL_1,
+            engine.registerDevice(new PushParameters(TEST_PLATFORM_UUID_1, null, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,
                     TEST_DEVICE_ALIAS_1, TEST_CUSTOM_USER_ID_1, null, true, true,
                     Pivotal.SslCertValidationMode.DEFAULT, null, null),
                 getListenerForRegistration(false));
@@ -307,7 +308,7 @@ public class RegistrationEngineTest {
             pcfPushRegistrationApiRequestProvider, geofenceUpdater, geofenceEngine,
             geofenceStatusUtil);
         engine.registerDevice(
-            new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1,
+            new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,
                 TEST_CUSTOM_USER_ID_1, null, null, true, true, Pivotal.SslCertValidationMode.DEFAULT,
                 null, null), getListenerForRegistration(true));
         semaphore.acquire();
@@ -320,7 +321,7 @@ public class RegistrationEngineTest {
             pcfPushRegistrationApiRequestProvider, geofenceUpdater, geofenceEngine,
             geofenceStatusUtil);
         engine.registerDevice(
-            new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, "",
+            new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,  "",
                 TEST_CUSTOM_USER_ID_1, null, true, true, Pivotal.SslCertValidationMode.DEFAULT, null,
                 null), getListenerForRegistration(true));
         semaphore.acquire();
@@ -333,7 +334,7 @@ public class RegistrationEngineTest {
             pcfPushRegistrationApiRequestProvider, geofenceUpdater, geofenceEngine,
             geofenceStatusUtil);
         engine.registerDevice(
-            new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1,
+            new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,
                 TEST_DEVICE_ALIAS_1, null, null, true, true,Pivotal.SslCertValidationMode.DEFAULT, null,
                 null), getListenerForRegistration(true));
         semaphore.acquire();
@@ -346,7 +347,7 @@ public class RegistrationEngineTest {
             pcfPushRegistrationApiRequestProvider, geofenceUpdater, geofenceEngine,
             geofenceStatusUtil);
         engine.registerDevice(
-            new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1,
+            new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,
                 TEST_DEVICE_ALIAS_1, "", null, true, true,Pivotal.SslCertValidationMode.DEFAULT, null,
                 null), getListenerForRegistration(true));
         semaphore.acquire();
@@ -360,7 +361,7 @@ public class RegistrationEngineTest {
             pcfPushRegistrationApiRequestProvider, geofenceUpdater, geofenceEngine,
             geofenceStatusUtil);
         engine.registerDevice(
-            new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1,
+            new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,
                 TEST_DEVICE_ALIAS_1, longString, null, true, true, Pivotal.SslCertValidationMode.DEFAULT,
                 null, null), getListenerForRegistration(true));
         semaphore.acquire();
@@ -374,7 +375,7 @@ public class RegistrationEngineTest {
             pcfPushRegistrationApiRequestProvider, geofenceUpdater, geofenceEngine,
             geofenceStatusUtil);
         engine.registerDevice(
-            new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1,
+            new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,
                 TEST_DEVICE_ALIAS_1, longString, null, true, true, Pivotal.SslCertValidationMode.DEFAULT,
                 null, null), getListenerForRegistration(true));
         semaphore.acquire();
@@ -389,7 +390,7 @@ public class RegistrationEngineTest {
                 pcfPushRegistrationApiRequestProvider, geofenceUpdater, geofenceEngine,
                 geofenceStatusUtil);
             engine.registerDevice(
-                new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1,
+                new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,
                     TEST_DEVICE_ALIAS_1, longString, null, true, true,
                     Pivotal.SslCertValidationMode.DEFAULT, null, null),
                 getListenerForRegistration(false));
@@ -408,7 +409,7 @@ public class RegistrationEngineTest {
                 pushRequestHeaders, pcfPushRegistrationApiRequestProvider, geofenceUpdater,
                 geofenceEngine, geofenceStatusUtil);
             engine.registerDevice(
-                new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, null,
+                new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, null, TEST_PLATFORM_TYPE,
                     TEST_DEVICE_ALIAS_1, TEST_CUSTOM_USER_ID_1, null, true, true,
                     Pivotal.SslCertValidationMode.DEFAULT, null, null),
                 getListenerForRegistration(true));
@@ -430,7 +431,7 @@ public class RegistrationEngineTest {
             pcfPushRegistrationApiRequestProvider, geofenceUpdater, geofenceEngine,
             geofenceStatusUtil);
         final PushParameters parameters = new PushParameters(TEST_PLATFORM_UUID_1,
-            TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_DEVICE_ALIAS_1, TEST_CUSTOM_USER_ID_1,
+            TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE, TEST_DEVICE_ALIAS_1, TEST_CUSTOM_USER_ID_1,
             null, true, true, Pivotal.SslCertValidationMode.DEFAULT, null, null);
         engine.registerDevice(parameters, getListenerForRegistration(false));
         semaphore.acquire();
