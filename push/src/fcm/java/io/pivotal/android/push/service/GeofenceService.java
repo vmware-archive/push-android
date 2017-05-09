@@ -17,7 +17,7 @@ import io.pivotal.android.push.analytics.AnalyticsEventLogger;
 import io.pivotal.android.push.backend.geofence.PCFPushGetGeofenceUpdatesApiRequest;
 import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofencePersistentStore;
-import io.pivotal.android.push.geofence.GeofenceRegistrarImpl;
+import io.pivotal.android.push.geofence.GeofenceRegistrar;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceData;
 import io.pivotal.android.push.model.geofence.PCFPushGeofenceLocation;
@@ -158,7 +158,7 @@ public class GeofenceService extends IntentService {
             pushPreferences = new PushPreferencesFCM(this);
         }
         if (geofenceEngine == null) {
-            final GeofenceRegistrarImpl registrar = new GeofenceRegistrarImpl(this);
+            final GeofenceRegistrar registrar = new GeofenceRegistrar(this);
             final TimeProvider timeProvider = new TimeProvider();
             geofenceEngine = new GeofenceEngine(registrar, store, timeProvider, pushPreferences);
         }

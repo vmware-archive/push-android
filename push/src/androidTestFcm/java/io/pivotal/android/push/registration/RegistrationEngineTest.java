@@ -30,6 +30,7 @@ import com.google.firebase.iid.FirebaseInstanceId;
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.api.FakePCFPushRegistrationApiRequest;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestProvider;
+import io.pivotal.android.push.geofence.GeofenceConstants;
 import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
@@ -451,7 +452,7 @@ public class RegistrationEngineTest {
             .setupTags(null, null, EMPTY_SET, true)
             .setupServiceUrl(null, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
             .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setupGeofenceUpdateTimestamp(GeofenceEngine.NEVER_UPDATED_GEOFENCES, 0L, 1337L, 1337L,
+            .setupGeofenceUpdateTimestamp(GeofenceConstants.NEVER_UPDATED_GEOFENCES, 0L, 1337L, 1337L,
                 true, true, false, false)
             .setupAreGeofencesEnabled(false, true, true, true)
             .setShouldFcmTokenIdHaveBeenSaved(true)
@@ -478,8 +479,8 @@ public class RegistrationEngineTest {
             .setupTags(null, null, EMPTY_SET, true)
             .setupServiceUrl(null, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
             .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setupGeofenceUpdateTimestamp(GeofenceEngine.NEVER_UPDATED_GEOFENCES, NOT_USED,
-                NOT_USED, GeofenceEngine.NEVER_UPDATED_GEOFENCES, true, false, false, true)
+            .setupGeofenceUpdateTimestamp(GeofenceConstants.NEVER_UPDATED_GEOFENCES, NOT_USED,
+                NOT_USED, GeofenceConstants.NEVER_UPDATED_GEOFENCES, true, false, false, true)
             .setupAreGeofencesEnabled(false, true, false, true)
             .setShouldFcmTokenIdHaveBeenSaved(true)
             .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
@@ -505,8 +506,8 @@ public class RegistrationEngineTest {
             .setupTags(null, null, EMPTY_SET, true)
             .setupServiceUrl(null, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
             .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setupGeofenceUpdateTimestamp(GeofenceEngine.NEVER_UPDATED_GEOFENCES, NOT_USED,
-                NOT_USED, GeofenceEngine.NEVER_UPDATED_GEOFENCES, true, false, false, false)
+            .setupGeofenceUpdateTimestamp(GeofenceConstants.NEVER_UPDATED_GEOFENCES, NOT_USED,
+                NOT_USED, GeofenceConstants.NEVER_UPDATED_GEOFENCES, true, false, false, false)
             .setupAreGeofencesEnabled(false, false, false, true)
             .setShouldFcmTokenIdHaveBeenSaved(true)
             .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
@@ -532,7 +533,7 @@ public class RegistrationEngineTest {
             .setupTags(null, TEST_TAGS1, TEST_TAGS1_LOWER, true)
             .setupServiceUrl(null, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
             .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setupGeofenceUpdateTimestamp(GeofenceEngine.NEVER_UPDATED_GEOFENCES, 0L, 1337L, 1337L,
+            .setupGeofenceUpdateTimestamp(GeofenceConstants.NEVER_UPDATED_GEOFENCES, 0L, 1337L, 1337L,
                 true, true, false, false)
             .setupAreGeofencesEnabled(false, true, true, true)
             .setShouldFcmTokenIdHaveBeenSaved(true)
@@ -559,8 +560,8 @@ public class RegistrationEngineTest {
             .setupTags(null, TEST_TAGS1, TEST_TAGS1_LOWER, true)
             .setupServiceUrl(null, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
             .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setupGeofenceUpdateTimestamp(GeofenceEngine.NEVER_UPDATED_GEOFENCES, NOT_USED,
-                NOT_USED, GeofenceEngine.NEVER_UPDATED_GEOFENCES, true, false, false, true)
+            .setupGeofenceUpdateTimestamp(GeofenceConstants.NEVER_UPDATED_GEOFENCES, NOT_USED,
+                NOT_USED, GeofenceConstants.NEVER_UPDATED_GEOFENCES, true, false, false, true)
             .setupAreGeofencesEnabled(false, true, false, true)
             .setShouldFcmTokenIdHaveBeenSaved(true)
             .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
@@ -584,8 +585,8 @@ public class RegistrationEngineTest {
             .setupTags(null, TEST_TAGS1, null, false)
             .setupServiceUrl(null, TEST_SERVICE_URL_1, null, false)
             .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setupGeofenceUpdateTimestamp(GeofenceEngine.NEVER_UPDATED_GEOFENCES, 0L, NOT_USED,
-                GeofenceEngine.NEVER_UPDATED_GEOFENCES, true, false, false, false)
+            .setupGeofenceUpdateTimestamp(GeofenceConstants.NEVER_UPDATED_GEOFENCES, 0L, NOT_USED,
+                GeofenceConstants.NEVER_UPDATED_GEOFENCES, true, false, false, false)
             .setupAreGeofencesEnabled(false, true, false, false)
             .setShouldFcmTokenIdHaveBeenSaved(false)
             .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
@@ -609,8 +610,8 @@ public class RegistrationEngineTest {
             .setupTags(null, TEST_TAGS1, null, true)
             .setupServiceUrl(null, TEST_SERVICE_URL_1, null, true)
             .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setupGeofenceUpdateTimestamp(GeofenceEngine.NEVER_UPDATED_GEOFENCES, 0L, NOT_USED,
-                GeofenceEngine.NEVER_UPDATED_GEOFENCES, true, false, false, false)
+            .setupGeofenceUpdateTimestamp(GeofenceConstants.NEVER_UPDATED_GEOFENCES, 0L, NOT_USED,
+                GeofenceConstants.NEVER_UPDATED_GEOFENCES, true, false, false, false)
             .setupAreGeofencesEnabled(false, true, false, false)
             .setShouldFcmTokenIdHaveBeenSaved(true)
             .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
@@ -635,8 +636,8 @@ public class RegistrationEngineTest {
             .setupTags(null, TEST_TAGS1, null, true)
             .setupServiceUrl(null, TEST_SERVICE_URL_1, null, true)
             .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setupGeofenceUpdateTimestamp(GeofenceEngine.NEVER_UPDATED_GEOFENCES, 0L, NOT_USED,
-                GeofenceEngine.NEVER_UPDATED_GEOFENCES, true, false, false, false)
+            .setupGeofenceUpdateTimestamp(GeofenceConstants.NEVER_UPDATED_GEOFENCES, 0L, NOT_USED,
+                GeofenceConstants.NEVER_UPDATED_GEOFENCES, true, false, false, false)
             .setupAreGeofencesEnabled(false, true, false, false)
             .setShouldFcmTokenIdHaveBeenSaved(true)
             .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
@@ -696,7 +697,7 @@ public class RegistrationEngineTest {
             .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
             .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
             .setupGeofenceUpdateTimestamp(1337L, NOT_USED, NOT_USED,
-                GeofenceEngine.NEVER_UPDATED_GEOFENCES, true, false, false, true)
+                GeofenceConstants.NEVER_UPDATED_GEOFENCES, true, false, false, true)
             .setupAreGeofencesEnabled(true, true, false, true)
             .setShouldFcmTokenIdHaveBeenSaved(false)
             .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
@@ -725,7 +726,7 @@ public class RegistrationEngineTest {
             .setupTags(null, null, null, false)
             .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
             .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setupGeofenceUpdateTimestamp(GeofenceEngine.NEVER_UPDATED_GEOFENCES, 0L, 1337L, 1337L,
+            .setupGeofenceUpdateTimestamp(GeofenceConstants.NEVER_UPDATED_GEOFENCES, 0L, 1337L, 1337L,
                 true, true, false, false)
             .setupAreGeofencesEnabled(false, true, true, true)
             .setShouldFcmTokenIdHaveBeenSaved(false)
@@ -755,8 +756,8 @@ public class RegistrationEngineTest {
             .setupTags(null, null, null, false)
             .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
             .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setupGeofenceUpdateTimestamp(GeofenceEngine.NEVER_UPDATED_GEOFENCES, NOT_USED,
-                NOT_USED, GeofenceEngine.NEVER_UPDATED_GEOFENCES, true, false, false, true)
+            .setupGeofenceUpdateTimestamp(GeofenceConstants.NEVER_UPDATED_GEOFENCES, NOT_USED,
+                NOT_USED, GeofenceConstants.NEVER_UPDATED_GEOFENCES, true, false, false, true)
             .setupAreGeofencesEnabled(false, true, false, true)
             .setShouldFcmTokenIdHaveBeenSaved(false)
             .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
@@ -786,7 +787,7 @@ public class RegistrationEngineTest {
             .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
             .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
             .setupGeofenceUpdateTimestamp(1337L, NOT_USED, NOT_USED,
-                GeofenceEngine.NEVER_UPDATED_GEOFENCES, true, false, true, false)
+                GeofenceConstants.NEVER_UPDATED_GEOFENCES, true, false, true, false)
             .setupAreGeofencesEnabled(true, false, false, true)
             .setShouldFcmTokenIdHaveBeenSaved(false)
             .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
@@ -846,7 +847,7 @@ public class RegistrationEngineTest {
             .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
             .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
             .setupGeofenceUpdateTimestamp(1337L, NOT_USED, NOT_USED,
-                GeofenceEngine.NEVER_UPDATED_GEOFENCES, true, false, false, true)
+                GeofenceConstants.NEVER_UPDATED_GEOFENCES, true, false, false, true)
             .setupAreGeofencesEnabled(true, false, false, true)
             .setShouldFcmTokenIdHaveBeenSaved(false)
             .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
@@ -1226,7 +1227,7 @@ public class RegistrationEngineTest {
             .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
             .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
             .setupGeofenceUpdateTimestamp(1337L, NOT_USED, NOT_USED,
-                GeofenceEngine.NEVER_UPDATED_GEOFENCES, true, false, false, true)
+                GeofenceConstants.NEVER_UPDATED_GEOFENCES, true, false, false, true)
             .setupAreGeofencesEnabled(true, true, false, true)
             .setShouldFcmTokenIdHaveBeenSaved(false)
             .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
@@ -1285,7 +1286,7 @@ public class RegistrationEngineTest {
             .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_2, TEST_SERVICE_URL_2, true)
             .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
             .setupGeofenceUpdateTimestamp(1337L, NOT_USED, NOT_USED,
-                GeofenceEngine.NEVER_UPDATED_GEOFENCES, true, false, false, true)
+                GeofenceConstants.NEVER_UPDATED_GEOFENCES, true, false, false, true)
             .setupAreGeofencesEnabled(true, true, false, true)
             .setShouldFcmTokenIdHaveBeenSaved(false)
             .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
@@ -1482,8 +1483,8 @@ public class RegistrationEngineTest {
             .setupTags(null, null, EMPTY_SET, true)
             .setupServiceUrl(null, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
             .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setupGeofenceUpdateTimestamp(GeofenceEngine.NEVER_UPDATED_GEOFENCES, 0L, 0L,
-                GeofenceEngine.NEVER_UPDATED_GEOFENCES, false, false, false, false)
+            .setupGeofenceUpdateTimestamp(GeofenceConstants.NEVER_UPDATED_GEOFENCES, 0L, 0L,
+                GeofenceConstants.NEVER_UPDATED_GEOFENCES, false, false, false, false)
             .setupAreGeofencesEnabled(false, true, false, false)
             .setShouldFcmTokenIdHaveBeenSaved(true)
             .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
@@ -1512,8 +1513,8 @@ public class RegistrationEngineTest {
             .setupTags(EMPTY_SET, null, EMPTY_SET, false)
             .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
             .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setupGeofenceUpdateTimestamp(GeofenceEngine.NEVER_UPDATED_GEOFENCES, NOT_USED,
-                NOT_USED, GeofenceEngine.NEVER_UPDATED_GEOFENCES, true, false, false, false)
+            .setupGeofenceUpdateTimestamp(GeofenceConstants.NEVER_UPDATED_GEOFENCES, NOT_USED,
+                NOT_USED, GeofenceConstants.NEVER_UPDATED_GEOFENCES, true, false, false, false)
             .setupAreGeofencesEnabled(false, false, false, false)
             .setShouldFcmTokenIdHaveBeenSaved(false)
             .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
@@ -1542,8 +1543,8 @@ public class RegistrationEngineTest {
             .setupTags(EMPTY_SET, null, EMPTY_SET, false)
             .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
             .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setupGeofenceUpdateTimestamp(GeofenceEngine.NEVER_UPDATED_GEOFENCES, NOT_USED,
-                NOT_USED, GeofenceEngine.NEVER_UPDATED_GEOFENCES, true, false, false, false)
+            .setupGeofenceUpdateTimestamp(GeofenceConstants.NEVER_UPDATED_GEOFENCES, NOT_USED,
+                NOT_USED, GeofenceConstants.NEVER_UPDATED_GEOFENCES, true, false, false, false)
             .setupAreGeofencesEnabled(false, false, false, false)
             .setShouldFcmTokenIdHaveBeenSaved(false)
             .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
@@ -1560,7 +1561,7 @@ public class RegistrationEngineTest {
         final PushPreferencesFCM pushPreferences = getMockPushPreferencesFCM(
             TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1,
             TEST_DEVICE_ALIAS_1, TEST_CUSTOM_USER_ID_1, TEST_PACKAGE_NAME, TEST_SERVICE_URL_1,
-            EMPTY_SET, GeofenceEngine.NEVER_UPDATED_GEOFENCES, false);
+            EMPTY_SET, GeofenceConstants.NEVER_UPDATED_GEOFENCES, false);
 
         final FakePCFPushRegistrationApiRequest fakePCFPushRegistrationApiRequest = new FakePCFPushRegistrationApiRequest(
             TEST_FCM_DEVICE_REGISTRATION_ID_2, true);

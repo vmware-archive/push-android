@@ -15,7 +15,6 @@ import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequest;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestImpl;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestProvider;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationListener;
-import io.pivotal.android.push.geofence.GeofenceEngine;
 
 import io.pivotal.android.push.prefs.PushRequestHeaders;
 import io.pivotal.android.push.registration.RegistrationListener;

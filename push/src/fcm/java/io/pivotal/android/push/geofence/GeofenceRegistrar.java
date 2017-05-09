@@ -32,13 +32,13 @@ import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.Util;
 import io.pivotal.android.push.version.GeofenceStatus;
 
-public class GeofenceRegistrarImpl implements GeofenceRegistrar {
+public class GeofenceRegistrar {
 
 
     private static final Object lock = new Object();
     private Context context;
 
-    public GeofenceRegistrarImpl(Context context) {
+    public GeofenceRegistrar(Context context) {
         if (context instanceof Application) {
             this.context = context;
         } else {

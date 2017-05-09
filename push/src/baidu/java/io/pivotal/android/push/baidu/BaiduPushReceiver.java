@@ -1,9 +1,8 @@
 package io.pivotal.android.push.baidu;
 
 import android.content.Context;
-import android.util.Log;
 import com.baidu.android.pushservice.PushMessageReceiver;
-import io.pivotal.android.push.BaiduPush;
+import io.pivotal.android.push.Push;
 import io.pivotal.android.push.prefs.PushPreferencesBaidu;
 import io.pivotal.android.push.util.Logger;
 import java.util.List;
@@ -13,7 +12,7 @@ public class BaiduPushReceiver extends PushMessageReceiver {
     @Override
     public void onBind(Context context, int errorCode, String appId, String userId, String channelId, String requestId) {
         Logger.d(String.format("onBind: errorCode: %s, appId: %s, userId: %s, channelId:%s, requestId:%s", errorCode, appId, userId, channelId, requestId));
-        BaiduPush.getInstance(context).onBaiduServiceBound(errorCode, channelId); // also the channel id
+        Push.getInstance(context).onBaiduServiceBound(errorCode, channelId); // also the channel id
 
         final PushPreferencesBaidu pushPreferences = new PushPreferencesBaidu(context); // not here
         pushPreferences.setBaiduChannelId(channelId);

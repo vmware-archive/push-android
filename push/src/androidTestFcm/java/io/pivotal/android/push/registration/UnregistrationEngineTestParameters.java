@@ -24,6 +24,7 @@ import android.content.pm.PackageManager;
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.api.FakePCFPushUnregisterDeviceApiRequest;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestProvider;
+import io.pivotal.android.push.geofence.GeofenceConstants;
 import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
@@ -182,7 +183,7 @@ public class UnregistrationEngineTestParameters {
 
         if (shouldClearGeofencesFromMonitorAndStoreBeCalled) {
             if (shouldClearGeofencesBeSuccessful) {
-                verify(pushPreferences).setLastGeofenceUpdate(GeofenceEngine.NEVER_UPDATED_GEOFENCES);
+                verify(pushPreferences).setLastGeofenceUpdate(GeofenceConstants.NEVER_UPDATED_GEOFENCES);
                 verify(pushPreferences).setAreGeofencesEnabled(eq(false));
             } else { // clear geofences not successful
                 verify(pushPreferences, never()).setLastGeofenceUpdate(anyLong());
@@ -192,7 +193,7 @@ public class UnregistrationEngineTestParameters {
 
         } else if (shouldClearGeofencesFromStoreOnlyBeCalled) {
             if (shouldClearGeofencesBeSuccessful) {
-                verify(pushPreferences).setLastGeofenceUpdate(GeofenceEngine.NEVER_UPDATED_GEOFENCES);
+                verify(pushPreferences).setLastGeofenceUpdate(GeofenceConstants.NEVER_UPDATED_GEOFENCES);
                 verify(pushPreferences).setAreGeofencesEnabled(eq(false));
             } else { // clear geofences not successful
                 verify(pushPreferences, never()).setLastGeofenceUpdate(anyLong());

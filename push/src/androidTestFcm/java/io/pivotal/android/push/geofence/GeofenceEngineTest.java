@@ -40,7 +40,7 @@ public class GeofenceEngineTest {
     private PCFPushGeofenceDataList FIVE_ITEM_GEOFENCE_LIST;
     private PCFPushGeofenceLocationMap ONE_ITEM_GEOFENCE_MAP;
     private GeofenceEngine engine;
-    private GeofenceRegistrarImpl registrar;
+    private GeofenceRegistrar registrar;
     private GeofencePersistentStore store;
     private TimeProvider timeProvider;
     private PushPreferencesFCM pushPreferences;
@@ -50,7 +50,7 @@ public class GeofenceEngineTest {
     public void setUp() throws Exception {
         System.setProperty("dexmaker.dexcache", InstrumentationRegistry.getContext().getCacheDir().getPath());
         store = mock(GeofencePersistentStore.class);
-        registrar = mock(GeofenceRegistrarImpl.class);
+        registrar = mock(GeofenceRegistrar.class);
         timeProvider = mock(TimeProvider.class);
 
         pushPreferences = mock(PushPreferencesFCM.class);

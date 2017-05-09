@@ -11,19 +11,7 @@ import android.support.annotation.Nullable;
 import com.baidu.android.pushservice.PushConstants;
 import com.baidu.android.pushservice.PushManager;
 
-import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequest;
-import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestImpl;
-import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestProvider;
-import io.pivotal.android.push.backend.geofence.PCFPushGetGeofenceUpdatesApiRequest;
-import io.pivotal.android.push.geofence.GeofenceEngine;
-import io.pivotal.android.push.geofence.GeofencePersistentStore;
-import io.pivotal.android.push.geofence.GeofenceRegistrar;
 import io.pivotal.android.push.prefs.PushPreferencesBaidu;
-import io.pivotal.android.push.registration.UnregistrationListener;
-import io.pivotal.android.push.util.FileHelper;
-import io.pivotal.android.push.util.NetworkWrapper;
-import io.pivotal.android.push.util.NetworkWrapperImpl;
-import io.pivotal.android.push.util.TimeProvider;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -39,14 +27,14 @@ import io.pivotal.android.push.util.Logger;
 import io.pivotal.android.push.util.ServiceStarter;
 import io.pivotal.android.push.util.ServiceStarterImpl;
 
-public class BaiduPush {
-    private static BaiduPush instance;
+public class Push {
+    private static Push instance;
     private static final ExecutorService threadPool = Executors.newFixedThreadPool(1);
     private String baiduAPIKey;
 
-    public synchronized static BaiduPush getInstance(Context context) {
+    public synchronized static Push getInstance(Context context) {
         if (instance == null) {
-            instance = new BaiduPush(context);
+            instance = new Push(context);
         }
         return instance;
     }
@@ -57,7 +45,7 @@ public class BaiduPush {
 
     private RegistrationListener registrationListener;
 
-    private BaiduPush(@NonNull Context context) {
+    private Push(@NonNull Context context) {
         if (context instanceof Application) {
             this.context = context;
         } else {
@@ -262,4 +250,12 @@ public class BaiduPush {
             Logger.w("Note: notification has no receiptId. No analytics event will be logged for opening this notification.");
         }
     }
+
+    /**
+     * @return the current version of the Pivotal CF Push Client SDK.
+     */
+    public static String getVersion() {
+        return BuildConfig.VERSION_NAME;
+    }
+
 }

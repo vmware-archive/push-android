@@ -10,6 +10,7 @@ import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequest;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestProvider;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceListener;
+import io.pivotal.android.push.geofence.GeofenceConstants;
 import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
@@ -171,7 +172,7 @@ public class UnregistrationEngine {
     }
 
     private boolean shouldClearGeofences() {
-        return pushPreferences.getLastGeofenceUpdate() != GeofenceEngine.NEVER_UPDATED_GEOFENCES;
+        return pushPreferences.getLastGeofenceUpdate() != GeofenceConstants.NEVER_UPDATED_GEOFENCES;
     }
 
     private boolean isPermissionForGeofences() {
@@ -239,7 +240,7 @@ public class UnregistrationEngine {
     }
 
     private void clearGeofencePreferences() {
-        pushPreferences.setLastGeofenceUpdate(GeofenceEngine.NEVER_UPDATED_GEOFENCES);
+        pushPreferences.setLastGeofenceUpdate(GeofenceConstants.NEVER_UPDATED_GEOFENCES);
         pushPreferences.setAreGeofencesEnabled(false);
     }
 }

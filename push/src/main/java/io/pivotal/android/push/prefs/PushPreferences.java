@@ -3,13 +3,12 @@ package io.pivotal.android.push.prefs;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import io.pivotal.android.push.geofence.GeofenceEngine;
+import io.pivotal.android.push.geofence.GeofenceConstants;
 import io.pivotal.android.push.prefs.Pivotal.SslCertValidationMode;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 public class PushPreferences {
     private static final String TAG_NAME = "PivotalCFMSPush";
@@ -108,7 +107,7 @@ public class PushPreferences {
 
     public long getLastGeofenceUpdate() {
         return getSharedPreferences()
-            .getLong(PROPERTY_GEOFENCE_UPDATE, GeofenceEngine.NEVER_UPDATED_GEOFENCES);
+            .getLong(PROPERTY_GEOFENCE_UPDATE, GeofenceConstants.NEVER_UPDATED_GEOFENCES);
     }
 
     public void setLastGeofenceUpdate(long timestamp) {

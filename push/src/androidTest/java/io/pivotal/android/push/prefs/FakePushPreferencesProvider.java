@@ -3,11 +3,8 @@
  */
 package io.pivotal.android.push.prefs;
 
-import java.util.Date;
+import io.pivotal.android.push.geofence.GeofenceConstants;
 import java.util.Set;
-
-import io.pivotal.android.push.geofence.GeofenceEngine;
-import io.pivotal.android.push.version.Version;
 
 public class FakePushPreferencesProvider implements PushPreferencesProvider {
 
@@ -20,7 +17,7 @@ public class FakePushPreferencesProvider implements PushPreferencesProvider {
     private String packageName;
     private String serviceUrl;
     private Set<String> tags;
-    private long lastGeofenceUpdate = GeofenceEngine.NEVER_UPDATED_GEOFENCES;
+    private long lastGeofenceUpdate = GeofenceConstants.NEVER_UPDATED_GEOFENCES;
     private boolean areGeofencesEnabled;
     private boolean wasFcmTokenIdSaved = false;
     private boolean wasPCFPushDeviceRegistrationIdSaved = false;

@@ -10,6 +10,8 @@ import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GoogleApiAvailability;
 import com.google.firebase.iid.FirebaseInstanceId;
 
+import io.pivotal.android.push.geofence.GeofenceConstants;
+import io.pivotal.android.push.geofence.GeofenceRegistrar;
 import io.pivotal.android.push.prefs.PushPreferencesFCM;
 import java.util.Set;
 
@@ -20,9 +22,7 @@ import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestProvider
 import io.pivotal.android.push.backend.api.PCFPushRegistrationListener;
 import io.pivotal.android.push.backend.geofence.PCFPushGetGeofenceUpdatesApiRequest;
 import io.pivotal.android.push.geofence.GeofenceEngine;
-import io.pivotal.android.push.geofence.GeofenceFactoryImpl;
 import io.pivotal.android.push.geofence.GeofencePersistentStore;
-import io.pivotal.android.push.geofence.GeofenceRegistrar;
 import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.PushRequestHeaders;
@@ -90,7 +90,7 @@ public class RegistrationEngine {
         final PCFPushRegistrationApiRequest dummyPCFPushRegistrationApiRequest = new PCFPushRegistrationApiRequestImpl(context, networkWrapper);
         final PCFPushRegistrationApiRequestProvider PCFPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(dummyPCFPushRegistrationApiRequest);
         final PCFPushGetGeofenceUpdatesApiRequest geofenceUpdatesApiRequest = new PCFPushGetGeofenceUpdatesApiRequest(context, networkWrapper);
-        final GeofenceRegistrar geofenceRegistrar = new GeofenceFactoryImpl().getGeofenceRegistrar(context);
+        final GeofenceRegistrar geofenceRegistrar = new GeofenceRegistrar(context);
         final FileHelper fileHelper = new FileHelper(context);
         final TimeProvider timeProvider = new TimeProvider();
         final GeofencePersistentStore geofencePersistentStore = new GeofencePersistentStore(context, fileHelper);
@@ -423,7 +423,7 @@ public class RegistrationEngine {
     }
 
     private boolean isGeofenceUpdateRequired(PushParameters parameters) {
-        if (isPermissionForGeofences() && parameters.areGeofencesEnabled() && pushPreferences.getLastGeofenceUpdate() == GeofenceEngine.NEVER_UPDATED_GEOFENCES) {
+        if (isPermissionForGeofences() && parameters.areGeofencesEnabled() && pushPreferences.getLastGeofenceUpdate() == GeofenceConstants.NEVER_UPDATED_GEOFENCES) {
             Logger.i("A geofence update is required in order to download the current geofence configuration.");
             return true;
         }
@@ -431,7 +431,7 @@ public class RegistrationEngine {
     }
 
     private boolean areGeofencesAvailable(PushParameters parameters) {
-        if (isPermissionForGeofences() && parameters.areGeofencesEnabled() && pushPreferences.getLastGeofenceUpdate() != GeofenceEngine.NEVER_UPDATED_GEOFENCES) {
+        if (isPermissionForGeofences() && parameters.areGeofencesEnabled() && pushPreferences.getLastGeofenceUpdate() != GeofenceConstants.NEVER_UPDATED_GEOFENCES) {
             Logger.v("Geofences are available.");
             return true;
         }
@@ -439,7 +439,7 @@ public class RegistrationEngine {
     }
 
     private boolean isClearGeofencesRequired(PushParameters parameters) {
-        if ((!isPermissionForGeofences() && parameters.areGeofencesEnabled()) || (!parameters.areGeofencesEnabled() && pushPreferences.getLastGeofenceUpdate() != GeofenceEngine.NEVER_UPDATED_GEOFENCES)) {
+        if ((!isPermissionForGeofences() && parameters.areGeofencesEnabled()) || (!parameters.areGeofencesEnabled() && pushPreferences.getLastGeofenceUpdate() != GeofenceConstants.NEVER_UPDATED_GEOFENCES)) {
             Logger.v("Geofences are now disabled and the current configuration needs to be cleared.");
             return true;
         }
@@ -584,7 +584,7 @@ public class RegistrationEngine {
 
                 } else {
                     pushPreferences.setAreGeofencesEnabled(false);
-                    pushPreferences.setLastGeofenceUpdate(GeofenceEngine.NEVER_UPDATED_GEOFENCES);
+                    pushPreferences.setLastGeofenceUpdate(GeofenceConstants.NEVER_UPDATED_GEOFENCES);
 
                     if (listener != null) {
                         listener.onRegistrationComplete();
@@ -638,7 +638,7 @@ public class RegistrationEngine {
                 @Override
                 public void onSuccess() {
                     pushPreferences.setAreGeofencesEnabled(false);
-                    pushPreferences.setLastGeofenceUpdate(GeofenceEngine.NEVER_UPDATED_GEOFENCES);
+                    pushPreferences.setLastGeofenceUpdate(GeofenceConstants.NEVER_UPDATED_GEOFENCES);
                     if (listener != null) {
                         listener.onRegistrationComplete();
                     }
@@ -659,7 +659,7 @@ public class RegistrationEngine {
                 @Override
                 public void onSuccess() {
 
-                    pushPreferences.setLastGeofenceUpdate(GeofenceEngine.NEVER_UPDATED_GEOFENCES);
+                    pushPreferences.setLastGeofenceUpdate(GeofenceConstants.NEVER_UPDATED_GEOFENCES);
                     pushPreferences.setAreGeofencesEnabled(false);
 
                     setGeofenceStatus();

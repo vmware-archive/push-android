@@ -14,7 +14,7 @@ import android.content.Context;
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.api.FakePCFPushRegistrationApiRequest;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestProvider;
-import io.pivotal.android.push.geofence.GeofenceEngine;
+import io.pivotal.android.push.geofence.GeofenceConstants;
 import io.pivotal.android.push.prefs.FakePushRequestHeaders;
 import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesBaidu;
@@ -77,7 +77,7 @@ public class RegistrationEngineTestParameters {
 
     public void run() {
         final PushPreferencesBaidu pushPreferences = getMockPushPreferences(baiduChannelIdInPrefs, pcfPushDeviceRegistrationIdInPrefs, platformUuidInPrefs, platformSecretInPrefs, deviceAliasInPrefs, customUserIdInPrefs, packageNameInPrefs, serviceUrlInPrefs, tagsInPrefs,
-            GeofenceEngine.NEVER_UPDATED_GEOFENCES, false);
+            GeofenceConstants.NEVER_UPDATED_GEOFENCES, false);
 
         final FakePushRequestHeaders pushRequestHeaders = new FakePushRequestHeaders();
         final FakePCFPushRegistrationApiRequest fakePCFPushRegistrationApiRequest = new FakePCFPushRegistrationApiRequest(pcfPushDeviceRegistrationIdFromServer, shouldPCFPushDeviceRegistrationBeSuccessful);

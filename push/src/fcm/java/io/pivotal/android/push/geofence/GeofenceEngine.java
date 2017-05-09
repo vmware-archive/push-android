@@ -15,8 +15,6 @@ import io.pivotal.android.push.util.TimeProvider;
 
 public class GeofenceEngine {
 
-    public static final long NEVER_UPDATED_GEOFENCES = -1L;
-
     private GeofenceRegistrar registrar;
     private GeofencePersistentStore store;
     private TimeProvider timeProvider;

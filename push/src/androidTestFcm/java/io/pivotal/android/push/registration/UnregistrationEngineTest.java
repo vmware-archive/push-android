@@ -17,6 +17,7 @@ import android.support.test.runner.AndroidJUnit4;
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.api.FakePCFPushUnregisterDeviceApiRequest;
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestProvider;
+import io.pivotal.android.push.geofence.GeofenceConstants;
 import io.pivotal.android.push.geofence.GeofenceEngine;
 import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
@@ -148,7 +149,7 @@ public class UnregistrationEngineTest {
     public void testSuccessfulUnregistrationWithGeofencesDisabled() throws Exception {
         UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, null)
-                .setupGeofences(GeofenceEngine.NEVER_UPDATED_GEOFENCES, false, false, false, true)
+                .setupGeofences(GeofenceConstants.NEVER_UPDATED_GEOFENCES, false, false, false, true)
                 .setShouldHavePermissionForGeofences(true)
                 .setupParameters(parameters)
                 .setShouldUnregistrationHaveSucceeded(true);
@@ -192,7 +193,7 @@ public class UnregistrationEngineTest {
     public void testUnregistrationWhePCFPushUnregistrationFailsWithGeofencesDisabled() throws Exception {
         UnregistrationEngineTestParameters testParams = new UnregistrationEngineTestParameters()
                 .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-                .setupGeofences(GeofenceEngine.NEVER_UPDATED_GEOFENCES, false, false, false, true)
+                .setupGeofences(GeofenceConstants.NEVER_UPDATED_GEOFENCES, false, false, false, true)
                 .setShouldHavePermissionForGeofences(true)
                 .setupParameters(parameters)
                 .setShouldUnregistrationHaveSucceeded(false);

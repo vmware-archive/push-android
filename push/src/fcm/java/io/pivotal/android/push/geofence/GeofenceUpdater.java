@@ -65,7 +65,6 @@ public class GeofenceUpdater {
             }
 
         } else {
-            // TODO - consider scheduling this request a short random time in the future in order to stagger the demand on the server.
             final PushParameters parameters = new PushParameters(
                     pushPreferences.getPlatformUuid(),
                     pushPreferences.getPlatformSecret(),
@@ -76,8 +75,8 @@ public class GeofenceUpdater {
                     pushPreferences.getTags(),
                     pushPreferences.areGeofencesEnabled(),
                     pushPreferences.areAnalyticsEnabled(),
-                    Pivotal.SslCertValidationMode.DEFAULT,
-                    new ArrayList<String>(),
+                    pushPreferences.getSslCertValidationMode(),
+                    pushPreferences.getPinnedCertificateNames(),
                     pushRequestHeaders.getRequestHeaders());
             final String deviceUuid = pushPreferences.getPCFPushDeviceRegistrationId();
 
@@ -103,7 +102,7 @@ public class GeofenceUpdater {
         Logger.v("Clearing geofences from monitor and store.");
         final Set<String> subscribedTags = pushPreferences.getTags();
         geofenceEngine.processResponseData(0L, null, subscribedTags);
-        pushPreferences.setLastGeofenceUpdate(GeofenceEngine.NEVER_UPDATED_GEOFENCES);
+        pushPreferences.setLastGeofenceUpdate(GeofenceConstants.NEVER_UPDATED_GEOFENCES);
         if (listener != null) {
             listener.onSuccess();
         }

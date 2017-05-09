@@ -19,6 +19,7 @@ import android.support.v4.content.ContextCompat;
 
 import com.google.firebase.iid.FirebaseInstanceId;
 
+import io.pivotal.android.push.geofence.GeofenceRegistrar;
 import io.pivotal.android.push.prefs.PushPreferencesFCM;
 import java.util.List;
 import java.util.Map;
@@ -33,9 +34,7 @@ import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestImpl
 import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestProvider;
 import io.pivotal.android.push.backend.geofence.PCFPushGetGeofenceUpdatesApiRequest;
 import io.pivotal.android.push.geofence.GeofenceEngine;
-import io.pivotal.android.push.geofence.GeofenceFactoryImpl;
 import io.pivotal.android.push.geofence.GeofencePersistentStore;
-import io.pivotal.android.push.geofence.GeofenceRegistrar;
 import io.pivotal.android.push.geofence.GeofenceStatusUtil;
 import io.pivotal.android.push.geofence.GeofenceUpdater;
 import io.pivotal.android.push.prefs.Pivotal;
@@ -384,7 +383,7 @@ public class Push {
         final PCFPushUnregisterDeviceApiRequest dummyPCFPushUnregisterDeviceApiRequest = new PCFPushUnregisterDeviceApiRequestImpl(context, networkWrapper);
         final PCFPushUnregisterDeviceApiRequestProvider pcfPushUnregisterDeviceApiRequestProvider = new PCFPushUnregisterDeviceApiRequestProvider(dummyPCFPushUnregisterDeviceApiRequest);
         final PCFPushGetGeofenceUpdatesApiRequest geofenceUpdatesApiRequest = new PCFPushGetGeofenceUpdatesApiRequest(context, networkWrapper);
-        final GeofenceRegistrar geofenceRegistrar = new GeofenceFactoryImpl().getGeofenceRegistrar(context);
+        final GeofenceRegistrar geofenceRegistrar = new GeofenceRegistrar(context);
         final FileHelper fileHelper = new FileHelper(context);
         final TimeProvider timeProvider = new TimeProvider();
         final GeofencePersistentStore geofencePersistentStore = new GeofencePersistentStore(context, fileHelper);

@@ -5,14 +5,13 @@ import android.content.Context;
 import android.content.Intent;
 import android.os.AsyncTask;
 
+import io.pivotal.android.push.geofence.GeofenceRegistrar;
 import io.pivotal.android.push.prefs.PushPreferencesFCM;
 import java.util.Set;
 
 import io.pivotal.android.push.analytics.jobs.PrepareDatabaseJob;
 import io.pivotal.android.push.geofence.GeofenceEngine;
-import io.pivotal.android.push.geofence.GeofenceFactoryImpl;
 import io.pivotal.android.push.geofence.GeofencePersistentStore;
-import io.pivotal.android.push.geofence.GeofenceRegistrar;
 import io.pivotal.android.push.service.AnalyticsEventService;
 import io.pivotal.android.push.util.FileHelper;
 import io.pivotal.android.push.util.Logger;
@@ -44,7 +43,7 @@ public class BootCompletedReceiver extends BroadcastReceiver {
                 @Override
                 protected Void doInBackground(Void[] params) {
                     Logger.i("Reregistering current geofences.");
-                    final GeofenceRegistrar geofenceRegistrar = new GeofenceFactoryImpl().getGeofenceRegistrar(context);
+                    final GeofenceRegistrar geofenceRegistrar = new GeofenceRegistrar(context);
                     final FileHelper fileHelper = new FileHelper(context);
                     final TimeProvider timeProvider = new TimeProvider();
                     final GeofencePersistentStore geofencePersistentStore = new GeofencePersistentStore(context, fileHelper);
