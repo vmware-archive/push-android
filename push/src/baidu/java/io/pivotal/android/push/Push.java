@@ -4,6 +4,7 @@ import static com.google.gson.internal.$Gson$Preconditions.checkArgument;
 
 import android.app.Application;
 import android.content.Context;
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -11,7 +12,19 @@ import android.support.annotation.Nullable;
 import com.baidu.android.pushservice.PushConstants;
 import com.baidu.android.pushservice.PushManager;
 
+import io.pivotal.android.push.analytics.jobs.PrepareDatabaseJob;
+import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequest;
+import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestImpl;
+import io.pivotal.android.push.backend.api.PCFPushUnregisterDeviceApiRequestProvider;
+import io.pivotal.android.push.baidu.UnregistrationEngine;
 import io.pivotal.android.push.prefs.PushPreferencesBaidu;
+import io.pivotal.android.push.receiver.AnalyticsEventsSenderAlarmProvider;
+import io.pivotal.android.push.receiver.AnalyticsEventsSenderAlarmProviderImpl;
+import io.pivotal.android.push.registration.SubscribeToTagsListener;
+import io.pivotal.android.push.registration.UnregistrationListener;
+import io.pivotal.android.push.service.AnalyticsEventService;
+import io.pivotal.android.push.util.NetworkWrapper;
+import io.pivotal.android.push.util.NetworkWrapperImpl;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,6 +44,7 @@ public class Push {
     private static Push instance;
     private static final ExecutorService threadPool = Executors.newFixedThreadPool(1);
     private String baiduAPIKey;
+    private boolean wasDatabaseCleanupJobRun = false;
 
     public synchronized static Push getInstance(Context context) {
         if (instance == null) {
@@ -44,13 +58,20 @@ public class Push {
     private PushServiceInfo pushServiceInfo = null;
 
     private RegistrationListener registrationListener;
+    private UnregistrationListener unregistrationListener;
 
     private Push(@NonNull Context context) {
+        if (context == null) {
+            throw new IllegalArgumentException("context may not be null");
+        }
+
         if (context instanceof Application) {
             this.context = context;
         } else {
             this.context = context.getApplicationContext();
         }
+
+        Logger.i("Push SDK initialized.");
     }
 
     /**
@@ -70,12 +91,10 @@ public class Push {
      * will only start after the first attempt completes.
      * @param deviceAlias Provides the device alias for registration.  This is optional and may be null
      * @param tags Provides the list of tags for registration.  This is optional and may be null.
-     * @param areGeofencesEnabled Should Push use geofences?  If 'yes' then you must ask the user for permission before calling `startRegistration`.
      */
     public void startRegistration(@Nullable final String deviceAlias,
-                                  @Nullable final Set<String> tags,
-                                  final boolean areGeofencesEnabled) {
-        startRegistration(deviceAlias, tags, areGeofencesEnabled, null);
+                                  @Nullable final Set<String> tags) {
+        startRegistration(deviceAlias, tags, null);
     }
 
     /**
@@ -86,14 +105,12 @@ public class Push {
      * will only start after the first attempt completes.
      * @param deviceAlias Provides the device alias for registration.  This is optional and may be null.
      * @param tags Provides the list of tags for registration.  This is optional and may be null.
-     * @param areGeofencesEnabled Should Push use geofences?  If 'yes' then you must ask the user for permission before calling `startRegistration`.
      * @param listener Optional listener for receiving a callback after registration finishes. This callback may
      */
     public void startRegistration(@Nullable final String deviceAlias,
                                   @Nullable final Set<String> tags,
-                                  final boolean areGeofencesEnabled,
                                   @Nullable final RegistrationListener listener) {
-        startRegistration(deviceAlias, null, tags, areGeofencesEnabled, listener);
+        startRegistration(deviceAlias, null, tags, listener);
     }
 
     /**
@@ -105,21 +122,21 @@ public class Push {
      * @param deviceAlias Provides the device alias for registration.  This is optional and may be null.
      * @param customUserId Provides a custom user ID that can be used to identify the user using the device. This field is optional and may be null.
      * @param tags Provides the list of tags for registration.  This is optional and may be null.
-     * @param areGeofencesEnabled Should Push use geofences?  If 'yes' then you must ask the user for permission before calling `startRegistration`.
      * @param listener Optional listener for receiving a callback after registration finishes. This callback may
      */
     public synchronized void startRegistration(@Nullable final String deviceAlias,
                                                @Nullable final String customUserId,
                                                @Nullable final Set<String> tags,
-                                               final boolean areGeofencesEnabled,
                                                @Nullable final RegistrationListener listener) {
-
         checkArgument(pushServiceInfo != null);
 
         final PushRequestHeaders pushRequestHeaders = PushRequestHeaders.getInstance(context);
-        parameters = getPushParameters(deviceAlias, customUserId, tags, areGeofencesEnabled, pushServiceInfo.areAnalyticsEnabled(), pushRequestHeaders.getRequestHeaders());
+
+        parameters = getPushParameters(deviceAlias, customUserId, tags, pushServiceInfo.areAnalyticsEnabled(), pushRequestHeaders.getRequestHeaders());
 
         registrationListener = listener;
+
+        checkAnalytics();
 
         verifyRegistrationArguments(parameters);
 
@@ -129,7 +146,6 @@ public class Push {
     private PushParameters getPushParameters(@Nullable String deviceAlias,
         @Nullable String customUserId,
         @Nullable Set<String> tags,
-        boolean areGeofencesEnabled,
         boolean areAnalyticsEnabled,
         @Nullable Map<String, String> requestHeaders) {
 
@@ -138,8 +154,41 @@ public class Push {
         final String serviceUrl = pushServiceInfo.getServiceUrl();
         final Pivotal.SslCertValidationMode sslCertValidationMode = pushServiceInfo.getSslCertValidationMode();
         final List<String> pinnedCertificateNames = pushServiceInfo.getPinnedSslCertificateNames();
+        final boolean areGeofencesEnabled = false;
 
         return new PushParameters(platformUuid, platformSecret, serviceUrl, "android-baidu", deviceAlias, customUserId, tags, areGeofencesEnabled, areAnalyticsEnabled, sslCertValidationMode, pinnedCertificateNames, requestHeaders);
+    }
+
+    private void checkAnalytics() {
+        if (pushServiceInfo.areAnalyticsEnabled()) {
+
+            AnalyticsEventService.setPushParameters(parameters);
+            final Intent intent = AnalyticsEventService.getIntentToRunJob(context, null);
+            context.startService(intent);
+
+            cleanupDatabase();
+        } else {
+            Logger.i("Pivotal PushSDK analytics is disabled.");
+            final AnalyticsEventsSenderAlarmProvider alarmProvider = new AnalyticsEventsSenderAlarmProviderImpl(context);
+            alarmProvider.disableAlarm();
+        }
+    }
+
+    private void cleanupDatabase() {
+        if (!wasDatabaseCleanupJobRun) {
+
+            // If the process has just been initialized, then run the PrepareDatabaseJob in order to prepare the database
+            final PrepareDatabaseJob job = new PrepareDatabaseJob(true);
+            final Intent intent = AnalyticsEventService.getIntentToRunJob(context, job);
+            context.startService(intent);
+
+        } else {
+
+            // Otherwise, simply make sure that the timer for posting events to the server is enabled.
+            final AnalyticsEventsSenderAlarmProvider alarmProvider = new AnalyticsEventsSenderAlarmProviderImpl(context);
+            alarmProvider.enableAlarmIfDisabled();
+        }
+        wasDatabaseCleanupJobRun = true;
     }
 
     /**
@@ -164,9 +213,11 @@ public class Push {
         if (parameters.getPlatformSecret() == null || parameters.getPlatformSecret().isEmpty()) {
             throw new IllegalArgumentException("parameters.platformSecret may not be null or empty");
         }
-        // TODO also check if it's empty
-        if (parameters.getServiceUrl() == null) {
-            throw new IllegalArgumentException("parameters.serviceUrl may not be null");
+        if (parameters.getServiceUrl() == null || parameters.getServiceUrl().isEmpty()) {
+            throw new IllegalArgumentException("parameters.serviceUrl may not be null or empty");
+        }
+        if (baiduAPIKey == null || baiduAPIKey.isEmpty()) {
+            throw new IllegalArgumentException("Baidu api key may not be null or empty");
         }
     }
 
@@ -202,6 +253,132 @@ public class Push {
         }
     }
 
+    public synchronized void onBaiduServiceUnbound(int errorCode) {
+        if (errorCode == PushConstants.ERROR_SUCCESS) {
+            executeUnregistration();
+        } else {
+            unregistrationListener.onUnregistrationFailed(String.format("Unregistration failed due to a baidu error: %s", errorCode));
+        }
+    }
+
+    /**
+     * Sets the tags that the device should be subscribed to. Always provide the entire
+     * list of tags that the device should be subscribed to. If the device is already subscribed to
+     * some tags and those tags are not provided when calling this method again then those
+     * tags will be unsubscribed.
+     *
+     * NOTE: Calling this method will perform a device registration, if the device has not been registered yet
+     *
+     * @param tags Provides the list of tags the device should subscribe to. Allowed to be `null` or empty.
+     */
+    public void subscribeToTags(@Nullable final Set<String> tags) {
+        subscribeToTags(tags, null);
+    }
+
+    /**
+     * Sets the tags that the device should be subscribed to. Always provide the entire
+     * list of tags that the device should be subscribed to. If the device is already subscribed to
+     * some tags and those tags are not provided when calling this method again then those
+     * tags will be unsubscribed.
+     *
+     * NOTE: Calling this method will perform a device registration, if the device has not been registered yet
+     *
+     * @param tags Provides the list of tags the device should subscribe to. Allowed to be `null` or empty.
+     *
+     * @param subscribeToTagsListener Optional listener for receiving a callback after registration finishes.
+     *        This callback may be called on a background thread.  May be `null`.
+     *
+     *        onSubscribeToTagsComplete will be executed if subscription is successful. This method may be called on
+     *                a background thread.
+     *
+     *        onSubscribeToTagsFailed will be executed if subscription fails. This method may be called on a
+     *                background thread.
+     */
+    public void subscribeToTags(@Nullable final Set<String> tags,
+        @Nullable final SubscribeToTagsListener subscribeToTagsListener) {
+
+        final PushPreferencesBaidu pushPreferences = new PushPreferencesBaidu(context);
+        final String deviceAlias = pushPreferences.getDeviceAlias();
+        final String customUserId = pushPreferences.getCustomUserId();
+
+        startRegistration(deviceAlias, customUserId, tags, new RegistrationListener() {
+            @Override
+            public void onRegistrationComplete() {
+                if (subscribeToTagsListener != null) {
+                    subscribeToTagsListener.onSubscribeToTagsComplete();
+                }
+            }
+
+            @Override
+            public void onRegistrationFailed(String reason) {
+                if (subscribeToTagsListener != null) {
+                    subscribeToTagsListener.onSubscribeToTagsFailed(reason);
+                }
+            }
+        });
+    }
+
+    /**
+     * Asynchronously unregisters the device and application from receiving push notifications.
+     *
+     */
+    public void startUnregistration() {
+        startUnregistration(null);
+    }
+
+    /**
+     * Asynchronously unregisters the device and application from receiving push notifications.
+     *
+     * @param listener Optional listener for receiving a callback after un`registration finishes. This callback may
+     */
+    public void startUnregistration(@Nullable final UnregistrationListener listener) {
+        checkArgument(pushServiceInfo != null);
+
+        unregistrationListener = listener;
+
+        verifyUnregistrationArguments(parameters);
+
+        executeUnregistration();
+    }
+
+    private void executeUnregistration() {
+        PushManager.stopWork(context);
+
+        final PushPreferencesBaidu pushPreferences = new PushPreferencesBaidu(context);
+
+        verifyUnregistrationArguments(this.parameters);
+
+        final NetworkWrapper networkWrapper = new NetworkWrapperImpl();
+        final PCFPushUnregisterDeviceApiRequest unregisterDeviceApiRequest = new PCFPushUnregisterDeviceApiRequestImpl(context, networkWrapper);
+        final PCFPushUnregisterDeviceApiRequestProvider pcfPushUnregisterDeviceApiRequestProvider = new PCFPushUnregisterDeviceApiRequestProvider(unregisterDeviceApiRequest);
+
+        final Runnable runnable = new Runnable() {
+
+            @Override
+            public void run() {
+                try {
+                    final UnregistrationEngine unregistrationEngine = new UnregistrationEngine(
+                        context,
+                        pushPreferences,
+                        pcfPushUnregisterDeviceApiRequestProvider);
+                    unregistrationEngine.unregisterDevice(parameters, unregistrationListener);
+                } catch (Exception e) {
+                    Logger.ex("Push SDK unregistration failed", e);
+                }
+            }
+        };
+        threadPool.execute(runnable);
+    }
+
+    private void verifyUnregistrationArguments(@NonNull PushParameters parameters) {
+        if (parameters == null) {
+            throw new IllegalArgumentException("parameters may not be null");
+        }
+        if (parameters.getServiceUrl() == null) {
+            throw new IllegalArgumentException("parameters.serviceUrl may not be null");
+        }
+    }
+
     /**
      * Call this method in order to inject custom headers into any HTTP requests made by the Push SDK.
      * Note that you can not provide any 'Authorization' or 'Content-Type' headers via this method; they will
@@ -217,7 +394,6 @@ public class Push {
         final PushRequestHeaders pushRequestHeaders = PushRequestHeaders.getInstance(context);
         pushRequestHeaders.setRequestHeaders(requestHeaders);
     }
-
 
     /**
      * Call this method to set or change the target Push platform information for network request.

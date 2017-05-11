@@ -11,7 +11,6 @@ import java.util.HashSet;
 import java.util.Set;
 
 import io.pivotal.android.push.geofence.GeofenceEngine;
-import io.pivotal.android.push.version.Version;
 
 /**
  * Saves preferences to the SharedPreferences on the filesystem.

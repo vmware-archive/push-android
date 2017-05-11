@@ -5,6 +5,7 @@ package io.pivotal.android.push.util;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -106,6 +107,10 @@ public class FakeHttpURLConnection extends HttpsURLConnection {
 
     @Override
     public InputStream getInputStream() throws IOException {
+        if (responseCode != 200) {
+            throw new FileNotFoundException();
+        }
+
         if (responseData != null) {
             return new ByteArrayInputStream(responseData.getBytes());
         } else {

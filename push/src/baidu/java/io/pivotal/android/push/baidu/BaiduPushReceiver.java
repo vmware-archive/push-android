@@ -20,7 +20,7 @@ public class BaiduPushReceiver extends PushMessageReceiver {
 
     @Override
     public void onUnbind(Context context, int errorCode, String requestId) {
-        Logger.d(String.format("onBind: errorCode: %s, requestId:%s", errorCode, requestId));
+        Logger.d(String.format("onUnbind: errorCode: %s, requestId:%s", errorCode, requestId));
     }
 
     @Override

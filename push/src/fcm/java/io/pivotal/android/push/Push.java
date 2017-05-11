@@ -171,7 +171,6 @@ public class Push {
 
         checkArgument(pushServiceInfo != null);
 
-        // TODO Fix header storage implementation
         final PushRequestHeaders pushRequestHeaders = PushRequestHeaders.getInstance(context);
 
         parameters = getPushParameters(deviceAlias, customUserId, tags, areGeofencesEnabled, pushServiceInfo.areAnalyticsEnabled(),
