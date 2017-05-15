@@ -110,7 +110,8 @@ public class Push {
     public void startRegistration(@Nullable final String deviceAlias,
                                   @Nullable final Set<String> tags,
                                   @Nullable final RegistrationListener listener) {
-        startRegistration(deviceAlias, null, tags, listener);
+        final String customUserId = null;
+        startRegistration(deviceAlias, customUserId, tags, listener);
     }
 
     /**
