@@ -8,7 +8,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -17,8 +16,7 @@ import android.content.pm.PackageManager;
 import android.support.annotation.NonNull;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.GoogleApiAvailability;
+
 import io.pivotal.android.push.PushParameters;
 import io.pivotal.android.push.backend.api.FakePCFPushRegistrationApiRequest;
 import io.pivotal.android.push.backend.api.PCFPushRegistrationApiRequestProvider;
@@ -27,11 +25,13 @@ import io.pivotal.android.push.prefs.Pivotal;
 import io.pivotal.android.push.prefs.PushPreferencesBaidu;
 import io.pivotal.android.push.registration.RegistrationListener;
 import io.pivotal.android.push.util.Logger;
+
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -70,7 +70,7 @@ public class RegistrationEngineTest {
     @Before
     public void setUp() throws Exception {
         System.setProperty("dexmaker.dexcache",
-            InstrumentationRegistry.getContext().getCacheDir().getPath());
+                InstrumentationRegistry.getContext().getCacheDir().getPath());
         TEST_TAGS1.addAll(Arrays.asList("CATS", "DOGS"));
         TEST_TAGS1_LOWER.addAll(Arrays.asList("cats", "dogs"));
         TEST_TAGS2.addAll(Arrays.asList("LEMURS", "MONKEYS"));
@@ -78,25 +78,21 @@ public class RegistrationEngineTest {
 
         context = mock(Context.class);
         when(context.checkCallingOrSelfPermission(anyString()))
-            .thenReturn(PackageManager.PERMISSION_GRANTED);
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
 
         pushPreferences = mock(PushPreferencesBaidu.class);
 
         pushRequestHeaders = new FakePushRequestHeaders();
 
         pcfPushRegistrationApiRequestProvider = new PCFPushRegistrationApiRequestProvider(
-            new FakePCFPushRegistrationApiRequest(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1));
-
-        GoogleApiAvailability googleApiAvailability = mock(GoogleApiAvailability.class);
-        when(googleApiAvailability.isGooglePlayServicesAvailable(any(Context.class)))
-            .thenReturn(ConnectionResult.SUCCESS);
+                new FakePCFPushRegistrationApiRequest(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1));
     }
 
     @Test
     public void testNullContext() {
         try {
             new RegistrationEngine(null, TEST_PACKAGE_NAME, pushPreferences, pushRequestHeaders,
-                pcfPushRegistrationApiRequestProvider);
+                    pcfPushRegistrationApiRequestProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -107,7 +103,7 @@ public class RegistrationEngineTest {
     public void testNullPackageName() {
         try {
             new RegistrationEngine(context, null, pushPreferences, pushRequestHeaders,
-                pcfPushRegistrationApiRequestProvider);
+                    pcfPushRegistrationApiRequestProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -118,7 +114,7 @@ public class RegistrationEngineTest {
     public void testNullPushPreferences() {
         try {
             new RegistrationEngine(context, TEST_PACKAGE_NAME, null, pushRequestHeaders,
-                pcfPushRegistrationApiRequestProvider);
+                    pcfPushRegistrationApiRequestProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -129,7 +125,7 @@ public class RegistrationEngineTest {
     public void testNullPushRequestHeaders() {
         try {
             new RegistrationEngine(context, TEST_PACKAGE_NAME, pushPreferences, null,
-                pcfPushRegistrationApiRequestProvider);
+                    pcfPushRegistrationApiRequestProvider);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -140,7 +136,7 @@ public class RegistrationEngineTest {
     public void testNullPCFPushRegisterDeviceApiRequestProvider() {
         try {
             new RegistrationEngine(context, TEST_PACKAGE_NAME, pushPreferences, pushRequestHeaders,
-                null);
+                    null);
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -151,7 +147,7 @@ public class RegistrationEngineTest {
     public void testNullParameters() {
         try {
             final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, pushPreferences, pushRequestHeaders,
-                pcfPushRegistrationApiRequestProvider);
+                    pcfPushRegistrationApiRequestProvider);
             engine.registerDevice(null, "some-channel-id", getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -163,12 +159,12 @@ public class RegistrationEngineTest {
     public void testNullPlatformUuid() {
         try {
             final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, pushPreferences, pushRequestHeaders,
-                pcfPushRegistrationApiRequestProvider);
+                    pcfPushRegistrationApiRequestProvider);
             engine.registerDevice(
-                new PushParameters(null, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,
-                    TEST_DEVICE_ALIAS_1, TEST_CUSTOM_USER_ID_1, null, true, true,
-                    Pivotal.SslCertValidationMode.DEFAULT, null, null),
-                "some-channel-id", getListenerForRegistration(false));
+                    new PushParameters(null, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,
+                            TEST_DEVICE_ALIAS_1, TEST_CUSTOM_USER_ID_1, null, true, true,
+                            Pivotal.SslCertValidationMode.DEFAULT, null, null),
+                    "some-channel-id", getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -179,11 +175,11 @@ public class RegistrationEngineTest {
     public void testNullPlatformSecret() {
         try {
             final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, pushPreferences, pushRequestHeaders,
-                pcfPushRegistrationApiRequestProvider);
+                    pcfPushRegistrationApiRequestProvider);
             engine.registerDevice(new PushParameters(TEST_PLATFORM_UUID_1, null, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,
-                    TEST_DEVICE_ALIAS_1, TEST_CUSTOM_USER_ID_1, null, true, true,
-                    Pivotal.SslCertValidationMode.DEFAULT, null, null),
-                "some-channel-id", getListenerForRegistration(false));
+                            TEST_DEVICE_ALIAS_1, TEST_CUSTOM_USER_ID_1, null, true, true,
+                            Pivotal.SslCertValidationMode.DEFAULT, null, null),
+                    "some-channel-id", getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -193,44 +189,44 @@ public class RegistrationEngineTest {
     @Test
     public void testNullDeviceAlias() throws InterruptedException {
         final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, pushPreferences, pushRequestHeaders,
-            pcfPushRegistrationApiRequestProvider);
+                pcfPushRegistrationApiRequestProvider);
         engine.registerDevice(
-            new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,
-                TEST_CUSTOM_USER_ID_1, null, null, true, true, Pivotal.SslCertValidationMode.DEFAULT,
-                null, null), "some-channel-id", getListenerForRegistration(true));
+                new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,
+                        TEST_CUSTOM_USER_ID_1, null, null, true, true, Pivotal.SslCertValidationMode.DEFAULT,
+                        null, null), "some-channel-id", getListenerForRegistration(true));
         semaphore.acquire();
     }
 
     @Test
     public void testEmptyDeviceAlias() throws InterruptedException {
         final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, pushPreferences, pushRequestHeaders,
-            pcfPushRegistrationApiRequestProvider);
+                pcfPushRegistrationApiRequestProvider);
         engine.registerDevice(
-            new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,  "",
-                TEST_CUSTOM_USER_ID_1, null, true, true, Pivotal.SslCertValidationMode.DEFAULT, null,
-                null), "some-channel-id", getListenerForRegistration(true));
+                new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE, "",
+                        TEST_CUSTOM_USER_ID_1, null, true, true, Pivotal.SslCertValidationMode.DEFAULT, null,
+                        null), "some-channel-id", getListenerForRegistration(true));
         semaphore.acquire();
     }
 
     @Test
     public void testNullCustomUserId() throws InterruptedException {
         final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, pushPreferences, pushRequestHeaders,
-            pcfPushRegistrationApiRequestProvider);
+                pcfPushRegistrationApiRequestProvider);
         engine.registerDevice(
-            new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,
-                TEST_DEVICE_ALIAS_1, null, null, true, true,Pivotal.SslCertValidationMode.DEFAULT, null,
-                null), "some-channel-id", getListenerForRegistration(true));
+                new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,
+                        TEST_DEVICE_ALIAS_1, null, null, true, true, Pivotal.SslCertValidationMode.DEFAULT, null,
+                        null), "some-channel-id", getListenerForRegistration(true));
         semaphore.acquire();
     }
 
     @Test
     public void testEmptyCustomUserId() throws InterruptedException {
         final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, pushPreferences, pushRequestHeaders,
-            pcfPushRegistrationApiRequestProvider);
+                pcfPushRegistrationApiRequestProvider);
         engine.registerDevice(
-            new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,
-                TEST_DEVICE_ALIAS_1, "", null, true, true,Pivotal.SslCertValidationMode.DEFAULT, null,
-                null), "some-channel-id", getListenerForRegistration(true));
+                new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,
+                        TEST_DEVICE_ALIAS_1, "", null, true, true, Pivotal.SslCertValidationMode.DEFAULT, null,
+                        null), "some-channel-id", getListenerForRegistration(true));
         semaphore.acquire();
     }
 
@@ -238,11 +234,11 @@ public class RegistrationEngineTest {
     public void test255LongCustomUserId_isAccepted() throws InterruptedException {
         final String longString = getStringWithLength(255);
         final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, pushPreferences, pushRequestHeaders,
-            pcfPushRegistrationApiRequestProvider);
+                pcfPushRegistrationApiRequestProvider);
         engine.registerDevice(
-            new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,
-                TEST_DEVICE_ALIAS_1, longString, null, true, true, Pivotal.SslCertValidationMode.DEFAULT,
-                null, null), "some-channel-id", getListenerForRegistration(true));
+                new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,
+                        TEST_DEVICE_ALIAS_1, longString, null, true, true, Pivotal.SslCertValidationMode.DEFAULT,
+                        null, null), "some-channel-id", getListenerForRegistration(true));
         semaphore.acquire();
     }
 
@@ -251,12 +247,12 @@ public class RegistrationEngineTest {
         try {
             final String longString = getStringWithLength(256);
             final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, pushPreferences, pushRequestHeaders,
-                pcfPushRegistrationApiRequestProvider);
+                    pcfPushRegistrationApiRequestProvider);
             engine.registerDevice(
-                new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,
-                    TEST_DEVICE_ALIAS_1, longString, null, true, true,
-                    Pivotal.SslCertValidationMode.DEFAULT, null, null),
-                "some-channel-id", getListenerForRegistration(false));
+                    new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, TEST_SERVICE_URL_1, TEST_PLATFORM_TYPE,
+                            TEST_DEVICE_ALIAS_1, longString, null, true, true,
+                            Pivotal.SslCertValidationMode.DEFAULT, null, null),
+                    "some-channel-id", getListenerForRegistration(false));
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
             // success
@@ -267,12 +263,12 @@ public class RegistrationEngineTest {
     public void testEmptyServiceUrl() throws InterruptedException {
         try {
             final RegistrationEngine engine = new RegistrationEngine(context, TEST_PACKAGE_NAME, pushPreferences, pushRequestHeaders,
-                pcfPushRegistrationApiRequestProvider);
+                    pcfPushRegistrationApiRequestProvider);
             engine.registerDevice(
-                new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, null, TEST_PLATFORM_TYPE,
-                    TEST_DEVICE_ALIAS_1, TEST_CUSTOM_USER_ID_1, null, true, true,
-                    Pivotal.SslCertValidationMode.DEFAULT, null, null),
-                "some-channel-id", getListenerForRegistration(true));
+                    new PushParameters(TEST_PLATFORM_UUID_1, TEST_PLATFORM_SECRET_1, null, TEST_PLATFORM_TYPE,
+                            TEST_DEVICE_ALIAS_1, TEST_CUSTOM_USER_ID_1, null, true, true,
+                            Pivotal.SslCertValidationMode.DEFAULT, null, null),
+                    "some-channel-id", getListenerForRegistration(true));
             semaphore.acquire();
             fail("should not have succeeded");
         } catch (IllegalArgumentException e) {
@@ -283,645 +279,645 @@ public class RegistrationEngineTest {
     @Test
     public void testSuccessfulInitialRegistration() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(null, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
-                TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-            .setupPlatformUuid(null, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, true)
-            .setupPlatformSecret(null, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, true)
-            .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
-            .setupCustomUserId(null, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, true)
-            .setupTags(null, null, EMPTY_SET, true)
-            .setupServiceUrl(null, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
-            .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(true)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
-            .setShouldRegistrationHaveSucceeded(true);
+                .setupBaiduChannelId(null, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                        TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupPlatformUuid(null, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, true)
+                .setupPlatformSecret(null, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, true)
+                .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupCustomUserId(null, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, true)
+                .setupTags(null, null, EMPTY_SET, true)
+                .setupServiceUrl(null, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
+                .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
 
     @Test
     public void testSuccessfulInitialRegistrationWithoutPermissionForGeofences() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(null, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
-                TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-            .setupPlatformUuid(null, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, true)
-            .setupPlatformSecret(null, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, true)
-            .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
-            .setupCustomUserId(null, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, true)
-            .setupTags(null, null, EMPTY_SET, true)
-            .setupServiceUrl(null, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
-            .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(true)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
-            .setShouldRegistrationHaveSucceeded(true);
+                .setupBaiduChannelId(null, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                        TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupPlatformUuid(null, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, true)
+                .setupPlatformSecret(null, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, true)
+                .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupCustomUserId(null, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, true)
+                .setupTags(null, null, EMPTY_SET, true)
+                .setupServiceUrl(null, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
+                .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
 
     @Test
     public void testSuccessfulInitialRegistrationWithGeofencesDisabled() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(null, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
-                TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-            .setupPlatformUuid(null, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, true)
-            .setupPlatformSecret(null, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, true)
-            .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
-            .setupCustomUserId(null, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, true)
-            .setupTags(null, null, EMPTY_SET, true)
-            .setupServiceUrl(null, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
-            .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(true)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
-            .setShouldRegistrationHaveSucceeded(true);
+                .setupBaiduChannelId(null, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                        TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupPlatformUuid(null, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, true)
+                .setupPlatformSecret(null, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, true)
+                .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupCustomUserId(null, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, true)
+                .setupTags(null, null, EMPTY_SET, true)
+                .setupServiceUrl(null, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
+                .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
 
     @Test
     public void testSuccessfulInitialRegistrationWithTags() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(null, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
-                TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-            .setupPlatformUuid(null, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, true)
-            .setupPlatformSecret(null, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, true)
-            .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
-            .setupCustomUserId(null, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, true)
-            .setupTags(null, TEST_TAGS1, TEST_TAGS1_LOWER, true)
-            .setupServiceUrl(null, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
-            .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(true)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
-            .setShouldRegistrationHaveSucceeded(true);
+                .setupBaiduChannelId(null, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                        TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupPlatformUuid(null, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, true)
+                .setupPlatformSecret(null, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, true)
+                .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupCustomUserId(null, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, true)
+                .setupTags(null, TEST_TAGS1, TEST_TAGS1_LOWER, true)
+                .setupServiceUrl(null, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
+                .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
 
     @Test
     public void testSuccessfulInitialRegistrationWithTagsWithoutPermissionForGeofences() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(null, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
-                TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-            .setupPlatformUuid(null, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, true)
-            .setupPlatformSecret(null, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, true)
-            .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
-            .setupCustomUserId(null, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, true)
-            .setupTags(null, TEST_TAGS1, TEST_TAGS1_LOWER, true)
-            .setupServiceUrl(null, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
-            .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(true)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
-            .setShouldRegistrationHaveSucceeded(true);
+                .setupBaiduChannelId(null, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(null, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                        TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupPlatformUuid(null, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, true)
+                .setupPlatformSecret(null, TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, true)
+                .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupCustomUserId(null, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, true)
+                .setupTags(null, TEST_TAGS1, TEST_TAGS1_LOWER, true)
+                .setupServiceUrl(null, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
+                .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
 
 
     public void testInitialPCFPushRegistrationFailed() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(null, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(null, null, null)
-            .setupPlatformUuid(null, TEST_PLATFORM_UUID_1, null, true)
-            .setupPlatformSecret(null, TEST_PLATFORM_SECRET_1, null, true)
-            .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, null, true)
-            .setupCustomUserId(null, TEST_CUSTOM_USER_ID_1, null, true)
-            .setupTags(null, TEST_TAGS1, null, true)
-            .setupServiceUrl(null, TEST_SERVICE_URL_1, null, true)
-            .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(true)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
-            .setShouldRegistrationHaveSucceeded(false);
+                .setupBaiduChannelId(null, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(null, null, null)
+                .setupPlatformUuid(null, TEST_PLATFORM_UUID_1, null, true)
+                .setupPlatformSecret(null, TEST_PLATFORM_SECRET_1, null, true)
+                .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, null, true)
+                .setupCustomUserId(null, TEST_CUSTOM_USER_ID_1, null, true)
+                .setupTags(null, TEST_TAGS1, null, true)
+                .setupServiceUrl(null, TEST_SERVICE_URL_1, null, true)
+                .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldRegistrationHaveSucceeded(false);
         testParams.run();
     }
 
     @Test
     public void testServerReturnedNullPCFPushRegistrationId() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(null, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationIdWithNullFromServer(null, null)
-            .setupPlatformUuid(null, TEST_PLATFORM_UUID_1, null, true)
-            .setupPlatformSecret(null, TEST_PLATFORM_SECRET_1, null, true)
-            .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, null, true)
-            .setupCustomUserId(null, TEST_CUSTOM_USER_ID_1, null, true)
-            .setupTags(null, TEST_TAGS1, null, true)
-            .setupServiceUrl(null, TEST_SERVICE_URL_1, null, true)
-            .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(false)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
-            .setShouldRegistrationHaveSucceeded(false);
+                .setupBaiduChannelId(null, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationIdWithNullFromServer(null, null)
+                .setupPlatformUuid(null, TEST_PLATFORM_UUID_1, null, true)
+                .setupPlatformSecret(null, TEST_PLATFORM_SECRET_1, null, true)
+                .setupDeviceAlias(null, TEST_DEVICE_ALIAS_1, null, true)
+                .setupCustomUserId(null, TEST_CUSTOM_USER_ID_1, null, true)
+                .setupTags(null, TEST_TAGS1, null, true)
+                .setupServiceUrl(null, TEST_SERVICE_URL_1, null, true)
+                .setupPackageName(null, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(false)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldRegistrationHaveSucceeded(false);
         testParams.run();
     }
 
     @Test
     public void testWasAlreadyRegistered() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
-                TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-            .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
-                false)
-            .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
-                TEST_PLATFORM_SECRET_1, false)
-            .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
-            .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
-                false)
-            .setupTags(null, null, null, false)
-            .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
-            .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(false)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
-            .setShouldRegistrationHaveSucceeded(true);
+                .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                        TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
+                        false)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
+                        TEST_PLATFORM_SECRET_1, false)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
+                .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
+                        false)
+                .setupTags(null, null, null, false)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(false)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
 
     @Test
     public void testWasAlreadyRegisteredIncludingTags() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
-                TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-            .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
-                false)
-            .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
-                TEST_PLATFORM_SECRET_1, false)
-            .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
-            .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
-                false)
-            .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, false)
-            .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
-            .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(false)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
-            .setShouldRegistrationHaveSucceeded(true);
+                .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                        TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
+                        false)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
+                        TEST_PLATFORM_SECRET_1, false)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
+                .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
+                        false)
+                .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, false)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(false)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
 
     @Test
     public void testWasAlreadyRegisteredIncludingTagsAndTagsWereSavedUppercase() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
-                TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-            .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
-                false)
-            .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
-                TEST_PLATFORM_SECRET_1, false)
-            .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
-            .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
-                false)
-            .setupTags(TEST_TAGS1, TEST_TAGS1_LOWER, TEST_TAGS1, false)
-            .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
-            .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(false)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
-            .setShouldRegistrationHaveSucceeded(true);
+                .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                        TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
+                        false)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
+                        TEST_PLATFORM_SECRET_1, false)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
+                .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
+                        false)
+                .setupTags(TEST_TAGS1, TEST_TAGS1_LOWER, TEST_TAGS1, false)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(false)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
 
     @Test
     public void testWasAlreadyRegisteredAndThePlatformSecretIsChanged() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
-                TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-            .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
-                true)
-            .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_2,
-                TEST_PLATFORM_SECRET_2, true)
-            .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
-            .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
-                true)
-            .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, true)
-            .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
-            .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(true)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
-            .setShouldRegistrationHaveSucceeded(true);
+                .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                        TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
+                        true)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_2,
+                        TEST_PLATFORM_SECRET_2, true)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
+                        true)
+                .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, true)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
 
     @Test
     public void testWasAlreadyRegisteredAndTheDeviceAliasIsChanged() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
-                TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-            .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
-                true)
-            .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
-                TEST_PLATFORM_SECRET_1, true)
-            .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_2, TEST_DEVICE_ALIAS_2, true)
-            .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
-                true)
-            .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, true)
-            .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
-            .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(true)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
-            .setShouldRegistrationHaveSucceeded(true);
+                .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                        TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
+                        true)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
+                        TEST_PLATFORM_SECRET_1, true)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_2, TEST_DEVICE_ALIAS_2, true)
+                .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
+                        true)
+                .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, true)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
 
     @Test
     public void testWasAlreadyRegisteredAndTheDeviceAliasIsCleared() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
-                TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-            .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
-                true)
-            .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
-                TEST_PLATFORM_SECRET_1, true)
-            .setupDeviceAlias(TEST_DEVICE_ALIAS_1, "", null, true)
-            .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
-                true)
-            .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, true)
-            .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
-            .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(true)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
-            .setShouldRegistrationHaveSucceeded(true);
+                .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                        TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
+                        true)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
+                        TEST_PLATFORM_SECRET_1, true)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, "", null, true)
+                .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
+                        true)
+                .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, true)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
 
     @Test
     public void testWasAlreadyRegisteredAndTheDeviceAliasIsNulled() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
-                TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-            .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
-                true)
-            .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
-                TEST_PLATFORM_SECRET_1, true)
-            .setupDeviceAlias(TEST_DEVICE_ALIAS_1, null, null, true)
-            .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
-                true)
-            .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, true)
-            .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
-            .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(true)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
-            .setShouldRegistrationHaveSucceeded(true);
+                .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                        TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
+                        true)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
+                        TEST_PLATFORM_SECRET_1, true)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, null, null, true)
+                .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
+                        true)
+                .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, true)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
 
     @Test
     public void testWasAlreadyRegisteredTheCustomUserIdIsChanged() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
-                TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-            .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
-                true)
-            .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
-                TEST_PLATFORM_SECRET_1, true)
-            .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
-            .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_2, TEST_CUSTOM_USER_ID_2,
-                true)
-            .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, true)
-            .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
-            .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(true)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
-            .setShouldRegistrationHaveSucceeded(true);
+                .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                        TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
+                        true)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
+                        TEST_PLATFORM_SECRET_1, true)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_2, TEST_CUSTOM_USER_ID_2,
+                        true)
+                .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, true)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
 
     @Test
     public void testWasAlreadyRegisteredAndTheCustomUserIdIsCleared() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
-                TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-            .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
-                true)
-            .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
-                TEST_PLATFORM_SECRET_1, true)
-            .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
-            .setupCustomUserId(TEST_CUSTOM_USER_ID_1, "", null, true)
-            .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, true)
-            .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
-            .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(true)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
-            .setShouldRegistrationHaveSucceeded(true);
+                .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                        TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
+                        true)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
+                        TEST_PLATFORM_SECRET_1, true)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupCustomUserId(TEST_CUSTOM_USER_ID_1, "", null, true)
+                .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, true)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
 
     @Test
     public void testWasAlreadyRegisteredAndTheCustomUserIdIsNulled() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
-                TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-            .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
-                true)
-            .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
-                TEST_PLATFORM_SECRET_1, true)
-            .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
-            .setupCustomUserId(TEST_CUSTOM_USER_ID_1, null, null, true)
-            .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, true)
-            .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
-            .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(true)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
-            .setShouldRegistrationHaveSucceeded(true);
+                .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                        TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
+                        true)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
+                        TEST_PLATFORM_SECRET_1, true)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupCustomUserId(TEST_CUSTOM_USER_ID_1, null, null, true)
+                .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, true)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
 
     @Test
     public void testWasAlreadyRegisteredAndThePlatformUuidIsChanged() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
-                TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-            .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_2, TEST_PLATFORM_UUID_2,
-                true)
-            .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
-                TEST_PLATFORM_SECRET_1, true)
-            .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
-            .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
-                true)
-            .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, true)
-            .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
-            .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(true)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
-            .setShouldRegistrationHaveSucceeded(true);
+                .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                        TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_2, TEST_PLATFORM_UUID_2,
+                        true)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
+                        TEST_PLATFORM_SECRET_1, true)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
+                        true)
+                .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, true)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
 
     @Test
     public void testWasAlreadyRegisteredAndTheTagsAreChanged() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
-                TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-            .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
-                true)
-            .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
-                TEST_PLATFORM_SECRET_1, true)
-            .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
-            .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
-                true)
-            .setupTags(TEST_TAGS1_LOWER, TEST_TAGS2, TEST_TAGS2_LOWER, true)
-            .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
-            .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(true)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
-            .setShouldRegistrationHaveSucceeded(true);
+                .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                        TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
+                        true)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
+                        TEST_PLATFORM_SECRET_1, true)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
+                        true)
+                .setupTags(TEST_TAGS1_LOWER, TEST_TAGS2, TEST_TAGS2_LOWER, true)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
 
     @Test
     public void testWasAlreadyRegisteredAndTheServiceUrlIsChanged() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
-                TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-            .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
-                true)
-            .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
-                TEST_PLATFORM_SECRET_1, true)
-            .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
-            .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
-                true)
-            .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, true)
-            .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_2, TEST_SERVICE_URL_2, true)
-            .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(true)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
-            .setShouldRegistrationHaveSucceeded(true);
+                .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                        TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
+                        true)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
+                        TEST_PLATFORM_SECRET_1, true)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
+                        true)
+                .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, true)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_2, TEST_SERVICE_URL_2, true)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
 
     @Test
     public void testWasAlreadyRegisteredAndTheServiceUrlIsChangedButPermissionForGeofencesWasRemoved() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
-                TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
-            .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
-                true)
-            .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
-                TEST_PLATFORM_SECRET_1, true)
-            .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
-            .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
-                true)
-            .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, true)
-            .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_2, TEST_SERVICE_URL_2, true)
-            .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(true)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
-            .setShouldRegistrationHaveSucceeded(true);
+                .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                        TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
+                        true)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
+                        TEST_PLATFORM_SECRET_1, true)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
+                        true)
+                .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, true)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_2, TEST_SERVICE_URL_2, true)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
 
     @Test
     public void testUpdateRegistrationWithTagsFailed() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_2,
-                TEST_BAIDU_CHANNEL_ID_2)
-            .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, null, null)
-            .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, null, true)
-            .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, null, true)
-            .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, null, true)
-            .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, null, true)
-            .setupTags(TEST_TAGS1, TEST_TAGS2, null, true)
-            .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, null, true)
-            .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(false)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
-            .setShouldRegistrationHaveSucceeded(false);
+                .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_2,
+                        TEST_BAIDU_CHANNEL_ID_2)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, null, null)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, null, true)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, null, true)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, null, true)
+                .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, null, true)
+                .setupTags(TEST_TAGS1, TEST_TAGS2, null, true)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, null, true)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(false)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldRegistrationHaveSucceeded(false);
         testParams.run();
     }
 
     @Test
     public void testPlatformSecretUpdatedAndRegisterFailed() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
-                TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2)
-            .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
-                true)
-            .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_2,
-                TEST_PLATFORM_SECRET_2, true)
-            .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
-            .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
-                true)
-            .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, true)
-            .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
-            .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(true)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
-            .setShouldRegistrationHaveSucceeded(true);
+                .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                        TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
+                        true)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_2,
+                        TEST_PLATFORM_SECRET_2, true)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, true)
+                .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1,
+                        true)
+                .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, true)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, true)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(true)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldRegistrationHaveSucceeded(true);
         testParams.run();
     }
 
     @Test
     public void testCustomUserIdUpdatedAndRegisterFailed() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
-                TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2)
-            .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
-                false)
-            .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
-                TEST_PLATFORM_SECRET_1, false)
-            .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
-            .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_2, TEST_CUSTOM_USER_ID_1,
-                false)
-            .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, false)
-            .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
-            .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldBaiduChannelIdHaveBeenSaved(false)
-            .setShouldPCFPushDeviceRegistrationBeSuccessful(false)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
-            .setShouldRegistrationHaveSucceeded(false);
+                .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                        TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1,
+                        false)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
+                        TEST_PLATFORM_SECRET_1, false)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, false)
+                .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_2, TEST_CUSTOM_USER_ID_1,
+                        false)
+                .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, TEST_TAGS1_LOWER, false)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, false)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldBaiduChannelIdHaveBeenSaved(false)
+                .setShouldPCFPushDeviceRegistrationBeSuccessful(false)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(false)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldRegistrationHaveSucceeded(false);
         testParams.run();
     }
 
     @Test
     public void testDeviceAliasUpdatedAndRegisterFailed() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
-                TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
-                null, null)
-            .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, null,
-                true)
-            .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
-                null, true)
-            .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_2, null, true)
-            .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, null,
-                true)
-            .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, null, true)
-            .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, null, true)
-            .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldPCFPushDeviceRegistrationBeSuccessful(false)
-            .setShouldBaiduChannelIdHaveBeenSaved(false)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
-            .setShouldRegistrationHaveSucceeded(false);
+                .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1,
+                        TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1,
+                        null, null)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, null,
+                        true)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1,
+                        null, true)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_2, null, true)
+                .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, null,
+                        true)
+                .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, null, true)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, null, true)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldPCFPushDeviceRegistrationBeSuccessful(false)
+                .setShouldBaiduChannelIdHaveBeenSaved(false)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldRegistrationHaveSucceeded(false);
         testParams.run();
     }
 
     @Test
     public void testTagsUpdatedAndRegisterFailed() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, null)
-            .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, null, true)
-            .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, null, true)
-            .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, null, true)
-            .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, null, true)
-            .setupTags(TEST_TAGS1_LOWER, TEST_TAGS2, null, true)
-            .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, null, true)
-            .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldPCFPushDeviceRegistrationBeSuccessful(false)
-            .setShouldBaiduChannelIdHaveBeenSaved(false)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
-            .setShouldRegistrationHaveSucceeded(false);
+                .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, null)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_1, null, true)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, null, true)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, null, true)
+                .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, null, true)
+                .setupTags(TEST_TAGS1_LOWER, TEST_TAGS2, null, true)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, null, true)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldPCFPushDeviceRegistrationBeSuccessful(false)
+                .setShouldBaiduChannelIdHaveBeenSaved(false)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(false)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(true)
+                .setShouldRegistrationHaveSucceeded(false);
         testParams.run();
     }
 
     @Test
     public void testPlatformUuidUpdatedAndRegisterFailed() {
         RegistrationEngineTestParameters testParams = new RegistrationEngineTestParameters()
-            .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1)
-            .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, null)
-            .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_2, null, true)
-            .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, null, true)
-            .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, null, true)
-            .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, null, true)
-            .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, null, true)
-            .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, null, true)
-            .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
-            .setShouldPCFPushDeviceRegistrationBeSuccessful(false)
-            .setShouldBaiduChannelIdHaveBeenSaved(false)
-            .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
-            .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
-            .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
-            .setShouldRegistrationHaveSucceeded(false);
+                .setupBaiduChannelId(TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1, TEST_BAIDU_CHANNEL_ID_1)
+                .setupPCFPushDeviceRegistrationId(TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_1, TEST_PCF_PUSH_DEVICE_REGISTRATION_ID_2, null)
+                .setupPlatformUuid(TEST_PLATFORM_UUID_1, TEST_PLATFORM_UUID_2, null, true)
+                .setupPlatformSecret(TEST_PLATFORM_SECRET_1, TEST_PLATFORM_SECRET_1, null, true)
+                .setupDeviceAlias(TEST_DEVICE_ALIAS_1, TEST_DEVICE_ALIAS_1, null, true)
+                .setupCustomUserId(TEST_CUSTOM_USER_ID_1, TEST_CUSTOM_USER_ID_1, null, true)
+                .setupTags(TEST_TAGS1_LOWER, TEST_TAGS1, null, true)
+                .setupServiceUrl(TEST_SERVICE_URL_1, TEST_SERVICE_URL_1, null, true)
+                .setupPackageName(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, TEST_PACKAGE_NAME)
+                .setShouldPCFPushDeviceRegistrationBeSuccessful(false)
+                .setShouldBaiduChannelIdHaveBeenSaved(false)
+                .setShouldPCFPushDeviceRegistrationHaveBeenSaved(true)
+                .setShouldPCFPushNewRegistrationHaveBeenCalled(true)
+                .setShouldPCFPushUpdateRegistrationHaveBeenCalled(false)
+                .setShouldRegistrationHaveSucceeded(false);
         testParams.run();
     }
 
     private RegistrationListener getListenerForRegistration(
-        final boolean isSuccessfulRegistration) {
+            final boolean isSuccessfulRegistration) {
         return new RegistrationListener() {
 
             @Override
