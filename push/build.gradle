@@ -3,8 +3,7 @@ repositories {
 }
 
 apply plugin: 'com.android.library'
-//apply plugin: 'maven'
-apply plugin: 'com.github.dcendents.android-maven'
+apply plugin: 'maven'
 
 group = "io.pivotal.android"
 version = System.getenv("PUSH_SDK_VERSION") ?: "2.0.0"
@@ -40,15 +39,16 @@ configurations {
 }
 
 dependencies {
-    androidTestCompile 'junit:junit:4.12'
-    compile 'com.google.android.gms:play-services-location:9.4.0'
-    compile 'com.google.firebase:firebase-core:9.4.0'
-    compile 'com.google.firebase:firebase-messaging:9.4.0'
-    compile fileTree(include: ['*.jar'], dir: 'src/baidu/libs')
+    fcmCompile 'com.google.android.gms:play-services-location:9.4.0'
+    fcmCompile 'com.google.firebase:firebase-core:9.4.0'
+    fcmCompile 'com.google.firebase:firebase-messaging:9.4.0'
+    baiduCompile fileTree(include: ['*.jar'], dir: 'src/baidu/libs')
     compile 'com.google.code.gson:gson:2.7'
     compile 'com.android.support:support-annotations:25.3.0'
     compile 'com.android.support:appcompat-v7:24.2.1'
+
     androidTestCompile 'com.google.guava:guava:20.0'
+    androidTestCompile 'junit:junit:4.12'
     androidTestCompile 'org.mockito:mockito-core:1.10.19'
     androidTestCompile 'com.crittercism.dexmaker:dexmaker:1.4'
     androidTestCompile 'com.crittercism.dexmaker:dexmaker-mockito:1.4'
@@ -57,84 +57,129 @@ dependencies {
     androidTestCompile 'com.android.support.test:rules:0.5'
 }
 
-uploadArchives {
-    configuration = configurations.archives
+def mavenLocal = 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
 
-    repositories.mavenDeployer {
+afterEvaluate {
+    uploadArchives {
+        configuration = configurations.archives
 
-        addFilter('fcmRelease') { artifact, file ->
-            artifact.attributes.classifier.equals("fcmRelease")
-        }
-        addFilter('baiduRelease') { artifact, file ->
-            artifact.attributes.classifier.equals("baiduRelease")
-        }
+        repositories.mavenDeployer {
 
-        pom('fcmRelease').project {
-            name 'Push client SDK for Android'
-            packaging 'aar'
-            description 'A comprehensive SDK for receiving and sending Push Notification through Pivotal Cloud Foundry\'s Push API'
-            url 'https://github.com/cfmobile/push-android'
-            artifactId project.archivesBaseName + "-fcm"
+            addFilter('fcmRelease') { artifact, file ->
+                artifact.attributes.classifier.equals("fcmRelease")
+            }
+            addFilter('baiduRelease') { artifact, file ->
+                artifact.attributes.classifier.equals("baiduRelease")
+            }
 
-            licenses {
-                license {
-                    // TODO - provide a more correct license file and URL
-                    name 'Pivotal Software License'
-                    url 'https://github.com/cfmobile/push-android/blob/master/LICENSE'
-                    distribution 'repo'
+            pom('fcmRelease') {
+                project {
+                    name 'Push client SDK for Android'
+                    packaging 'aar'
+                    description 'A comprehensive SDK for receiving and sending Push Notification through Pivotal Cloud Foundry\'s Push API'
+                    url 'https://github.com/cfmobile/push-android'
+                    artifactId project.archivesBaseName + "-fcm"
+
+                    licenses {
+                        license {
+                            // TODO - provide a more correct license file and URL
+                            name 'Pivotal Software License'
+                            url 'https://github.com/cfmobile/push-android/blob/master/LICENSE'
+                            distribution 'repo'
+                        }
+                    }
+
+                    scm {
+                        url 'https://github.com/cfmobile/push-android'
+                        connection 'scm:git:git@github.com/cfmobile/push-android.git'
+                        developerConnection 'scm:git:ssh://github.com:cfmobile/push-android.git'
+                    }
+
+                    developers {
+                        developer {
+                            id 'cf-push-notifications'
+                            name 'PCF Push Nofitications'
+                            email 'cf-push-notifications@poivotal.io'
+                        }
+                    }
+                }
+
+                withXml {
+                    def dependencies = asNode().appendNode('dependencies')
+                    configurations.getByName('_fcmReleaseCompile').getResolvedConfiguration().getFirstLevelModuleDependencies().each { dp ->
+                        def dependency = dependencies.appendNode('dependency')
+                        dependency.appendNode('groupId', dp.moduleGroup)
+                        dependency.appendNode('artifactId', dp.moduleName)
+                        dependency.appendNode('version', dp.moduleVersion)
+                    }
                 }
             }
 
-            scm {
-                url 'https://github.com/cfmobile/push-android'
-                connection 'scm:git:git@github.com/cfmobile/push-android.git'
-                developerConnection 'scm:git:ssh://github.com:cfmobile/push-android.git'
+            pom('baiduRelease') {
+                project {
+                    name 'Push client SDK for Android'
+                    packaging 'aar'
+                    description 'A comprehensive SDK for receiving and sending Push Notification through Pivotal Cloud Foundry\'s Push API'
+                    url 'https://github.com/cfmobile/push-android'
+                    artifactId project.archivesBaseName + "-baidu"
+
+                    licenses {
+                        license {
+                            // TODO - provide a more correct license file and URL
+                            name 'Pivotal Software License'
+                            url 'https://github.com/cfmobile/push-android/blob/master/LICENSE'
+                            distribution 'repo'
+                        }
+                    }
+
+                    scm {
+                        url 'https://github.com/cfmobile/push-android'
+                        connection 'scm:git:git@github.com/cfmobile/push-android.git'
+                        developerConnection 'scm:git:ssh://github.com:cfmobile/push-android.git'
+                    }
+
+                    developers {
+                        developer {
+                            id 'cf-push-notifications'
+                            name 'PCF Push Nofitications'
+                            email 'cf-push-notifications@poivotal.io'
+                        }
+                    }
+                }
+
+                withXml {
+                    def dependencies = asNode().appendNode('dependencies')
+                    configurations.getByName('_baiduReleaseCompile').getResolvedConfiguration().getFirstLevelModuleDependencies().each { dp ->
+                        def dependency = dependencies.appendNode('dependency')
+                        dependency.appendNode('groupId', dp.moduleGroup)
+                        dependency.appendNode('artifactId', dp.moduleName)
+                        dependency.appendNode('version', dp.moduleVersion)
+                    }
+                }
             }
 
-            developers {
-                developer {
-                    id 'cf-push-notifications'
-                    name 'PCF Push Nofitications'
-                    email 'cf-push-notifications@poivotal.io'
+            // Publishes to local repository
+            repository url: mavenLocal
+        }
+
+        // Rename artifacts
+        // Artifacts placed in maven repository contain classifer for build variant, which needs to be removed
+        doLast {
+            def repository = System.getProperty('user.home') + '/.m2/repository/' + project.group.replace('.', '/')
+            new File(repository).listFiles().each { f ->
+                def base = new File(f.absolutePath + "/" + project.version)
+                base.listFiles().each { o ->
+                    if (o.path.contains(".aar")) {
+                        def newname = o.absolutePath.replaceAll("-[a-z]+Release", "")
+                        println "Renaming " + o.absolutePath + " to " + newname
+                        o.renameTo(new File(newname))
+                    }
                 }
             }
         }
-
-        pom('baiduRelease').project {
-            name 'Push client SDK for Android'
-            packaging 'aar'
-            description 'A comprehensive SDK for receiving and sending Push Notification through Pivotal Cloud Foundry\'s Push API'
-            url 'https://github.com/cfmobile/push-android'
-            artifactId project.archivesBaseName + "-baidu"
-
-            licenses {
-                license {
-                    // TODO - provide a more correct license file and URL
-                    name 'Pivotal Software License'
-                    url 'https://github.com/cfmobile/push-android/blob/master/LICENSE'
-                    distribution 'repo'
-                }
-            }
-
-            scm {
-                url 'https://github.com/cfmobile/push-android'
-                connection 'scm:git:git@github.com/cfmobile/push-android.git'
-                developerConnection 'scm:git:ssh://github.com:cfmobile/push-android.git'
-            }
-
-            developers {
-                developer {
-                    id 'cf-push-notifications'
-                    name 'PCF Push Nofitications'
-                    email 'cf-push-notifications@poivotal.io'
-                }
-            }
-        }
-
-        // Publishes to local repository
-        repository url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
     }
 }
+
 
 task javadoc(type: Javadoc) {
     failOnError false
@@ -181,18 +226,8 @@ task printVersion {
     }
 }
 
-// Here be hax
-task renameArtifacts {
+task uploadToJCenter(dependsOn: uploadArchives) {
     doLast {
-        new File(System.getProperty('user.home'), '.m2/repository/' + project.group.replace(".", "/")).listFiles().each { f ->
-            def base = new File(f.absolutePath + "/" + project.version)
-            base.listFiles().each { o ->
-                if (o.path.contains(".aar")) {
-                    def newname = o.absolutePath.replaceAll("-[a-z]+Release", "")
-                    println "Renaming " + o.absolutePath + " to " + newname
-                    o.renameTo(new File(newname))
-                }
-            }
-        }
+        println "Uploading to Jcenter..."
     }
 }
