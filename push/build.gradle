@@ -57,8 +57,6 @@ dependencies {
     androidTestCompile 'com.android.support.test:rules:0.5'
 }
 
-def mavenLocal = 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
-
 afterEvaluate {
     uploadArchives {
         configuration = configurations.archives
@@ -159,7 +157,7 @@ afterEvaluate {
             }
 
             // Publishes to local repository
-            repository url: mavenLocal
+            repository url: 'file://' + new File(System.getProperty('user.home'), '.m2/repository').absolutePath
         }
 
         // Rename artifacts
@@ -180,7 +178,6 @@ afterEvaluate {
     }
 }
 
-
 task javadoc(type: Javadoc) {
     failOnError false
     source = android.sourceSets.main.java.sourceFiles
@@ -195,17 +192,21 @@ task javadoc(type: Javadoc) {
     exclude '**/R.java'
 }
 
-//Creating sources with comments
+// Creating sources with comments
+
+def sourcesBasePath = System.getProperty('user.home') + '/.m2/repository/' + project.group.replace('.', '/') + "/%%%/" + version
 task androidFcmSourcesJar(type: Jar) {
     classifier = 'sources'
-    baseName = 'fcm'
-    from android.sourceSets.main.java.srcDirs
+    baseName = 'push-fcm'
+    from android.sourceSets.fcm.java.srcDirs
+    destinationDir = file(sourcesBasePath.replace("%%%", "push-fcm"))
 }
 
 task androidBaiduSourcesJar(type: Jar) {
     classifier = 'sources'
-    baseName = 'baidu'
-    from android.sourceSets.main.java.srcDirs
+    baseName = 'push-baidu'
+    from android.sourceSets.baidu.java.srcDirs
+    destinationDir = file(file(sourcesBasePath.replace("%%%", "push-baidu")))
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
@@ -213,21 +214,13 @@ task javadocJar(type: Jar, dependsOn: javadoc) {
     from javadoc.destinationDir
 }
 
-//Put the androidSources and javadocs to the artifacts
 artifacts {
     archives androidBaiduSourcesJar
     archives androidFcmSourcesJar
-    archives javadocJar
 }
 
 task printVersion {
     doLast {
         println "My version is: " + project.version
-    }
-}
-
-task uploadToJCenter(dependsOn: uploadArchives) {
-    doLast {
-        println "Uploading to Jcenter..."
     }
 }
