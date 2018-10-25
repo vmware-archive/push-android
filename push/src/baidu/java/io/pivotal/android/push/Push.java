@@ -237,6 +237,7 @@ public class Push {
 
                     registrationEngine.registerDevice(pushParameters, channelId, registrationListener);
                 } catch (Exception e) {
+                    registrationListener.onRegistrationFailed(e.getMessage());
                     Logger.ex("Push SDK registration failed", e);
                 }
             }
